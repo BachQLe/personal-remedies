@@ -1,0 +1,377 @@
+import { useState, useEffect, useRef } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+  animate,
+} from "framer-motion";
+import { Reveal } from "./Reveal";
+
+const CONDITIONS = [
+  { id: "diabetes", label: "Type 2 Diabetes" },
+  { id: "hypertension", label: "Hypertension" },
+  { id: "kidney", label: "Kidney Disease" },
+];
+
+function getRecommendation(profileIds) {
+  if (profileIds.includes("kidney")) {
+    return {
+      verdict: "Avoid",
+      score: 12,
+      reason:
+        "Garlic's potassium content can stress compromised kidneys, and its antiplatelet effect may interact with medications commonly used in CKD management.",
+    };
+  }
+  if (profileIds.includes("hypertension")) {
+    return {
+      verdict: "Excellent fit",
+      score: 94,
+      reason:
+        "Garlic's allicin compounds have shown meaningful systolic blood pressure reduction in meta-analyses — a strong advantage for hypertension alongside a diabetes-friendly glycemic profile.",
+    };
+  }
+  return {
+    verdict: "Good fit",
+    score: 68,
+    reason:
+      "Garlic shows modest improvements in insulin sensitivity and fasting glucose in T2D patients. Benefits are real but secondary to first-line dietary changes.",
+  };
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function barColor(score) {
+  if (score >= 80) return "#1F4A3A";
+  if (score >= 50) return "#D98A4A";
+  return "#ef4444";
+}
+
+function badgeClass(score) {
+  if (score >= 80) return "bg-sage-soft text-forest";
+  if (score >= 50) return "bg-amber/15 text-amber";
+  return "bg-red-50 text-red-600";
+}
+
+function moveTo(mv, target, duration = 0.55) {
+  return animate(mv, target, { duration, ease: [0.22, 1, 0.36, 1] });
+}
+
+export default function Differentiators() {
+  const [profileIds, setProfileIds] = useState(["diabetes", "hypertension", "kidney"]);
+  const [draggingId, setDraggingId] = useState(null);
+  const [ghostLabel, setGhostLabel] = useState(null);
+
+  const containerRef = useRef(null);
+  const chipRefs = useRef({});
+  const profileBoxRef = useRef(null);
+  const poolBoxRef = useRef(null);
+
+  const curX = useMotionValue(0);
+  const curY = useMotionValue(0);
+  const curOpacity = useMotionValue(0);
+
+  // Ghost chip trails the cursor with a small offset so it looks held
+  const ghostX = useTransform(curX, (x) => x + 10);
+  const ghostY = useTransform(curY, (y) => y + 14);
+
+  const rec = getRecommendation(profileIds);
+  const poolIds = CONDITIONS.map((c) => c.id).filter((id) => !profileIds.includes(id));
+
+  function relCenter(el) {
+    const container = containerRef.current;
+    if (!container || !el) return null;
+    const cr = container.getBoundingClientRect();
+    const mr = el.getBoundingClientRect();
+    return {
+      x: mr.left - cr.left + mr.width / 2 - 9,
+      y: mr.top - cr.top + mr.height / 2 - 11,
+    };
+  }
+
+  function chipCenter(id) {
+    return relCenter(chipRefs.current[id]);
+  }
+
+  function boxDropPoint(boxRef) {
+    const container = containerRef.current;
+    const box = boxRef.current;
+    if (!container || !box) return null;
+    const cr = container.getBoundingClientRect();
+    const br = box.getBoundingClientRect();
+    return {
+      x: br.left - cr.left + 36 - 9,
+      y: br.top - cr.top + br.height * 0.58 - 11,
+    };
+  }
+
+  async function dragChip(id, destBoxRef, nextProfileIds) {
+    const from = chipCenter(id);
+    const to = boxDropPoint(destBoxRef);
+    if (!from || !to) return;
+
+    // Glide cursor to chip
+    await Promise.all([
+      moveTo(curX, from.x, 0.5),
+      moveTo(curY, from.y, 0.5),
+    ]);
+    await sleep(320);
+
+    // Grab: chip dims, ghost chip appears
+    setDraggingId(id);
+    const c = CONDITIONS.find((c) => c.id === id);
+    setGhostLabel(c.label);
+    await sleep(120);
+
+    // Drag cursor (+ ghost) to destination
+    await Promise.all([
+      moveTo(curX, to.x, 0.62),
+      moveTo(curY, to.y, 0.62),
+    ]);
+    await sleep(100);
+
+    // Drop: update state, ghost disappears
+    setProfileIds(nextProfileIds);
+    setGhostLabel(null);
+    await sleep(160);
+    setDraggingId(null);
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function run() {
+      await sleep(700);
+      if (cancelled) return;
+
+      // Fade cursor in near kidney chip
+      const start = chipCenter("kidney");
+      if (start) {
+        curX.set(start.x + 50);
+        curY.set(start.y - 10);
+        await animate(curOpacity, 1, { duration: 0.4 });
+      }
+
+      await sleep(900);
+      if (cancelled) return;
+
+      while (!cancelled) {
+        // Remove kidney → pool
+        await dragChip("kidney", poolBoxRef, ["diabetes", "hypertension"]);
+        if (cancelled) break;
+        await sleep(2100);
+        if (cancelled) break;
+
+        // Remove hypertension → pool
+        await dragChip("hypertension", poolBoxRef, ["diabetes"]);
+        if (cancelled) break;
+        await sleep(2100);
+        if (cancelled) break;
+
+        // Add hypertension back → profile
+        await dragChip("hypertension", profileBoxRef, ["diabetes", "hypertension"]);
+        if (cancelled) break;
+        await sleep(1100);
+        if (cancelled) break;
+
+        // Add kidney back → profile
+        await dragChip("kidney", profileBoxRef, ["diabetes", "hypertension", "kidney"]);
+        if (cancelled) break;
+        await sleep(1100);
+      }
+    }
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <section id="how" className="py-24 lg:py-32">
+      <div className="mx-auto max-w-7xl container-px grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+
+        {/* ── Left: text ─────────────────────────────────────────── */}
+        <div>
+          <Reveal delay={0.1}>
+            <h2 className="display mb-10 text-[34px] leading-[1.1] sm:text-[44px] sm:leading-[1.08] lg:text-[54px] lg:leading-[1.06] max-w-[22ch]">
+              Handles multiple conditions.{" "}
+            </h2>
+            <h2 className="mt-2 font-display italic text-[18px] sm:text-[22px] text-slate-900/70 text-center tracking-tight">
+              General advice is dead. Know exactly what is and isn't good for your health{" "}
+            </h2>
+          </Reveal>
+        </div>
+
+        {/* ── Right: animation ────────────────────────────────────── */}
+        <Reveal delay={0.15}>
+          <div ref={containerRef} className="relative select-none">
+
+            {/* Condition boxes */}
+            <div className="grid grid-cols-2 gap-3 mb-3">
+
+              {/* Profile box */}
+              <div
+                ref={profileBoxRef}
+                className="rounded-2xl border border-ink/[0.08] bg-white p-4 min-h-[144px] shadow-card"
+              >
+                <p className="text-[9.5px] font-semibold tracking-widest uppercase text-ink/35 mb-3">
+                  Your Profile
+                </p>
+                <div className="flex flex-col gap-2">
+                  <AnimatePresence>
+                    {profileIds.map((id) => {
+                      const c = CONDITIONS.find((c) => c.id === id);
+                      return (
+                        <motion.div
+                          key={id}
+                          ref={(el) => { chipRefs.current[id] = el; }}
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{
+                            opacity: draggingId === id ? 0.2 : 1,
+                            y: 0,
+                            scale: draggingId === id ? 0.94 : 1,
+                          }}
+                          exit={{ opacity: 0, y: 4 }}
+                          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                          className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium bg-sage-soft text-forest border border-forest/15"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-forest/50 flex-shrink-0" />
+                          {c.label}
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Inactive pool box */}
+              <div
+                ref={poolBoxRef}
+                className="rounded-2xl border border-dashed border-ink/[0.12] bg-cream/50 p-4 min-h-[144px]"
+              >
+                <p className="text-[9.5px] font-semibold tracking-widest uppercase text-ink/25 mb-3">
+                  Not in profile
+                </p>
+                <div className="flex flex-col gap-2">
+                  <AnimatePresence>
+                    {poolIds.map((id) => {
+                      const c = CONDITIONS.find((c) => c.id === id);
+                      return (
+                        <motion.div
+                          key={id}
+                          ref={(el) => { chipRefs.current[id] = el; }}
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{
+                            opacity: draggingId === id ? 0.2 : 0.55,
+                            y: 0,
+                            scale: draggingId === id ? 0.94 : 1,
+                          }}
+                          exit={{ opacity: 0, y: 4 }}
+                          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                          className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium bg-white text-ink/45 border border-ink/10"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-ink/20 flex-shrink-0" />
+                          {c.label}
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </div>
+
+            {/* Garlic recommendation card */}
+            <div className="rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-card">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-[22px] leading-none">🧄</span>
+                <div>
+                  <p className="font-semibold text-ink text-[14.5px] leading-tight">Garlic</p>
+                  <p className="text-[11px] text-ink/40 leading-tight">Allium sativum</p>
+                </div>
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={rec.verdict}
+                    initial={{ opacity: 0, scale: 0.82 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.82 }}
+                    transition={{ duration: 0.22 }}
+                    className={`ml-auto text-[12px] font-semibold px-2.5 py-1 rounded-full ${badgeClass(rec.score)}`}
+                  >
+                    {rec.verdict}
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+
+              <div className="h-1.5 rounded-full bg-ink/[0.06] overflow-hidden mb-4">
+                <motion.div
+                  className="h-full rounded-full"
+                  animate={{ width: `${rec.score}%`, backgroundColor: barColor(rec.score) }}
+                  transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                />
+              </div>
+
+              <div className="pt-3 border-t border-ink/[0.06]">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="h-3.5 w-3.5 rounded-full bg-amber flex items-center justify-center flex-shrink-0">
+                    <span className="text-[8px] text-white font-bold leading-none">N</span>
+                  </span>
+                  <p className="text-[9.5px] font-semibold tracking-widest uppercase text-ink/35">
+                    Nutri reasoning
+                  </p>
+                </div>
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={rec.verdict}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    className="text-[13px] leading-[1.65] text-ink-soft"
+                  >
+                    {rec.reason}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Ghost chip — follows cursor during drag */}
+            <AnimatePresence>
+              {ghostLabel && (
+                <motion.div
+                  key="ghost"
+                  style={{ x: ghostX, y: ghostY }}
+                  initial={{ opacity: 0, scale: 0.88 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.88 }}
+                  transition={{ duration: 0.18 }}
+                  className="absolute top-0 left-0 pointer-events-none z-40 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium bg-sage-soft text-forest border border-forest/20 shadow-lift"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-forest/50 flex-shrink-0" />
+                  {ghostLabel}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Cursor */}
+            <motion.div
+              style={{ x: curX, y: curY, opacity: curOpacity }}
+              className="absolute top-0 left-0 pointer-events-none z-50 drop-shadow"
+            >
+              <svg width="18" height="22" viewBox="0 0 18 22" fill="none">
+                <path
+                  d="M3.5 1.5L15.5 10.5L9.5 11.5L13 19L10.5 20L7 13L2.5 16.5L3.5 1.5Z"
+                  fill={ghostLabel ? "#E4EDE5" : "white"}
+                  stroke={ghostLabel ? "#1F4A3A" : "#1B2A23"}
+                  strokeWidth="1.4"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </motion.div>
+
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}

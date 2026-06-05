@@ -1,0 +1,67 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Raleway:wght@800;900&display=swap");
+@import url("https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+    font-feature-settings: "ss01", "ss02", "cv11";
+  }
+
+  ::selection {
+    background: #1F4A3A;
+    color: #F5F2EA;
+  }
+}
+
+@layer components {
+  .container-px {
+    @apply px-5 sm:px-8 lg:px-12;
+  }
+
+  .display {
+    @apply font-display font-medium tracking-tighter2 text-ink;
+    font-variation-settings: "opsz" 144;
+  }
+
+  .pill-btn {
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-[15px] font-medium tracking-tight transition-all duration-200;
+  }
+
+  .pill-forest {
+    @apply pill-btn bg-forest text-cream hover:bg-forest-deep hover:-translate-y-[1px] hover:shadow-lift;
+  }
+
+  .pill-amber {
+    @apply pill-btn bg-amber text-white hover:brightness-110 hover:-translate-y-[1px] hover:shadow-lift;
+  }
+
+  .pill-ghost {
+    @apply pill-btn border border-ink/15 bg-white text-ink hover:border-ink/30 hover:-translate-y-[1px];
+  }
+
+  .pill-ghost-dark {
+    @apply pill-btn border border-cream/25 bg-transparent text-cream hover:bg-cream/10;
+  }
+
+  .tag {
+    @apply inline-block text-[11px] font-semibold tracking-[0.18em] uppercase text-forest/80;
+  }
+
+  .tag-amber {
+    @apply text-amber/90;
+  }
+
+  .tag-cream {
+    @apply text-cream/70;
+  }
+}
