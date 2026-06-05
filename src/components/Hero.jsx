@@ -118,7 +118,7 @@ function RatingDots({ filled }) {
   );
 }
 
-export default function Hero() {
+export default function Hero({ topOffset = 0 }) {
   const navigate = useNavigate();
   const heroRef = useRef(null);
   const [isFixed, setIsFixed] = useState(true);
@@ -264,27 +264,91 @@ export default function Hero() {
   return (
     <section
       ref={heroRef}
-      className="relative overflow-hidden pt-16 pb-[108px]"
-      style={{ background: "#fffffaff" }}
+      className="relative overflow-hidden pb-[108px]"
+      style={{ background: "#f1eee9ff", marginTop: -topOffset, paddingTop: topOffset + 64 }}
     >
-      {/* halftone dots */}
-      <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none opacity-[0.12]"
-        style={{
-          backgroundImage: `radial-gradient(circle, #000 1px, transparent 1px)`,
-          backgroundSize: "20px 20px",
-        }}
-      />
-      {/* grain */}
-      <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none opacity-[0.22]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundSize: "200px 200px",
-        }}
-      />
+
+      {/* shared hand-drawn filter */}
+      <svg aria-hidden className="absolute w-0 h-0 overflow-hidden">
+        <defs>
+          <filter id="sketchy" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" seed="8" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+
+      {/* ── food sketch decorations – left column ── */}
+      {/* Lemon */}
+      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ left: "calc(50% - 620px)", top: "6%", transform: "rotate(-14deg)" }} width="44" height="30" viewBox="0 0 44 30" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
+        <path d="M22 2C11 2 2 8 2 15C2 22 11 28 22 28C33 28 42 22 42 15C42 8 33 2 22 2Z" strokeWidth="1.4" />
+        <path d="M42 14C44 11 44 8 42 6" strokeWidth="1.2" />
+        <path d="M2 14C0 11 0 8 2 6" strokeWidth="1.2" />
+        <path d="M12 9C15 6 19 6 22 8" strokeWidth="1" />
+      </svg>
+      {/* Garlic */}
+      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ left: "calc(50% - 660px)", top: "28%", transform: "rotate(-8deg)" }} width="42" height="48" viewBox="0 0 42 48" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
+        <path d="M21 44C11 44 4 37 4 28C4 19 11 14 17 14C19 12 21 9 21 7C21 9 23 12 25 14C31 14 38 19 38 28C38 37 31 44 21 44Z" strokeWidth="1.4" />
+        <line x1="21" y1="14" x2="21" y2="44" strokeWidth="0.9" strokeDasharray="1.5 2.5" />
+        <path d="M10 19C7 24 7 34 10 40" strokeWidth="1" />
+        <path d="M32 19C35 24 35 34 32 40" strokeWidth="1" />
+        <path d="M21 7L21 2" strokeWidth="1.4" />
+        <path d="M21 2C19 0 16 1 15 3M21 2C23 0 26 1 27 3" strokeWidth="1.1" />
+      </svg>
+      {/* Carrot */}
+      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ left: "calc(50% - 630px)", top: "55%", transform: "rotate(-12deg)" }} width="28" height="56" viewBox="0 0 28 56" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
+        <path d="M14 52C6 46 3 32 5 19C6 12 10 8 14 8C18 8 22 12 23 19C25 32 22 46 14 52Z" strokeWidth="1.4" />
+        <path d="M7 22C10 24 18 24 21 22" strokeWidth="0.9" />
+        <path d="M6 30C9 32 19 32 22 30" strokeWidth="0.9" />
+        <path d="M6 38C9 40 19 40 22 38" strokeWidth="0.9" />
+        <path d="M10 8L6 2M14 8L14 1M18 8L22 2" strokeWidth="1.3" />
+      </svg>
+      {/* Tomato */}
+      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ left: "calc(50% - 500px)", top: "17%", transform: "rotate(-6deg)" }} width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
+        <path d="M19 10C10 10 3 16 3 23C3 30 10 36 19 36C28 36 35 30 35 23C35 16 28 10 19 10Z" strokeWidth="1.4" />
+        <path d="M19 10L19 5" strokeWidth="1.4" />
+        <path d="M19 6C16 3 12 4 12 7M19 6C22 3 26 4 26 7" strokeWidth="1.1" />
+        <path d="M10 22C9 18 10 15 12 14" strokeWidth="1" />
+      </svg>
+
+      {/* ── food sketch decorations – right column ── */}
+      {/* Apple */}
+      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ right: "calc(50% - 620px)", top: "4%", transform: "rotate(12deg)" }} width="40" height="46" viewBox="0 0 40 46" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
+        <path d="M20 12C13 12 4 18 4 27C4 36 10 44 20 44C30 44 36 36 36 27C36 18 27 12 20 12Z" strokeWidth="1.4" />
+        <path d="M15 12C16 8 18 7 20 8C22 7 24 8 25 12" strokeWidth="1.2" />
+        <path d="M20 8L20 3" strokeWidth="1.4" />
+        <path d="M20 5C22 3 27 3 26 7C25 9 22 8 20 5Z" strokeWidth="1.1" />
+        <path d="M10 21C10 18 12 16 14 16" strokeWidth="1" />
+      </svg>
+      {/* Herb sprig */}
+      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ right: "calc(50% - 660px)", top: "30%", transform: "rotate(6deg)" }} width="34" height="52" viewBox="0 0 34 52" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
+        <path d="M17 50L17 6" strokeWidth="1.4" />
+        <path d="M17 40C11 38 8 32 12 29C15 27 17 32 17 40Z" strokeWidth="1.1" />
+        <path d="M17 40C23 38 26 32 22 29C19 27 17 32 17 40Z" strokeWidth="1.1" />
+        <path d="M17 28C11 26 8 20 12 17C15 15 17 20 17 28Z" strokeWidth="1.1" />
+        <path d="M17 28C23 26 26 20 22 17C19 15 17 20 17 28Z" strokeWidth="1.1" />
+        <path d="M17 16C12 14 11 10 14 8C16 6 17 10 17 16Z" strokeWidth="1.1" />
+        <path d="M17 16C22 14 23 10 20 8C18 6 17 10 17 16Z" strokeWidth="1.1" />
+      </svg>
+      {/* Blueberries */}
+      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ right: "calc(50% - 630px)", top: "57%", transform: "rotate(-10deg)" }} width="46" height="40" viewBox="0 0 46 40" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
+        <circle cx="12" cy="26" r="10" strokeWidth="1.3" />
+        <path d="M8 16C9 13 15 13 16 16" strokeWidth="1.1" />
+        <circle cx="34" cy="26" r="10" strokeWidth="1.3" />
+        <path d="M30 16C31 13 37 13 38 16" strokeWidth="1.1" />
+        <circle cx="23" cy="14" r="10" strokeWidth="1.3" />
+        <path d="M19 4C20 1 26 1 27 4" strokeWidth="1.1" />
+        <path d="M12 16L18 10M34 16L28 10" strokeWidth="1" />
+      </svg>
+      {/* Mushroom */}
+      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ right: "calc(50% - 500px)", top: "16%", transform: "rotate(8deg)" }} width="38" height="44" viewBox="0 0 38 44" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
+        <path d="M14 26L12 42L26 42L24 26" strokeWidth="1.4" />
+        <path d="M6 26C6 14 12 4 19 4C26 4 32 14 32 26Z" strokeWidth="1.4" />
+        <path d="M11 22C10 16 13 10 17 8" strokeWidth="0.9" />
+        <path d="M25 22C26 16 23 10 21 8" strokeWidth="0.9" />
+        <circle cx="15" cy="15" r="2" strokeWidth="0.9" />
+        <circle cx="22" cy="11" r="1.5" strokeWidth="0.9" />
+      </svg>
 
       <div className="mx-auto max-w-7xl container-px">
 
@@ -292,10 +356,42 @@ export default function Hero() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="display text-[32px] leading-[1.04] sm:text-[46px] sm:leading-[1.02] lg:text-[56px] lg:leading-[1.0] text-slate-900 text-center"
+          className="display text-[48px] leading-[1.04] sm:text-[48px] sm:leading-[1.02] lg:text-[64px] lg:leading-[1.0] text-slate-900 text-center"
         >
-          Less pills, {" "}
-          <em className="font-display italic font-normal text-slate-900">more real food</em>
+          <span className="relative inline-block">
+            Less pills,{" "}
+            <em className="font-display italic font-normal text-slate-900">more real food</em>
+            {/* hand-drawn underline */}
+            <motion.svg
+              aria-hidden
+              className="absolute pointer-events-none"
+              style={{ left: "-4%", width: "108%", bottom: "-0.18em", height: "0.34em", overflow: "visible" }}
+              viewBox="0 0 340 18"
+              preserveAspectRatio="none"
+              fill="none"
+              opacity="0.10"
+              stroke="#C9973A"
+              strokeWidth="3.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <motion.path
+                d="M4 11C56 6 110 5 168 7C226 9 282 8 336 5"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 0.7, delay: 0.85, ease: [0.22, 1, 0.36, 1] }}
+              />
+              <motion.path
+                d="M10 15C66 12 134 12 200 13C244 13.6 290 13 330 11"
+                stroke="#C9973A"
+                strokeWidth="2.2"
+                opacity="0.10"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.7, delay: 1.0, ease: [0.22, 1, 0.36, 1] }}
+              />
+            </motion.svg>
+          </span>
 
         </motion.h1>
 
@@ -303,36 +399,45 @@ export default function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-2 font-display italic text-[18px] sm:text-[22px] text-slate-900/70 text-center tracking-tight"
+          className="mt-4 max-w-[34ch] mx-auto text-[17px] sm:text-[19px] leading-snug text-slate-900/70 text-center tracking-tight"
         >
-          a simple diet change can reverse many chronic conditions —<br />the question is what foods to eat.
+          A simple diet change can reverse many chronic conditions — the question is{" "}
+          <em className="font-display italic text-slate-900/80">what foods to eat.</em>
         </motion.p>
 
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-6 text-center text-[8px] sm:text-[12px] text-ink/60 tracking-tight"
-        >
-          Diets based on 100k+ real scientific articles, for real, unique people
-        </motion.p>
-
-        <div className="relative z-10 flex justify-center mt-1">
+        <div className="relative z-10 flex flex-col items-center mt-8">
           <button
             onClick={() => navigate("/survey")}
-            className=" pill-btn !rounded-lg text-white hover:-translate-y-[1px] hover:shadow-lift text-[16px] px-6 py-2.5"
-            style={{ background: "#3c7235ff" }}
+            className="pill-btn !rounded-2xl text-white hover:-translate-y-[1px] hover:shadow-lift text-[16px] px-7 py-3 font-semibold"
+            style={{ background: "#1B3A2D" }}
           >
-            Get your personalized <strong className="mx-1">SUPERFOOD</strong> diet plan
+            Get your personalized plan
           </button>
+          <p className="mt-3 text-center text-[11px] sm:text-[12px] text-ink/55 tracking-tight">
+            Built on 100k+ real scientific articles, for real, unique people
+          </p>
         </div>
+
+        {/* section label — signals "this is the product" */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-12 flex items-center justify-center gap-3"
+        >
+          <span className="h-px w-8 bg-ink/15" />
+          <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-ink/40">
+            See it in action
+          </span>
+          <span className="h-px w-8 bg-ink/15" />
+        </motion.div>
 
         {/* ── unified app window ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10 mt-10 mx-auto max-w-5xl rounded-[5px] bg-white border border-ink/[0.08] shadow-lift overflow-hidden"
+          className="relative z-10 mt-6 mx-auto max-w-5xl rounded-[5px] bg-white border border-ink/[0.08] shadow-lift overflow-hidden"
         >
           {/* cursor overlay */}
           <motion.div
@@ -352,20 +457,20 @@ export default function Hero() {
           </motion.div>
 
           {/* chrome bar */}
-          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-ink/[0.06] bg-white">
+          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-black/[0.10]" style={{ background: "#6B98A8" }}>
             <span className="h-2.5 w-2.5 rounded-full bg-amber animate-slow-pulse" />
-            <span className="text-[13px] font-medium tracking-tight text-ink">
-              Nutri <span className="text-ink/40">·</span>{" "}
-              <span className="text-ink/70">Personal Remedies</span>
+            <span className="text-[13px] font-medium tracking-tight text-white">
+              Nutri <span className="text-white/50">·</span>{" "}
+              <span className="text-white/80">Personal Remedies</span>
             </span>
-            <span className="ml-auto text-[11px] text-ink/40">Live demo</span>
+            <span className="ml-auto text-[11px] text-white/60">demo</span>
           </div>
 
           {/* two-pane body */}
           <div className="flex divide-x divide-ink/[0.06]" style={{ minHeight: 420 }}>
 
             {/* LEFT PANEL */}
-            <div className="w-[42%] shrink-0 flex flex-col" style={{ background: "#e8ede6" }}>
+            <div className="w-[42%] shrink-0 flex flex-col" style={{ background: "#E7EEE7" }}>
 
               {/* Nutri Recommendations */}
               <div className="px-4 pt-4 pb-3 border-b border-black/[0.06]">
@@ -462,7 +567,7 @@ export default function Hero() {
                 as chat fills, oldest messages push up and clip at the top edge.
               */}
               <div
-                className="flex-1 flex flex-col-reverse overflow-hidden bg-[#FBFAF6]"
+                className="flex-1 flex flex-col-reverse overflow-hidden bg-[#ECEFF5]"
                 style={{ padding: "20px", gap: "14px", maxHeight: 360 }}
               >
                 {/* typing indicator — first in DOM = very bottom */}
@@ -500,7 +605,7 @@ export default function Hero() {
                           ? "text-white rounded-tr-md"
                           : "bg-white text-ink rounded-tl-md border border-ink/[0.06]"
                           }`}
-                        style={m.from === "user" ? { background: "linear-gradient(135deg, #2d5a28 0%, #3c7235 60%, #4d8f44 100%)" } : {}}
+                        style={m.from === "user" ? { background: "linear-gradient(135deg, #1B3A2D 0%, #3c5e49 60%, #7A9E7E 100%)" } : {}}
                       >
                         {m.text}
                       </div>
@@ -511,7 +616,7 @@ export default function Hero() {
 
               {/* input bar */}
               <div className="px-4 py-3 border-t border-ink/[0.06] flex items-center gap-2 bg-white">
-                <div className="flex-1 rounded-full bg-[#FBFAF6] px-4 py-2 text-[13px] border border-ink/[0.06] flex items-center min-w-0">
+                <div className="flex-1 rounded-full bg-[#ECEFF5] px-4 py-2 text-[13px] border border-ink/[0.06] flex items-center min-w-0">
                   {inputText ? (
                     <>
                       <span className="text-ink truncate">{inputText}</span>
@@ -523,7 +628,7 @@ export default function Hero() {
                 </div>
                 <button
                   className="h-8 w-8 rounded-full text-white flex items-center justify-center shrink-0"
-                  style={{ background: "linear-gradient(135deg, #2d5a28 0%, #3c7235 100%)" }}
+                  style={{ background: "linear-gradient(135deg, #1B3A2D 0%, #7A9E7E 100%)" }}
                 >
                   <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
                     <path d="M7 12V2M7 2 2 7M7 2l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -539,7 +644,7 @@ export default function Hero() {
 
       <div
         className={`left-0 right-0 z-40 ${isFixed ? "fixed bottom-0" : "absolute bottom-0"}`}
-        style={{ background: "#fffffaff" }}
+        style={{ background: "#f1eee9ff" }}
       >
         <TrustStrip />
       </div>

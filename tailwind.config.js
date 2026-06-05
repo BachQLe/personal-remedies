@@ -23,6 +23,14 @@ export default {
         amber: {
           DEFAULT: "#D98A4A",
         },
+        // Extended brand palette (page section coloring)
+        paper: "#F5F0E8", // cream · dominant
+        pine: "#1B3A2D", // forest green · structural
+        gold: "#C9973A", // amber · accent
+        herb: "#7A9E7E", // sage
+        terra: "#C4715A", // terra cotta
+        steel: "#4A7C8E", // slate blue
+        clay: "#8C6B3E", // warm brown
       },
       fontFamily: {
         display: ['"Fraunces"', "ui-serif", "Georgia", "serif"],

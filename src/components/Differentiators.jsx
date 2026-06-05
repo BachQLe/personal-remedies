@@ -36,15 +36,15 @@ function getRecommendation(profileIds) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function barColor(score) {
-  if (score >= 80) return "#1F4A3A";
-  if (score >= 50) return "#D98A4A";
-  return "#ef4444";
+  if (score >= 80) return "#61ba6cff";
+  if (score >= 50) return "#f0d92bff";
+  return "#d16041ff";
 }
 
 function badgeClass(score) {
   if (score >= 80) return "bg-sage-soft text-forest";
   if (score >= 50) return "bg-amber/15 text-amber";
-  return "bg-red-50 text-red-600";
+  return "bg-red-200   text-red-600";
 }
 
 // Nudge the ghost chip relative to where the chip actually sits.
@@ -199,7 +199,7 @@ export default function Differentiators() {
             {/* Condition boxes */}
             <div className="grid grid-cols-2 gap-3 mb-3">
 
-              <div ref={profileBoxRef} className="rounded-2xl border border-ink/[0.08] bg-white p-4 h-[172px] overflow-hidden shadow-card">
+              <div ref={profileBoxRef} className="rounded-2xl border border-ink/[0.08] bg-[#ECEFF5] p-4 h-[172px] overflow-hidden shadow-card">
                 <p className="text-[9.5px] font-semibold tracking-widest uppercase text-ink/35 mb-3">Your Profile</p>
                 <div className="flex flex-col gap-2">
                   <AnimatePresence>
@@ -251,12 +251,12 @@ export default function Differentiators() {
             </div>
 
             {/* Garlic card */}
-            <div className="rounded-2xl border border-ink/[0.08] bg-white p-5 shadow-card">
+            <div className="rounded-2xl border border-ink/[0.08] bg-[#4A7C8E] p-5 shadow-card">
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-[22px] leading-none">🧄</span>
                 <div>
-                  <p className="font-semibold text-ink text-[14.5px] leading-tight">Garlic</p>
-                  <p className="text-[11px] text-ink/40 leading-tight">Allium sativum</p>
+                  <p className="font-semibold text-white text-[14.5px] leading-tight">Garlic</p>
+                  <p className="text-[11px] text-white/40 leading-tight">Allium sativum</p>
                 </div>
                 <AnimatePresence mode="wait">
                   <motion.span
@@ -272,7 +272,7 @@ export default function Differentiators() {
                 </AnimatePresence>
               </div>
 
-              <div className="h-1.5 rounded-full bg-ink/[0.06] overflow-hidden mb-4">
+              <div className="h-1.5 rounded-full bg-white/25 overflow-hidden mb-4">
                 <motion.div
                   className="h-full rounded-full"
                   animate={{ width: `${rec.score}%`, backgroundColor: barColor(rec.score) }}
@@ -285,7 +285,7 @@ export default function Differentiators() {
                   <span className="h-3.5 w-3.5 rounded-full bg-amber flex items-center justify-center flex-shrink-0">
                     <span className="text-[8px] text-white font-bold leading-none">N</span>
                   </span>
-                  <p className="text-[9.5px] font-semibold tracking-widest uppercase text-ink/35">Nutri reasoning</p>
+                  <p className="text-[9.5px] font-semibold tracking-widest uppercase text-white/35">Nutri reasoning</p>
                 </div>
                 {/* Fixed height so the card doesn't resize when text swaps */}
                 <div className="h-[88px] overflow-hidden">
@@ -296,7 +296,7 @@ export default function Differentiators() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
                       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                      className="text-[13px] leading-[1.65] text-ink-soft"
+                      className="text-[13px] leading-[1.65] text-white"
                     >
                       {rec.reason}
                     </motion.p>

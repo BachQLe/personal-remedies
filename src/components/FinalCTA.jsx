@@ -42,9 +42,8 @@ export default function FinalCTA() {
       className="relative overflow-hidden py-28 lg:py-40"
       style={{ scale, y, boxShadow }}
     >
-      <div aria-hidden className="absolute inset-0 -z-1" style={{}} />
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-        <div className="w-[600px] h-96 bg-amber-500/10 rounded-md" />
+        <div className="w-[600px] h-96 bg-[#C4715A] rounded-md" />
       </div>
       <div className="relative z-10 mx-auto max-w-3xl container-px text-center">
         <Reveal>

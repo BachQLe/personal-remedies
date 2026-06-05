@@ -1,17 +1,32 @@
 const cols = [
   {
     heading: "For Patients",
-    items: ["Get started", "How it works", "Pricing", "Apps"],
+    items: [
+      { label: "Get started", to: "/survey" },
+      { label: "How it works", to: "/" },
+      { label: "Pricing", to: "/" },
+      { label: "Apps", to: "/" },
+    ],
   },
   {
     heading: "For Providers",
-    items: ["Providers", "Developers / API", "The science"],
+    items: [
+      { label: "Providers", to: "/providers" },
+      { label: "Developers / API", to: "/developers" },
+      { label: "The science", to: "/science" },
+    ],
   },
   {
     heading: "Company",
-    items: ["Team & Partners", "News", "Contact"],
+    items: [
+      { label: "Team & Partners", to: "/about" },
+      { label: "News", to: "/news" },
+      { label: "Contact", to: "/providers" },
+    ],
   },
 ];
+
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -19,12 +34,12 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl container-px py-20 lg:py-24">
         <div className="grid gap-12 lg:gap-16 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <a
-              href="#"
+            <Link
+              to="/"
               className="font-display text-[22px] tracking-tighter2 text-cream font-medium"
             >
               Personal <span className="text-amber">Remedies</span>
-            </a>
+            </Link>
             <p className="mt-4 text-[14px] leading-[1.6] text-cream/65 max-w-[34ch]">
               Individualized help for chronic conditions.
             </p>
@@ -36,13 +51,13 @@ export default function Footer() {
               </h4>
               <ul className="mt-5 space-y-3">
                 {c.items.map((i) => (
-                  <li key={i}>
-                    <a
-                      href="#"
+                  <li key={i.label}>
+                    <Link
+                      to={i.to}
                       className="text-[14.5px] text-cream/80 hover:text-cream transition-colors"
                     >
-                      {i}
-                    </a>
+                      {i.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
