@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Reveal, Stagger, StaggerItem } from "./Reveal";
 
 function Arrow({ color = "text-forest" }) {
@@ -54,7 +55,12 @@ export default function TwoDoors() {
 
         <Stagger className="mt-14 grid gap-5 sm:gap-6 md:grid-cols-2">
           <StaggerItem>
-            <article className="h-full rounded-3xl p-8 sm:p-10 border border-ink/[0.05] flex flex-col" style={{ backgroundColor: "#C4715A" }}>
+            <motion.article
+              whileHover={{ scale: 1.02, y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="h-full rounded-3xl p-8 sm:p-10 border border-ink/[0.05] flex flex-col shadow-sm hover:shadow-lift"
+              style={{ backgroundColor: "#C4715A" }}
+            >
               <span className="tag text-white">For Patients &amp; Caregivers</span>
               <h3 className="display mt-4 text-[26px] sm:text-[30px] leading-[1.15] font-medium text-white">
                 Take an active role in your health.
@@ -80,11 +86,16 @@ export default function TwoDoors() {
               >
                 Start free <span aria-hidden>→</span>
               </Link>
-            </article>
+            </motion.article>
           </StaggerItem>
 
           <StaggerItem>
-            <article className="h-full rounded-3xl p-8 sm:p-10 border border-ink/[0.05] flex flex-col" style={{ backgroundColor: "#4A7C8E" }}>
+            <motion.article
+              whileHover={{ scale: 1.02, y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="h-full rounded-3xl p-8 sm:p-10 border border-ink/[0.05] flex flex-col shadow-sm hover:shadow-lift"
+              style={{ backgroundColor: "#4A7C8E" }}
+            >
               <span className="tag text-white">For Providers &amp; Developers</span>
               <h3 className="display mt-4 text-[26px] sm:text-[30px] leading-[1.15] font-medium text-white">
                 The API behind better outcomes.
@@ -109,7 +120,7 @@ export default function TwoDoors() {
               >
                 Explore the API <span aria-hidden>→</span>
               </a>
-            </article>
+            </motion.article>
           </StaggerItem>
         </Stagger>
       </div>

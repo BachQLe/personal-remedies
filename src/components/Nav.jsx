@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 const menus = [
   {
@@ -72,9 +73,17 @@ function Dropdown({ menu }) {
 
 export default function Nav({ offset = 0 }) {
   const [scrolled, setScrolled] = useState(false);
+  const prevScrolledRef = useRef(false);
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => {
+      const isScrolled = window.scrollY > 60;
+      if (isScrolled !== prevScrolledRef.current) {
+        prevScrolledRef.current = isScrolled;
+        setScrolled(isScrolled);
+      }
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -113,9 +122,28 @@ export default function Nav({ offset = 0 }) {
           ))}
         </nav>
 
-        <Link to="/survey" className="bg-[#3c7235] text-white text-[14px] font-semibold px-5 py-2.5 rounded-sm">
-          Get Remedy free
-        </Link>
+        <div className="flex items-center gap-3">
+          {user ? (
+            <button
+              onClick={signOut}
+              className="text-[14px] font-semibold text-ink/85 hover:text-ink transition-colors"
+            >
+              Log out
+            </button>
+          ) : (
+            <>
+              <Link to="/survey" className="bg-[#1B3A2F] text-white text-[14px] font-semibold px-4 py-2 rounded-md">
+                Get Remedy free
+              </Link>
+              <Link
+                to="/login"
+                className="text-[14px] font-semibold text-ink/85 hover:text-ink transition-colors"
+              >
+                Log in
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </motion.header>
   );

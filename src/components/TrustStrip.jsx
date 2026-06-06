@@ -4,8 +4,8 @@ import edamamLogo from "../assets/edamam-logo.png";
 import adherisLogo from "../assets/adheris-logo.png";
 import snowflakeLogo from "../assets/snowflake-logo.png";
 
-const inkFilter = "brightness(0)";
-const logoStyle = { filter: inkFilter, opacity: 0.55 };
+const logoFilter = "brightness(0) invert(1)";
+const logoStyle = { filter: logoFilter, opacity: 1 };
 
 const items = [
   { type: "logo", src: alexaLogo, alt: "Amazon Alexa" },
@@ -16,11 +16,11 @@ const items = [
 
 export default function TrustStrip() {
   return (
-    <section className="border-y border-ink/[0.08] bg-cream/40">
-      <div className="mx-auto max-w-7xl container-px py-1 sm:py-1">
+    <section className="border-y border-ink/[0.08] bg-sky-950 mx-24 rounded-lg">
+      <div className="mx-auto max-w-7xl container-px py-1 sm:py-1 px-10">
         <Reveal>
           <div className="flex flex-col lg:flex-row lg:items-center gap-6 lg:gap-12">
-            <span className="text-[14px] sm:text-[15px] text-ink/70 font-medium tracking-tight shrink-0">
+            <span className="text-[14px] sm:text-[15px] text-white font-medium tracking-tight shrink-0">
               The technology behind
             </span>
             <ul className="flex flex-wrap items-center gap-x-8 gap-y-3">
@@ -30,7 +30,7 @@ export default function TrustStrip() {
                   className="flex items-center gap-8"
                 >
                   {item.type === "snowflake" ? (
-                    <span className="flex items-center gap-2 text-[14px] sm:text-[15px] text-ink/70 font-medium tracking-tight">
+                    <span className="flex items-center gap-2 text-[14px] sm:text-[15px] text-white font-medium tracking-tight">
                       Advised by the former CEO of
                       <img src={item.src} alt="Snowflake" className="h-6 sm:h-7 w-auto object-contain" style={logoStyle} />
                     </span>
@@ -43,7 +43,7 @@ export default function TrustStrip() {
                     />
                   )}
                   {i < items.length - 1 && (
-                    <span className="hidden sm:inline text-ink/25">·</span>
+                    <span className="hidden sm:inline text-white/25">·</span>
                   )}
                 </li>
               ))}

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Reveal, Stagger, StaggerItem } from "./Reveal";
 
 function Check({ light }) {
@@ -73,7 +74,11 @@ export default function Pricing() {
 
         <Stagger className="mt-14 grid gap-5 sm:gap-6 md:grid-cols-2 max-w-4xl mx-auto">
           <StaggerItem>
-            <div className="h-full rounded-3xl bg-white border border-ink/[0.1] p-8 sm:p-10 flex flex-col">
+            <motion.div
+              whileHover={{ scale: 1.02, y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="h-full rounded-3xl bg-white border border-ink/[0.1] p-8 sm:p-10 flex flex-col shadow-sm hover:shadow-lift"
+            >
               <div className="flex items-baseline justify-between">
                 <h3 className="font-display text-[22px] font-medium tracking-tightish">
                   Free
@@ -99,11 +104,15 @@ export default function Pricing() {
               <Link to="/survey" className="pill-ghost mt-10">
                 Start free
               </Link>
-            </div>
+            </motion.div>
           </StaggerItem>
 
           <StaggerItem>
-            <div className="relative h-full rounded-3xl bg-forest text-cream p-8 sm:p-10 flex flex-col shadow-lift">
+            <motion.div
+              whileHover={{ scale: 1.02, y: -4 }}
+              transition={{ duration: 0.2 }}
+              className="relative h-full rounded-3xl bg-forest text-cream p-8 sm:p-10 flex flex-col shadow-lift hover:shadow-lg"
+            >
               <span className="absolute top-5 right-5 inline-flex items-center rounded-full bg-amber text-white text-[11px] font-semibold tracking-[0.14em] uppercase px-3 py-1">
                 Most popular
               </span>
@@ -132,7 +141,7 @@ export default function Pricing() {
               <a href="#start" className="pill-amber mt-10">
                 Start free trial
               </a>
-            </div>
+            </motion.div>
           </StaggerItem>
         </Stagger>
       </div>

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Reveal } from "./Reveal";
 
 const PAPERS = [
@@ -27,23 +28,23 @@ const DURATION = N * 2.2;
 function PaperWheel() {
   return (
     <div
-      className="relative rounded-xl overflow-hidden border border-white/10"
-      style={{ height: 280, perspective: "520px" }}
+      className="relative rounded-xl overflow-hidden border border-black/10"
+      style={{ height: 280, perspective: "520px", background: "#ffffff" }}
     >
       {/* slot window bg */}
-      <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.25)" }} />
+      <div className="absolute inset-0" style={{ background: "rgba(255,255,255,1)" }} />
 
       {/* top fade */}
       <div
         aria-hidden
         className="absolute inset-x-0 top-0 z-10 h-24 pointer-events-none"
-        style={{ background: "linear-gradient(to bottom, #111e17, transparent)" }}
+        style={{ background: "linear-gradient(to bottom, rgba(255,255,255,1), transparent)" }}
       />
       {/* bottom fade */}
       <div
         aria-hidden
         className="absolute inset-x-0 bottom-0 z-10 h-24 pointer-events-none"
-        style={{ background: "linear-gradient(to top, #111e17, transparent)" }}
+        style={{ background: "linear-gradient(to top, rgba(255,255,255,1), transparent)" }}
       />
 
       {/* center active-row highlight */}
@@ -54,8 +55,8 @@ function PaperWheel() {
           top: "50%",
           transform: "translateY(-50%)",
           height: FACE_H,
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.10)",
+          background: "rgba(0,0,0,0.03)",
+          border: "1px solid rgba(0,0,0,0.08)",
         }}
       />
 
@@ -94,13 +95,13 @@ function PaperWheel() {
               >
                 {paper.journal}
               </span>
-              <span className="text-[10px]" style={{ color: "rgba(245,242,234,0.3)" }}>
+              <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
                 {paper.year}
               </span>
             </div>
             <p
               className="text-[13px] leading-[1.45] font-medium"
-              style={{ color: "rgba(245,242,234,0.88)" }}
+              style={{ color: "rgba(0,0,0,0.85)" }}
             >
               {paper.title}
             </p>
@@ -129,50 +130,56 @@ export default function Nutri() {
           backgroundSize: "20px 20px",
         }}
       />
-      <div className="relative mx-auto max-w-6xl container-px">
-        <div
-          className="relative overflow-hidden rounded-sm px-8 py-4 lg:px-14 lg:py-24"
-          style={{ background: "#1a3528" }}
-        >
-          <div
-            aria-hidden
-            className="absolute inset-0 opacity-60 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(50% 50% at 12% 0%, rgba(31,74,58,0.9) 0%, rgba(22,53,40,0) 70%), radial-gradient(40% 50% at 90% 100%, rgba(217,138,74,0.18) 0%, rgba(22,53,40,0) 70%)",
-            }}
-          />
-
+      <div
+        className="relative mx-auto max-w-7xl overflow-hidden rounded-sm px-8 py-4 lg:px-14 lg:py-24"
+      >
+        <div className="relative mx-auto max-w-7xl container-px">
           <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* LEFT — headline copy */}
             <div>
               <Reveal>
-                <span className="tag tag-amber">Meet Nutri, your AI dietician</span>
+                <span className="tag">Meet Nutri, your AI dietician</span>
               </Reveal>
               <Reveal delay={0.1}>
-                <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[44px] sm:leading-[1.06] lg:text-[50px] lg:leading-[1.04] text-cream">
+                <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[44px] sm:leading-[1.06] lg:text-[50px] lg:leading-[1.04] text-black">
                   We read 100,000+ studies {" "}
-                  <em className="font-display italic font-normal text-amber">
+                  <em className="font-display italic font-normal text-forest">
                     so you don't have to
                   </em>
                 </h2>
               </Reveal>
               <Reveal delay={0.18}>
-                <p className="mt-6 text-[12px] sm:text-[14px] leading-[1.6] text-cream/75">
+                <p className="mt-2 font-display italic text-[18px] sm:text-[22px] text-slate-900/70 tracking-tight">
                   Nutri shows you the everyday foods that can reverse your chronic conditions — the same everyday foods medical companies can't monetize.
                 </p>
               </Reveal>
             </div>
 
             {/* RIGHT — rolling paper wheel */}
-            <Reveal delay={0.22}>
-              <div className="flex flex-col gap-3">
-                <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-cream/35">
+            <div className="relative py-10 px-5">
+              <div className="absolute inset-0 pointer-events-none" style={{
+                perspective: '1200px',
+                transformStyle: 'preserve-3d',
+                zIndex: 1,
+              }}>
+                <div className="absolute inset-0 rounded-3xl border border-black/10" style={{
+                  transform: 'translateZ(20px)',
+                  background: 'linear-gradient(to right, rgba(36, 106, 79, 1) 0%, rgba(58, 126, 100, 1) 100%)',
+                }} />
+              </div>
+              <motion.div
+                className="flex flex-col gap-3 relative z-10"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+              >
+                <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/75">
                   100,000+ peer-reviewed studies
                 </p>
                 <PaperWheel />
-              </div>
-            </Reveal>
+              </motion.div>
+            </div>
           </div>
         </div>
       </div>

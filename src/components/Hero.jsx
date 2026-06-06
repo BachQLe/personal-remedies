@@ -121,18 +121,205 @@ function RatingDots({ filled }) {
 export default function Hero({ topOffset = 0 }) {
   const navigate = useNavigate();
   const heroRef = useRef(null);
+  const canvasRef = useRef(null);
   const [isFixed, setIsFixed] = useState(true);
+  const prevFixedRef = useRef(true);
+
+
+  // Initialize WebGL sunset clouds background
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return;
+
+    function resize() {
+      const r = canvas.getBoundingClientRect();
+      canvas.width = r.width * Math.min(devicePixelRatio, 1);
+      canvas.height = r.height * Math.min(devicePixelRatio, 1);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+
+    const VS = `attribute vec2 a_pos; void main(){ gl_Position=vec4(a_pos,0.,1.); }`;
+
+    const FS = `
+      precision highp float;
+      uniform vec2  u_res;
+      uniform float u_time;
+
+      vec2 hash2(vec2 p){
+        p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));
+        return -1.+2.*fract(sin(p)*43758.5453);
+      }
+      float vn(vec2 p){
+        vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);
+        return mix(
+          mix(dot(hash2(i),f),dot(hash2(i+vec2(1,0)),f-vec2(1,0)),u.x),
+          mix(dot(hash2(i+vec2(0,1)),f-vec2(0,1)),dot(hash2(i+vec2(1)),f-vec2(1)),u.x),u.y);
+      }
+      float fbm(vec2 p, int oct){
+        float v=0.,a=.5,tot=0.;
+        for(int i=0;i<10;i++){
+          if(i>=oct)break;
+          v+=a*vn(p); tot+=a; a*=.48;
+          p=p*2.07+vec2(1.7,9.2);
+        }
+        return v/tot;
+      }
+
+      vec2 cloudSample(vec2 p, int sOct, int dOct){
+        vec2 q=vec2(fbm(p,3),fbm(p+vec2(5.2,1.3),3));
+        vec2 r=vec2(fbm(p+q+vec2(1.7,9.2),2),fbm(p+q+vec2(8.3,2.8),2));
+        float shape=fbm(p+r*0.7,sOct);
+        vec2 dq=vec2(fbm(p*2.1+vec2(3.1,7.4)+r*0.4,2),fbm(p*2.1+vec2(8.8,2.1)+r*0.4,2));
+        float detail=fbm(p*2.6+dq*0.6+vec2(11.,5.),dOct);
+        return vec2(shape,detail);
+      }
+
+      float layer(vec2 uv, float scale, float spd, float spd2, float seed, float edgeFade, float threshold, int sOct, int dOct){
+        vec2 p=uv*scale+vec2(seed,seed*0.43);
+        p.x+=u_time*spd;
+        p.y+=u_time*spd2;
+        vec2 s=cloudSample(p,sOct,dOct);
+        float mask=smoothstep(threshold,threshold+edgeFade,s.x);
+        float interior=mix(0.,s.y*0.5+0.5,mask);
+        float cloudD=mask*(0.55+interior*0.45);
+        float edgeMask=smoothstep(threshold,threshold+edgeFade*2.,s.x);
+        cloudD*=mix(0.6+s.y*0.4,1.,edgeMask);
+        return clamp(cloudD,0.,1.);
+      }
+
+      void main(){
+        vec2 uv=gl_FragCoord.xy/u_res;
+        float yT=uv.y;
+
+        vec3 skyAmb  = vec3(.85,.52,.25);
+        vec3 skyTerra= vec3(.82,.42,.30);
+        vec3 sky = mix(skyTerra, skyAmb, smoothstep(0.2, 0.8, yT));
+
+        float sunY = 0.38;
+        float sunX = 0.52;
+        vec2 sunPos = vec2(sunX, sunY);
+        float sunDist = length(uv - sunPos);
+        float sunGlow = exp(-sunDist*sunDist*18.)*0.65
+                      + exp(-sunDist*sunDist*4.0)*0.30;
+        sky += vec3(1.0,.72,.28)*sunGlow;
+        sky  = clamp(sky,0.,1.);
+
+        float pStretch=1.0+(1.-yT)*1.3;
+        vec2 pUV=vec2(uv.x*pStretch,uv.y);
+
+        float altMF  = smoothstep(.46,.56,yT)*smoothstep(.62,.55,yT);
+        float dMF    = layer(pUV,4.0,0.015,-0.002,  23.7, 0.10,0.05,5,4)*altMF*0.75;
+
+        float altMid = smoothstep(.36,.46,yT)*smoothstep(.54,.47,yT);
+        float dMid   = layer(pUV,2.8,0.024, 0.001,  47.1, 0.09,0.04,6,5)*altMid*0.92;
+
+        float nScale = 1.0+(1.-yT)*0.8;
+        vec2 nUV     = vec2(pUV.x*nScale,pUV.y);
+        float altNear= smoothstep(.30,.38,yT)*smoothstep(.44,.38,yT);
+        float dNear  = layer(nUV,2.0,0.038,-0.001, 81.9, 0.07,0.05,7,6)*altNear*1.0;
+
+        float d=max(dNear,max(dMid*(1.-dNear*.55),dMF*(1.-dMid*.5)*(1.-dNear*.7)));
+
+        vec3 cloudEdge  = vec3(1.0,.90,.65);
+        vec3 cloudMid   = vec3(.95,.65,.30);
+        vec3 cloudShadow= vec3(.78,.50,.65);
+        vec3 cloudBase  = vec3(.68,.40,.50);
+
+        float sunProx = exp(-sunDist*sunDist*6.)*0.8 + 0.2;
+
+        float thick=clamp(d,0.,1.);
+        vec3 cloudCol;
+        cloudCol = mix(cloudEdge, cloudMid,   smoothstep(.10,.50,thick));
+        cloudCol = mix(cloudCol,  cloudShadow,smoothstep(.55,.90,thick));
+        cloudCol = mix(cloudCol,  cloudBase,  smoothstep(.80,1.0, thick));
+
+        vec3 sunBloom = vec3(1.0,.95,.75);
+        cloudCol = mix(cloudCol, sunBloom, sunProx*smoothstep(.6,1.,1.-thick)*0.75);
+
+        float rimGlow = smoothstep(.08,.22,d)*(1.-smoothstep(.22,.50,d));
+        cloudCol = mix(cloudCol, vec3(1.0,.80,.40), rimGlow*sunProx*0.80);
+
+        float terraBleed = smoothstep(.38,.55,d)*(1.-smoothstep(.55,.80,d));
+        cloudCol = mix(cloudCol, vec3(.88,.45,.30), terraBleed*(1.-yT)*0.55);
+
+        float alpha=smoothstep(0.,.65,d);
+        vec3 col=mix(sky,cloudCol,alpha);
+
+        float vig=1.-smoothstep(.55,1.4,length((uv-vec2(.5,.5))*vec2(1.,.8)));
+        col*=mix(.72,1.,vig);
+
+        gl_FragColor=vec4(clamp(col,0.,1.),1.);
+      }
+    `;
+
+    function mkShader(type, src) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
+      return s;
+    }
+
+    const prog = gl.createProgram();
+    gl.attachShader(prog, mkShader(gl.VERTEX_SHADER, VS));
+    gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const aloc = gl.getAttribLocation(prog, 'a_pos');
+    gl.enableVertexAttribArray(aloc);
+    gl.vertexAttribPointer(aloc, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes = gl.getUniformLocation(prog, 'u_res');
+    const uTime = gl.getUniformLocation(prog, 'u_time');
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const t0 = performance.now();
+    let lastFrameTime = 0;
+    let frameScheduled = false;
+
+    function frame() {
+      const now = performance.now();
+      if (now - lastFrameTime >= 33) {
+        const t = prefersReducedMotion ? 0 : (now - t0) * 0.001;
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+        gl.uniform1f(uTime, t);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        lastFrameTime = now;
+      }
+      frameScheduled = requestAnimationFrame(frame);
+    }
+    frameScheduled = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(frameScheduled);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
 
   useEffect(() => {
     const check = () => {
       if (!heroRef.current) return;
       const { bottom } = heroRef.current.getBoundingClientRect();
-      setIsFixed(bottom > window.innerHeight);
+      const shouldBeFixed = bottom > window.innerHeight;
+      if (shouldBeFixed !== prevFixedRef.current) {
+        prevFixedRef.current = shouldBeFixed;
+        setIsFixed(shouldBeFixed);
+      }
     };
     check();
     window.addEventListener("scroll", check, { passive: true });
     return () => window.removeEventListener("scroll", check);
   }, []);
+
 
   // Superfood cycling
   const [activeIdx, setActiveIdx] = useState(0);
@@ -265,8 +452,17 @@ export default function Hero({ topOffset = 0 }) {
     <section
       ref={heroRef}
       className="relative overflow-hidden pb-[108px]"
-      style={{ background: "#f1eee9ff", marginTop: -topOffset, paddingTop: topOffset + 64 }}
+      style={{ marginTop: -topOffset, paddingTop: topOffset + 64 }}
     >
+      {/* WebGL sunset clouds background */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ top: 0, left: 0, zIndex: 0 }}
+      />
+
+      {/* dark overlay for readability */}
+      <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.12)', zIndex: 1 }} />
 
       {/* shared hand-drawn filter */}
       <svg aria-hidden className="absolute w-0 h-0 overflow-hidden">
@@ -278,89 +474,18 @@ export default function Hero({ topOffset = 0 }) {
         </defs>
       </svg>
 
-      {/* ── food sketch decorations – left column ── */}
-      {/* Lemon */}
-      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ left: "calc(50% - 620px)", top: "6%", transform: "rotate(-14deg)" }} width="44" height="30" viewBox="0 0 44 30" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
-        <path d="M22 2C11 2 2 8 2 15C2 22 11 28 22 28C33 28 42 22 42 15C42 8 33 2 22 2Z" strokeWidth="1.4" />
-        <path d="M42 14C44 11 44 8 42 6" strokeWidth="1.2" />
-        <path d="M2 14C0 11 0 8 2 6" strokeWidth="1.2" />
-        <path d="M12 9C15 6 19 6 22 8" strokeWidth="1" />
-      </svg>
-      {/* Garlic */}
-      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ left: "calc(50% - 660px)", top: "28%", transform: "rotate(-8deg)" }} width="42" height="48" viewBox="0 0 42 48" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
-        <path d="M21 44C11 44 4 37 4 28C4 19 11 14 17 14C19 12 21 9 21 7C21 9 23 12 25 14C31 14 38 19 38 28C38 37 31 44 21 44Z" strokeWidth="1.4" />
-        <line x1="21" y1="14" x2="21" y2="44" strokeWidth="0.9" strokeDasharray="1.5 2.5" />
-        <path d="M10 19C7 24 7 34 10 40" strokeWidth="1" />
-        <path d="M32 19C35 24 35 34 32 40" strokeWidth="1" />
-        <path d="M21 7L21 2" strokeWidth="1.4" />
-        <path d="M21 2C19 0 16 1 15 3M21 2C23 0 26 1 27 3" strokeWidth="1.1" />
-      </svg>
-      {/* Carrot */}
-      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ left: "calc(50% - 630px)", top: "55%", transform: "rotate(-12deg)" }} width="28" height="56" viewBox="0 0 28 56" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
-        <path d="M14 52C6 46 3 32 5 19C6 12 10 8 14 8C18 8 22 12 23 19C25 32 22 46 14 52Z" strokeWidth="1.4" />
-        <path d="M7 22C10 24 18 24 21 22" strokeWidth="0.9" />
-        <path d="M6 30C9 32 19 32 22 30" strokeWidth="0.9" />
-        <path d="M6 38C9 40 19 40 22 38" strokeWidth="0.9" />
-        <path d="M10 8L6 2M14 8L14 1M18 8L22 2" strokeWidth="1.3" />
-      </svg>
-      {/* Tomato */}
-      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ left: "calc(50% - 500px)", top: "17%", transform: "rotate(-6deg)" }} width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
-        <path d="M19 10C10 10 3 16 3 23C3 30 10 36 19 36C28 36 35 30 35 23C35 16 28 10 19 10Z" strokeWidth="1.4" />
-        <path d="M19 10L19 5" strokeWidth="1.4" />
-        <path d="M19 6C16 3 12 4 12 7M19 6C22 3 26 4 26 7" strokeWidth="1.1" />
-        <path d="M10 22C9 18 10 15 12 14" strokeWidth="1" />
-      </svg>
 
-      {/* ── food sketch decorations – right column ── */}
-      {/* Apple */}
-      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ right: "calc(50% - 620px)", top: "4%", transform: "rotate(12deg)" }} width="40" height="46" viewBox="0 0 40 46" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
-        <path d="M20 12C13 12 4 18 4 27C4 36 10 44 20 44C30 44 36 36 36 27C36 18 27 12 20 12Z" strokeWidth="1.4" />
-        <path d="M15 12C16 8 18 7 20 8C22 7 24 8 25 12" strokeWidth="1.2" />
-        <path d="M20 8L20 3" strokeWidth="1.4" />
-        <path d="M20 5C22 3 27 3 26 7C25 9 22 8 20 5Z" strokeWidth="1.1" />
-        <path d="M10 21C10 18 12 16 14 16" strokeWidth="1" />
-      </svg>
-      {/* Herb sprig */}
-      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ right: "calc(50% - 660px)", top: "30%", transform: "rotate(6deg)" }} width="34" height="52" viewBox="0 0 34 52" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
-        <path d="M17 50L17 6" strokeWidth="1.4" />
-        <path d="M17 40C11 38 8 32 12 29C15 27 17 32 17 40Z" strokeWidth="1.1" />
-        <path d="M17 40C23 38 26 32 22 29C19 27 17 32 17 40Z" strokeWidth="1.1" />
-        <path d="M17 28C11 26 8 20 12 17C15 15 17 20 17 28Z" strokeWidth="1.1" />
-        <path d="M17 28C23 26 26 20 22 17C19 15 17 20 17 28Z" strokeWidth="1.1" />
-        <path d="M17 16C12 14 11 10 14 8C16 6 17 10 17 16Z" strokeWidth="1.1" />
-        <path d="M17 16C22 14 23 10 20 8C18 6 17 10 17 16Z" strokeWidth="1.1" />
-      </svg>
-      {/* Blueberries */}
-      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ right: "calc(50% - 630px)", top: "57%", transform: "rotate(-10deg)" }} width="46" height="40" viewBox="0 0 46 40" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
-        <circle cx="12" cy="26" r="10" strokeWidth="1.3" />
-        <path d="M8 16C9 13 15 13 16 16" strokeWidth="1.1" />
-        <circle cx="34" cy="26" r="10" strokeWidth="1.3" />
-        <path d="M30 16C31 13 37 13 38 16" strokeWidth="1.1" />
-        <circle cx="23" cy="14" r="10" strokeWidth="1.3" />
-        <path d="M19 4C20 1 26 1 27 4" strokeWidth="1.1" />
-        <path d="M12 16L18 10M34 16L28 10" strokeWidth="1" />
-      </svg>
-      {/* Mushroom */}
-      <svg aria-hidden className="absolute opacity-[0.35] pointer-events-none" style={{ right: "calc(50% - 500px)", top: "16%", transform: "rotate(8deg)" }} width="38" height="44" viewBox="0 0 38 44" fill="none" stroke="#C9973A" strokeLinecap="round" strokeLinejoin="round" filter="url(#sketchy)">
-        <path d="M14 26L12 42L26 42L24 26" strokeWidth="1.4" />
-        <path d="M6 26C6 14 12 4 19 4C26 4 32 14 32 26Z" strokeWidth="1.4" />
-        <path d="M11 22C10 16 13 10 17 8" strokeWidth="0.9" />
-        <path d="M25 22C26 16 23 10 21 8" strokeWidth="0.9" />
-        <circle cx="15" cy="15" r="2" strokeWidth="0.9" />
-        <circle cx="22" cy="11" r="1.5" strokeWidth="0.9" />
-      </svg>
-
-      <div className="mx-auto max-w-7xl container-px">
+      <div className="mx-auto max-w-7xl container-px relative z-20">
 
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="display text-[48px] leading-[1.04] sm:text-[48px] sm:leading-[1.02] lg:text-[64px] lg:leading-[1.0] text-slate-900 text-center"
+          className="display text-[48px] leading-[1.04] sm:text-[48px] sm:leading-[1.02] lg:text-[64px] lg:leading-[1.0] text-white text-center"
         >
           <span className="relative inline-block">
             Less pills,{" "}
-            <em className="font-display italic font-normal text-slate-900">more real food</em>
+            <em className="font-display italic font-normal text-white">more real food</em>
             {/* hand-drawn underline */}
             <motion.svg
               aria-hidden
@@ -399,10 +524,10 @@ export default function Hero({ topOffset = 0 }) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-4 max-w-[34ch] mx-auto text-[17px] sm:text-[19px] leading-snug text-slate-900/70 text-center tracking-tight"
+          className="mt-4 max-w-[34ch] mx-auto text-[17px] sm:text-[19px] leading-snug text-white/85 text-center tracking-tight"
         >
           A simple diet change can reverse many chronic conditions — the question is{" "}
-          <em className="font-display italic text-slate-900/80">what foods to eat.</em>
+          <em className="font-display italic text-white">what foods to eat.</em>
         </motion.p>
 
         <div className="relative z-10 flex flex-col items-center mt-8">
@@ -413,7 +538,7 @@ export default function Hero({ topOffset = 0 }) {
           >
             Get your personalized plan
           </button>
-          <p className="mt-3 text-center text-[11px] sm:text-[12px] text-ink/55 tracking-tight">
+          <p className="mt-3 text-center text-[11px] sm:text-[12px] text-white/80 tracking-tight">
             Built on 100k+ real scientific articles, for real, unique people
           </p>
         </div>
@@ -425,11 +550,11 @@ export default function Hero({ topOffset = 0 }) {
           transition={{ duration: 0.7, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
           className="mt-12 flex items-center justify-center gap-3"
         >
-          <span className="h-px w-8 bg-ink/15" />
-          <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-ink/40">
+          <span className="h-px w-8" style={{ background: 'rgba(255,255,255,0.25)' }} />
+          <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/60">
             See it in action
           </span>
-          <span className="h-px w-8 bg-ink/15" />
+          <span className="h-px w-8" style={{ background: 'rgba(255,255,255,0.25)' }} />
         </motion.div>
 
         {/* ── unified app window ── */}
@@ -438,6 +563,9 @@ export default function Hero({ topOffset = 0 }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="relative z-10 mt-6 mx-auto max-w-5xl rounded-[5px] bg-white border border-ink/[0.08] shadow-lift overflow-hidden"
+          style={{
+            boxShadow: `0 0 60px rgba(100, 150, 200, 0.4), 0 25px 50px -12px rgba(0, 0, 0, 0.25)`
+          }}
         >
           {/* cursor overlay */}
           <motion.div
@@ -457,7 +585,7 @@ export default function Hero({ topOffset = 0 }) {
           </motion.div>
 
           {/* chrome bar */}
-          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-black/[0.10]" style={{ background: "#6B98A8" }}>
+          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-black/[0.10]" style={{ background: "linear-gradient(90deg, #0EA5E9 0%, #06B6D4 40%, #103db9ff 100%)", boxShadow: "0 0 30px rgba(6, 182, 212, 0.6), 0 0 60px rgba(16, 185, 129, 0.3)" }}>
             <span className="h-2.5 w-2.5 rounded-full bg-amber animate-slow-pulse" />
             <span className="text-[13px] font-medium tracking-tight text-white">
               Nutri <span className="text-white/50">·</span>{" "}
@@ -643,8 +771,7 @@ export default function Hero({ topOffset = 0 }) {
       </div>
 
       <div
-        className={`left-0 right-0 z-40 ${isFixed ? "fixed bottom-0" : "absolute bottom-0"}`}
-        style={{ background: "#f1eee9ff" }}
+        className={`left-6 right-6 z-40 ${isFixed ? "fixed bottom-0" : "absolute bottom-0"}`}
       >
         <TrustStrip />
       </div>
