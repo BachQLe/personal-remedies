@@ -10,28 +10,32 @@ const stats = [
 
 const offerings = [
   {
-    icon: "🏷️",
+    icon: "whitelabel-icon",
     title: "White-label deployment",
     body: "Offer our platform under your own brand on every major app store.",
     chip: "bg-herb/15",
+    color: "#3f6b48",
   },
   {
-    icon: "🔌",
+    icon: "api-icon",
     title: "API integration",
     body: "Plug our Nutridigm knowledgebase directly into your existing patient portal or app.",
     chip: "bg-steel/15",
+    color: "#556b7f",
   },
   {
-    icon: "🧬",
+    icon: "depth-icon",
     title: "Condition depth no one else has",
     body: "300+ conditions, including complex comorbidities. Not just diabetes and obesity.",
     chip: "bg-terra/15",
+    color: "#a9762a",
   },
   {
-    icon: "📈",
+    icon: "revenue-icon",
     title: "New revenue stream",
     body: "Package and price our capabilities as your own telehealth service offering.",
     chip: "bg-gold/15",
+    color: "#d4a574",
   },
 ];
 
@@ -52,8 +56,8 @@ const differentiators = [
     dot: "bg-terra",
   },
   {
-    title: "Proven at scale",
-    body: "Over 45,000 patients and consumers have used our knowledgebase. US Patent No. 8504385.",
+    title: "Patented, proven, proprietary",
+    body: "45,000+ patients have benefited from our algorithm. Backed by US Patent No. 8504385 — a legal moat you can't get anywhere else in nutrition.",
     dot: "bg-steel",
   },
 ];
@@ -158,7 +162,11 @@ export default function Providers() {
             {offerings.map((o) => (
               <StaggerItem key={o.title}>
                 <div className="flex gap-5 rounded-2xl bg-white border border-ink/[0.06] shadow-card p-6 sm:p-7">
-                  <span className={`h-12 w-12 shrink-0 rounded-xl ${o.chip} flex items-center justify-center text-[24px] leading-none`} aria-hidden>{o.icon}</span>
+                  <div className={`h-12 w-12 shrink-0 rounded-xl ${o.chip} flex items-center justify-center`} aria-hidden>
+                    <svg className="h-6 w-6" style={{ color: o.color }}>
+                      <use href={`/icons.svg#${o.icon}`} />
+                    </svg>
+                  </div>
                   <div>
                     <h3 className="text-[17px] font-semibold tracking-tight text-ink">{o.title}</h3>
                     <p className="mt-1.5 text-[15px] leading-[1.6] text-ink-soft">{o.body}</p>
