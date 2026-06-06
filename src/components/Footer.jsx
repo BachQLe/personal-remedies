@@ -22,6 +22,8 @@ const cols = [
       { label: "Team & Partners", to: "/about" },
       { label: "News", to: "/news" },
       { label: "Contact", to: "/providers" },
+      { label: "Terms of Use", to: "/terms" },
+      { label: "Privacy Policy", to: "/privacy" },
     ],
   },
 ];
@@ -36,9 +38,10 @@ export default function Footer() {
           <div>
             <Link
               to="/"
-              className="font-display text-[22px] tracking-tighter2 text-cream font-medium"
+              style={{ fontFamily: "'Raleway', sans-serif", fontWeight: 900 }}
+              className="text-[22px] tracking-tight text-cream"
             >
-              Personal <span className="text-amber">Remedies</span>
+              personalRemedies
             </Link>
             <p className="mt-4 text-[14px] leading-[1.6] text-cream/65 max-w-[34ch]">
               Individualized help for chronic conditions.

@@ -59,7 +59,7 @@ export default function TwoDoors() {
               whileHover={{ scale: 1.02, y: -4 }}
               transition={{ duration: 0.2 }}
               className="h-full rounded-3xl p-8 sm:p-10 border border-ink/[0.05] flex flex-col shadow-sm hover:shadow-lift"
-              style={{ backgroundColor: "#C4715A" }}
+              style={{ background: "linear-gradient(to right, rgba(199, 113, 90, 1) 0%, rgba(230, 150, 120, 1) 100%)" }}
             >
               <span className="tag text-white">For Patients &amp; Caregivers</span>
               <h3 className="display mt-4 text-[26px] sm:text-[30px] leading-[1.15] font-medium text-white">
@@ -94,7 +94,7 @@ export default function TwoDoors() {
               whileHover={{ scale: 1.02, y: -4 }}
               transition={{ duration: 0.2 }}
               className="h-full rounded-3xl p-8 sm:p-10 border border-ink/[0.05] flex flex-col shadow-sm hover:shadow-lift"
-              style={{ backgroundColor: "#4A7C8E" }}
+              style={{ background: "linear-gradient(to right, rgba(74, 124, 142, 1) 0%, rgba(110, 160, 180, 1) 100%)" }}
             >
               <span className="tag text-white">For Providers &amp; Developers</span>
               <h3 className="display mt-4 text-[26px] sm:text-[30px] leading-[1.15] font-medium text-white">

@@ -177,7 +177,7 @@ export default function Differentiators() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <section id="how" className="py-16 lg:py-24">
+    <section id="how" className="py-16 lg:py-24 rounded-l-3xl">
       <div className="mx-auto max-w-7xl container-px rounded-sm overflow-hidden px-8 py-12 lg:px-14 lg:py-16 border border-dashed border-ink/[0]">
         <div className="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
 

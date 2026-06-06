@@ -46,24 +46,39 @@ const steps = [
 
 const facts = [
   {
+    stat: "30%",
+    claim: "A Mediterranean diet can reduce your risk of heart disease by 30%.",
+    source: "Johns Hopkins Medicine",
+  },
+  {
+    stat: "8 in 10",
+    claim: "8 in 10 chronic diseases are preventable through nutrition and lifestyle changes.",
+    source: "PMC / peer-reviewed",
+  },
+  {
+    stat: "55%",
+    claim: "Higher folate intake from leafy greens can reduce depression risk by up to 55%.",
+    source: "American Journal of Psychiatry",
+  },
+  {
+    stat: "70%",
+    claim: "70% of the immune system lives in the gut — what you eat is your first line of defense.",
+    source: "Cleveland Clinic",
+  },
+  {
+    stat: "in just 4–8 weeks",
+    claim: "People who added fermented foods to their diet reported better mood and lower stress in as little as 4–8 weeks.",
+    source: "peer-reviewed study, 2022",
+  },
+  {
     stat: "80%",
-    claim: "of chronic diseases are preventable through diet and lifestyle.",
-    source: "PMC, peer-reviewed",
+    claim: "A Mediterranean diet can reduce the risk of early death by up to 80%.",
+    source: "Johns Hopkins Medicine",
   },
   {
-    stat: "#1",
-    claim: "Poor diet is the #1 cause of death in the US.",
-    source: "NIH",
-  },
-  {
-    stat: "6 in 10",
-    claim: "Americans have a chronic disease linked to poor diet.",
-    source: "CDC",
-  },
-  {
-    stat: "#2",
-    claim: "Unhealthy diet is the #2 cause of cardiovascular death — behind only smoking.",
-    source: "WHO",
+    stat: "number 1",
+    claim: "Nutrition is the single most powerful lever you have over your long-term health.",
+    source: "Harvard Health",
   },
 ];
 
@@ -83,6 +98,19 @@ function OrbitingCarrot({ phase }) {
         <path d="M5 6.5 Q4.5 10 5 13" stroke="#f09050" strokeWidth="0.9" strokeLinecap="round" />
       </svg>
     </motion.div>
+  );
+}
+
+function BackArrow() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Curved arrow stem with organic look */}
+      <path d="M16 10 Q12 6 8 6 L8 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Arrow head - left pointing */}
+      <path d="M8 6 L12 4 L10 10" fill="currentColor" />
+      {/* Decorative leaf accent */}
+      <path d="M7 9 Q5.5 10 6 12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
+    </svg>
   );
 }
 
@@ -116,7 +144,7 @@ export default function Survey() {
       setStep(step + 1);
     } else {
       setLoading(true);
-      const delay = 5000 + Math.random() * 3000;
+      const delay = 4000 + Math.random() * 2000;
       setTimeout(() => { setLoading(false); setDone(true); }, delay);
     }
   }
@@ -189,20 +217,22 @@ export default function Survey() {
       </header>
 
       {/* progress bar — centered, limited width */}
-      <div className="flex justify-center px-5 pt-4 pb-1">
-        <div className="w-full max-w-lg flex items-center gap-3">
-          <span className="text-[12px] text-ink-soft font-medium whitespace-nowrap shrink-0">
-            {done ? "Done" : `${step + 1} of ${steps.length}`}
-          </span>
-          <div className="flex-1 h-1 bg-ink/[0.06] rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-forest rounded-full"
-              animate={{ width: done || loading ? "100%" : `${progress}%` }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            />
+      {!loading && (
+        <div className="flex justify-center px-5 pt-4 pb-1">
+          <div className="w-full max-w-lg flex items-center gap-3">
+            <span className="text-[12px] text-ink-soft font-medium whitespace-nowrap shrink-0">
+              {done ? "Done" : `${step + 1} of ${steps.length}`}
+            </span>
+            <div className="flex-1 h-1 bg-ink/[0.06] rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-forest rounded-full"
+                animate={{ width: done ? "100%" : `${progress}%` }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <main className="flex-1 flex items-start justify-center px-5 pt-8 pb-16">
         <div className="w-full max-w-lg">
@@ -217,31 +247,18 @@ export default function Survey() {
                 className="w-full"
               >
                 {/* Spinner + label */}
-                <div className="text-center mb-5">
-                  <div className="mx-auto mb-5" style={{ width: 72, height: 72, position: "relative" }}>
+                <div className="text-center mb-5 pt-10">
+                  <div className="mx-auto mb-5" style={{ width: 60, height: 60, position: "relative" }}>
                     <OrbitingCarrot phase={0} />
                     <OrbitingCarrot phase={(2 * Math.PI) / 3} />
                     <OrbitingCarrot phase={(4 * Math.PI) / 3} />
                   </div>
-                  <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-forest/60 mb-1">
-                    Sorting your plan…
+                  <p className="text-[24px] font-display text-ink leading-snug">
+                    Building your personalized plan.
                   </p>
-                  <p className="text-[20px] font-display text-ink leading-snug">
-                    Building your personalised plan.
+                  <p className="text-[14px] text-ink/60 mt-2">
+                    This takes about 6 seconds.
                   </p>
-                </div>
-
-                {/* Skeleton card — large, looks like plan content loading in */}
-                <div className="rounded-2xl border border-ink/[0.08] bg-white px-7 py-7 mb-5 animate-pulse">
-                  <div className="h-3 bg-ink/[0.08] rounded-full w-1/4 mb-5" />
-                  <div className="h-5 bg-ink/[0.07] rounded-full w-3/4 mb-3" />
-                  <div className="h-4 bg-ink/[0.05] rounded-full w-full mb-2" />
-                  <div className="h-4 bg-ink/[0.05] rounded-full w-5/6 mb-7" />
-                  <div className="space-y-2.5">
-                    <div className="h-10 bg-ink/[0.05] rounded-xl w-full" />
-                    <div className="h-10 bg-ink/[0.05] rounded-xl w-full" />
-                    <div className="h-10 bg-ink/[0.05] rounded-xl w-full" />
-                  </div>
                 </div>
 
                 {/* Fun fact — separate card below, fades in after delay */}
@@ -250,19 +267,20 @@ export default function Survey() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1, duration: 0.6 }}
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink/30 mb-3 text-center">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink/30 mb-2 text-center">
                     A fact while you wait
                   </p>
-                  <div className="rounded-2xl border border-ink/[0.08] bg-white px-8 py-7 text-left">
-                    <p className="text-[48px] font-display font-bold text-forest leading-none mb-3">
+                  <div className="rounded-2xl border border-ink/[0.08] bg-white px-8 py-4 text-left">
+                    <p className="text-[24px] font-display font-bold text-forest leading-none mb-3">
                       {fact.stat}
                     </p>
-                    <p className="text-[16px] leading-[1.6] text-ink font-medium mb-3">
+                    <p className="text-[24px] leading-[1.6] text-ink font-medium mb-2">
                       {fact.claim}
                     </p>
                     <p className="text-[12px] text-ink/40 font-medium">— {fact.source}</p>
                   </div>
                 </motion.div>
+
               </motion.div>
             ) : done ? (
               <motion.div key="done" {...slide} className="text-center">
@@ -281,7 +299,7 @@ export default function Survey() {
                   ].filter(Boolean).join(", ")}.
                 </p>
 
-                <a href="#" className="pill-forest mt-7 inline-flex text-[15px] px-7 py-3.5">
+                <a href="/login" className="pill-forest mt-7 inline-flex text-[15px] px-7 py-3.5">
                   Get my free plan
                 </a>
 
@@ -315,9 +333,10 @@ export default function Survey() {
 
                 <button
                   onClick={() => navigate("/")}
-                  className="block mt-4 mx-auto text-[13px] text-ink-soft hover:text-ink transition-colors"
+                  className="flex items-center gap-1.5 mx-auto mt-4 text-[13px] text-ink-soft hover:text-ink transition-colors"
                 >
-                  ← Back to home
+                  <BackArrow />
+                  Back to home
                 </button>
               </motion.div>
             ) : (
@@ -325,9 +344,10 @@ export default function Survey() {
                 {step > 0 && (
                   <button
                     onClick={handleBack}
-                    className="mb-6 text-[13px] font-semibold text-ink/50 hover:text-ink transition-colors"
+                    className="mb-6 flex items-center gap-1.5 text-[13px] font-semibold text-ink/50 hover:text-ink transition-colors"
                   >
-                    ← Back
+                    <BackArrow />
+                    Back
                   </button>
                 )}
                 <p className="text-[12px] font-semibold tracking-[0.18em] uppercase text-forest/70 mb-5">

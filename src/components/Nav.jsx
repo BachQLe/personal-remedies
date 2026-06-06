@@ -73,17 +73,10 @@ function Dropdown({ menu }) {
 
 export default function Nav({ offset = 0 }) {
   const [scrolled, setScrolled] = useState(false);
-  const prevScrolledRef = useRef(false);
   const { user, signOut } = useAuth();
 
   useEffect(() => {
-    const onScroll = () => {
-      const isScrolled = window.scrollY > 60;
-      if (isScrolled !== prevScrolledRef.current) {
-        prevScrolledRef.current = isScrolled;
-        setScrolled(isScrolled);
-      }
-    };
+    const onScroll = () => setScrolled(window.scrollY > 60);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -97,16 +90,16 @@ export default function Nav({ offset = 0 }) {
       style={{
         top: offset,
         background: scrolled
-          ? "rgba(255, 253, 245, 0.55)"
-          : "rgba(255, 253, 245, 0.35)",
-        backdropFilter: "blur(24px) saturate(180%) brightness(1.08)",
-        WebkitBackdropFilter: "blur(24px) saturate(180%) brightness(1.08)",
+          ? "rgba(255, 253, 245, 0.1)"
+          : "rgba(255, 253, 245, 0.1)",
+        backdropFilter: "blur(24px) saturate(180%) brightness(1.00)",
+        WebkitBackdropFilter: "blur(24px) saturate(110%) brightness(1.00)",
         boxShadow: scrolled
           ? "0 1px 0 rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)"
           : "inset 0 1px 0 rgba(255,255,255,0.5)",
         borderBottom: "1px solid rgba(255,255,255,0.45)",
       }}
-      className="fixed inset-x-10 z-50 transition-all duration-300 rounded-lg"
+      className="fixed inset-x-10 mt-2 z-50 transition-all duration-300 rounded-lg"
     >
       <div className="mx-auto max-w-7xl container-px h-16 flex items-center justify-between">
         <Link to="/" style={{ fontFamily: "'Raleway', sans-serif", fontWeight: 900 }} className="text-[22px] tracking-tight text-ink">

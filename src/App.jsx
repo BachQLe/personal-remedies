@@ -17,6 +17,8 @@ import Science from "./pages/Science";
 import About from "./pages/About";
 import News from "./pages/News";
 import Login from "./pages/Login";
+import TermsOfUse from "./pages/TermsOfUse";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -79,6 +81,8 @@ function App() {
           <Route path="/science" element={<Science />} />
           <Route path="/about" element={<About />} />
           <Route path="/news" element={<News />} />
+          <Route path="/terms" element={<TermsOfUse />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
