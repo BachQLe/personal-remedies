@@ -299,9 +299,9 @@ export default function Survey() {
                   ].filter(Boolean).join(", ")}.
                 </p>
 
-                <a href="/login" className="pill-forest mt-7 inline-flex text-[15px] px-7 py-3.5">
+                <button onClick={() => navigate("/login")} className="pill-forest mt-7 inline-flex text-[15px] px-7 py-3.5">
                   Get my free plan
-                </a>
+                </button>
 
                 {/* Personalized summary */}
                 <div className="mt-5 text-left rounded-xl border border-ink/[0.08] bg-white divide-y divide-ink/[0.06] overflow-hidden">
