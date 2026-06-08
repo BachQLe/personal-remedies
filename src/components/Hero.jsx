@@ -577,7 +577,7 @@ export default function Hero({ topOffset = 0 }) {
         >
           {/* cursor overlay */}
           <motion.div
-            className="absolute z-50 pointer-events-none"
+            className="absolute z-50 pointer-events-none hidden lg:block"
             animate={{ left: wp.x, top: wp.y, scale: isClicking ? 0.72 : 1 }}
             transition={{ left: { duration: 0.75, ease: [0.22, 1, 0.36, 1] }, top: { duration: 0.75, ease: [0.22, 1, 0.36, 1] }, scale: { duration: 0.12 } }}
           >
@@ -593,7 +593,7 @@ export default function Hero({ topOffset = 0 }) {
           </motion.div>
 
           {/* chrome bar */}
-          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-black/[0.10]" style={{ background: "linear-gradient(45deg, #0EA5E9 0%, #0EA5E9 20%, #08AFDA 20%, #08AFDA 40%, #06B6D4 40%, #06B6D4 60%, #0892D0 60%, #0892D0 80%, #1083b9ff 80%, #103db9ff 100%)", boxShadow: "0 0 20px rgba(14, 165, 233, 0.8), 0 0 40px rgba(6, 182, 212, 0.8), 0 0 60px rgba(16, 61, 185, 0.6)" }}>
+          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-black/[0.10] relative z-50" style={{ background: "linear-gradient(45deg, #0EA5E9 0%, #0EA5E9 20%, #08AFDA 20%, #08AFDA 40%, #06B6D4 40%, #06B6D4 60%, #0892D0 60%, #0892D0 80%, #1083b9ff 80%, #103db9ff 100%)", boxShadow: "0 0 20px rgba(14, 165, 233, 0.8), 0 0 40px rgba(6, 182, 212, 0.8), 0 0 60px rgba(16, 61, 185, 0.6)" }}>
             <span className="h-2.5 w-2.5 rounded-full bg-amber animate-slow-pulse" />
             <span className="text-[11px] sm:text-[13px] font-medium tracking-tight text-white">
               Nutri <span className="text-white/50">·</span>{" "}
@@ -696,15 +696,15 @@ export default function Hero({ topOffset = 0 }) {
             </div>
 
             {/* RIGHT PANEL — chat */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col h-full relative -translate-y-20">
               {/*
                 flex-col-reverse + overflow-hidden:
                 newest message is first in DOM → appears at bottom.
                 as chat fills, oldest messages push up and clip at the top edge.
               */}
               <div
-                className="flex-1 flex flex-col-reverse overflow-hidden bg-[#ECEFF5]"
-                style={{ padding: "20px", gap: "14px" }}
+                className="flex-1 flex flex-col-reverse overflow-hidden bg-[#ECEFF5] -translate-y-20"
+                style={{ padding: "20px", paddingBottom: "60px", gap: "14px" }}
               >
                 {/* typing indicator — first in DOM = very bottom */}
                 {showTyping && (
@@ -751,7 +751,7 @@ export default function Hero({ topOffset = 0 }) {
               </div>
 
               {/* input bar */}
-              <div className="px-4 py-3 border-t border-ink/[0.06] flex items-center gap-2 bg-white">
+              <div className="absolute bottom-0 left-0 right-0 px-4 py-3 border-t border-ink/[0.06] flex items-center gap-2 bg-white">
                 <div className="flex-1 rounded-full bg-[#ECEFF5] px-4 py-2 text-[11px] sm:text-[13px] border border-ink/[0.06] flex items-center min-w-0">
                   {inputText ? (
                     <>
