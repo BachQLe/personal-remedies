@@ -39,7 +39,7 @@ export default function TwoDoors() {
             <span className="tag">Two paths, one agent</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[44px] sm:leading-[1.06] lg:text-[54px] lg:leading-[1.04]">
+            <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06]">
               Built for the people living it —{" "}
               <em className="font-display italic font-normal text-forest">
                 and the people treating it.

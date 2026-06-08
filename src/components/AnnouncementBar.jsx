@@ -31,7 +31,7 @@ export default function AnnouncementBar({ onDismiss, scrollHidden }) {
   }, []);
 
   return (
-    <div className={`fixed top-0 rounded-lg inset-x-10 z-[60] bg-slate-800 text-white px-4 py-2 flex items-center justify-center gap-4 flex-wrap text-center transition-transform duration-300 ease-in-out will-change-transform ${scrollHidden ? "-translate-y-full" : "translate-y-0"}`} style={{ backfaceVisibility: "hidden" }}>
+    <div className={`fixed top-0 rounded-lg inset-x-20 z-[60] bg-slate-800 text-white px-4 py-2 flex items-center justify-center gap-4 flex-wrap text-center transition-transform duration-300 ease-in-out will-change-transform ${scrollHidden ? "-translate-y-full" : "translate-y-0"}`} style={{ backfaceVisibility: "hidden" }}>
       <p className="text-[13px] font-medium tracking-tight">
         Get one{" "}
         <span className="font-black uppercase tracking-wide">free</span>{" "}

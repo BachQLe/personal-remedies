@@ -141,7 +141,7 @@ export default function Nutri() {
                 <span className="tag">Meet Nutri, your AI dietician</span>
               </Reveal>
               <Reveal delay={0.1}>
-                <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[44px] sm:leading-[1.06] lg:text-[50px] lg:leading-[1.04] text-black">
+                <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06] text-black">
                   We read 100,000+ studies {" "}
                   <em className="font-display italic font-normal text-forest">
                     so you don't have to

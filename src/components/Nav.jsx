@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 
@@ -21,7 +21,7 @@ const menus = [
   },
 ];
 
-function Dropdown({ menu }) {
+function Dropdown({ menu, textColor, textColorHover }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -30,7 +30,7 @@ function Dropdown({ menu }) {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <button className="flex items-center gap-1 text-[14px] font-semibold text-ink/85 hover:text-ink transition-colors">
+      <button className={`flex items-center gap-1 text-[14px] font-semibold ${textColor} ${textColorHover} transition-colors`}>
         {menu.label}
         <svg
           width="11"
@@ -73,17 +73,61 @@ function Dropdown({ menu }) {
 
 export default function Nav({ offset = 0 }) {
   const [scrolled, setScrolled] = useState(false);
+  const [isDarkBehind, setIsDarkBehind] = useState(false);
+  const navRef = useRef(null);
+  const location = useLocation();
   const { user, signOut } = useAuth();
 
+  const checkBackgroundBrightness = () => {
+    // On landing page, check if past hero section
+    if (location.pathname === "/") {
+      const hero = document.querySelector("section");
+      if (hero) {
+        const heroRect = hero.getBoundingClientRect();
+        const heroHeight = heroRect.height;
+        if (window.scrollY > heroHeight / 2) {
+          setIsDarkBehind(false);
+          return;
+        }
+      }
+    }
+
+    if (!navRef.current) return;
+    const rect = navRef.current.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.bottom + 10;
+
+    // Temporarily hide navbar to detect element behind it
+    navRef.current.style.pointerEvents = "none";
+    const element = document.elementFromPoint(x, y);
+    navRef.current.style.pointerEvents = "auto";
+
+    if (!element) return;
+
+    const bgColor = window.getComputedStyle(element).backgroundColor;
+    const rgb = bgColor.match(/\d+/g);
+    if (!rgb || rgb.length < 3) return;
+
+    const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255;
+    setIsDarkBehind(luminance < 0.5);
+  };
+
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 60);
+      checkBackgroundBrightness();
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const textColor = isDarkBehind ? "text-white" : "text-ink/85";
+  const textColorHover = isDarkBehind ? "hover:text-white" : "hover:text-ink";
+
   return (
     <motion.header
+      ref={navRef}
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -99,19 +143,19 @@ export default function Nav({ offset = 0 }) {
           : "inset 0 1px 0 rgba(255,255,255,0.5)",
         borderBottom: "1px solid rgba(255,255,255,0.45)",
       }}
-      className="fixed inset-x-10 mt-2 z-50 transition-all duration-300 rounded-lg"
+      className="fixed inset-x-20 mt-2 z-50 transition-all duration-300 rounded-3xl"
     >
-      <div className="mx-auto max-w-7xl container-px h-16 flex items-center justify-between">
-        <Link to="/" style={{ fontFamily: "'Raleway', sans-serif", fontWeight: 900 }} className="text-[22px] tracking-tight text-ink">
+      <div className="mx-auto max-w-7xl container-px h-12 flex items-center justify-between">
+        <Link to="/" style={{ fontFamily: "'Raleway', sans-serif", fontWeight: 900 }} className={`text-[22px] tracking-tight ${textColor}`}>
           personalRemedies
         </Link>
 
         <nav className="hidden md:flex items-center gap-9 ml-auto mr-10">
-          <Link to="/" className="text-[14px] font-semibold text-ink/85 hover:text-ink transition-colors">
+          <Link to="/" className={`text-[14px] font-semibold ${textColor} ${textColorHover} transition-colors`}>
             For Individuals
           </Link>
           {menus.map((m) => (
-            <Dropdown key={m.label} menu={m} />
+            <Dropdown key={m.label} menu={m} textColor={textColor} textColorHover={textColorHover} />
           ))}
         </nav>
 
@@ -119,18 +163,18 @@ export default function Nav({ offset = 0 }) {
           {user ? (
             <button
               onClick={signOut}
-              className="text-[14px] font-semibold text-ink/85 hover:text-ink transition-colors"
+              className={`text-[14px] font-semibold ${textColor} ${textColorHover} transition-colors`}
             >
               Log out
             </button>
           ) : (
             <>
-              <Link to="/survey" className="bg-[#1B3A2F] text-white text-[14px] font-semibold px-4 py-2 rounded-md">
+              <Link to="/survey" className="bg-[#1B3A2D] text-white text-[14px] font-semibold px-2 py-2 rounded-md">
                 Get Remedy free
               </Link>
               <Link
                 to="/login"
-                className="text-[14px] font-semibold text-ink/85 hover:text-ink transition-colors"
+                className={`text-[14px] font-semibold ${textColor} ${textColorHover} transition-colors`}
               >
                 Log in
               </Link>

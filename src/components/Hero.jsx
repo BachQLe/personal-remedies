@@ -195,7 +195,7 @@ export default function Hero({ topOffset = 0 }) {
 
         vec3 skyAmb  = vec3(.85,.52,.25);
         vec3 skyTerra= vec3(.82,.42,.30);
-        vec3 sky = mix(skyTerra, skyAmb, smoothstep(0.2, 0.8, yT));
+        vec3 sky = mix(skyAmb, skyTerra, smoothstep(0.2, 0.8, yT));
 
         float sunY = 0.38;
         float sunX = 0.52;
@@ -209,18 +209,15 @@ export default function Hero({ topOffset = 0 }) {
         float pStretch=1.0+(1.-yT)*1.3;
         vec2 pUV=vec2(uv.x*pStretch,uv.y);
 
-        float altMF  = smoothstep(.46,.56,yT)*smoothstep(.62,.55,yT);
-        float dMF    = layer(pUV,4.0,0.015,-0.002,  23.7, 0.10,0.05,5,4)*altMF*0.75;
-
-        float altMid = smoothstep(.36,.46,yT)*smoothstep(.54,.47,yT);
+        float altMid = smoothstep(.44,.54,yT)*smoothstep(.62,.55,yT);
         float dMid   = layer(pUV,2.8,0.024, 0.001,  47.1, 0.09,0.04,6,5)*altMid*0.92;
 
         float nScale = 1.0+(1.-yT)*0.8;
         vec2 nUV     = vec2(pUV.x*nScale,pUV.y);
-        float altNear= smoothstep(.30,.38,yT)*smoothstep(.44,.38,yT);
+        float altNear= smoothstep(.38,.46,yT)*smoothstep(.52,.46,yT);
         float dNear  = layer(nUV,2.0,0.038,-0.001, 81.9, 0.07,0.05,7,6)*altNear*1.0;
 
-        float d=max(dNear,max(dMid*(1.-dNear*.55),dMF*(1.-dMid*.5)*(1.-dNear*.7)));
+        float d=max(dNear,dMid*(1.-dNear*.55));
 
         vec3 cloudEdge  = vec3(1.0,.90,.65);
         vec3 cloudMid   = vec3(.95,.65,.30);
@@ -461,8 +458,19 @@ export default function Hero({ topOffset = 0 }) {
         style={{ top: 0, left: 0, zIndex: 0 }}
       />
 
+
       {/* dark overlay for readability */}
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.12)', zIndex: 1 }} />
+
+      {/* fade to cream at bottom */}
+      <div
+        className="absolute bottom-0 left-0 right-0 pointer-events-none"
+        style={{
+          height: '220px',
+          background: 'linear-gradient(to top, #F5F0E8 0%, #F5F0E8 10%, transparent 100%)',
+          zIndex: 2
+        }}
+      />
 
       {/* shared hand-drawn filter */}
       <svg aria-hidden className="absolute w-0 h-0 overflow-hidden">
@@ -481,7 +489,7 @@ export default function Hero({ topOffset = 0 }) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="display text-[48px] leading-[1.04] sm:text-[48px] sm:leading-[1.02] lg:text-[64px] lg:leading-[1.0] text-white text-center"
+          className="display text-[56px] leading-[1.04] sm:text-[48px] sm:leading-[1.02] lg:text-[72px] lg:leading-[1.0] text-white text-center"
         >
           <span className="relative inline-block">
             Less pills,{" "}
@@ -562,7 +570,7 @@ export default function Hero({ topOffset = 0 }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10 mt-6 mx-auto max-w-5xl rounded-[5px] bg-white border border-ink/[0.08] shadow-lift overflow-hidden"
+          className="relative z-10 mt-6 mx-auto max-w-5xl rounded-[5px] bg-white border border-ink/[0.08] shadow-lift overflow-hidden aspect-video"
           style={{
             boxShadow: `0 0 60px rgba(100, 150, 200, 0.4), 0 25px 50px -12px rgba(0, 0, 0, 0.25)`
           }}
@@ -585,17 +593,17 @@ export default function Hero({ topOffset = 0 }) {
           </motion.div>
 
           {/* chrome bar */}
-          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-black/[0.10]" style={{ background: "linear-gradient(90deg, #0EA5E9 0%, #06B6D4 40%, #103db9ff 100%)", boxShadow: "0 0 30px rgba(6, 182, 212, 0.6), 0 0 60px rgba(16, 185, 129, 0.3)" }}>
+          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-black/[0.10]" style={{ background: "linear-gradient(45deg, #0EA5E9 0%, #0EA5E9 20%, #08AFDA 20%, #08AFDA 40%, #06B6D4 40%, #06B6D4 60%, #0892D0 60%, #0892D0 80%, #1083b9ff 80%, #103db9ff 100%)", boxShadow: "0 0 20px rgba(14, 165, 233, 0.8), 0 0 40px rgba(6, 182, 212, 0.8), 0 0 60px rgba(16, 61, 185, 0.6)" }}>
             <span className="h-2.5 w-2.5 rounded-full bg-amber animate-slow-pulse" />
-            <span className="text-[13px] font-medium tracking-tight text-white">
+            <span className="text-[11px] sm:text-[13px] font-medium tracking-tight text-white">
               Nutri <span className="text-white/50">·</span>{" "}
               <span className="text-white/80">Personal Remedies</span>
             </span>
-            <span className="ml-auto text-[11px] text-white/60">demo</span>
+            <span className="ml-auto text-[9px] sm:text-[11px] text-white/60">demo</span>
           </div>
 
           {/* two-pane body */}
-          <div className="flex divide-x divide-ink/[0.06]" style={{ minHeight: 420 }}>
+          <div className="flex divide-x divide-ink/[0.06] h-full">
 
             {/* LEFT PANEL */}
             <div className="w-[42%] shrink-0 flex flex-col" style={{ background: "#E7EEE7" }}>
@@ -603,7 +611,7 @@ export default function Hero({ topOffset = 0 }) {
               {/* Nutri Recommendations */}
               <div className="px-4 pt-4 pb-3 border-b border-black/[0.06]">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[11px] font-semibold tracking-widest uppercase text-ink/40">
+                  <span className="text-[9px] sm:text-[11px] font-semibold tracking-widest uppercase text-ink/40">
                     Nutri Recommendations
                   </span>
                   <span className="flex gap-1">
@@ -627,17 +635,17 @@ export default function Hero({ topOffset = 0 }) {
                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                     className="flex items-center gap-2.5 mb-3"
                   >
-                    <span className="text-3xl leading-none select-none" aria-hidden>{food.emoji}</span>
+                    <span className="text-2xl sm:text-3xl leading-none select-none" aria-hidden>{food.emoji}</span>
                     <div>
-                      <p className="text-[14px] font-semibold tracking-tight text-ink leading-none">{food.name}</p>
-                      <p className="text-[11px] text-ink/45 mt-0.5">{food.tag}</p>
+                      <p className="text-[12px] sm:text-[14px] font-semibold tracking-tight text-ink leading-none">{food.name}</p>
+                      <p className="text-[9px] sm:text-[11px] text-ink/45 mt-0.5">{food.tag}</p>
                     </div>
                   </motion.div>
                 </AnimatePresence>
                 <div className="space-y-2">
                   {food.stats.map(({ label }, rowIdx) => (
-                    <div key={rowIdx} className="flex items-center justify-between gap-2">
-                      <span className="text-[12px] text-ink/60 truncate">{label}</span>
+                    <div key={rowIdx} className={`flex items-center justify-between gap-2 ${rowIdx >= 3 ? "hidden lg:flex" : ""}`}>
+                      <span className="text-[10px] sm:text-[12px] text-ink/60 truncate">{label}</span>
                       <div className="flex items-center gap-1.5 shrink-0">
                         <span className="flex items-center gap-1 -mr-1">
                           <RatingDots filled={animatedFilled[rowIdx]} />
@@ -649,14 +657,14 @@ export default function Hero({ topOffset = 0 }) {
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: 10, opacity: 0 }}
                                 transition={{ duration: 0.1, ease: "easeInOut" }}
-                                className="text-[11px] font-semibold text-ink block"
+                                className="text-[9px] sm:text-[11px] font-semibold text-ink block"
                               >
                                 {animatedRatings[rowIdx]}
                               </motion.span>
                             </AnimatePresence>
                           </span>
                         </span>
-                        <span className="text-[11px] text-ink/30 font-normal">/10</span>
+                        <span className="text-[9px] sm:text-[11px] text-ink/30 font-normal">/10</span>
                       </div>
                     </div>
                   ))}
@@ -665,21 +673,21 @@ export default function Hero({ topOffset = 0 }) {
 
               {/* Your Profile */}
               <div className="px-4 pt-3 pb-4 flex-1">
-                <p className="text-[11px] font-semibold tracking-widest uppercase text-ink/40 mb-2.5">
+                <p className="text-[9px] sm:text-[11px] font-semibold tracking-widest uppercase text-ink/40 mb-2.5">
                   Your Profile
                 </p>
-                <p className="text-[11px] text-ink/50 mb-1.5 font-medium">Conditions</p>
+                <p className="text-[9px] sm:text-[11px] text-ink/50 mb-1.5 font-medium">Conditions</p>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {CONDITIONS.map(({ label, color }) => (
-                    <span key={label} className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${color}`}>
+                    <span key={label} className={`text-[9px] sm:text-[11px] font-medium px-2 py-0.5 rounded-full ${color}`}>
                       {label}
                     </span>
                   ))}
                 </div>
-                <p className="text-[11px] text-ink/50 mb-1.5 font-medium">Preferences</p>
-                <div className="flex flex-wrap gap-1.5">
+                <p className="hidden sm:block text-[9px] sm:text-[11px] text-ink/50 mb-1.5 font-medium">Preferences</p>
+                <div className="hidden sm:flex flex-wrap gap-1.5">
                   {PREFERENCES.map((pref) => (
-                    <span key={pref} className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-forest/10 text-forest">
+                    <span key={pref} className="text-[9px] sm:text-[11px] font-medium px-2 py-0.5 rounded-full bg-forest/10 text-forest">
                       {pref}
                     </span>
                   ))}
@@ -696,7 +704,7 @@ export default function Hero({ topOffset = 0 }) {
               */}
               <div
                 className="flex-1 flex flex-col-reverse overflow-hidden bg-[#ECEFF5]"
-                style={{ padding: "20px", gap: "14px", maxHeight: 360 }}
+                style={{ padding: "20px", gap: "14px" }}
               >
                 {/* typing indicator — first in DOM = very bottom */}
                 {showTyping && (
@@ -729,11 +737,11 @@ export default function Hero({ topOffset = 0 }) {
                       className={`flex shrink-0 ${m.from === "user" ? "justify-end" : "justify-start"}`}
                     >
                       <div
-                        className={`max-w-[85%] rounded-2xl px-4 py-3 text-[13.5px] leading-[1.55] ${m.from === "user"
+                        className={`max-w-[85%] rounded-2xl px-4 py-3 text-[11px] sm:text-[13.5px] leading-[1.55] ${m.from === "user"
                           ? "text-white rounded-tr-md"
                           : "bg-white text-ink rounded-tl-md border border-ink/[0.06]"
                           }`}
-                        style={m.from === "user" ? { background: "linear-gradient(135deg, #1B3A2D 0%, #3c5e49 60%, #7A9E7E 100%)" } : {}}
+                        style={m.from === "user" ? { background: "linear-gradient(315deg, #1B3A2D 0%, #3c5e49 60%, #7A9E7E 100%)" } : {}}
                       >
                         {m.text}
                       </div>
@@ -744,7 +752,7 @@ export default function Hero({ topOffset = 0 }) {
 
               {/* input bar */}
               <div className="px-4 py-3 border-t border-ink/[0.06] flex items-center gap-2 bg-white">
-                <div className="flex-1 rounded-full bg-[#ECEFF5] px-4 py-2 text-[13px] border border-ink/[0.06] flex items-center min-w-0">
+                <div className="flex-1 rounded-full bg-[#ECEFF5] px-4 py-2 text-[11px] sm:text-[13px] border border-ink/[0.06] flex items-center min-w-0">
                   {inputText ? (
                     <>
                       <span className="text-ink truncate">{inputText}</span>
@@ -756,7 +764,7 @@ export default function Hero({ topOffset = 0 }) {
                 </div>
                 <button
                   className="h-8 w-8 rounded-full text-white flex items-center justify-center shrink-0"
-                  style={{ background: "linear-gradient(135deg, #1B3A2D 0%, #7A9E7E 100%)" }}
+                  style={{ background: "linear-gradient(315deg, #1B3A2D 0%, #7A9E7E 100%)" }}
                 >
                   <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
                     <path d="M7 12V2M7 2 2 7M7 2l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />

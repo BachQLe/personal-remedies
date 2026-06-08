@@ -317,6 +317,7 @@ export default function Differentiators() {
                   transform: 'translateZ(20px)',
                   border: '1px solid #e5e5e5',
                   background: 'linear-gradient(to right, rgba(36, 106, 79, 1) 0%, rgba(58, 126, 100, 1) 100%)',
+                  boxShadow: '0 10px 40px rgba(36, 106, 79, 0.25)',
                 }} />
               </div>
 

@@ -47,7 +47,7 @@ export default function FinalCTA() {
           <span className="tag">You don't have to manage this alone</span>
         </Reveal>
         <Reveal delay={0.1}>
-          <h2 className="display mt-5 text-[36px] leading-[1.08] sm:text-[52px] sm:leading-[1.04] lg:text-[64px] lg:leading-[1.02]">
+          <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06]">
             Take your first step to a healthier life.{" "}
             <em className="font-display italic font-normal text-forest">
               Your first diet plan is on us.

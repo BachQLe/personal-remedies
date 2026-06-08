@@ -63,7 +63,7 @@ export default function Pricing() {
             <span className="tag">Simple, honest pricing</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[44px] sm:leading-[1.06] lg:text-[52px] lg:leading-[1.04]">
+            <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06]">
               Free is genuinely free.{" "}
               <em className="font-display italic font-normal text-forest">
                 Premium is for when you want to optimize your living
