@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence, useTime, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { conditions as allConditions } from "../data/conditions";
 
 const steps = [
@@ -40,7 +40,7 @@ const steps = [
   {
     id: "age",
     question: "What's your age range?",
-    options: ["Under 25", "25–34", "35–44", "45–54", "55+"],
+    options: ["Under 25", "25-34", "35-44", "45-54", "55+"],
   },
 ];
 
@@ -62,12 +62,12 @@ const facts = [
   },
   {
     stat: "70%",
-    claim: "70% of the immune system lives in the gut — what you eat is your first line of defense.",
+    claim: "70% of the immune system lives in the gut -- what you eat is your first line of defense.",
     source: "Cleveland Clinic",
   },
   {
-    stat: "in just 4–8 weeks",
-    claim: "People who added fermented foods to their diet reported better mood and lower stress in as little as 4–8 weeks.",
+    stat: "in just 4-8 weeks",
+    claim: "People who added fermented foods to their diet reported better mood and lower stress in as little as 4-8 weeks.",
     source: "peer-reviewed study, 2022",
   },
   {
@@ -82,43 +82,19 @@ const facts = [
   },
 ];
 
-function OrbitingCarrot({ phase }) {
-  const time = useTime();
-  const angle = useTransform(time, (t) => (t / 4000) * 2 * Math.PI + phase);
-  const x = useTransform(angle, (a) => Math.cos(a) * 26);
-  const y = useTransform(angle, (a) => Math.sin(a) * 26);
-
-  return (
-    <motion.div style={{ position: "absolute", top: "50%", left: "50%", x, y, marginLeft: -6, marginTop: -10 }}>
-      <svg width="12" height="20" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6 4 C4.5 1.5 2 1 2.5 3 C3 4.5 4.5 4 6 4Z" fill="#5a9e4a" />
-        <path d="M6 4 C7.5 1.5 10 1 9.5 3 C9 4.5 7.5 4 6 4Z" fill="#5a9e4a" />
-        <path d="M6 4 C6 1 6 0 6 1.5Z" fill="#4a8e3a" />
-        <path d="M3.5 5 Q2 11 6 19 Q10 11 8.5 5 Q7 3.5 6 3.5 Q5 3.5 3.5 5Z" fill="#e8722a" />
-        <path d="M5 6.5 Q4.5 10 5 13" stroke="#f09050" strokeWidth="0.9" strokeLinecap="round" />
-      </svg>
-    </motion.div>
-  );
-}
-
-function BackArrow() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Curved arrow stem with organic look */}
-      <path d="M16 10 Q12 6 8 6 L8 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      {/* Arrow head - left pointing */}
-      <path d="M8 6 L12 4 L10 10" fill="currentColor" />
-      {/* Decorative leaf accent */}
-      <path d="M7 9 Q5.5 10 6 12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
-    </svg>
-  );
-}
+/* DS spring-settle: small settle, no bounce */
+const chipSpring = {
+  type: "spring",
+  stiffness: 500,
+  damping: 30,
+  mass: 0.8,
+};
 
 const slide = {
   initial: { opacity: 0, x: 40 },
   animate: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -40 },
-  transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+  transition: { duration: 0.32, ease: [0.22, 0.61, 0.36, 1] },
 };
 
 export default function Survey() {
@@ -135,7 +111,7 @@ export default function Survey() {
   const [fact] = useState(() => facts[Math.floor(Math.random() * facts.length)]);
 
   const current = steps[step];
-  const progress = (step / steps.length) * 100;
+  const progress = ((step + 1) / steps.length) * 100;
 
   function advance(value) {
     const next = { ...answers, [current.id]: value };
@@ -204,30 +180,29 @@ export default function Survey() {
   }
 
   return (
-    <div className="min-h-screen bg-cream flex flex-col">
+    <div className="min-h-screen bg-paper-200 flex flex-col">
       {/* top bar */}
-      <header className="flex items-center px-6 py-4 border-b border-ink/[0.06]">
+      <header className="flex items-center px-6 py-4 border-b border-sand-200">
         <button
           onClick={() => navigate("/")}
-          style={{ fontFamily: "'Raleway', sans-serif", fontWeight: 900 }}
-          className="text-[22px] tracking-tight text-ink"
+          className="font-display font-semibold text-[22px] tracking-tightish text-char-900"
         >
           personalRemedies
         </button>
       </header>
 
-      {/* progress bar — centered, limited width */}
+      {/* progress bar */}
       {!loading && (
         <div className="flex justify-center px-5 pt-4 pb-1">
           <div className="w-full max-w-lg flex items-center gap-3">
-            <span className="text-[12px] text-ink-soft font-medium whitespace-nowrap shrink-0">
-              {done ? "Done" : `${step + 1} of ${steps.length}`}
+            <span className="font-mono text-[12px] text-char-500 whitespace-nowrap shrink-0">
+              {done ? "Done" : `Step ${step + 1} of ${steps.length}`}
             </span>
-            <div className="flex-1 h-1 bg-ink/[0.06] rounded-full overflow-hidden">
+            <div className="flex-1 h-1.5 bg-sand-200 rounded-pill overflow-hidden">
               <motion.div
-                className="h-full bg-forest rounded-full"
+                className="h-full bg-forest-700 rounded-pill"
                 animate={{ width: done ? "100%" : `${progress}%` }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.4, ease: [0.22, 0.61, 0.36, 1] }}
               />
             </div>
           </div>
@@ -242,56 +217,65 @@ export default function Survey() {
                 key="loading"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, transition: { duration: 1 } }}
-                transition={{ duration: 0.4 }}
+                exit={{ opacity: 0, transition: { duration: 0.8 } }}
+                transition={{ duration: 0.32 }}
                 className="w-full"
               >
                 {/* Spinner + label */}
                 <div className="text-center mb-5 pt-10">
-                  <div className="mx-auto mb-5" style={{ width: 60, height: 60, position: "relative" }}>
-                    <OrbitingCarrot phase={0} />
-                    <OrbitingCarrot phase={(2 * Math.PI) / 3} />
-                    <OrbitingCarrot phase={(4 * Math.PI) / 3} />
+                  <div className="mx-auto mb-5 w-14 h-14 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full border-[3px] border-forest-700 border-t-transparent animate-spin" />
                   </div>
-                  <p className="text-[24px] font-display text-ink leading-snug">
-                    Building your personalized plan.
-                  </p>
-                  <p className="text-[14px] text-ink/60 mt-2">
+                  <h2 className="font-display font-semibold tracking-tightish text-[24px] text-char-900 leading-snug">
+                    Building your personalized plan
+                  </h2>
+                  <p className="text-sm text-char-500 mt-2 font-sans">
                     This takes about 6 seconds.
                   </p>
                 </div>
 
-                {/* Fun fact — separate card below, fades in after delay */}
+                {/* Fun fact card */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 1, duration: 0.6 }}
+                  transition={{ delay: 1, duration: 0.5 }}
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink/30 mb-2 text-center">
+                  <p className="text-[12px] uppercase tracking-eyebrow text-char-500 mb-2 text-center font-sans">
                     A fact while you wait
                   </p>
-                  <div className="rounded-2xl border border-ink/[0.08] bg-white px-8 py-4 text-left">
-                    <p className="text-[24px] font-display font-bold text-forest leading-none mb-3">
+                  <div className="bg-white rounded-xl border border-sand-200 shadow-card px-8 py-5 text-left">
+                    <p className="font-display font-semibold text-[24px] text-forest-700 leading-none mb-3">
                       {fact.stat}
                     </p>
-                    <p className="text-[24px] leading-[1.6] text-ink font-medium mb-2">
+                    <p className="text-[18px] leading-[1.6] text-char-900 font-sans mb-2">
                       {fact.claim}
                     </p>
-                    <p className="text-[12px] text-ink/40 font-medium">— {fact.source}</p>
+                    <p className="text-[12px] text-char-500 font-sans">-- {fact.source}</p>
                   </div>
                 </motion.div>
-
               </motion.div>
             ) : done ? (
               <motion.div key="done" {...slide} className="text-center">
-                <span className="tag">Your plan is ready</span>
-                <h2 className="display mt-5 text-[36px] sm:text-[48px] leading-[1.06]">
+                {/* Success icon */}
+                <motion.div
+                  initial={{ scale: 0.6, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={chipSpring}
+                  className="w-16 h-16 rounded-full bg-forest-100 flex items-center justify-center mx-auto mb-4"
+                >
+                  <span className="material-symbols-rounded fill text-forest-700 text-[36px]">
+                    check_circle
+                  </span>
+                </motion.div>
+
+                <p className="text-[12px] uppercase tracking-eyebrow text-char-500 font-sans">Your plan is ready</p>
+                <h2 className="font-display font-semibold tracking-tightish mt-3 text-[36px] sm:text-[48px] leading-[1.06] text-char-900">
                   Here's{" "}
-                  <em className="font-display italic font-normal text-forest mr-1">your</em>
+                  <em className="font-display italic font-normal text-forest-700 mr-1">your</em>
                   {" "}superfood plan.
                 </h2>
 
-                <p className="mt-4 text-[16px] leading-[1.65] text-ink-soft max-w-[38ch] mx-auto">
+                <p className="mt-4 text-base leading-[1.65] text-char-500 max-w-[38ch] mx-auto font-sans">
                   {[
                     answers.goal && `Optimized to help you ${answers.goal.toLowerCase()}`,
                     answers.condition && answers.condition[0] !== "None" && `with ${answers.condition.join(", ").toLowerCase()} in mind`,
@@ -299,43 +283,47 @@ export default function Survey() {
                   ].filter(Boolean).join(", ")}.
                 </p>
 
-                <button onClick={() => navigate("/login")} className="pill-forest mt-7 inline-flex text-[15px] px-7 py-3.5">
+                <button
+                  onClick={() => navigate("/login")}
+                  className="mt-7 inline-flex items-center gap-2 text-[15px] px-7 py-3.5 rounded-pill bg-forest-700 hover:bg-forest-800 text-white font-semibold transition-colors duration-fast min-h-[48px] font-sans"
+                >
                   Get my free plan
+                  <span className="material-symbols-rounded text-[18px]">arrow_forward</span>
                 </button>
 
                 {/* Personalized summary */}
-                <div className="mt-5 text-left rounded-xl border border-ink/[0.08] bg-white divide-y divide-ink/[0.06] overflow-hidden">
+                <div className="mt-5 text-left bg-white rounded-xl border border-sand-200 shadow-card divide-y divide-sand-200 overflow-hidden">
                   {answers.goal && (
-                    <div className="px-3 py-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/40">Your goal</p>
-                      <p className="text-[12px] font-medium text-ink">{answers.goal}</p>
+                    <div className="px-4 py-3">
+                      <p className="text-[12px] uppercase tracking-eyebrow text-char-500 font-sans">Your goal</p>
+                      <p className="text-sm font-medium text-char-900 mt-0.5 font-sans">{answers.goal}</p>
                     </div>
                   )}
                   {answers.condition && answers.condition[0] !== "None" && (
-                    <div className="px-3 py-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/40">Conditions</p>
-                      <p className="text-[12px] font-medium text-ink">{answers.condition.join(", ")}</p>
+                    <div className="px-4 py-3">
+                      <p className="text-[12px] uppercase tracking-eyebrow text-char-500 font-sans">Conditions</p>
+                      <p className="text-sm font-medium text-char-900 mt-0.5 font-sans">{answers.condition.join(", ")}</p>
                     </div>
                   )}
                   {answers.diet && (
-                    <div className="px-3 py-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/40">Diet</p>
-                      <p className="text-[12px] font-medium text-ink">{answers.diet}</p>
+                    <div className="px-4 py-3">
+                      <p className="text-[12px] uppercase tracking-eyebrow text-char-500 font-sans">Diet</p>
+                      <p className="text-sm font-medium text-char-900 mt-0.5 font-sans">{answers.diet}</p>
                     </div>
                   )}
                   {answers.age && (
-                    <div className="px-3 py-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/40">Age range</p>
-                      <p className="text-[12px] font-medium text-ink">{answers.age}</p>
+                    <div className="px-4 py-3">
+                      <p className="text-[12px] uppercase tracking-eyebrow text-char-500 font-sans">Age range</p>
+                      <p className="text-sm font-medium text-char-900 mt-0.5 font-sans">{answers.age}</p>
                     </div>
                   )}
                 </div>
 
                 <button
                   onClick={() => navigate("/")}
-                  className="flex items-center gap-1.5 mx-auto mt-4 text-[13px] text-ink-soft hover:text-ink transition-colors"
+                  className="flex items-center gap-1.5 mx-auto mt-4 text-sm text-char-500 hover:text-char-900 transition-colors duration-fast min-h-[44px] font-sans"
                 >
-                  <BackArrow />
+                  <span className="material-symbols-rounded text-[18px]">arrow_back</span>
                   Back to home
                 </button>
               </motion.div>
@@ -344,16 +332,16 @@ export default function Survey() {
                 {step > 0 && (
                   <button
                     onClick={handleBack}
-                    className="mb-6 flex items-center gap-1.5 text-[13px] font-semibold text-ink/50 hover:text-ink transition-colors"
+                    className="mb-6 flex items-center gap-1.5 text-sm font-semibold text-char-500 hover:text-char-900 transition-colors duration-fast min-h-[44px] font-sans"
                   >
-                    <BackArrow />
+                    <span className="material-symbols-rounded text-[18px]">arrow_back</span>
                     Back
                   </button>
                 )}
-                <p className="text-[12px] font-semibold tracking-[0.18em] uppercase text-forest/70 mb-5">
+                <p className="text-[12px] uppercase tracking-eyebrow text-char-500 mb-5 font-sans">
                   Question {step + 1}
                 </p>
-                <h2 className="display text-[28px] sm:text-[36px] leading-[1.1] mb-8">
+                <h2 className="font-display font-semibold tracking-tightish text-[28px] sm:text-[36px] leading-[1.1] text-char-900 mb-8">
                   {current.question}
                 </h2>
 
@@ -363,21 +351,25 @@ export default function Survey() {
                     <div className="relative mb-3">
                       <div
                         onClick={() => inputRef.current?.focus()}
-                        className="min-h-[44px] w-full px-3 py-2 rounded-xl border border-ink/12 bg-white flex flex-wrap gap-2 cursor-text focus-within:border-forest/60 transition-colors"
+                        className="min-h-[44px] w-full px-3 py-2 rounded-md border border-sand-200 bg-white flex flex-wrap gap-2 cursor-text focus-within:ring-2 focus-within:ring-forest-700 focus-within:border-forest-700 transition-colors duration-fast"
                       >
                         {multiSelected.map((tag) => (
-                          <span
+                          <motion.span
                             key={tag}
-                            className="inline-flex items-center gap-1.5 bg-forest/10 text-forest text-[13px] font-medium px-3 py-1 rounded-full"
+                            layout
+                            initial={{ scale: 0.85, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={chipSpring}
+                            className="inline-flex items-center gap-1.5 bg-forest-700 text-white text-sm font-medium px-3 py-1 rounded-pill"
                           >
                             {tag}
                             <button
                               onClick={(e) => { e.stopPropagation(); removeCondition(tag); }}
-                              className="text-forest/60 hover:text-forest transition-colors leading-none"
+                              className="text-white/70 hover:text-white transition-colors duration-fast leading-none"
                             >
-                              ×
+                              <span className="material-symbols-rounded text-[14px]">close</span>
                             </button>
-                          </span>
+                          </motion.span>
                         ))}
                         <input
                           ref={inputRef}
@@ -388,19 +380,19 @@ export default function Survey() {
                             if (e.key === "Enter" && suggestions.length > 0) addCondition(suggestions[0]);
                             if (e.key === "Escape") setSuggestions([]);
                           }}
-                          placeholder={multiSelected.length === 0 ? "Search conditions…" : ""}
-                          className="flex-1 min-w-[140px] bg-transparent text-[15px] text-ink placeholder:text-ink/30 focus:outline-none py-1 px-2"
+                          placeholder={multiSelected.length === 0 ? "Search conditions..." : ""}
+                          className="flex-1 min-w-[140px] bg-transparent text-sm text-char-900 placeholder:text-char-400 focus:outline-none py-1 px-2 font-sans"
                         />
                       </div>
 
                       {/* Dropdown suggestions */}
                       {suggestions.length > 0 && (
-                        <div className="absolute z-10 top-full mt-1.5 w-full bg-white rounded-xl border border-ink/10 shadow-lift overflow-hidden">
+                        <div className="absolute z-10 top-full mt-1.5 w-full bg-white rounded-xl border border-sand-200 shadow-md overflow-hidden">
                           {suggestions.map((s) => (
                             <button
                               key={s}
                               onMouseDown={(e) => { e.preventDefault(); addCondition(s); }}
-                              className="w-full text-left px-5 py-3 text-[14px] text-ink hover:bg-sage-soft transition-colors"
+                              className="w-full text-left px-5 py-3 text-sm text-char-900 hover:bg-paper-200 transition-colors duration-fast min-h-[44px] font-sans"
                             >
                               {s}
                             </button>
@@ -409,51 +401,56 @@ export default function Survey() {
                       )}
                     </div>
 
-                    <p className="text-[12px] font-semibold text-ink/40 uppercase tracking-[0.14em] mb-2">
-                      Common conditions — pick up to 3
+                    <p className="text-[12px] uppercase tracking-eyebrow text-char-500 mb-2 font-sans">
+                      Common conditions -- pick up to 3
                     </p>
                     <div className="flex flex-col gap-2">
                       {current.quickOptions.map((opt) => {
                         const isActive = multiSelected.includes(opt);
                         const isDisabled = !isActive && multiSelected.length >= 3;
                         return (
-                          <button
+                          <motion.button
                             key={opt}
+                            whileTap={{ scale: 0.98 }}
+                            transition={chipSpring}
                             onClick={() => !isDisabled && toggleQuickSelect(opt)}
-                            className={`w-full text-left px-5 py-3 rounded-xl border text-[15px] font-medium transition-all duration-150 ${isActive
-                              ? "border-forest bg-forest text-cream shadow-lift"
+                            className={`w-full text-left px-5 py-3.5 rounded-pill border text-sm font-medium transition-all duration-fast min-h-[44px] font-sans ${isActive
+                              ? "border-forest-700 bg-forest-700 text-white"
                               : isDisabled
-                                ? "border-ink/8 bg-white text-ink/30 cursor-not-allowed"
-                                : "border-ink/12 bg-white text-ink hover:border-forest/40 hover:bg-sage-soft"
+                                ? "border-sand-200 bg-white text-char-300 cursor-not-allowed"
+                                : "border-sand-200 bg-white text-char-900 hover:border-forest-700"
                               }`}
                           >
                             {opt}
-                          </button>
+                          </motion.button>
                         );
                       })}
                     </div>
                     <button
                       onClick={handleConditionContinue}
                       disabled={multiSelected.length === 0}
-                      className={`mt-5 pill-forest w-full justify-center text-[15px] py-3 ${multiSelected.length === 0 ? "opacity-40 cursor-not-allowed" : ""
+                      className={`mt-5 w-full flex items-center justify-center gap-2 text-sm py-3.5 rounded-pill bg-forest-700 hover:bg-forest-800 text-white font-semibold transition-colors duration-fast min-h-[48px] font-sans ${multiSelected.length === 0 ? "opacity-40 cursor-not-allowed" : ""
                         }`}
                     >
-                      Continue →
+                      Continue
+                      <span className="material-symbols-rounded text-[18px]">arrow_forward</span>
                     </button>
                   </>
                 ) : (
                   <div className="flex flex-col gap-3">
                     {current.options.map((opt) => (
-                      <button
+                      <motion.button
                         key={opt}
+                        whileTap={{ scale: 0.98 }}
+                        transition={chipSpring}
                         onClick={() => handleSelect(opt)}
-                        className={`w-full text-left px-5 py-4 rounded-xl border text-[15px] font-medium transition-all duration-150 ${selected === opt
-                          ? "border-forest bg-forest text-cream shadow-lift"
-                          : "border-ink/12 bg-white text-ink hover:border-forest/40 hover:bg-sage-soft"
+                        className={`w-full text-left px-5 py-4 rounded-pill border text-sm font-medium transition-all duration-fast min-h-[48px] font-sans ${selected === opt
+                          ? "border-forest-700 bg-forest-700 text-white"
+                          : "border-sand-200 bg-white text-char-900 hover:border-forest-700"
                           }`}
                       >
                         {opt}
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 )}

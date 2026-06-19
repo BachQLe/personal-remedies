@@ -1,5 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Raleway:wght@800;900&display=swap");
-@import url("https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap");
+@import url("./styles/remedy/tokens/fonts.css");
+@import url("./styles/remedy/tokens/icons.css");
+@import url("./styles/remedy/tokens/colors.css");
+@import url("./styles/remedy/tokens/typography.css");
+@import url("./styles/remedy/tokens/elevation.css");
+@import url("./styles/remedy/tokens/spacing.css");
+@import url("./styles/remedy/tokens/base.css");
 
 @tailwind base;
 @tailwind components;
@@ -10,17 +15,128 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scrollbar-color: rgba(0,0,0,0.05) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.05);
+    border-radius: 3px;
   }
 
   body {
-    @apply bg-cream text-ink font-sans antialiased;
-    font-feature-settings: "ss01", "ss02", "cv11";
+    @apply bg-paper-200 text-char-900 font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display font-semibold tracking-tightish leading-[1.08];
   }
 
   ::selection {
-    background: #1F4A3A;
-    color: #F5F2EA;
+    background: #DCE9DF;
+    color: #0F2A21;
   }
+}
+
+@keyframes plan-blur-in {
+  from { filter: blur(6px); opacity: 0; }
+  to   { filter: blur(0);   opacity: 1; }
+}
+
+@keyframes plan-jitter {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-1.5deg); }
+  40% { transform: rotate(1.5deg); }
+  60% { transform: rotate(-1deg); }
+  80% { transform: rotate(1deg); }
+}
+
+/* ── Ghost loaders ───────────────────────────────────────────────────────────
+   `.rm-ghost` turns ANY real screen markup into a skeleton automatically.
+   Each screen renders its real layout (with placeholder data) under this class
+   while loading, so the ghost always matches the page exactly and tracks any
+   layout change you make — no separate skeleton to maintain.
+   - Text leaf nodes  → neutral bars sized to their text
+   - Images           → shimmering card tiles
+   - All colour       → softened to a calm monochrome
+   - The shine plays on each card/bar individually (not one screen-wide sweep)
+---------------------------------------------------------------------------- */
+@keyframes rm-ghost-shimmer {
+  to { background-position-x: -200%; }
+}
+
+.rm-ghost {
+  position: relative;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  /* calm the brand palette down into a soft ghost while keeping a hint of warmth */
+  filter: grayscale(0.72) brightness(1.03) contrast(0.96);
+}
+
+/* Escape hatch: mark any element `data-ghost-hide` to omit it from the ghost
+   (it still renders normally once loaded). */
+.rm-ghost [data-ghost-hide] { display: none !important; }
+
+/* Hide ALL real text so nothing leaks (incl. bare text nodes in mixed elements
+   like a chip that holds both a label and a count). Leaves get a bar fill below. */
+.rm-ghost,
+.rm-ghost * {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Hide real imagery so the tile box behind it reads as the card surface. */
+.rm-ghost img,
+.rm-ghost svg,
+.rm-ghost video { opacity: 0 !important; }
+
+/* The shine is reserved for card tiles only (recipe cards, food cards, meal
+   tiles) — i.e. the boxes that hold an image. Each shimmers on its own.
+   `data-ghost-shimmer` is an opt-in for non-image elements (e.g. day cells). */
+.rm-ghost :is(div, a, button, figure, picture, span):has(> img),
+.rm-ghost :is(div, a, button, figure, picture, span):has(> svg),
+.rm-ghost [data-ghost-shimmer] {
+  background-color: #e3dccd !important;
+  background-image: linear-gradient(110deg, #e3dccd 8%, #f6f1e8 18%, #e3dccd 33%) !important;
+  background-size: 200% 100% !important;
+  background-repeat: no-repeat !important;
+  animation: rm-ghost-shimmer 1.5s linear infinite !important;
+}
+
+/* Text leaves (elements whose only content is text) become static bars sized to
+   the text — no shimmer, just a calm placeholder.
+   `:not(:has(*))` keeps structural containers untouched so the layout is preserved. */
+.rm-ghost :is(
+  h1, h2, h3, h4, h5, h6, p, a, span, strong, em, small, b, time, label, li
+):not(:has(*)) {
+  background-color: #e3dccd !important;
+  border-radius: 0.5em !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  background-clip: padding-box !important;
+}
+
+/* Inputs read as empty fields. */
+.rm-ghost input,
+.rm-ghost textarea {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+.rm-ghost input::placeholder,
+.rm-ghost textarea::placeholder { color: transparent !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rm-ghost :is(div, a, button, figure, picture, span):has(> img),
+  .rm-ghost :is(div, a, button, figure, picture, span):has(> svg),
+  .rm-ghost [data-ghost-shimmer] { animation: none !important; }
 }
 
 @layer components {
@@ -29,39 +145,50 @@
   }
 
   .display {
-    @apply font-display font-medium tracking-tighter2 text-ink;
-    font-variation-settings: "opsz" 144;
+    @apply font-display font-medium tracking-tightish text-char-900;
+    font-variation-settings: "opsz" 72;
   }
 
   .pill-btn {
-    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-[15px] font-medium tracking-tight transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-pill px-6 py-3 text-[15px] font-medium tracking-tight transition-all duration-base ease-ds-out;
   }
 
   .pill-forest {
-    @apply pill-btn bg-forest text-cream hover:bg-forest-deep hover:-translate-y-[1px] hover:shadow-lift;
+    @apply pill-btn bg-forest-700 text-[#F3EFE6] hover:bg-forest-800 active:translate-y-[1px] active:scale-[0.99];
   }
 
-  .pill-amber {
-    @apply pill-btn bg-amber text-white hover:brightness-110 hover:-translate-y-[1px] hover:shadow-lift;
+  .pill-plum {
+    @apply pill-btn bg-plum-700 text-[#F3EFE6] hover:bg-plum-800 active:translate-y-[1px] active:scale-[0.99];
   }
 
   .pill-ghost {
-    @apply pill-btn border border-ink/15 bg-white text-ink hover:border-ink/30 hover:-translate-y-[1px];
+    @apply pill-btn border border-sand-200 bg-white text-char-900 hover:bg-forest-50;
   }
 
   .pill-ghost-dark {
-    @apply pill-btn border border-cream/25 bg-transparent text-cream hover:bg-cream/10;
+    @apply pill-btn border border-[#F3EFE6]/25 bg-transparent text-[#F3EFE6] hover:bg-[#F3EFE6]/10;
+  }
+
+  .pill-honey {
+    @apply pill-btn bg-honey-600 text-white hover:bg-honey-700 active:translate-y-[1px] active:scale-[0.99];
   }
 
   .tag {
-    @apply inline-block text-[11px] font-semibold tracking-[0.18em] uppercase text-forest/80;
+    @apply inline-block text-[12px] font-semibold tracking-eyebrow uppercase text-char-500;
   }
 
-  .tag-amber {
-    @apply text-amber/90;
+  .ds-card {
+    @apply bg-white rounded-xl border border-sand-200 shadow-card transition-all duration-fast ease-ds-out hover:-translate-y-[2px] hover:shadow-md;
   }
 
-  .tag-cream {
-    @apply text-cream/70;
+  .ds-num {
+    @apply font-mono tabular-nums;
+  }
+
+  .material-symbols-rounded {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  }
+  .material-symbols-rounded.fill {
+    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
   }
 }

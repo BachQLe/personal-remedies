@@ -1,0 +1,32 @@
+<!-- @dsCard group="Chips" -->
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 32px; background: var(--app-bg); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .signal-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 9999px;
+    font-size: 12px; font-weight: 600; font-family: var(--font-sans);
+  }
+  .signal-helpful { background: #EBF5EC; color: #1B6B2B; }
+  .signal-avoid { background: #FDEAEA; color: #B0190E; }
+  .signal-neutral { background: #F3F4F6; color: #374151; }
+  .label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; }
+</style>
+</head><body>
+  <span class="label">Full</span>
+  <div class="row">
+    <span class="signal-chip signal-helpful"><span>✓</span><span>Helpful</span></span>
+    <span class="signal-chip signal-avoid"><span>✗</span><span>Avoid</span></span>
+    <span class="signal-chip signal-neutral"><span>–</span><span>Neutral</span></span>
+  </div>
+  <span class="label">Compact (icon only)</span>
+  <div class="row">
+    <span class="signal-chip signal-helpful">✓</span>
+    <span class="signal-chip signal-avoid">✗</span>
+    <span class="signal-chip signal-neutral">–</span>
+  </div>
+</body></html>

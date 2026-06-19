@@ -1,0 +1,39 @@
+/* ============================================================
+   Remedy — Typography tokens
+   Newsreader (editorial serif display) + Hanken Grotesk (sans body)
+   ============================================================ */
+:root {
+  --font-display: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Weights */
+  --fw-regular: 400; /* @kind font */
+  --fw-medium: 500; /* @kind font */
+  --fw-semibold: 600; /* @kind font */
+  --fw-bold: 700; /* @kind font */
+  --fw-extrabold: 800; /* @kind font */
+
+  /* Type scale (px) — editorial, generous display steps */
+  --fs-display: 56px;   /* hero serif */
+  --fs-h1: 40px;
+  --fs-h2: 30px;
+  --fs-h3: 23px;
+  --fs-h4: 19px;
+  --fs-body-lg: 18px;
+  --fs-body: 16px;
+  --fs-body-sm: 14px;
+  --fs-caption: 13px;
+  --fs-label: 12px;     /* eyebrow / overline */
+
+  /* Line heights */
+  --lh-tight: 1.08; /* @kind font */
+  --lh-snug: 1.25; /* @kind font */
+  --lh-normal: 1.5; /* @kind font */
+  --lh-relaxed: 1.65; /* @kind font */
+
+  /* Tracking */
+  --ls-tight: -0.02em; /* @kind font */
+  --ls-normal: 0em; /* @kind font */
+  --ls-eyebrow: 0.14em; /* @kind font */
+}

@@ -28,12 +28,9 @@ const DURATION = N * 2.2;
 function PaperWheel() {
   return (
     <div
-      className="relative rounded-xl overflow-hidden border border-black/10"
+      className="relative rounded-xl overflow-hidden border border-sand-200"
       style={{ height: 280, perspective: "520px", background: "#ffffff" }}
     >
-      {/* slot window bg */}
-      <div className="absolute inset-0" style={{ background: "rgba(255,255,255,1)" }} />
-
       {/* top fade */}
       <div
         aria-hidden
@@ -50,17 +47,16 @@ function PaperWheel() {
       {/* center active-row highlight */}
       <div
         aria-hidden
-        className="absolute inset-x-4 z-10 pointer-events-none rounded-lg"
+        className="absolute inset-x-4 z-10 pointer-events-none rounded-lg border border-sand-200"
         style={{
           top: "50%",
           transform: "translateY(-50%)",
           height: FACE_H,
-          background: "rgba(0,0,0,0.03)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          background: "rgba(245, 245, 240, 0.5)",
         }}
       />
 
-      {/* 3-D drum — perspective lives on the parent above, not here */}
+      {/* 3-D drum */}
       <div
         style={{
           position: "absolute",
@@ -89,20 +85,14 @@ function PaperWheel() {
             }}
           >
             <div className="flex items-center gap-2 mb-1">
-              <span
-                className="text-[10px] font-bold tracking-widest uppercase"
-                style={{ color: "rgba(217,138,74,0.85)" }}
-              >
+              <span className="text-[10px] font-semibold tracking-eyebrow uppercase text-honey-600">
                 {paper.journal}
               </span>
-              <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>
+              <span className="text-[10px] font-mono tabular-nums text-char-400">
                 {paper.year}
               </span>
             </div>
-            <p
-              className="text-[13px] leading-[1.45] font-medium"
-              style={{ color: "rgba(0,0,0,0.85)" }}
-            >
+            <p className="text-[13px] leading-[1.45] font-sans font-medium text-char-900">
               {paper.title}
             </p>
           </div>
@@ -121,50 +111,42 @@ function PaperWheel() {
 
 export default function Nutri() {
   return (
-    <section className="relative overflow-hidden py-8 lg:py-12" style={{ background: "#fffffaff" }}>
+    <section className="relative overflow-hidden py-8 lg:py-12 bg-paper-200">
       <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none opacity-[0.12]"
-        style={{
-          backgroundImage: `radial-gradient(circle, #000 1px, transparent 1px)`,
-          backgroundSize: "20px 20px",
-        }}
-      />
-      <div
-        className="relative mx-auto max-w-7xl overflow-hidden rounded-sm px-8 py-4 lg:px-14 lg:py-24"
+        className="relative mx-auto max-w-7xl overflow-hidden px-8 py-4 lg:px-14 lg:py-24"
       >
         <div className="relative mx-auto max-w-7xl container-px">
           <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* LEFT — headline copy */}
+            {/* LEFT -- headline copy */}
             <div>
               <Reveal>
-                <span className="tag">Meet Nutri, your AI dietician</span>
+                <span className="text-[12px] font-semibold tracking-eyebrow uppercase text-char-500">Meet Nutri, your AI dietician</span>
               </Reveal>
               <Reveal delay={0.1}>
-                <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06] text-black">
-                  We read 100,000+ studies {" "}
-                  <em className="font-display italic font-normal text-forest">
+                <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06] text-char-900">
+                  We read <span className="font-mono tabular-nums">100,000</span>+ studies{" "}
+                  <em className="font-display italic font-normal text-forest-700">
                     so you don't have to
                   </em>
                 </h2>
               </Reveal>
               <Reveal delay={0.18}>
-                <p className="mt-2 font-display italic text-[18px] sm:text-[22px] text-slate-900/70 tracking-tight">
-                  Nutri shows you the everyday foods that can reverse your chronic conditions — the same everyday foods medical companies can't monetize.
+                <p className="mt-3 font-sans text-[18px] sm:text-[20px] text-char-500 tracking-tight leading-[1.5]">
+                  Nutri shows you the everyday foods that can help your chronic conditions -- the same everyday foods medical companies can't monetize.
                 </p>
               </Reveal>
             </div>
 
-            {/* RIGHT — rolling paper wheel */}
+            {/* RIGHT -- rolling paper wheel */}
             <div className="relative py-10 px-5">
               <div className="absolute inset-0 pointer-events-none" style={{
                 perspective: '1200px',
                 transformStyle: 'preserve-3d',
                 zIndex: 1,
               }}>
-                <div className="absolute inset-0 rounded-3xl border border-black/10" style={{
+                <div className="absolute inset-0 rounded-xl border border-sand-200" style={{
                   transform: 'translateZ(20px)',
-                  background: 'linear-gradient(to right, rgba(36, 106, 79, 1) 0%, rgba(58, 126, 100, 1) 100%)',
+                  background: 'linear-gradient(to right, var(--forest-700, #1E4736) 0%, var(--forest-500, #3A7058) 100%)',
                 }} />
               </div>
               <motion.div
@@ -172,10 +154,10 @@ export default function Nutri() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.5, delay: 0.4, ease: "easeOut" }}
+                transition={{ duration: 0.5, delay: 0.4, ease: [0.22, 0.61, 0.36, 1] }}
               >
-                <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/75">
-                  100,000+ peer-reviewed studies
+                <p className="text-[12px] font-semibold tracking-eyebrow uppercase text-white/75">
+                  <span className="font-mono tabular-nums">100,000</span>+ peer-reviewed studies
                 </p>
                 <PaperWheel />
               </motion.div>

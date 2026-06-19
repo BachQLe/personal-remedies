@@ -3,62 +3,54 @@ import { Reveal, Stagger, StaggerItem } from "../components/Reveal";
 import PageShell from "../components/PageShell";
 
 const stats = [
-  { figure: "50%", label: "of US adults have at least one chronic condition", tint: "bg-herb/10", bar: "bg-herb", fig: "text-[#3f6b48]" },
-  { figure: "75%", label: "of total healthcare costs come from chronic care", tint: "bg-terra/10", bar: "bg-terra", fig: "text-terra" },
-  { figure: "80%", label: "of chronic patients would benefit meaningfully from dietary changes", tint: "bg-steel/10", bar: "bg-steel", fig: "text-steel" },
+  { figure: "50%", label: "of US adults have at least one chronic condition" },
+  { figure: "75%", label: "of total healthcare costs come from chronic care" },
+  { figure: "80%", label: "of chronic patients would benefit meaningfully from dietary changes" },
 ];
 
 const offerings = [
   {
-    icon: "whitelabel-icon",
+    icon: "storefront",
     title: "White-label deployment",
     body: "Offer our platform under your own brand on every major app store.",
-    chip: "bg-herb/15",
-    color: "#3f6b48",
   },
   {
-    icon: "api-icon",
+    icon: "api",
     title: "API integration",
     body: "Plug our Nutridigm knowledgebase directly into your existing patient portal or app.",
-    chip: "bg-steel/15",
-    color: "#556b7f",
   },
   {
-    icon: "depth-icon",
+    icon: "library_books",
     title: "Condition depth no one else has",
     body: "300+ conditions, including complex comorbidities. Not just diabetes and obesity.",
-    chip: "bg-terra/15",
-    color: "#a9762a",
   },
   {
-    icon: "revenue-icon",
+    icon: "trending_up",
     title: "New revenue stream",
     body: "Package and price our capabilities as your own telehealth service offering.",
-    chip: "bg-gold/15",
-    color: "#d4a574",
   },
 ];
 
 const differentiators = [
   {
+    icon: "person_check",
     title: "Personalized, not generic",
     body: "Guidance tied to each patient's exact profile: their conditions, medications, allergies, and health risks — together.",
-    dot: "bg-herb",
   },
   {
+    icon: "task_alt",
     title: "Actionable, not encyclopedic",
     body: "Not a wall of text. Clear do's, don'ts, and swaps a patient can use today.",
-    dot: "bg-gold",
   },
   {
+    icon: "verified",
     title: "Credible and independent",
     body: "No supplement sponsors. No product placements. Science-backed and conflict-free.",
-    dot: "bg-terra",
   },
   {
+    icon: "shield",
     title: "Patented, proven, proprietary",
     body: "45,000+ patients have benefited from our algorithm. Backed by US Patent No. 8504385 — a legal moat you can't get anywhere else in nutrition.",
-    dot: "bg-steel",
   },
 ];
 
@@ -66,35 +58,27 @@ export default function Providers() {
   return (
     <PageShell>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-paper">
+      <section className="relative overflow-hidden bg-paper-200">
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(60% 50% at 50% 0%, rgba(122,158,126,0.22), transparent 70%)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none opacity-[0.10]"
-          style={{
-            backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
+              "radial-gradient(60% 50% at 50% 0%, rgba(30,71,54,0.12), transparent 70%)",
           }}
         />
         <div className="relative mx-auto max-w-5xl container-px py-20 lg:py-28 text-center">
           <Reveal>
-            <span className="tag">For Providers</span>
+            <span className="tag">For providers</span>
           </Reveal>
           <Reveal delay={0.1}>
             <h1 className="display mt-5 text-[34px] leading-[1.08] sm:text-[48px] sm:leading-[1.04] lg:text-[58px] lg:leading-[1.02] max-w-[18ch] mx-auto">
               Better chronic care starts with{" "}
-              <em className="font-display italic font-normal text-forest">better nutrition intelligence.</em>
+              <em className="font-display italic font-normal text-forest-700">better nutrition intelligence.</em>
             </h1>
           </Reveal>
           <Reveal delay={0.2}>
-            <p className="mt-7 text-[17px] sm:text-[18px] leading-[1.6] text-ink-soft max-w-[60ch] mx-auto">
+            <p className="mt-7 text-[17px] sm:text-[18px] leading-[1.6] text-char-500 max-w-[60ch] mx-auto font-sans">
               Half of US adults live with at least one chronic condition. The dietary guidance they need
               doesn't exist anywhere in your current stack — until now.
             </p>
@@ -108,23 +92,20 @@ export default function Providers() {
       </section>
 
       {/* Problem — stat cards */}
-      <section className="py-16 lg:py-24">
+      <section className="py-16 lg:py-24 bg-paper-200">
         <div className="mx-auto max-w-5xl container-px">
           <Stagger className="grid gap-5 sm:gap-6 md:grid-cols-3">
             {stats.map((s) => (
               <StaggerItem key={s.figure}>
-                <div className={`h-full rounded-3xl ${s.tint} border border-ink/[0.06] shadow-card overflow-hidden text-center flex flex-col`}>
-                  <span className={`h-1.5 w-full ${s.bar}`} />
-                  <div className="p-8 flex flex-col flex-1">
-                    <span className={`display text-[56px] leading-none ${s.fig}`}>{s.figure}</span>
-                    <p className="mt-4 text-[15px] leading-[1.5] text-ink-soft">{s.label}</p>
-                  </div>
+                <div className="ds-card h-full overflow-hidden text-center flex flex-col p-8">
+                  <span className="font-mono text-[56px] leading-none tabular-nums text-forest-700 font-semibold">{s.figure}</span>
+                  <p className="mt-4 text-[15px] leading-[1.5] text-char-500 font-sans">{s.label}</p>
                 </div>
               </StaggerItem>
             ))}
           </Stagger>
           <Reveal delay={0.2}>
-            <p className="mt-6 text-center text-[12.5px] text-ink/45">
+            <p className="mt-6 text-center text-[12px] tracking-eyebrow uppercase text-char-500">
               Sources: US Dept. of Health &amp; Human Services, peer-reviewed literature
             </p>
           </Reveal>
@@ -132,7 +113,7 @@ export default function Providers() {
       </section>
 
       {/* Body copy block */}
-      <section className="pb-4">
+      <section className="pb-4 bg-paper-200">
         <div className="mx-auto max-w-3xl container-px text-center">
           <Reveal>
             <h2 className="display text-[30px] leading-[1.12] sm:text-[40px] sm:leading-[1.06]">
@@ -140,7 +121,7 @@ export default function Providers() {
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mt-6 text-[17px] sm:text-[18px] leading-[1.65] text-ink-soft">
+            <p className="mt-6 text-[17px] sm:text-[18px] leading-[1.65] text-char-500 font-sans">
               Most physicians don't have the time, the training, or the reimbursement structure to answer
               nutrition questions. Registered dietitians help — but they don't scale. The result: patients
               with Type 2 diabetes, hypertension, and three other conditions leave your office without knowing
@@ -151,7 +132,7 @@ export default function Providers() {
       </section>
 
       {/* What we offer */}
-      <section className="py-16 lg:py-24 bg-clay/[0.06] border-y border-ink/[0.06]">
+      <section className="py-16 lg:py-24 bg-paper-100 border-y border-sand-200">
         <div className="mx-auto max-w-3xl container-px">
           <Reveal>
             <h2 className="display text-[28px] leading-[1.12] sm:text-[36px] sm:leading-[1.08] text-center mb-12">
@@ -161,15 +142,13 @@ export default function Providers() {
           <Stagger className="space-y-4">
             {offerings.map((o) => (
               <StaggerItem key={o.title}>
-                <div className="flex gap-5 rounded-2xl bg-white border border-ink/[0.06] shadow-card p-6 sm:p-7">
-                  <div className={`h-12 w-12 shrink-0 rounded-xl ${o.chip} flex items-center justify-center`} aria-hidden>
-                    <svg className="h-6 w-6" style={{ color: o.color }}>
-                      <use href={`/icons.svg#${o.icon}`} />
-                    </svg>
+                <div className="ds-card flex gap-5 p-6 sm:p-7">
+                  <div className="h-12 w-12 shrink-0 rounded-lg bg-forest-100 flex items-center justify-center" aria-hidden>
+                    <span className="material-symbols-rounded text-forest-700 text-[24px]">{o.icon}</span>
                   </div>
                   <div>
-                    <h3 className="text-[17px] font-semibold tracking-tight text-ink">{o.title}</h3>
-                    <p className="mt-1.5 text-[15px] leading-[1.6] text-ink-soft">{o.body}</p>
+                    <h3 className="text-[17px] font-semibold tracking-tightish text-char-900 font-sans">{o.title}</h3>
+                    <p className="mt-1.5 text-[15px] leading-[1.6] text-char-500 font-sans">{o.body}</p>
                   </div>
                 </div>
               </StaggerItem>
@@ -179,21 +158,21 @@ export default function Providers() {
       </section>
 
       {/* Differentiators — forest band */}
-      <section className="py-20 lg:py-28 bg-pine text-cream">
+      <section className="py-20 lg:py-28 bg-forest-900">
         <div className="mx-auto max-w-5xl container-px">
           <Reveal>
-            <h2 className="display text-[30px] leading-[1.1] sm:text-[42px] sm:leading-[1.06] text-center max-w-[20ch] mx-auto text-cream">
+            <h2 className="display text-[30px] leading-[1.1] sm:text-[42px] sm:leading-[1.06] text-center max-w-[20ch] mx-auto text-[#F3EFE6]">
               Why providers choose{" "}
-              <em className="font-display italic font-normal text-gold">Personal Remedies</em>
+              <em className="font-display italic font-normal text-honey-500">Personal Remedies</em>
             </h2>
           </Reveal>
           <Stagger className="mt-12 grid gap-5 sm:gap-6 md:grid-cols-2">
             {differentiators.map((d) => (
               <StaggerItem key={d.title}>
-                <div className="h-full rounded-3xl bg-cream/[0.06] border border-cream/15 p-8">
-                  <span className={`inline-block h-2.5 w-2.5 rounded-full ${d.dot} mb-4`} />
-                  <h3 className="display text-[20px] sm:text-[22px] leading-tight font-medium text-cream">{d.title}</h3>
-                  <p className="mt-3 text-[15px] leading-[1.6] text-cream/70">{d.body}</p>
+                <div className="h-full rounded-xl bg-[#F3EFE6]/[0.06] border border-[#F3EFE6]/15 p-8">
+                  <span className="material-symbols-rounded text-honey-500 text-[28px] mb-4 block">{d.icon}</span>
+                  <h3 className="font-display font-semibold text-[20px] sm:text-[22px] leading-tight text-[#F3EFE6]">{d.title}</h3>
+                  <p className="mt-3 text-[15px] leading-[1.6] text-[#F3EFE6]/70 font-sans">{d.body}</p>
                 </div>
               </StaggerItem>
             ))}
@@ -202,16 +181,16 @@ export default function Providers() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 lg:py-32 bg-gold/[0.10]">
+      <section className="py-24 lg:py-32 bg-paper-200">
         <div className="mx-auto max-w-3xl container-px text-center">
           <Reveal>
             <h2 className="display text-[32px] leading-[1.08] sm:text-[46px] sm:leading-[1.04]">
               Let's talk about your{" "}
-              <em className="font-display italic font-normal text-[#a9762a]">patient population.</em>
+              <em className="font-display italic font-normal text-plum-700">patient population.</em>
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mt-6 text-[17px] sm:text-[18px] leading-[1.6] text-ink-soft">
+            <p className="mt-6 text-[17px] sm:text-[18px] leading-[1.6] text-char-500 font-sans">
               We work with telehealth groups, integrative medicine practices, ACOs, and health-tech platforms.
               One conversation is enough to know if we're a fit.
             </p>

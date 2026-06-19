@@ -5,57 +5,97 @@ export default {
     extend: {
       colors: {
         forest: {
-          DEFAULT: "#1F4A3A",
-          deep: "#163528",
+          DEFAULT: "#1E4736",
+          50: "#EDF3EE",
+          100: "#DCE9DF",
+          300: "#A7C0AC",
+          500: "#3A7058",
+          600: "#2A5A45",
+          700: "#1E4736",
+          800: "#143628",
+          900: "#0F2A21",
         },
-        cream: {
-          DEFAULT: "#F5F2EA",
-          warm: "#ECE6D8",
+        plum: {
+          DEFAULT: "#5C2A47",
+          50: "#F4ECF0",
+          100: "#EBDDE6",
+          400: "#A86C8E",
+          600: "#743A5C",
+          700: "#5C2A47",
+          800: "#401F33",
+          900: "#2E1626",
         },
-        sage: {
-          DEFAULT: "#CFE0D4",
-          soft: "#E4EDE5",
+        honey: {
+          DEFAULT: "#D6A642",
+          50: "#FAF3E2",
+          100: "#F3E6C7",
+          500: "#D6A642",
+          600: "#C2902F",
+          700: "#9C6F1E",
         },
-        ink: {
-          DEFAULT: "#1B2A23",
-          soft: "#4C5C53",
+        char: {
+          DEFAULT: "#211E1B",
+          300: "#B7AF9F",
+          400: "#8A8377",
+          500: "#6B645A",
+          700: "#423D36",
+          900: "#211E1B",
         },
-        amber: {
-          DEFAULT: "#D98A4A",
+        sand: {
+          100: "#EEEEE9",
+          200: "#E6E6E0",
         },
-        // Extended brand palette (page section coloring)
-        paper: "#F5F0E8", // cream · dominant
-        pine: "#1B3A2D", // forest green · structural
-        gold: "#C9973A", // amber · accent
-        herb: "#7A9E7E", // sage
-        terra: "#C4715A", // terra cotta
-        steel: "#4A7C8E", // slate blue
-        clay: "#8C6B3E", // warm brown
+        paper: {
+          100: "#FAFAF8",
+          200: "#F5F5F0",
+        },
+        signal: {
+          beneficial: { DEFAULT: "#2F8C5A", tint: "#DCEDE2" },
+          limit: { DEFAULT: "#C98A2E", tint: "#F6E8CB" },
+          avoid: { DEFAULT: "#C04A2F", tint: "#F6DED5" },
+          info: { DEFAULT: "#3F6E86", tint: "#DDE8ED" },
+        },
       },
       fontFamily: {
-        display: ['"Fraunces"', "ui-serif", "Georgia", "serif"],
-        sans: ['"Satoshi"', "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ['"Newsreader"', "ui-serif", "Georgia", "serif"],
+        sans: ['"Hanken Grotesk"', "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ['"IBM Plex Mono"', "ui-monospace", "monospace"],
+      },
+      borderRadius: {
+        xs: "6px",
+        sm: "10px",
+        md: "14px",
+        lg: "20px",
+        xl: "28px",
+        "2xl": "36px",
+        pill: "999px",
+      },
+      boxShadow: {
+        xs: "0 1px 2px rgba(45, 36, 24, 0.06)",
+        sm: "0 2px 8px rgba(45, 36, 24, 0.06)",
+        card: "0 3px 16px rgba(45, 36, 24, 0.07)",
+        md: "0 8px 24px rgba(45, 36, 24, 0.10)",
+        lg: "0 14px 40px rgba(45, 36, 24, 0.14), 0 4px 12px rgba(45, 36, 24, 0.06)",
+        sheet: "0 -8px 32px rgba(45, 36, 24, 0.12)",
+        nav: "0 1px 0 rgba(45, 36, 24, 0.06), 0 8px 24px rgba(45, 36, 24, 0.06)",
+        fab: "0 6px 20px rgba(30, 71, 54, 0.28)",
+        inset: "inset 0 1px 2px rgba(45, 36, 24, 0.06)",
       },
       letterSpacing: {
-        tightish: "-0.01em",
-        tighter2: "-0.02em",
+        eyebrow: "0.14em",
+        tightish: "-0.02em",
+      },
+      transitionTimingFunction: {
+        "ds-out": "cubic-bezier(0.22, 0.61, 0.36, 1)",
+        "ds-spring": "cubic-bezier(0.34, 1.4, 0.64, 1)",
+      },
+      transitionDuration: {
+        fast: "120ms",
+        base: "200ms",
+        slow: "320ms",
       },
       maxWidth: {
         prose: "60ch",
-      },
-      boxShadow: {
-        card: "0 1px 2px rgba(22,53,40,0.04), 0 8px 24px rgba(22,53,40,0.06)",
-        lift: "0 8px 20px rgba(22,53,40,0.08), 0 24px 60px rgba(22,53,40,0.10)",
-        nav: "0 1px 0 rgba(22,53,40,0.06), 0 8px 24px rgba(22,53,40,0.06)",
-      },
-      animation: {
-        "slow-pulse": "slowPulse 6s ease-in-out infinite",
-      },
-      keyframes: {
-        slowPulse: {
-          "0%, 100%": { opacity: 0.6 },
-          "50%": { opacity: 1 },
-        },
       },
     },
   },

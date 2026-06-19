@@ -1,0 +1,77 @@
+<!-- @dsCard group="Chips" -->
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 32px; background: var(--app-bg); }
+  .rating-row { display: flex; align-items: center; gap: 12px; }
+  .rating-label { font-size: 12px; color: rgba(26,26,26,0.6); min-width: 120px; }
+  .dots { display: flex; gap: 4px; align-items: center; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    transition: background 0.15s;
+  }
+  .dot-filled { background: var(--forest); }
+  .dot-empty { border: 1px solid rgba(31,74,58,0.25); background: transparent; }
+  .rating-num { font-size: 11px; font-weight: 600; color: var(--ink); min-width: 18px; text-align: right; }
+  .rating-max { font-size: 11px; color: rgba(26,26,26,0.3); }
+  .card { background: #E7EEE7; border-radius: 16px; padding: 20px; max-width: 320px; width: 100%; }
+  .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(26,26,26,0.4); margin-bottom: 12px; }
+  .food-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .food-emoji { font-size: 28px; }
+  .food-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .food-tag { font-size: 11px; color: rgba(26,26,26,0.45); }
+  .ratings { display: flex; flex-direction: column; gap: 8px; }
+  .label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; }
+</style>
+</head><body>
+  <span class="label">Nutri Recommendation Card</span>
+  <div class="card">
+    <p class="card-title">Nutri Recommendations</p>
+    <div class="food-header">
+      <span class="food-emoji">🧄</span>
+      <div>
+        <p class="food-name">Garlic</p>
+        <p class="food-tag">Immune Booster</p>
+      </div>
+    </div>
+    <div class="ratings">
+      <div class="rating-row">
+        <span class="rating-label">Immune Support</span>
+        <div class="dots">
+          <span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span>
+        </div>
+        <span class="rating-num">10</span><span class="rating-max">/10</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">Anti-Inflammatory</span>
+        <div class="dots">
+          <span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span>
+        </div>
+        <span class="rating-num">9</span><span class="rating-max">/10</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">Blood Pressure</span>
+        <div class="dots">
+          <span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-empty"></span>
+        </div>
+        <span class="rating-num">8</span><span class="rating-max">/10</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">Antioxidant</span>
+        <div class="dots">
+          <span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span>
+        </div>
+        <span class="rating-num">9</span><span class="rating-max">/10</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">Antimicrobial</span>
+        <div class="dots">
+          <span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span><span class="dot dot-filled"></span>
+        </div>
+        <span class="rating-num">9</span><span class="rating-max">/10</span>
+      </div>
+    </div>
+  </div>
+</body></html>

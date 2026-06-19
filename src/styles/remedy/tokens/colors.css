@@ -1,0 +1,88 @@
+/* ============================================================
+   Remedy — Color tokens
+   Deep botanical: forest + plum + charcoal, on warm paper.
+   Base palette first, then semantic aliases.
+   ============================================================ */
+:root {
+  /* ---- Brand: Forest (primary) ---- */
+  --forest-900: #0F2A21;
+  --forest-800: #143628;
+  --forest-700: #1E4736;   /* primary */
+  --forest-600: #2A5A45;
+  --forest-500: #3A7058;
+  --forest-300: #A7C0AC;   /* sage */
+  --forest-100: #DCE9DF;
+  --forest-50:  #EDF3EE;
+
+  /* ---- Brand: Plum (secondary) ---- */
+  --plum-900: #2E1626;
+  --plum-800: #401F33;
+  --plum-700: #5C2A47;     /* secondary */
+  --plum-600: #743A5C;
+  --plum-400: #A86C8E;
+  --plum-100: #EBDDE6;
+  --plum-50:  #F4ECF0;
+
+  /* ---- Brand: Honey / gold accent ---- */
+  --honey-700: #9C6F1E;
+  --honey-600: #C2902F;
+  --honey-500: #D6A642;
+  --honey-100: #F3E6C7;
+  --honey-50:  #FAF3E2;
+
+  /* ---- Warm neutrals (charcoal → paper) ---- */
+  --char-900: #211E1B;     /* ink */
+  --char-700: #423D36;
+  --char-500: #6B645A;
+  --char-400: #8A8377;
+  --char-300: #B7AF9F;
+  --sand-200: #E6E6E0;     /* hairline */
+  --sand-100: #EEEEE9;
+  --paper-200: #F5F5F0;    /* page */
+  --paper-100: #FAFAF8;    /* light page */
+  --white:     #FFFFFF;
+  --paper-card:#FFFFFF;
+
+  /* ---- Signals (food-as-medicine guidance) ---- */
+  --benefit-700: #1F6B43;
+  --benefit-600: #2F8C5A;  /* beneficial / eat freely */
+  --benefit-100: #DCEDE2;
+  --caution-700: #9C6A18;
+  --caution-600: #C98A2E;  /* limit / moderate */
+  --caution-100: #F6E8CB;
+  --avoid-700: #9E3A22;
+  --avoid-600: #C04A2F;    /* avoid / restrict */
+  --avoid-100: #F6DED5;
+  --info-600: #3F6E86;     /* clinical / info */
+  --info-100: #DDE8ED;
+
+  /* ============================================================
+     Semantic aliases — reference these in components
+     ============================================================ */
+  --brand-primary: var(--forest-700);
+  --brand-primary-strong: var(--forest-800);
+  --brand-secondary: var(--plum-700);
+  --brand-accent: var(--honey-600);
+
+  --text-primary: var(--char-900);
+  --text-secondary: var(--char-500);
+  --text-muted: var(--char-400);
+  --text-on-dark: #F3EFE6;
+  --text-on-dark-muted: #BFC9BD;
+  --text-link: var(--forest-700);
+
+  --surface-page: var(--paper-200);
+  --surface-page-alt: var(--paper-100);
+  --surface-card: var(--white);
+  --surface-card-warm: var(--paper-card);
+  --surface-sunken: var(--sand-100);
+  --surface-forest: var(--forest-700);
+  --surface-forest-deep: var(--forest-900);
+  --surface-plum: var(--plum-700);
+
+  --border-subtle: var(--sand-200);
+  --border-strong: var(--char-300);
+  --border-focus: var(--forest-600);
+
+  --ring-focus: 0 0 0 3px rgba(30, 71, 54, 0.22);
+}

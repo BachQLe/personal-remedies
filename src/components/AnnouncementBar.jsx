@@ -16,8 +16,12 @@ function getTimeLeft() {
 function Segment({ value, label }) {
   return (
     <span className="inline-flex flex-col items-center leading-none">
-      <span className="font-black text-[15px] tabular-nums transition-all duration-300 ease-out">{String(value).padStart(2, "0")}</span>
-      <span className="text-[9px] font-medium tracking-[0.14em] uppercase text-white/50 mt-0.5">{label}</span>
+      <span className="font-mono font-bold text-[15px] tabular-nums text-white transition-all duration-300 ease-out">
+        {String(value).padStart(2, "0")}
+      </span>
+      <span className="text-[9px] font-medium tracking-[0.14em] uppercase text-[#BFC9BD] mt-0.5">
+        {label}
+      </span>
     </span>
   );
 }
@@ -31,38 +35,40 @@ export default function AnnouncementBar({ onDismiss, scrollHidden }) {
   }, []);
 
   return (
-    <div className={`fixed top-0 rounded-lg inset-x-20 z-[60] bg-slate-800 text-white px-4 py-2 flex items-center justify-center gap-4 flex-wrap text-center transition-transform duration-300 ease-in-out will-change-transform ${scrollHidden ? "-translate-y-full" : "translate-y-0"}`} style={{ backfaceVisibility: "hidden" }}>
-      <p className="text-xs sm:text-[13px] font-medium tracking-tight hidden md:block">
+    <div
+      className={`fixed top-0 inset-x-0 z-[60] bg-forest-700 text-white px-4 py-2 flex items-center justify-center gap-4 flex-wrap text-center transition-transform duration-300 ease-in-out will-change-transform ${scrollHidden ? "-translate-y-full" : "translate-y-0"}`}
+      style={{ backfaceVisibility: "hidden" }}
+    >
+      <p className="text-xs sm:text-[13px] font-sans font-medium tracking-tight hidden md:block text-[#F3EFE6]">
         Get one{" "}
-        <span className="font-black uppercase tracking-wide">free</span>{" "}
+        <span className="font-bold uppercase tracking-wide text-honey-600">free</span>{" "}
         diet consulting on us with our top model
       </p>
 
       <div className="flex items-center gap-2">
         <Segment value={time.d} label="days" />
-        <span className="text-white/30 font-bold text-[14px] mb-2">:</span>
+        <span className="text-[#BFC9BD] font-bold text-[14px] mb-2">:</span>
         <Segment value={time.h} label="hrs" />
-        <span className="text-white/30 font-bold text-[14px] mb-2">:</span>
+        <span className="text-[#BFC9BD] font-bold text-[14px] mb-2">:</span>
         <Segment value={time.m} label="min" />
-        <span className="text-white/30 font-bold text-[14px] mb-2">:</span>
+        <span className="text-[#BFC9BD] font-bold text-[14px] mb-2">:</span>
         <Segment value={time.s} label="sec" />
       </div>
 
       <a
         href="#"
-        className="text-[12px] font-semibold underline underline-offset-2 text-white/70 hover:text-white transition-colors whitespace-nowrap"
+        className="text-[12px] font-sans font-semibold underline underline-offset-2 text-honey-600 hover:text-honey-500 transition-colors duration-[120ms] whitespace-nowrap"
       >
-        Claim offer →
+        Claim offer
+        <span className="material-symbols-rounded text-[14px] align-middle ml-0.5">arrow_forward</span>
       </a>
 
       <button
         onClick={onDismiss}
         aria-label="Dismiss"
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#BFC9BD] hover:text-white transition-colors duration-[120ms]"
       >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-        </svg>
+        <span className="material-symbols-rounded text-[18px]">close</span>
       </button>
     </div>
   );

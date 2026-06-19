@@ -16,7 +16,7 @@ const items = [
 export default function TrustStrip() {
 
   return (
-    <section className="border-y border-ink/[0.08] backdrop-blur-lg bg-white/30 mx-36 rounded-full mb-2 shadow-sm">
+    <section className="border-y border-char-900/[0.08] backdrop-blur-lg bg-white/30 mx-36 rounded-full mb-2 shadow-sm">
       <div className="mx-auto max-w-7xl container-px py-2 sm:py-2 px-6">
         <div className="hidden lg:flex lg:items-center justify-center gap-6">
           <span className="text-[14px] sm:text-[15px] text-black font-medium tracking-tight shrink-0">

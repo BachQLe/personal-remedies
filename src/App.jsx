@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import AnnouncementBar from "./components/AnnouncementBar";
 import Nav from "./components/Nav";
@@ -20,6 +20,19 @@ import Login from "./pages/Login";
 import Contact from "./pages/Contact";
 import TermsOfUse from "./pages/TermsOfUse";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import OnboardingPage from "./components/onboarding";
+// App screens
+import HomeScreen from "./screens/home/HomeScreen";
+import PlanScreen from "./screens/plan/PlanScreen";
+import WeeklyPlanScreen from "./screens/week/WeeklyPlanScreen";
+import RecipesScreen from "./screens/recipes/RecipesScreen";
+import LookupScreen from "./screens/lookup/LookupScreen";
+import ProfileScreen from "./screens/profile/ProfileScreen";
+// App chrome
+import TabBar from "./components/TabBar";
+import FAB from "./components/FAB";
+// Dev
+import KitchenSink from "./pages/KitchenSink";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -50,7 +63,7 @@ function Home({ barVisible, setBarVisible }) {
   const barShowing = barVisible && !barScrollHidden;
 
   return (
-    <div className="min-h-screen bg-cream text-ink">
+    <div className="min-h-screen bg-paper-200 text-char-900">
       {barVisible && <AnnouncementBar onDismiss={() => setBarVisible(false)} scrollHidden={barScrollHidden} />}
       <Nav offset={barShowing ? BAR_H : 0} />
       <main style={{ paddingTop: barVisible ? BAR_H + 64 : 64 }}>
@@ -66,6 +79,21 @@ function Home({ barVisible, setBarVisible }) {
   );
 }
 
+// Shell for the PWA app routes — always phone layout
+function AppShell({ children }) {
+  return (
+    <div className="min-h-screen bg-paper-200">
+      <main className="pb-24">
+        <div className="max-w-[430px] mx-auto w-full">
+          {children}
+        </div>
+      </main>
+      <TabBar />
+      <FAB />
+    </div>
+  );
+}
+
 function App() {
   const [barVisible, setBarVisible] = useState(true);
 
@@ -74,6 +102,7 @@ function App() {
       <BrowserRouter>
         <ScrollToTop />
         <Routes>
+          {/* Marketing site */}
           <Route path="/" element={<Home barVisible={barVisible} setBarVisible={setBarVisible} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/survey" element={<Survey />} />
@@ -85,6 +114,17 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/terms" element={<TermsOfUse />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
+          {/* Dev */}
+          <Route path="/kitchen-sink" element={<KitchenSink />} />
+          {/* PWA App */}
+          <Route path="/app" element={<Navigate to="/app/home" replace />} />
+          <Route path="/app/home" element={<AppShell><HomeScreen /></AppShell>} />
+          <Route path="/app/plan" element={<AppShell><PlanScreen /></AppShell>} />
+          <Route path="/app/week" element={<AppShell><WeeklyPlanScreen /></AppShell>} />
+          <Route path="/app/recipes" element={<AppShell><RecipesScreen /></AppShell>} />
+          <Route path="/app/lookup" element={<AppShell><LookupScreen /></AppShell>} />
+          <Route path="/app/profile" element={<AppShell><ProfileScreen /></AppShell>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

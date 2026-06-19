@@ -2,32 +2,16 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Reveal, Stagger, StaggerItem } from "./Reveal";
 
-function Arrow({ color = "text-forest" }) {
-  return (
-    <span className={`mt-[7px] shrink-0 ${color}`}>
-      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" aria-hidden>
-        <path
-          d="M1 6h13M9 1l5 5-5 5"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
-  );
-}
-
 const patientBullets = [
   "Personalized to your conditions and goals",
-  "Actionable — you know the next step",
+  "Actionable -- you know the next step",
   "Free to start, premium when you want more",
 ];
 
 const providerBullets = [
   "Better care, lower re-admission rates",
   "Higher compliance with prescribed therapy",
-  "Integrates with telehealth, ACO & health-tech",
+  "Integrates with telehealth, ACO and health-tech",
 ];
 
 export default function TwoDoors() {
@@ -36,18 +20,18 @@ export default function TwoDoors() {
       <div className="mx-auto max-w-5xl container-px">
         <div className="text-center max-w-[64ch] mx-auto">
           <Reveal>
-            <span className="tag">Two paths, one agent</span>
+            <span className="text-[12px] font-semibold tracking-eyebrow uppercase text-char-500">Two paths, one agent</span>
           </Reveal>
           <Reveal delay={0.1}>
             <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06]">
-              Built for the people living it —{" "}
-              <em className="font-display italic font-normal text-forest">
+              Built for the people living it --{" "}
+              <em className="font-display italic font-normal text-forest-700">
                 and the people treating it.
               </em>
             </h2>
           </Reveal>
           <Reveal delay={0.2}>
-            <p className="mt-6 text-[17px] leading-[1.6] text-ink-soft">
+            <p className="mt-6 text-[17px] leading-[1.6] font-sans text-char-500">
               The consumer product helps those in need. That same engine can be used to power health-tech partners.
             </p>
           </Reveal>
@@ -56,16 +40,17 @@ export default function TwoDoors() {
         <Stagger className="mt-14 grid gap-5 sm:gap-6 md:grid-cols-2">
           <StaggerItem>
             <motion.article
-              whileHover={{ scale: 1.02, y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="h-full rounded-3xl p-8 sm:p-10 border border-ink/[0.05] flex flex-col shadow-sm hover:shadow-lift"
-              style={{ background: "linear-gradient(to right, rgba(199, 113, 90, 1) 0%, rgba(230, 150, 120, 1) 100%)" }}
+              whileHover={{ y: -2 }}
+              transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
+              className="h-full rounded-xl p-8 sm:p-10 bg-forest-700 flex flex-col shadow-card hover:shadow-md"
             >
-              <span className="tag text-white">For Patients &amp; Caregivers</span>
-              <h3 className="display mt-4 text-[26px] sm:text-[30px] leading-[1.15] font-medium text-white">
+              <span className="text-[12px] font-semibold tracking-eyebrow uppercase text-honey-600">
+                For patients and caregivers
+              </span>
+              <h3 className="font-display font-medium tracking-tightish mt-4 text-[26px] sm:text-[30px] leading-[1.15] text-white">
                 Take an active role in your health.
               </h3>
-              <p className="mt-4 text-[15.5px] leading-[1.6] text-white max-w-[42ch]">
+              <p className="mt-4 text-[15.5px] leading-[1.6] font-sans text-white/80 max-w-[42ch]">
                 Guidance tailored to your profile, in plain language, easy to
                 act on.
               </p>
@@ -73,52 +58,59 @@ export default function TwoDoors() {
                 {patientBullets.map((b) => (
                   <li
                     key={b}
-                    className="flex gap-3 text-[15px] leading-[1.5] text-white"
+                    className="flex gap-3 text-[15px] leading-[1.5] font-sans text-white/90"
                   >
-                    <Arrow color="text-white" />
+                    <span className="material-symbols-rounded text-honey-600 mt-0.5 flex-shrink-0" style={{ fontSize: '18px' }}>
+                      arrow_forward
+                    </span>
                     <span>{b}</span>
                   </li>
                 ))}
               </ul>
               <Link
                 to="/survey"
-                className="mt-auto pt-8 inline-flex items-center gap-1.5 text-[14.5px] font-medium text-white border-b border-white/40 self-start hover:border-white transition"
+                className="mt-auto pt-8 inline-flex items-center gap-1.5 text-[14.5px] font-medium text-white border-b border-white/40 self-start hover:border-white transition-colors duration-base"
               >
-                Start free <span aria-hidden>→</span>
+                Start free
+                <span className="material-symbols-rounded" style={{ fontSize: '16px' }}>arrow_forward</span>
               </Link>
             </motion.article>
           </StaggerItem>
 
           <StaggerItem>
             <motion.article
-              whileHover={{ scale: 1.02, y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="h-full rounded-3xl p-8 sm:p-10 border border-ink/[0.05] flex flex-col shadow-sm hover:shadow-lift"
-              style={{ background: "linear-gradient(to right, rgba(74, 124, 142, 1) 0%, rgba(110, 160, 180, 1) 100%)" }}
+              whileHover={{ y: -2 }}
+              transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
+              className="h-full rounded-xl p-8 sm:p-10 bg-plum-700 flex flex-col shadow-card hover:shadow-md"
             >
-              <span className="tag text-white">For Providers &amp; Developers</span>
-              <h3 className="display mt-4 text-[26px] sm:text-[30px] leading-[1.15] font-medium text-white">
+              <span className="text-[12px] font-semibold tracking-eyebrow uppercase text-honey-600">
+                For providers and developers
+              </span>
+              <h3 className="font-display font-medium tracking-tightish mt-4 text-[26px] sm:text-[30px] leading-[1.15] text-white">
                 The API behind better outcomes.
               </h3>
-              <p className="mt-4 text-[15.5px] leading-[1.6] text-white max-w-[42ch]">
+              <p className="mt-4 text-[15.5px] leading-[1.6] font-sans text-white/80 max-w-[42ch]">
                 Engage patients in proactive management of their own conditions.
               </p>
               <ul className="mt-7 space-y-3.5">
                 {providerBullets.map((b) => (
                   <li
                     key={b}
-                    className="flex gap-3 text-[15px] leading-[1.5] text-white"
+                    className="flex gap-3 text-[15px] leading-[1.5] font-sans text-white/90"
                   >
-                    <Arrow color="text-white" />
+                    <span className="material-symbols-rounded text-honey-600 mt-0.5 flex-shrink-0" style={{ fontSize: '18px' }}>
+                      arrow_forward
+                    </span>
                     <span>{b}</span>
                   </li>
                 ))}
               </ul>
               <a
                 href="#api"
-                className="mt-auto pt-8 inline-flex items-center gap-1.5 text-[14.5px] font-medium text-white border-b border-white/40 self-start hover:border-white transition"
+                className="mt-auto pt-8 inline-flex items-center gap-1.5 text-[14.5px] font-medium text-white border-b border-white/40 self-start hover:border-white transition-colors duration-base"
               >
-                Explore the API <span aria-hidden>→</span>
+                Explore the API
+                <span className="material-symbols-rounded" style={{ fontSize: '16px' }}>arrow_forward</span>
               </a>
             </motion.article>
           </StaggerItem>

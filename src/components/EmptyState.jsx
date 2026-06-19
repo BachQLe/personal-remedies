@@ -1,0 +1,36 @@
+/**
+ * EmptyState — centered zero-data placeholder.
+ *
+ * Props:
+ *   icon  — Material Symbols Rounded icon name (was emoji, NOW string like "search")
+ *   title — sentence-case heading
+ *   body  — supporting copy
+ *   action — optional CTA element
+ */
+export default function EmptyState({
+  icon = "search",
+  title,
+  body,
+  action,
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-7 text-center gap-1.5">
+      <div className="w-16 h-16 rounded-full bg-forest-50 flex items-center justify-center mb-2.5">
+        <span className="material-symbols-rounded text-forest-600" style={{ fontSize: 28 }}>
+          {icon}
+        </span>
+      </div>
+      {title && (
+        <p className="font-display font-semibold text-char-900 text-lg leading-snug">
+          {title}
+        </p>
+      )}
+      {body && (
+        <p className="text-char-500 text-sm max-w-[300px] leading-normal">
+          {body}
+        </p>
+      )}
+      {action && <div className="mt-3.5">{action}</div>}
+    </div>
+  );
+}

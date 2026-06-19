@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Reveal, Stagger, StaggerItem } from "../components/Reveal";
 import PageShell from "../components/PageShell";
 
-// newest first. `to` = internal route, `href` = external. omit both for a plain card.
 const news = [
   {
     date: "Oct 1, 2025",
@@ -28,7 +27,7 @@ const news = [
   {
     date: "Nov 24, 2020",
     title: "Radio Entrepreneurs Interviews Mory Bahar",
-    desc: "“Fully Automated & Personalized Diet Plans for Multiple Illnesses.”",
+    desc: "\"Fully Automated & Personalized Diet Plans for Multiple Illnesses.\"",
   },
   {
     date: "Jan 14, 2020",
@@ -38,41 +37,34 @@ const news = [
 ];
 
 const awards = [
-  { title: "Best in Health API", sub: "API World 2024", chip: "bg-gold/15" },
-  { title: "Breakthrough Startup Award", sub: "Food as Medicine Conference 2025", chip: "bg-herb/15" },
-  { title: "Digital Health Finalist — Prevention & Wellness", sub: "HLTH Conference 2025", chip: "bg-steel/15" },
-  { title: "Named Top 14 AI APIs", sub: "Programmable Web 2019 — alongside Google, Amazon, IBM", chip: "bg-terra/15" },
+  { title: "Best in Health API", sub: "API World 2024", icon: "emoji_events" },
+  { title: "Breakthrough Startup Award", sub: "Food as Medicine Conference 2025", icon: "emoji_events" },
+  { title: "Digital Health Finalist -- Prevention & Wellness", sub: "HLTH Conference 2025", icon: "emoji_events" },
+  { title: "Named Top 14 AI APIs", sub: "Programmable Web 2019 -- alongside Google, Amazon, IBM", icon: "emoji_events" },
 ];
 
-const accents = [
-  { date: "text-terra", border: "border-l-terra" },
-  { date: "text-[#a9762a]", border: "border-l-gold" },
-  { date: "text-steel", border: "border-l-steel" },
-  { date: "text-[#3f6b48]", border: "border-l-herb" },
-  { date: "text-clay", border: "border-l-clay" },
-];
-
-function NewsCard({ item, accent }) {
+function NewsCard({ item }) {
   const linked = item.to || item.href;
 
   const inner = (
     <article
-      className={`h-full rounded-2xl bg-white border border-ink/[0.06] border-l-[3px] ${accent.border} shadow-card p-7 transition ${
-        linked ? "group hover:-translate-y-[2px] hover:shadow-lift" : ""
+      className={`h-full rounded-xl bg-white border border-sand-200 shadow-card p-7 transition-all duration-base ease-ds-out ${
+        linked ? "group hover:-translate-y-[2px] hover:shadow-md" : ""
       }`}
     >
-      <p className={`text-[12px] font-semibold tracking-[0.14em] uppercase ${accent.date}`}>{item.date}</p>
+      <p className="font-mono text-[12px] font-semibold tracking-eyebrow uppercase text-char-500">{item.date}</p>
       <h3
         className={`display mt-3 text-[20px] sm:text-[22px] leading-[1.2] font-medium ${
-          linked ? "group-hover:text-forest transition-colors" : ""
+          linked ? "group-hover:text-forest-700 transition-colors duration-base ease-ds-out" : ""
         }`}
       >
         {item.title}
       </h3>
-      <p className="mt-3 text-[14.5px] leading-[1.6] text-ink-soft">{item.desc}</p>
+      <p className="mt-3 font-sans text-[14.5px] leading-[1.6] text-char-500">{item.desc}</p>
       {linked && (
-        <span className={`mt-4 inline-flex items-center gap-1.5 text-[13.5px] font-medium ${accent.date}`}>
-          Read more <span aria-hidden>→</span>
+        <span className="mt-4 inline-flex items-center gap-1.5 text-[13.5px] font-semibold text-forest-700">
+          Read more
+          <span className="material-symbols-rounded text-[18px]">arrow_forward</span>
         </span>
       )}
     </article>
@@ -87,31 +79,18 @@ export default function News() {
   return (
     <PageShell>
       {/* Header */}
-      <section className="relative overflow-hidden bg-paper">
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(60% 50% at 50% 0%, rgba(201,151,58,0.18), transparent 70%)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none opacity-[0.10]"
-          style={{
-            backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
-          }}
-        />
-        <div className="relative mx-auto max-w-5xl container-px py-20 lg:py-24 text-center">
+      <section className="bg-paper-200">
+        <div className="mx-auto max-w-5xl container-px py-20 lg:py-24 text-center">
           <Reveal>
-            <h1 className="display text-[34px] leading-[1.06] sm:text-[48px] sm:leading-[1.03] lg:text-[56px]">
-              News &amp; Recognition
-            </h1>
+            <span className="tag">Updates</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mt-6 text-[17px] sm:text-[18px] leading-[1.6] text-ink-soft">
+            <h1 className="display mt-4 text-[34px] leading-[1.08] sm:text-[48px] sm:leading-[1.08] lg:text-[56px] lg:leading-[1.08]">
+              News &amp; recognition
+            </h1>
+          </Reveal>
+          <Reveal delay={0.15}>
+            <p className="mt-6 font-sans text-[17px] sm:text-[18px] leading-[1.6] text-char-500">
               Awards, press coverage, and company updates.
             </p>
           </Reveal>
@@ -119,12 +98,12 @@ export default function News() {
       </section>
 
       {/* News cards */}
-      <section className="py-16 lg:py-24">
+      <section className="py-16 lg:py-24 bg-paper-200">
         <div className="mx-auto max-w-5xl container-px">
           <Stagger className="grid gap-5 sm:gap-6 md:grid-cols-2">
-            {news.map((item, i) => (
+            {news.map((item) => (
               <StaggerItem key={item.title}>
-                <NewsCard item={item} accent={accents[i % accents.length]} />
+                <NewsCard item={item} />
               </StaggerItem>
             ))}
           </Stagger>
@@ -132,21 +111,26 @@ export default function News() {
       </section>
 
       {/* Awards */}
-      <section className="py-16 lg:py-24 bg-herb/[0.08] border-y border-ink/[0.06]">
+      <section className="py-16 lg:py-24 bg-paper-200 border-y border-sand-200">
         <div className="mx-auto max-w-5xl container-px">
           <Reveal>
-            <h2 className="display text-[30px] leading-[1.1] sm:text-[42px] sm:leading-[1.06] text-center mb-12">
+            <span className="tag block text-center">Awards</span>
+          </Reveal>
+          <Reveal delay={0.05}>
+            <h2 className="display mt-4 text-[30px] leading-[1.08] sm:text-[42px] sm:leading-[1.08] text-center mb-12">
               Recognition
             </h2>
           </Reveal>
           <Stagger className="grid gap-5 sm:gap-6 md:grid-cols-2">
             {awards.map((a) => (
               <StaggerItem key={a.title}>
-                <div className="h-full rounded-2xl bg-white border border-ink/[0.06] shadow-card p-7 flex items-start gap-4">
-                  <span className={`h-11 w-11 shrink-0 rounded-xl ${a.chip} flex items-center justify-center text-[22px] leading-none`} aria-hidden>🏆</span>
+                <div className="h-full rounded-xl bg-white border border-sand-200 shadow-card p-7 flex items-start gap-4">
+                  <span className="h-11 w-11 shrink-0 rounded-lg bg-honey-50 flex items-center justify-center" aria-hidden>
+                    <span className="material-symbols-rounded text-[22px] text-honey-600">{a.icon}</span>
+                  </span>
                   <div>
-                    <p className="text-[16px] font-semibold tracking-tight text-ink leading-snug">{a.title}</p>
-                    <p className="text-[13.5px] text-ink/55 mt-1">{a.sub}</p>
+                    <p className="font-sans text-[16px] font-semibold tracking-tight text-char-900 leading-snug">{a.title}</p>
+                    <p className="font-sans text-[13.5px] text-char-500 mt-1">{a.sub}</p>
                   </div>
                 </div>
               </StaggerItem>
@@ -155,20 +139,21 @@ export default function News() {
         </div>
       </section>
 
-      {/* CTA strip */}
-      <section className="py-20 lg:py-28">
+      {/* CTA band — inverted plum */}
+      <section className="py-20 lg:py-28 bg-plum-700 text-[#F3EFE6]">
         <div className="mx-auto max-w-5xl container-px">
           <Reveal>
-            <div className="rounded-3xl bg-pine text-cream px-8 py-12 sm:px-12 sm:py-14 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-              <h2 className="display text-[26px] sm:text-[32px] leading-[1.1] text-cream">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+              <h2 className="display text-[26px] sm:text-[32px] leading-[1.08] text-[#F3EFE6]">
                 Press inquiry or{" "}
-                <em className="font-display italic font-normal text-gold">partnership?</em>
+                <em className="font-display italic font-normal text-honey-600">partnership?</em>
               </h2>
               <Link
                 to="/providers"
-                className="pill-btn bg-amber text-white hover:brightness-110 hover:-translate-y-[1px] hover:shadow-lift text-[16px] px-7 py-3 shrink-0"
+                className="inline-flex items-center gap-2 font-sans text-[16px] font-semibold px-7 py-3 rounded-pill bg-honey-600 text-white hover:bg-honey-700 transition-all duration-base ease-ds-out shrink-0"
               >
                 Contact us
+                <span className="material-symbols-rounded text-[20px]">arrow_forward</span>
               </Link>
             </div>
           </Reveal>

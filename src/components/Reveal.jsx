@@ -1,4 +1,11 @@
+/**
+ * Reveal / Stagger / StaggerItem — scroll-triggered entrance animations.
+ *
+ * Props (unchanged for all three)
+ */
 import { motion } from "framer-motion";
+
+const DS_EASE = [0.22, 0.61, 0.36, 1];
 
 export function Reveal({ children, delay = 0, y = 40, className = "" }) {
   return (
@@ -6,7 +13,7 @@ export function Reveal({ children, delay = 0, y = 40, className = "" }) {
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+      transition={{ duration: 0.5, delay, ease: DS_EASE }}
       className={className}
     >
       {children}
@@ -41,7 +48,7 @@ export function StaggerItem({ children, className = "", y = 40 }) {
         show: {
           opacity: 1,
           y: 0,
-          transition: { duration: 0.5, ease: "easeOut" },
+          transition: { duration: 0.5, ease: DS_EASE },
         },
       }}
       className={className}

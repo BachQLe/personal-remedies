@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Reveal } from "../components/Reveal";
 import PageShell from "../components/PageShell";
 
+const inputClasses =
+  "w-full px-4 py-3 rounded-md border border-sand-200 bg-white text-char-900 font-sans placeholder-char-400 focus:outline-none focus:border-forest-600 focus:shadow-[0_0_0_3px_rgba(30,71,54,0.22)] transition-all duration-fast";
+
 export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
@@ -60,26 +63,18 @@ export default function Contact() {
   return (
     <PageShell>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-paper">
+      <section className="relative overflow-hidden bg-paper-200">
         <div
           aria-hidden
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(60% 50% at 50% 0%, rgba(196,113,90,0.18), transparent 70%)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 pointer-events-none opacity-[0.10]"
-          style={{
-            backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
+              "radial-gradient(60% 50% at 50% 0%, rgba(30,71,54,0.12), transparent 70%)",
           }}
         />
         <div className="relative mx-auto max-w-5xl container-px py-20 lg:py-28 text-center">
           <Reveal>
-            <span className="tag">Contact Us</span>
+            <span className="tag">Contact us</span>
           </Reveal>
           <Reveal delay={0.1}>
             <h1 className="display mt-5 text-[32px] leading-[1.1] sm:text-[46px] sm:leading-[1.05] lg:text-[54px] lg:leading-[1.03] max-w-[24ch] mx-auto">
@@ -87,7 +82,7 @@ export default function Contact() {
             </h1>
           </Reveal>
           <Reveal delay={0.2}>
-            <p className="mt-7 text-[17px] sm:text-[18px] leading-[1.6] text-ink-soft max-w-[62ch] mx-auto">
+            <p className="mt-7 text-[17px] sm:text-[18px] leading-[1.6] text-char-500 max-w-[62ch] mx-auto font-sans">
               Have a question or want to learn more about Personal Remedies? We'd love to hear from you. Send us a message and we'll get back to you as soon as possible.
             </p>
           </Reveal>
@@ -95,14 +90,14 @@ export default function Contact() {
       </section>
 
       {/* Contact Form */}
-      <section className="py-20 lg:py-28">
+      <section className="py-20 lg:py-28 bg-paper-200">
         <div className="mx-auto max-w-2xl container-px">
           <Reveal>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name */}
               <div>
-                <label htmlFor="name" className="block text-[16px] font-semibold text-ink mb-2">
-                  Full Name
+                <label htmlFor="name" className="block text-[15px] font-medium text-char-900 mb-2 font-sans">
+                  Full name
                 </label>
                 <input
                   type="text"
@@ -111,14 +106,14 @@ export default function Contact() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="John Doe"
-                  className="w-full px-4 py-3 rounded-lg border border-ink/[0.12] bg-white text-ink placeholder-ink/40 focus:outline-none focus:ring-2 focus:ring-terra focus:border-transparent transition"
+                  className={inputClasses}
                 />
               </div>
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-[16px] font-semibold text-ink mb-2">
-                  Email Address
+                <label htmlFor="email" className="block text-[15px] font-medium text-char-900 mb-2 font-sans">
+                  Email address
                 </label>
                 <input
                   type="email"
@@ -127,13 +122,13 @@ export default function Contact() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="john@example.com"
-                  className="w-full px-4 py-3 rounded-lg border border-ink/[0.12] bg-white text-ink placeholder-ink/40 focus:outline-none focus:ring-2 focus:ring-terra focus:border-transparent transition"
+                  className={inputClasses}
                 />
               </div>
 
               {/* Subject */}
               <div>
-                <label htmlFor="subject" className="block text-[16px] font-semibold text-ink mb-2">
+                <label htmlFor="subject" className="block text-[15px] font-medium text-char-900 mb-2 font-sans">
                   Subject
                 </label>
                 <input
@@ -143,13 +138,13 @@ export default function Contact() {
                   value={formData.subject}
                   onChange={handleChange}
                   placeholder="How can we help?"
-                  className="w-full px-4 py-3 rounded-lg border border-ink/[0.12] bg-white text-ink placeholder-ink/40 focus:outline-none focus:ring-2 focus:ring-terra focus:border-transparent transition"
+                  className={inputClasses}
                 />
               </div>
 
               {/* Message */}
               <div>
-                <label htmlFor="message" className="block text-[16px] font-semibold text-ink mb-2">
+                <label htmlFor="message" className="block text-[15px] font-medium text-char-900 mb-2 font-sans">
                   Message
                 </label>
                 <textarea
@@ -159,23 +154,29 @@ export default function Contact() {
                   onChange={handleChange}
                   placeholder="Tell us what's on your mind..."
                   rows="6"
-                  className="w-full px-4 py-3 rounded-lg border border-ink/[0.12] bg-white text-ink placeholder-ink/40 focus:outline-none focus:ring-2 focus:ring-terra focus:border-transparent transition resize-none"
+                  className={`${inputClasses} resize-none`}
                 />
               </div>
 
               {/* Error Message */}
               {error && (
-                <div className="p-4 rounded-lg bg-red-50 border border-red-200">
-                  <p className="text-[15px] text-red-800">{error}</p>
+                <div className="p-4 rounded-md bg-signal-avoid-tint border border-signal-avoid">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-rounded text-signal-avoid text-[20px]">error</span>
+                    <p className="text-[15px] text-signal-avoid font-sans">{error}</p>
+                  </div>
                 </div>
               )}
 
               {/* Success Message */}
               {submitted && (
-                <div className="p-4 rounded-lg bg-herb/15 border border-herb">
-                  <p className="text-[15px] text-herb">
-                    Thank you! We've received your message and will get back to you soon.
-                  </p>
+                <div className="p-4 rounded-md bg-signal-beneficial-tint border border-signal-beneficial">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-rounded text-signal-beneficial text-[20px]">check_circle</span>
+                    <p className="text-[15px] text-signal-beneficial font-sans">
+                      Thank you! We've received your message and will get back to you soon.
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -183,9 +184,9 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-7 py-3 bg-terra text-cream font-semibold text-[16px] rounded-lg hover:bg-terra/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="pill-forest w-full text-[16px] px-7 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Sending..." : "Send Message"}
+                {loading ? "Sending..." : "Send message"}
               </button>
             </form>
           </Reveal>
@@ -193,7 +194,7 @@ export default function Contact() {
       </section>
 
       {/* Contact Info */}
-      <section className="py-16 lg:py-24 bg-clay/[0.06] border-y border-ink/[0.06]">
+      <section className="py-16 lg:py-24 bg-paper-100 border-y border-sand-200">
         <div className="mx-auto max-w-3xl container-px">
           <Reveal>
             <h2 className="display text-[30px] leading-[1.1] sm:text-[42px] sm:leading-[1.06] text-center mb-12">
@@ -202,20 +203,26 @@ export default function Contact() {
           </Reveal>
           <div className="grid gap-6 sm:grid-cols-2">
             <Reveal delay={0.1}>
-              <div className="bg-white rounded-2xl p-6 border border-ink/[0.06] shadow-card">
-                <h3 className="text-[18px] font-semibold text-ink mb-2">Email</h3>
-                <p className="text-[16px] text-ink/70">
-                  <a href="mailto:hello@personalremedies.com" className="hover:text-terra transition">
+              <div className="ds-card p-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="material-symbols-rounded text-forest-700 text-[24px]">mail</span>
+                  <h3 className="text-[18px] font-semibold text-char-900 font-sans">Email</h3>
+                </div>
+                <p className="text-[16px] text-char-500 font-sans">
+                  <a href="mailto:hello@personalremedies.com" className="hover:text-forest-700 transition-colors duration-fast">
                     hello@personalremedies.com
                   </a>
                 </p>
               </div>
             </Reveal>
             <Reveal delay={0.2}>
-              <div className="bg-white rounded-2xl p-6 border border-ink/[0.06] shadow-card">
-                <h3 className="text-[18px] font-semibold text-ink mb-2">For Providers</h3>
-                <p className="text-[16px] text-ink/70">
-                  <a href="mailto:providers@personalremedies.com" className="hover:text-terra transition">
+              <div className="ds-card p-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="material-symbols-rounded text-plum-700 text-[24px]">local_hospital</span>
+                  <h3 className="text-[18px] font-semibold text-char-900 font-sans">For providers</h3>
+                </div>
+                <p className="text-[16px] text-char-500 font-sans">
+                  <a href="mailto:providers@personalremedies.com" className="hover:text-forest-700 transition-colors duration-fast">
                     providers@personalremedies.com
                   </a>
                 </p>

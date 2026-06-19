@@ -1,0 +1,56 @@
+<!-- @dsCard group="Cards" -->
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 32px; background: var(--app-bg); }
+  .stat-card {
+    background: #fff; border-radius: 24px; padding: 24px;
+    box-shadow: var(--shadow-card); max-width: 380px; width: 100%;
+  }
+  .stat-title { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+  .stat-row { display: flex; align-items: center; justify-content: space-around; }
+  .stat-ring { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .ring-label { font-size: 12px; color: var(--muted); font-weight: 500; text-align: center; }
+  .ring-value { font-size: 24px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+  .divider { width: 1px; height: 64px; background: var(--hairline); }
+  .stat-plain { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; }
+</style>
+</head><body>
+  <span class="label">Stat Ring Card</span>
+  <div class="stat-card">
+    <p class="stat-title">Your food profile</p>
+    <div class="stat-row">
+      <div class="stat-ring">
+        <svg width="88" height="88" style="transform:rotate(-90deg)">
+          <circle cx="44" cy="44" r="39" fill="none" stroke="#ECECEE" stroke-width="10"/>
+          <circle cx="44" cy="44" r="39" fill="none" stroke="#34A853" stroke-width="10"
+            stroke-dasharray="183 245" stroke-linecap="round" style="transition:stroke-dasharray 0.6s ease"/>
+        </svg>
+        <div style="position:relative;margin-top:-62px;text-align:center;height:40px;display:flex;align-items:center;justify-content:center">
+          <span class="ring-value">24</span>
+        </div>
+        <span class="ring-label" style="margin-top:14px">Helpful foods</span>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-ring">
+        <svg width="88" height="88" style="transform:rotate(-90deg)">
+          <circle cx="44" cy="44" r="39" fill="none" stroke="#ECECEE" stroke-width="10"/>
+          <circle cx="44" cy="44" r="39" fill="none" stroke="#E5573F" stroke-width="10"
+            stroke-dasharray="61 245" stroke-linecap="round" style="transition:stroke-dasharray 0.6s ease"/>
+        </svg>
+        <div style="position:relative;margin-top:-62px;text-align:center;height:40px;display:flex;align-items:center;justify-content:center">
+          <span class="ring-value">8</span>
+        </div>
+        <span class="ring-label" style="margin-top:14px">Foods to avoid</span>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-plain">
+        <span class="ring-value">6</span>
+        <span class="ring-label">Categories</span>
+      </div>
+    </div>
+  </div>
+</body></html>

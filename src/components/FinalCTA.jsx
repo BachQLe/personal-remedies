@@ -32,37 +32,39 @@ export default function FinalCTA() {
   );
   const boxShadow = useTransform(
     [shadowBlur, shadowOpacity],
-    ([b, o]) => `0 ${b * 0.5}px ${b}px -12px rgba(0,0,0,${o})`
+    ([b, o]) => `0 ${b * 0.5}px ${b}px -12px rgba(45,36,24,${o})`
   );
 
   return (
     <motion.section
       ref={ref}
       id="start"
-      className="relative overflow-hidden py-28 lg:py-40"
+      className="relative overflow-hidden py-28 lg:py-40 bg-forest-900 rounded-xl mx-4 lg:mx-8 mb-8"
       style={{ scale, y, boxShadow }}
     >
       <div className="relative z-10 mx-auto max-w-3xl container-px text-center">
         <Reveal>
-          <span className="tag">You don't have to manage this alone</span>
+          <span className="text-[12px] font-semibold tracking-eyebrow uppercase text-honey-600">
+            You don't have to manage this alone
+          </span>
         </Reveal>
         <Reveal delay={0.1}>
-          <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06]">
+          <h2 className="font-display font-medium tracking-tightish mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06] text-white">
             Take your first step to a healthier life.{" "}
-            <em className="font-display italic font-normal text-forest">
+            <em className="font-display italic font-normal text-honey-500">
               Your first diet plan is on us.
             </em>
           </h2>
         </Reveal>
         <Reveal delay={0.2}>
-          <p className="mt-7 text-[17px] sm:text-[18px] leading-[1.55] text-ink-soft">
+          <p className="mt-7 text-[17px] sm:text-[18px] leading-[1.55] font-sans text-white/70">
             No card. No appointment. No waiting room.
           </p>
         </Reveal>
         <Reveal delay={0.3}>
           <Link
             to="/survey"
-            className="pill-forest mt-10 inline-flex text-[16px] px-7 py-3"
+            className="pill-honey mt-10 inline-flex text-[16px] px-7 py-3"
           >
             Start free
           </Link>
