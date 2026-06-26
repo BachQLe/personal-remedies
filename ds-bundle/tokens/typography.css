@@ -1,0 +1,40 @@
+/* ============================================================
+   Remedy — Typography tokens
+   Chillax (display) + Switzer (body sans) + Quantico (ui/label)
+   ============================================================ */
+:root {
+  --font-display: "Chillax", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: "Switzer", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-label: "Quantico", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Weights */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+
+  /* Type scale (px) — editorial, generous display steps */
+  --fs-display: 56px;   /* hero serif */
+  --fs-h1: 40px;
+  --fs-h2: 30px;
+  --fs-h3: 23px;
+  --fs-h4: 19px;
+  --fs-body-lg: 18px;
+  --fs-body: 16px;
+  --fs-body-sm: 14px;
+  --fs-caption: 13px;
+  --fs-label: 12px;     /* eyebrow / overline */
+
+  /* Line heights */
+  --lh-tight: 1.08;
+  --lh-snug: 1.25;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.65;
+
+  /* Tracking */
+  --ls-tight: -0.02em;
+  --ls-normal: 0em;
+  --ls-eyebrow: 0.14em;
+}

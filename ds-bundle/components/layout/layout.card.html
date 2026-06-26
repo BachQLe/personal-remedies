@@ -1,0 +1,16 @@
+<!-- @dsCard group="Components" viewport="700x260" name="Layout" subtitle="ProfileProgressCard" -->
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="../../_ds_bundle.js"></script>
+</head><body style="padding:24px;background:var(--lavender-100)">
+<div id="progress" style="max-width:380px"></div>
+<script type="text/babel">
+const { ProfileProgressCard } = window.RemediDesign || {};
+if (ProfileProgressCard) {
+  ReactDOM.render(<ProfileProgressCard
+    steps={['Conditions selected','Dietary preferences','Allergies noted','Meal schedule','Goal setting']}
+    currentStep={3} totalSteps={5}
+  />, document.getElementById('progress'));
+}
+</script>
+</body></html>

@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../../api/api.js';
-import RecipeCard from '../../components/RecipeCard.jsx';
-import BottomSheet from '../../components/BottomSheet.jsx';
-import ConditionTag from '../../components/ConditionTag.jsx';
-import SignalChip from '../../components/SignalChip.jsx';
-import StudyReferences from '../../components/StudyReferences.jsx';
-import EmptyState from '../../components/EmptyState.jsx';
-import Pill from '../../components/Pill.jsx';
-import SearchInput from '../../components/SearchInput.jsx';
+import RecipeCard from '../../components/shared/RecipeCard.jsx';
+import BottomSheet from '../../components/shared/BottomSheet.jsx';
+import ConditionTag from '../../components/shared/ConditionTag.jsx';
+import SignalChip from '../../components/shared/SignalChip.jsx';
+import StudyReferences from '../../components/shared/StudyReferences.jsx';
+import EmptyState from '../../components/shared/EmptyState.jsx';
+import Pill from '../../components/shared/Pill.jsx';
+import SearchInput from '../../components/shared/SearchInput.jsx';
+import Icon from '../../components/shared/Icon.jsx';
 import { GHOST_PROFILE, GHOST_RECIPES } from '../../api/ghostData.js';
 
 const DEMO_PROFILE = {
@@ -20,20 +21,20 @@ const DEMO_PROFILE = {
 };
 
 const CONDITION_DOT_COLORS = {
-  "type 2 diabetes": "bg-plum-600",
-  prediabetes: "bg-plum-400",
-  "hypertension (high blood pressure)": "bg-signal-info",
-  hypertension: "bg-signal-info",
-  "high cholesterol": "bg-honey-700",
+  "type 2 diabetes": "bg-lavender-600",
+  prediabetes: "bg-lavender-400",
+  "hypertension (high blood pressure)": "bg-info-600",
+  hypertension: "bg-info-600",
+  "high cholesterol": "bg-caution-600",
   "chronic kidney disease (ckd)": "bg-forest-500",
-  "heart failure": "bg-plum-700",
-  "heart disease": "bg-plum-700",
-  depression: "bg-signal-info",
-  osteoarthritis: "bg-honey-600",
+  "heart failure": "bg-lavender-700",
+  "heart disease": "bg-lavender-700",
+  depression: "bg-info-600",
+  osteoarthritis: "bg-caution-600",
   hypothyroidism: "bg-forest-700",
-  "irritable bowel syndrome (ibs)": "bg-plum-400",
-  "fatty liver": "bg-honey-700",
-  gout: "bg-honey-600",
+  "irritable bowel syndrome (ibs)": "bg-lavender-400",
+  "fatty liver": "bg-caution-600",
+  gout: "bg-caution-600",
 };
 
 function ConditionDot({ condition }) {
@@ -94,11 +95,8 @@ function IngredientRow({ ingredient, profile }) {
               transition-all duration-fast ease-ds-out hover:shadow-sm"
             aria-label={expanded ? 'Collapse studies' : 'Expand studies'}
           >
-            <span
-              className={`material-symbols-rounded text-char-500 transition-transform duration-base ${expanded ? 'rotate-180' : ''}`}
-              style={{ fontSize: 14 }}
-            >
-              expand_more
+            <span className={`text-char-500 transition-transform duration-base ${expanded ? 'rotate-180' : ''}`}>
+              <Icon name="chevron-down" size={14} />
             </span>
           </button>
         )}
@@ -137,7 +135,7 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
 
       {/* Title + source */}
       <div className="mb-5">
-        <h2 className="font-display text-xl font-semibold text-char-900 tracking-tightish leading-snug">{recipe.title}</h2>
+        <h2 className="font-display text-xl font-semibold text-blue-950 tracking-tightish leading-snug">{recipe.title}</h2>
         <p className="text-sm text-char-500 mt-1 font-sans">
           from <span className="font-semibold text-char-900">{recipe.sourceName}</span>
         </p>
@@ -146,19 +144,19 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
           <div className="flex items-center gap-4 mt-2.5 font-mono text-xs text-char-500">
             {recipe.prepTime && (
               <span className="flex items-center gap-1">
-                <span className="material-symbols-rounded" style={{ fontSize: 14 }}>timer</span>
+                <Icon name="clock" size={14} />
                 Prep {recipe.prepTime}
               </span>
             )}
             {recipe.cookTime && (
               <span className="flex items-center gap-1">
-                <span className="material-symbols-rounded" style={{ fontSize: 14 }}>local_fire_department</span>
+                <Icon name="zap" size={14} />
                 Cook {recipe.cookTime}
               </span>
             )}
             {recipe.servings && (
               <span className="flex items-center gap-1">
-                <span className="material-symbols-rounded" style={{ fontSize: 14 }}>group</span>
+                <Icon name="user" size={14} />
                 {recipe.servings}
               </span>
             )}
@@ -169,7 +167,7 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
       {/* Profile match banner */}
       <div className="bg-signal-beneficial-tint rounded-xl p-4 mb-5">
         <div className="flex items-center gap-2 mb-2.5">
-          <span className="material-symbols-rounded text-signal-beneficial" style={{ fontSize: 16 }}>check_circle</span>
+          <Icon name="check" size={16} className="text-signal-beneficial" />
           <span className="text-sm font-bold text-signal-beneficial font-sans">Matched to your profile</span>
         </div>
         <div className="flex flex-wrap gap-1.5 mb-2.5">
@@ -184,7 +182,7 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
 
       {/* Ingredients */}
       <div className="mb-6">
-        <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-3 font-sans">Ingredients</p>
+        <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-500 mb-3">Ingredients</p>
         <div className="flex flex-col gap-2">
           {helpful.map((ing) => (
             <IngredientRow key={ing.name} ingredient={ing} profile={profile} />
@@ -251,8 +249,8 @@ export default function RecipesScreen() {
     >
       {/* Header */}
       <div>
-        <p className="text-[12px] text-char-500 font-bold uppercase tracking-eyebrow font-sans">Personal Remedies</p>
-        <h1 className="font-display text-2xl font-semibold text-char-900 tracking-tightish">Recipes</h1>
+        <p className="text-[12px] text-char-500 font-label tracking-[0.14em] uppercase">Personal Remedies</p>
+        <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">Recipes</h1>
         <p className="text-sm text-char-500 mt-0.5 font-sans">Condition-approved for your profile</p>
       </div>
 
@@ -266,13 +264,13 @@ export default function RecipesScreen() {
       </div>
 
       {/* Section header */}
-      <h2 className="font-display text-lg font-semibold text-char-900 tracking-tightish -mb-2">Discover your top recipes</h2>
+      <h2 className="font-display text-lg font-semibold text-blue-950 tracking-tightish -mb-2">Discover your top recipes</h2>
 
       {/* Filters */}
       <div>
         {/* Meal type filter */}
         <div>
-          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-2 font-sans">Meal type</p>
+          <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-500 mb-2">Meal type</p>
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-hide">
             {MEAL_TYPES.map(({ label, icon }) => (
               <Pill
@@ -280,7 +278,7 @@ export default function RecipesScreen() {
                 selected={mealFilter === label}
                 onClick={() => setMealFilter(label)}
               >
-                <span className="material-symbols-rounded" style={{ fontSize: 16 }}>{icon}</span>
+                <Icon name="utensils" size={16} />
                 {label}
               </Pill>
             ))}
@@ -290,7 +288,7 @@ export default function RecipesScreen() {
         {/* Condition emphasis filter */}
         {conditions.length > 1 && (
           <div className="mt-3">
-            <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-2 font-sans">Condition</p>
+            <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-500 mb-2">Condition</p>
             <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-hide">
               {conditionOptions.map((c) => (
                 <Pill
@@ -325,7 +323,7 @@ export default function RecipesScreen() {
           action={
             <button
               onClick={() => { setMealFilter('All'); setConditionFilter('All'); setSearchQuery(''); }}
-              className="px-5 py-2.5 rounded-pill bg-forest-700 text-white text-sm font-semibold font-sans
+              className="px-5 py-2.5 rounded-xs bg-forest-700 text-white text-sm font-semibold font-sans
                 transition-all duration-fast ease-ds-out
                 hover:bg-forest-800 active:scale-[0.98]"
             >

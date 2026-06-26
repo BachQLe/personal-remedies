@@ -1,0 +1,33 @@
+<!-- @dsCard group="Components" viewport="700x280" name="Buttons" subtitle="PrimaryButton · SecondaryButton · PillButton · FAB" -->
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="../../_ds_bundle.js"></script>
+</head><body style="padding:24px;display:flex;flex-direction:column;gap:24px">
+<div style="font-family:var(--font-label);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted);margin-bottom:-16px">Primary · sizes</div>
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap" id="primary"></div>
+<div style="font-family:var(--font-label);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted);margin-bottom:-16px">Pill variants + Secondary</div>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap" id="pills"></div>
+<div style="font-family:var(--font-label);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-muted);margin-bottom:-16px">FAB</div>
+<div style="display:flex;gap:16px;align-items:center" id="fabs"></div>
+<script type="text/babel">
+const { PrimaryButton, SecondaryButton, PillButton, FAB } = window.RemediDesign || {};
+if (PrimaryButton) {
+  ReactDOM.render(<div style={{display:'flex',gap:12,alignItems:'center',flexWrap:'wrap'}}>
+    <PrimaryButton size="sm">Small</PrimaryButton>
+    <PrimaryButton size="md">See my daily picks</PrimaryButton>
+    <PrimaryButton size="lg">Continue</PrimaryButton>
+    <PrimaryButton disabled>Disabled</PrimaryButton>
+  </div>, document.getElementById('primary'));
+  ReactDOM.render(<div style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
+    <PillButton variant="forest">Forest</PillButton>
+    <PillButton variant="accent">Accent</PillButton>
+    <PillButton variant="ghost">Ghost</PillButton>
+    <SecondaryButton>Maybe later</SecondaryButton>
+  </div>, document.getElementById('pills'));
+  ReactDOM.render(<div style={{display:'flex',gap:16,alignItems:'center'}}>
+    <FAB size="sm"/><FAB size="md"/><FAB size="lg"/>
+    <FAB label="Log food"/>
+  </div>, document.getElementById('fabs'));
+}
+</script>
+</body></html>

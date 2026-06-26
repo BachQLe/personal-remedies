@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import Card from '../components/Card';
-import PrimaryButton from '../components/PrimaryButton';
-import SecondaryButton from '../components/SecondaryButton';
-import SignalChip from '../components/SignalChip';
-import FoodCard from '../components/FoodCard';
-import ConditionTag from '../components/ConditionTag';
-import StatRing from '../components/StatRing';
-import EmptyState from '../components/EmptyState';
+import Card from '../components/shared/Card';
+import PrimaryButton from '../components/shared/PrimaryButton';
+import SecondaryButton from '../components/shared/SecondaryButton';
+import SignalChip from '../components/shared/SignalChip';
+import FoodCard from '../components/shared/FoodCard';
+import ConditionTag from '../components/shared/ConditionTag';
+import StatRing from '../components/shared/StatRing';
+import EmptyState from '../components/shared/EmptyState';
 import { foods } from '../api/mockData';
 
 /* ── Color palette for swatch display ──────────────────────── */

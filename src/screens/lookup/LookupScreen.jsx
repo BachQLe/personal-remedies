@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api/api.js';
-import SearchInput from '../../components/SearchInput.jsx';
-import Card from '../../components/Card.jsx';
-import SignalChip from '../../components/SignalChip.jsx';
-import ConditionTag from '../../components/ConditionTag.jsx';
-import StudyReferences from '../../components/StudyReferences.jsx';
-import EmptyState from '../../components/EmptyState.jsx';
-import BottomSheet from '../../components/BottomSheet.jsx';
+import SearchInput from '../../components/shared/SearchInput.jsx';
+import Card from '../../components/shared/Card.jsx';
+import SignalChip from '../../components/shared/SignalChip.jsx';
+import ConditionTag from '../../components/shared/ConditionTag.jsx';
+import StudyReferences from '../../components/shared/StudyReferences.jsx';
+import EmptyState from '../../components/shared/EmptyState.jsx';
+import BottomSheet from '../../components/shared/BottomSheet.jsx';
+import Icon from '../../components/shared/Icon.jsx';
 
 const DEMO_PROFILE = {
   conditions: ['Type 2 Diabetes', 'Hypertension (high blood pressure)', 'High cholesterol'],
@@ -21,41 +22,41 @@ function VerdictHeader({ signal }) {
   const config = {
     beneficial: {
       label: 'Beneficial for you',
-      bg: 'bg-signal-beneficial-tint',
-      text: 'text-signal-beneficial',
-      icon: 'check_circle',
+      bg: 'bg-benefit-100',
+      text: 'text-benefit-600',
+      iconName: 'check',
     },
     avoid: {
       label: 'Avoid for now',
-      bg: 'bg-signal-avoid-tint',
-      text: 'text-signal-avoid',
-      icon: 'cancel',
+      bg: 'bg-avoid-100',
+      text: 'text-avoid-600',
+      iconName: 'x',
     },
     limit: {
       label: 'Limit intake',
-      bg: 'bg-signal-limit-tint',
-      text: 'text-signal-limit',
-      icon: 'remove_circle',
+      bg: 'bg-caution-100',
+      text: 'text-caution-600',
+      iconName: 'alert-triangle',
     },
     neutral: {
       label: 'Neutral',
       bg: 'bg-sand-100',
       text: 'text-char-700',
-      icon: 'help',
+      iconName: 'info',
     },
   };
-  const { label, bg, text, icon } = config[signal] ?? config.neutral;
+  const { label, bg, text, iconName } = config[signal] ?? config.neutral;
   return (
     <div className={`flex items-center gap-3 px-5 py-4 rounded-xl ${bg}`}>
       <span
         className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-          signal === 'beneficial' ? 'bg-signal-beneficial'
-          : signal === 'avoid' ? 'bg-signal-avoid'
-          : signal === 'limit' ? 'bg-signal-limit'
+          signal === 'beneficial' ? 'bg-benefit-600'
+          : signal === 'avoid' ? 'bg-avoid-600'
+          : signal === 'limit' ? 'bg-caution-600'
           : 'bg-char-500'
         } text-white`}
       >
-        <span className="material-symbols-rounded" style={{ fontSize: 22 }}>{icon}</span>
+        <Icon name={iconName} size={22} />
       </span>
       <p className={`font-display font-semibold text-xl ${text}`}>{label}</p>
     </div>
@@ -107,7 +108,7 @@ function FoodDetailBottomSheet({ food, perCondition, profile, onClose }) {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <p className="font-display font-semibold text-char-900 text-lg leading-tight tracking-tightish">{food.name}</p>
+          <p className="font-display font-semibold text-blue-950 text-lg leading-tight tracking-tightish">{food.name}</p>
           <p className="text-xs text-char-500 font-sans">{food.category}</p>
           <p className="text-xs text-char-400 font-sans">
             <span className="font-mono">{food.referenceCount}</span>{' '}
@@ -129,7 +130,7 @@ function FoodDetailBottomSheet({ food, perCondition, profile, onClose }) {
       {/* Nutritional data */}
       {food.nutrients && food.nutrients.length > 0 && (
         <div className="mb-5">
-          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-3 font-sans">Per serving</p>
+          <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-500 mb-3">Per serving</p>
           <div className="grid grid-cols-2 gap-2">
             {food.nutrients.map((n) => (
               <div key={n.label} className="flex items-center justify-between px-3.5 py-2.5 bg-sand-100 rounded-md border border-sand-200">
@@ -144,12 +145,12 @@ function FoodDetailBottomSheet({ food, perCondition, profile, onClose }) {
       {/* Per-condition breakdown */}
       {displayPerCondition.length > 0 && (
         <div>
-          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-3 font-sans">
+          <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-500 mb-3">
             For your conditions
           </p>
           <div className="flex flex-col gap-3">
             {displayPerCondition.map((pc) => (
-              <div key={pc.condition} className="bg-sand-100 rounded-xl p-4">
+              <div key={pc.condition} className="bg-lavender-100 rounded-xl p-4">
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <ConditionTag condition={pc.condition} />
                   <SignalChip signal={pc.signal} compact />
@@ -195,15 +196,15 @@ function KnownResult({ result, profile, onOpenDetail }) {
           />
         </div>
         <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-          <p className="font-display font-semibold text-char-900 text-lg leading-tight tracking-tightish">{food.name}</p>
+          <p className="font-display font-semibold text-blue-950 text-lg leading-tight tracking-tightish">{food.name}</p>
           <p className="text-xs text-char-500 font-sans">{food.category}</p>
           <p className="text-xs text-char-400 font-sans">
             <span className="font-mono">{food.referenceCount}</span>{' '}
             {food.referenceCount === 1 ? 'study' : 'studies'} behind this
           </p>
         </div>
-        <span className="flex-shrink-0 text-char-400 material-symbols-rounded" style={{ fontSize: 18 }}>
-          chevron_right
+        <span className="flex-shrink-0 text-char-400">
+          <Icon name="chevron-right" size={18} />
         </span>
       </Card>
 
@@ -213,7 +214,7 @@ function KnownResult({ result, profile, onOpenDetail }) {
       {/* Per-condition breakdown */}
       {displayPerCondition.length > 0 && (
         <Card>
-          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-3 font-sans">
+          <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-500 mb-3">
             For your conditions
           </p>
           <div>
@@ -272,8 +273,8 @@ export default function LookupScreen() {
     <div className="flex flex-col min-h-full px-5 pt-6 pb-6 gap-5 bg-paper-200">
       {/* Header */}
       <div>
-        <p className="text-[12px] text-char-500 font-bold uppercase tracking-eyebrow font-sans">Food lookup</p>
-        <h1 className="font-display text-2xl font-semibold text-char-900 tracking-tightish">Check a food</h1>
+        <p className="text-[12px] text-char-500 font-label tracking-[0.14em] uppercase">Food lookup</p>
+        <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">Check a food</h1>
         <p className="text-sm text-char-500 mt-1 font-sans">
           Is it beneficial or to avoid for your conditions?
         </p>
@@ -292,13 +293,13 @@ export default function LookupScreen() {
         <button
           type="submit"
           disabled={!query.trim() || loading}
-          className="px-4 py-3 rounded-md bg-forest-700 text-white text-sm font-semibold font-sans
+          className="px-4 py-3 rounded-xs bg-forest-700 text-white text-sm font-semibold font-sans
             disabled:opacity-40
             transition-all duration-fast ease-ds-out
             hover:bg-forest-800 active:scale-[0.97]"
         >
           {loading ? (
-            <span className="material-symbols-rounded animate-spin" style={{ fontSize: 18 }}>progress_activity</span>
+            <span className="animate-spin inline-flex"><Icon name="refresh-cw" size={18} /></span>
           ) : 'Check'}
         </button>
       </form>
@@ -327,7 +328,7 @@ export default function LookupScreen() {
 
       {!loading && !searched && (
         <div className="flex flex-col gap-2 mt-2">
-          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 font-sans">Try searching</p>
+          <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-500">Try searching</p>
           <div className="flex flex-wrap gap-2">
             {['Salmon', 'Spinach', 'Blueberries', 'Lentils', 'Pork rinds'].map((s) => (
               <button

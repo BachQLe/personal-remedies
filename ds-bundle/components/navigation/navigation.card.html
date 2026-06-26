@@ -1,0 +1,16 @@
+<!-- @dsCard group="Components" viewport="700x160" name="Navigation" subtitle="BottomTabBar — active Home and active Insights states" -->
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="../../_ds_bundle.js"></script>
+</head><body style="padding:24px;display:flex;flex-direction:column;gap:16px">
+<div id="nav1" style="max-width:440px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-card)"></div>
+<div id="nav2" style="max-width:440px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-card)"></div>
+<script type="text/babel">
+const { BottomTabBar } = window.RemediDesign || {};
+const tabs=[{key:'home',label:'Home',icon:'home'},{key:'search',label:'Search',icon:'search'},{key:'foods',label:'My Foods',icon:'grid'},{key:'insights',label:'Insights',icon:'insights'},{key:'profile',label:'Profile',icon:'profile'}];
+if (BottomTabBar) {
+  ReactDOM.render(<BottomTabBar tabs={tabs} activeKey="home"/>, document.getElementById('nav1'));
+  ReactDOM.render(<BottomTabBar tabs={tabs} activeKey="insights"/>, document.getElementById('nav2'));
+}
+</script>
+</body></html>

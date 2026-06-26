@@ -1,0 +1,31 @@
+<!-- @dsCard group="Components" viewport="700x320" name="Chips + Tags" subtitle="SignalChip · ConditionTag · FilterTabs · MealTimeBadge" -->
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="../../_ds_bundle.js"></script>
+</head><body style="padding:24px;display:flex;flex-direction:column;gap:20px">
+<div id="signals"></div>
+<div id="conditions"></div>
+<div id="filters"></div>
+<div id="meals"></div>
+<script type="text/babel">
+const { SignalChip, ConditionTag, FilterTabs, MealTimeBadge } = window.RemediDesign || {};
+if (SignalChip) {
+  ReactDOM.render(<div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+    {['beneficial','limit','avoid','info'].map(s=><SignalChip key={s} signal={s}/>)}
+    {['beneficial','limit','avoid','info'].map(s=><SignalChip key={s+'c'} signal={s} compact/>)}
+  </div>, document.getElementById('signals'));
+  ReactDOM.render(<div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+    <ConditionTag label="Type 2 Diabetes" colorKey="diabetes"/>
+    <ConditionTag label="Hypertension" colorKey="hypertension"/>
+    <ConditionTag label="High cholesterol" colorKey="cholesterol"/>
+    <ConditionTag label="Kidney disease" colorKey="kidney"/>
+    <ConditionTag label="Heart failure" colorKey="heart"/>
+  </div>, document.getElementById('conditions'));
+  const tabs=[{key:'all',label:'All foods'},{key:'b',label:'✓ Beneficial',color:'var(--benefit-600)'},{key:'l',label:'! Limit',color:'var(--caution-600)'},{key:'a',label:'✗ Avoid',color:'var(--avoid-600)'}];
+  ReactDOM.render(<FilterTabs tabs={tabs} value="b"/>, document.getElementById('filters'));
+  ReactDOM.render(<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+    {['breakfast','lunch','dinner','snack'].map(m=><MealTimeBadge key={m} meal={m} active={m==='lunch'}/>)}
+  </div>, document.getElementById('meals'));
+}
+</script>
+</body></html>

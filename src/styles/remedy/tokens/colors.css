@@ -1,34 +1,73 @@
 /* ============================================================
    Remedy — Color tokens
-   Deep botanical: forest + plum + charcoal, on warm paper.
-   Base palette first, then semantic aliases.
+   Fresh & vivid: lime forest + navy blue, lavender panels,
+   warm paper neutrals. Base palette first, then semantic aliases.
    ============================================================ */
 :root {
-  /* ---- Brand: Forest (primary) ---- */
-  --forest-900: #0F2A21;
-  --forest-800: #143628;
-  --forest-700: #1E4736;   /* primary */
-  --forest-600: #2A5A45;
-  --forest-500: #3A7058;
-  --forest-300: #A7C0AC;   /* sage */
-  --forest-100: #DCE9DF;
-  --forest-50:  #EDF3EE;
+  /* ---- Brand: Forest / lime (primary action) ---- */
+  --forest-50:  #F4FAE4;
+  --forest-100: #E6F5C4;
+  --forest-200: #D4EDA0;
+  --forest-300: #C8E87A;
+  --forest-400: #B4D85C;   /* base */
+  --forest-500: #98C040;
+  --forest-600: #7CA830;
+  --forest-700: #628C22;   /* primary action */
+  --forest-800: #4A6E18;
+  --forest-900: #345010;
+  --forest-950: #1E3208;
 
-  /* ---- Brand: Plum (secondary) ---- */
-  --plum-900: #2E1626;
-  --plum-800: #401F33;
-  --plum-700: #5C2A47;     /* secondary */
-  --plum-600: #743A5C;
-  --plum-400: #A86C8E;
-  --plum-100: #EBDDE6;
-  --plum-50:  #F4ECF0;
+  /* ---- Brand: Blue / navy (headings, ink accent) ---- */
+  --blue-50:  #F0F4FF;
+  --blue-100: #D8E4FF;
+  --blue-200: #BBCEFF;
+  --blue-300: #98B4F8;
+  --blue-400: #7898F0;
+  --blue-500: #5878E0;   /* base */
+  --blue-600: #3F5EC8;
+  --blue-700: #2E46A8;
+  --blue-800: #1E3080;
+  --blue-900: #111E58;
+  --blue-950: #080E30;   /* deepest ink-navy */
 
-  /* ---- Brand: Honey / gold accent ---- */
-  --honey-700: #9C6F1E;
-  --honey-600: #C2902F;
-  --honey-500: #D6A642;
-  --honey-100: #F3E6C7;
-  --honey-50:  #FAF3E2;
+  /* ---- Brand: Lavender (panel surface) ---- */
+  --lavender-50:  #F6F0FC;
+  --lavender-100: #ECE0F8;
+  --lavender-200: #DCC8F0;
+  --lavender-300: #C8A8E8;   /* panel */
+  --lavender-400: #B488DC;
+  --lavender-500: #9D68CC;
+  --lavender-600: #844FB0;
+  --lavender-700: #6A3D8E;
+  --lavender-800: #4F2C68;
+  --lavender-900: #371D48;
+  --lavender-950: #21102C;
+
+  /* ---- Red (alerts / destructive) ---- */
+  --red-50:  #FFF0F0;
+  --red-100: #FFD8D8;
+  --red-200: #FFBABA;
+  --red-300: #F89898;
+  --red-400: #F07070;
+  --red-500: #E04848;   /* base */
+  --red-600: #C83030;
+  --red-700: #A82020;
+  --red-800: #801414;
+  --red-900: #580C0C;
+  --red-950: #300404;
+
+  /* ---- Yellow (gold / caution accent — supersedes honey) ---- */
+  --yellow-50:  #FFFBE0;
+  --yellow-100: #FFF5B8;
+  --yellow-200: #FFEC88;
+  --yellow-300: #FFE05C;
+  --yellow-400: #F5CC30;   /* base */
+  --yellow-500: #E0B010;
+  --yellow-600: #C09000;
+  --yellow-700: #9A7000;
+  --yellow-800: #705000;
+  --yellow-900: #483200;
+  --yellow-950: #281A00;
 
   /* ---- Warm neutrals (charcoal → paper) ---- */
   --char-900: #211E1B;     /* ink */
@@ -57,16 +96,35 @@
   --info-100: #DDE8ED;
 
   /* ============================================================
+     Legacy — kept for screens not yet migrated (Home, Plan, etc.)
+     Do not reference in new work; will be retired via claude design.
+     ============================================================ */
+  --plum-900: #2E1626;
+  --plum-800: #401F33;
+  --plum-700: #5C2A47;
+  --plum-600: #743A5C;
+  --plum-400: #A86C8E;
+  --plum-100: #EBDDE6;
+  --plum-50:  #F4ECF0;
+  --honey-700: #9C6F1E;
+  --honey-600: #C2902F;
+  --honey-500: #D6A642;
+  --honey-100: #F3E6C7;
+  --honey-50:  #FAF3E2;
+
+  /* ============================================================
      Semantic aliases — reference these in components
      ============================================================ */
   --brand-primary: var(--forest-700);
   --brand-primary-strong: var(--forest-800);
-  --brand-secondary: var(--plum-700);
-  --brand-accent: var(--honey-600);
+  --brand-secondary: var(--blue-950);
+  --brand-accent: var(--yellow-400);
+  --brand-panel: var(--lavender-300);
 
   --text-primary: var(--char-900);
   --text-secondary: var(--char-500);
   --text-muted: var(--char-400);
+  --text-heading: var(--blue-950);
   --text-on-dark: #F3EFE6;
   --text-on-dark-muted: #BFC9BD;
   --text-link: var(--forest-700);
@@ -77,12 +135,12 @@
   --surface-card-warm: var(--paper-card);
   --surface-sunken: var(--sand-100);
   --surface-forest: var(--forest-700);
-  --surface-forest-deep: var(--forest-900);
-  --surface-plum: var(--plum-700);
+  --surface-panel: var(--lavender-300);
+  --surface-ink: var(--blue-950);
 
   --border-subtle: var(--sand-200);
   --border-strong: var(--char-300);
   --border-focus: var(--forest-600);
 
-  --ring-focus: 0 0 0 3px rgba(30, 71, 54, 0.22);
+  --ring-focus: 0 0 0 3px rgba(180, 216, 92, 0.35);
 }

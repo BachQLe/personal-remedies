@@ -2,9 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
-import BottomSheet from '../../components/BottomSheet.jsx';
-import SwipeDeck from '../../components/SwipeDeck.jsx';
-import ConditionTag from '../../components/ConditionTag.jsx';
+import BottomSheet from '../../components/shared/BottomSheet.jsx';
+import SwipeDeck from './SwipeDeck.jsx';
+import ConditionTag from '../../components/shared/ConditionTag.jsx';
+import Icon from '../../components/shared/Icon.jsx';
 import { conditions as allConditions } from '../../data/conditions.js';
 import { popularConditions } from '../../api/mockData.js';
 
@@ -18,14 +19,14 @@ const DEMO_PROFILE = {
 };
 
 const DIETARY_OPTIONS = [
-  { value: 'vegetarian', label: 'Vegetarian', icon: 'eco' },
-  { value: 'vegan', label: 'Vegan', icon: 'spa' },
-  { value: 'pescatarian', label: 'Pescatarian', icon: 'set_meal' },
-  { value: 'halal', label: 'Halal', icon: 'mosque' },
-  { value: 'kosher', label: 'Kosher', icon: 'synagogue' },
-  { value: 'gluten-free', label: 'Gluten-Free', icon: 'grain' },
-  { value: 'dairy-free', label: 'Dairy-Free', icon: 'water_drop' },
-  { value: 'low-sodium', label: 'Low Sodium', icon: 'water_loss' },
+  { value: 'vegetarian', label: 'Vegetarian', icon: 'leaf' },
+  { value: 'vegan', label: 'Vegan', icon: 'sun' },
+  { value: 'pescatarian', label: 'Pescatarian', icon: 'utensils' },
+  { value: 'halal', label: 'Halal', icon: 'shield' },
+  { value: 'kosher', label: 'Kosher', icon: 'shield' },
+  { value: 'gluten-free', label: 'Gluten-Free', icon: 'zap' },
+  { value: 'dairy-free', label: 'Dairy-Free', icon: 'cloud' },
+  { value: 'low-sodium', label: 'Low Sodium', icon: 'activity' },
 ];
 
 function SettingsRow({ icon, label, value, onClick }) {
@@ -35,8 +36,8 @@ function SettingsRow({ icon, label, value, onClick }) {
       className="w-full flex items-center gap-3 px-5 py-4 text-left border-b border-sand-200 last:border-b-0 hover:bg-paper-100 transition-colors duration-fast"
       style={{ minHeight: 56 }}
     >
-      <span className="material-symbols-rounded text-char-500" style={{ fontSize: 22 }}>
-        {icon}
+      <span className="text-char-500">
+        <Icon name={icon} size={22} />
       </span>
       <div className="flex-1 min-w-0">
         <span className="text-sm font-sans font-medium text-char-900">{label}</span>
@@ -44,8 +45,8 @@ function SettingsRow({ icon, label, value, onClick }) {
           <span className="block text-xs font-sans text-char-400 truncate mt-0.5">{value}</span>
         )}
       </div>
-      <span className="material-symbols-rounded text-char-400" style={{ fontSize: 18 }}>
-        chevron_right
+      <span className="text-char-400">
+        <Icon name="chevron-right" size={18} />
       </span>
     </button>
   );
@@ -61,9 +62,7 @@ function SectionCard({ title, onEdit, children }) {
           className="flex items-center gap-1.5 text-xs font-semibold font-sans text-forest-700 hover:text-forest-800 transition-colors duration-fast"
           style={{ minHeight: 44, minWidth: 44 }}
         >
-          <span className="material-symbols-rounded" style={{ fontSize: 16 }}>
-            edit
-          </span>
+          <Icon name="edit" size={16} />
           Edit
         </button>
       </div>
@@ -125,8 +124,8 @@ function EditConditions({ value, onChange, onClose }) {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-pill text-sm font-medium font-sans text-white bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
               >
                 {c}
-                <span className="material-symbols-rounded opacity-70" style={{ fontSize: 14 }}>
-                  close
+                <span className="opacity-70">
+                  <Icon name="x" size={14} />
                 </span>
               </button>
             ))}
@@ -146,7 +145,7 @@ function EditConditions({ value, onChange, onClose }) {
         />
         <div className="flex flex-col gap-2 overflow-y-auto" style={{ maxHeight: 220 }}>
           {!query && (
-            <p className="font-mono text-xs uppercase tracking-eyebrow font-semibold text-char-400">
+            <p className="font-label text-xs uppercase tracking-[0.14em] text-char-400">
               Common
             </p>
           )}
@@ -173,7 +172,7 @@ function EditConditions({ value, onChange, onClose }) {
         </div>
         <button
           onClick={() => { onChange(selected); onClose(); }}
-          className="w-full py-4 rounded-pill text-white font-semibold font-sans text-base mt-auto bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
+          className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base mt-auto bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
         >
           Save
         </button>
@@ -233,7 +232,7 @@ function EditList({ title, value, placeholder, onChange, onClose }) {
         </div>
         <button
           onClick={() => { onChange(items); onClose(); }}
-          className="w-full py-4 rounded-pill text-white font-semibold font-sans text-base mt-auto bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
+          className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base mt-auto bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
         >
           Save
         </button>
@@ -266,11 +265,8 @@ function EditDietary({ value, onChange, onClose }) {
                     : 'border-sand-200 bg-white hover:border-forest-300'
                   }`}
               >
-                <span
-                  className="material-symbols-rounded"
-                  style={{ fontSize: 22, color: isSel ? '#1E4736' : '#8A8377' }}
-                >
-                  {icon}
+                <span style={{ color: isSel ? '#1E4736' : '#8A8377' }}>
+                  <Icon name={icon} size={22} />
                 </span>
                 <span
                   className={`text-sm font-semibold font-sans ${isSel ? 'text-forest-700' : 'text-char-900'}`}
@@ -283,7 +279,7 @@ function EditDietary({ value, onChange, onClose }) {
         </div>
         <button
           onClick={() => { onChange(selected); onClose(); }}
-          className="w-full py-4 rounded-pill text-white font-semibold font-sans text-base bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
+          className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
         >
           Save
         </button>
@@ -372,13 +368,13 @@ export default function ProfileScreen() {
           {initials}
         </div>
         <div className="flex-1">
-          <h1 className="font-display text-xl font-semibold text-char-900">Profile</h1>
+          <h1 className="font-display text-xl font-semibold text-blue-950">Profile</h1>
           {user?.email && <p className="text-sm text-char-500 font-sans">{user.email}</p>}
           <p className="font-mono text-xs text-char-400 mt-0.5">Member since {memberSince}</p>
         </div>
         {saving && (
           <span className="text-xs text-char-400 font-sans flex items-center gap-1.5">
-            <span className="material-symbols-rounded animate-spin" style={{ fontSize: 14 }}>sync</span>
+            <span className="animate-spin inline-flex"><Icon name="refresh-cw" size={14} /></span>
             Saving
           </span>
         )}
@@ -404,8 +400,8 @@ export default function ProfileScreen() {
             <div className="flex flex-col gap-1.5">
               {profile.medications.map((m) => (
                 <div key={m} className="flex items-center gap-3">
-                  <span className="material-symbols-rounded text-forest-700" style={{ fontSize: 18 }}>
-                    medication
+                  <span className="text-forest-700">
+                    <Icon name="pill" size={18} />
                   </span>
                   <span className="text-sm text-char-900 font-sans">{m}</span>
                   <span className="font-mono text-xs text-char-400 ml-auto">daily</span>
@@ -437,16 +433,16 @@ export default function ProfileScreen() {
 
         {/* Settings */}
         <div className="bg-white rounded-xl shadow-card overflow-hidden">
-          <p className="font-mono text-xs font-semibold uppercase tracking-eyebrow text-char-400 px-5 pt-4 pb-2">
+          <p className="font-label text-xs uppercase tracking-[0.14em] text-char-400 px-5 pt-4 pb-2">
             Settings
           </p>
           <SettingsRow
-            icon="notifications"
+            icon="bell"
             label="Notifications"
             value="Daily reminders on"
           />
           <SettingsRow
-            icon="sync"
+            icon="refresh-cw"
             label="Health sync"
             value="Connected to Apple Health"
           />
@@ -459,21 +455,21 @@ export default function ProfileScreen() {
 
         {/* Account */}
         <div className="bg-white rounded-xl shadow-card overflow-hidden">
-          <p className="font-mono text-xs font-semibold uppercase tracking-eyebrow text-char-400 px-5 pt-4 pb-2">
+          <p className="font-label text-xs uppercase tracking-[0.14em] text-char-400 px-5 pt-4 pb-2">
             Account
           </p>
           {/* Upgrade placeholder */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-sand-200 opacity-50">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-rounded text-honey-600" style={{ fontSize: 22 }}>
-                workspace_premium
+              <span className="text-yellow-400">
+                <Icon name="award" size={22} />
               </span>
               <div>
                 <p className="text-sm font-semibold font-sans text-char-900">Upgrade to Pro</p>
                 <p className="text-xs text-char-400 font-sans">Unlock full meal plans</p>
               </div>
             </div>
-            <span className="px-3 py-1 rounded-pill text-xs font-semibold font-sans text-white bg-honey-600">
+            <span className="px-3 py-1 rounded-pill text-xs font-semibold font-sans text-white bg-yellow-400">
               Soon
             </span>
           </div>
@@ -484,10 +480,10 @@ export default function ProfileScreen() {
             className="w-full flex items-center gap-3 px-5 text-left hover:bg-paper-100 transition-colors duration-fast"
             style={{ minHeight: 56 }}
           >
-            <span className="material-symbols-rounded text-signal-avoid" style={{ fontSize: 22 }}>
-              logout
+            <span className="text-avoid-600">
+              <Icon name="external-link" size={22} />
             </span>
-            <span className="text-sm font-medium font-sans text-signal-avoid">Sign out</span>
+            <span className="text-sm font-medium font-sans text-avoid-600">Sign out</span>
           </button>
         </div>
 

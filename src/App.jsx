@@ -1,26 +1,29 @@
 import { useState, useEffect, useRef } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import AnnouncementBar from "./components/AnnouncementBar";
-import Nav from "./components/Nav";
-import Hero from "./components/Hero";
-import Differentiators from "./components/Differentiators";
-import Nutri from "./components/Nutri";
-import TwoDoors from "./components/TwoDoors";
-import Pricing from "./components/Pricing";
-import FinalCTA from "./components/FinalCTA";
-import Footer from "./components/Footer";
-import Survey from "./pages/Survey";
-import Providers from "./pages/Providers";
-import Developers from "./pages/Developers";
-import Science from "./pages/Science";
-import About from "./pages/About";
-import News from "./pages/News";
-import Login from "./pages/Login";
-import Contact from "./pages/Contact";
-import TermsOfUse from "./pages/TermsOfUse";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
+import { storage } from "./api/storage";
+import AnnouncementBar from "./components/marketing/AnnouncementBar";
+import Nav from "./components/marketing/Nav";
+import Hero from "./components/marketing/Hero";
+import Differentiators from "./components/marketing/Differentiators";
+import Nutri from "./components/marketing/Nutri";
+import TwoDoors from "./components/marketing/TwoDoors";
+import Pricing from "./components/marketing/Pricing";
+import FinalCTA from "./components/marketing/FinalCTA";
+import Footer from "./components/marketing/Footer";
+import Survey from "./pages/marketing/Survey";
+import Providers from "./pages/marketing/Providers";
+import Developers from "./pages/marketing/Developers";
+import Science from "./pages/marketing/Science";
+import About from "./pages/marketing/About";
+import News from "./pages/marketing/News";
+import Login from "./pages/marketing/Login";
+import Contact from "./pages/marketing/Contact";
+import TermsOfUse from "./pages/marketing/TermsOfUse";
+import PrivacyPolicy from "./pages/marketing/PrivacyPolicy";
+import AuthCallback from "./pages/marketing/AuthCallback";
 import OnboardingPage from "./components/onboarding";
+import DailyPicksScreen from "./screens/dailyPicks/DailyPicksScreen";
 // App screens
 import HomeScreen from "./screens/home/HomeScreen";
 import PlanScreen from "./screens/plan/PlanScreen";
@@ -29,8 +32,8 @@ import RecipesScreen from "./screens/recipes/RecipesScreen";
 import LookupScreen from "./screens/lookup/LookupScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
 // App chrome
-import TabBar from "./components/TabBar";
-import FAB from "./components/FAB";
+import TabBar from "./components/layout/TabBar";
+import FAB from "./components/layout/FAB";
 // Dev
 import KitchenSink from "./pages/KitchenSink";
 
@@ -39,6 +42,27 @@ function ScrollToTop() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+  return null;
+}
+
+// When the app runs inside PhoneFrame's iframe, react-router navigations update
+// the iframe's URL but not the outer browser address bar. Since the frame is
+// same-origin, mirror the current route up to the parent window so the address
+// bar reflects in-app navigation. No-op when not framed.
+function SyncParentUrl() {
+  const location = useLocation();
+  useEffect(() => {
+    if (window.parent === window) return; // not framed
+    try {
+      const search = location.search
+        .replace(/([?&])noframe(&|$)/, "$1")
+        .replace(/[?&]$/, "");
+      const url = location.pathname + search + location.hash;
+      window.parent.history.replaceState(null, "", url || "/");
+    } catch {
+      /* cross-origin (shouldn't happen, same origin) — ignore */
+    }
+  }, [location]);
   return null;
 }
 
@@ -79,6 +103,14 @@ function Home({ barVisible, setBarVisible }) {
   );
 }
 
+// Gate the app behind onboarding: un-onboarded users are sent to /onboarding.
+// Reads the browser-persisted profile synchronously to avoid a redirect flash.
+function RequireOnboarding({ children }) {
+  const onboarded = !!storage.get("profile", null);
+  if (!onboarded) return <Navigate to="/onboarding" replace />;
+  return children;
+}
+
 // Shell for the PWA app routes — always phone layout
 function AppShell({ children }) {
   return (
@@ -101,10 +133,12 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <ScrollToTop />
+        <SyncParentUrl />
         <Routes>
           {/* Marketing site */}
           <Route path="/" element={<Home barVisible={barVisible} setBarVisible={setBarVisible} />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/survey" element={<Survey />} />
           <Route path="/providers" element={<Providers />} />
           <Route path="/developers" element={<Developers />} />
@@ -117,14 +151,16 @@ function App() {
           <Route path="/onboarding" element={<OnboardingPage />} />
           {/* Dev */}
           <Route path="/kitchen-sink" element={<KitchenSink />} />
-          {/* PWA App */}
+          {/* PWA App — gated behind onboarding */}
           <Route path="/app" element={<Navigate to="/app/home" replace />} />
-          <Route path="/app/home" element={<AppShell><HomeScreen /></AppShell>} />
-          <Route path="/app/plan" element={<AppShell><PlanScreen /></AppShell>} />
-          <Route path="/app/week" element={<AppShell><WeeklyPlanScreen /></AppShell>} />
-          <Route path="/app/recipes" element={<AppShell><RecipesScreen /></AppShell>} />
-          <Route path="/app/lookup" element={<AppShell><LookupScreen /></AppShell>} />
-          <Route path="/app/profile" element={<AppShell><ProfileScreen /></AppShell>} />
+          {/* Daily Picks — standalone full screen (own pinned recap, no tab bar) */}
+          <Route path="/onboarding/daily-picks" element={<RequireOnboarding><DailyPicksScreen /></RequireOnboarding>} />
+          <Route path="/app/home" element={<RequireOnboarding><AppShell><HomeScreen /></AppShell></RequireOnboarding>} />
+          <Route path="/app/plan" element={<RequireOnboarding><AppShell><PlanScreen /></AppShell></RequireOnboarding>} />
+          <Route path="/app/week" element={<RequireOnboarding><AppShell><WeeklyPlanScreen /></AppShell></RequireOnboarding>} />
+          <Route path="/app/recipes" element={<RequireOnboarding><AppShell><RecipesScreen /></AppShell></RequireOnboarding>} />
+          <Route path="/app/lookup" element={<RequireOnboarding><AppShell><LookupScreen /></AppShell></RequireOnboarding>} />
+          <Route path="/app/profile" element={<RequireOnboarding><AppShell><ProfileScreen /></AppShell></RequireOnboarding>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

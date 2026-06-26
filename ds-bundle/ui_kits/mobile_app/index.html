@@ -1,0 +1,300 @@
+<!-- @dsCard group="Mobile App" viewport="390x844" subtitle="Interactive prototype — Home, Search, Detail" -->
+<!-- @startingPoint section="Mobile App" subtitle="Personal Remedies — Home + Search + Detail" viewport="390x844" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Personal Remedies</title>
+<style>
+
+  @import url("https://api.fontshare.com/v2/css?f[]=chillax@400,500,600,700&display=swap");
+  @import url("https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700,800&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap");
+  :root {
+    --forest-50:#F4FAE4;--forest-100:#E6F5C4;--forest-700:#628C22;--forest-800:#4A6E18;--forest-900:#345010;
+    --blue-100:#D8E4FF;--blue-800:#1E3080;--blue-950:#080E30;
+    --lavender-100:#ECE0F8;--lavender-300:#C8A8E8;
+    --yellow-50:#FFFBE0;--yellow-100:#FFF5B8;--yellow-800:#705000;
+    --red-100:#FFD8D8;--red-800:#801414;
+    --char-300:#B7AF9F;--char-400:#8A8377;--char-500:#6B645A;--char-900:#211E1B;
+    --sand-100:#EEEEE9;--sand-200:#E6E6E0;--paper-200:#F5F5F0;--white:#FFFFFF;
+    --benefit-600:#2F8C5A;--benefit-100:#DCEDE2;
+    --caution-600:#C98A2E;--caution-100:#F6E8CB;
+    --avoid-600:#C04A2F;--avoid-100:#F6DED5;
+    --info-600:#3F6E86;--info-100:#DDE8ED;
+    --brand-primary:#628C22;--text-on-dark:#F3EFE6;--text-heading:#080E30;
+    --text-primary:#211E1B;--text-secondary:#6B645A;--text-muted:#8A8377;
+    --surface-card:#FFFFFF;--surface-page:#F5F5F0;--border-subtle:#E6E6E0;
+    --shadow-card:0 3px 16px rgba(45,36,24,.07);--shadow-sm:0 2px 8px rgba(45,36,24,.06);
+    --radius-pill:999px;--radius-md:14px;--radius-xl:28px;
+    --font-display:'Chillax',ui-sans-serif,system-ui,sans-serif;
+    --font-sans:'Switzer',ui-sans-serif,system-ui,sans-serif;
+    --font-label:'Quantico',ui-sans-serif,system-ui,sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); color: var(--text-primary); background: #111E58; -webkit-font-smoothing: antialiased; }
+
+  html, body { height: 100%; }
+  body { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+  .phone { width: 390px; height: 844px; background: var(--surface-page); border-radius: 46px; overflow: hidden; box-shadow: 0 28px 80px rgba(0,0,0,.6); position: relative; display: flex; flex-direction: column; }
+  .screen { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scroll-behavior: smooth; }
+  .screen::-webkit-scrollbar { display: none; }
+  .status-bar { height: 48px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 28px 8px; flex-shrink: 0; background: var(--surface-page); }
+  .bottom-nav { flex-shrink: 0; background: var(--surface-card); border-top: 1px solid var(--border-subtle); display: flex; }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0 18px; cursor: pointer; position: relative; }
+  .tab .tlabel { font-family: var(--font-label); font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--char-300); transition: color .15s; }
+  .tab.active .tlabel { color: var(--brand-primary); }
+  .tab.active::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:3px; border-radius:3px 3px 0 0; background:var(--brand-primary); }
+  .food-card { display:flex; align-items:center; gap:14px; border-radius:20px; padding:14px; box-shadow:var(--shadow-card); cursor:pointer; }
+  .cat-card { display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px; border-radius:18px; box-shadow:var(--shadow-card); min-width:60px; cursor:pointer; flex-shrink:0; }
+  .hidden { display:none !important; }
+  .search-input { width:100%; background:var(--surface-card); border:1px solid var(--border-subtle); border-radius:14px; padding:14px 14px 14px 44px; font-size:16px; font-family:var(--font-sans); color:var(--text-primary); outline:none; box-shadow:var(--shadow-sm); }
+  .search-input:focus { border-color:#7CA830; box-shadow:0 0 0 3px rgba(180,216,92,.32); }
+  .filter-btn { padding:8px 18px; border-radius:999px; border:1px solid var(--border-subtle); cursor:pointer; font-family:var(--font-sans); font-size:13px; font-weight:600; white-space:nowrap; flex-shrink:0; background:var(--surface-card); transition: all .15s; }
+  .filter-btn.active { background:var(--brand-primary); color:var(--text-on-dark); border-color:transparent; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen">
+    <div class="status-bar">
+      <span style="font-family:var(--font-label);font-size:12px;font-weight:700;color:var(--text-muted)">9:41</span>
+      <span style="font-size:11px;color:var(--text-muted)">●●●</span>
+    </div>
+    <div style="padding:0 20px 32px;flex:1">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <p style="font-family:var(--font-label);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:2px">Personal Remedies</p>
+          <h1 style="font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--text-heading);letter-spacing:-.02em;line-height:1">Good morning</h1>
+        </div>
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--brand-primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;font-family:var(--font-label)">T</div>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:18px">
+        <span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--forest-100);color:var(--forest-900);font-family:var(--font-sans)">Type 2 Diabetes</span>
+        <span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--blue-100);color:var(--blue-800);font-family:var(--font-sans)">Hypertension</span>
+        <span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--yellow-100);color:var(--yellow-800);font-family:var(--font-sans)">High cholesterol</span>
+      </div>
+      <div style="background:var(--surface-card);border-radius:20px;padding:18px;box-shadow:var(--shadow-card);margin-bottom:18px">
+        <p style="font-family:var(--font-label);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:14px">Your food profile</p>
+        <div style="display:flex;justify-content:space-around;align-items:center">
+          <div style="text-align:center"><div style="font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--benefit-600)">24</div><div style="font-size:11px;color:var(--text-muted);font-family:var(--font-sans)">Helpful</div></div>
+          <div style="width:1px;height:36px;background:var(--border-subtle)"></div>
+          <div style="text-align:center"><div style="font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--avoid-600)">8</div><div style="font-size:11px;color:var(--text-muted);font-family:var(--font-sans)">Avoid</div></div>
+          <div style="width:1px;height:36px;background:var(--border-subtle)"></div>
+          <div style="text-align:center"><div style="font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--text-heading)">6</div><div style="font-size:11px;color:var(--text-muted);font-family:var(--font-sans)">Categories</div></div>
+        </div>
+      </div>
+      <p style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-heading);margin-bottom:10px">Browse by category</p>
+      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px">
+        <div class="cat-card" style="background:var(--forest-100)"><div style="width:38px;height:38px;border-radius:10px;background:rgba(98,140,34,.2);display:flex;align-items:center;justify-content:center;font-size:20px">🥦</div><span style="font-size:11px;font-weight:600;color:var(--text-heading);font-family:var(--font-sans)">Veg</span></div>
+        <div class="cat-card" style="background:var(--yellow-100)"><div style="width:38px;height:38px;border-radius:10px;background:rgba(245,204,48,.3);display:flex;align-items:center;justify-content:center;font-size:20px">🍎</div><span style="font-size:11px;font-weight:600;color:var(--text-heading);font-family:var(--font-sans)">Fruits</span></div>
+        <div class="cat-card" style="background:var(--lavender-100)"><div style="width:38px;height:38px;border-radius:10px;background:rgba(180,136,220,.3);display:flex;align-items:center;justify-content:center;font-size:20px">🥜</div><span style="font-size:11px;font-weight:600;color:var(--text-heading);font-family:var(--font-sans)">Nuts</span></div>
+        <div class="cat-card" style="background:var(--blue-100)"><div style="width:38px;height:38px;border-radius:10px;background:rgba(88,120,224,.25);display:flex;align-items:center;justify-content:center;font-size:20px">🐟</div><span style="font-size:11px;font-weight:600;color:var(--text-heading);font-family:var(--font-sans)">Fish</span></div>
+        <div class="cat-card" style="background:var(--yellow-50)"><div style="width:38px;height:38px;border-radius:10px;background:rgba(224,176,16,.2);display:flex;align-items:center;justify-content:center;font-size:20px">🌾</div><span style="font-size:11px;font-weight:600;color:var(--text-heading);font-family:var(--font-sans)">Grains</span></div>
+      </div>
+      <p style="font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text-heading);margin-bottom:10px">Most helpful for you</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="food-card" style="background:var(--benefit-100)" onclick="showDetail('blueberries')">
+          <div style="width:52px;height:52px;border-radius:12px;background:rgba(47,140,90,.14);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🫐</div>
+          <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font-weight:700;color:var(--text-heading);font-size:14px;font-family:var(--font-sans)">Blueberries</span><span style="padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--benefit-100);color:var(--benefit-600)">✓</span></div><span style="display:inline-flex;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;background:var(--forest-100);color:var(--forest-900);font-family:var(--font-sans)">Type 2 Diabetes</span></div>
+        </div>
+        <div class="food-card" style="background:var(--yellow-100)" onclick="showDetail('avocado')">
+          <div style="width:52px;height:52px;border-radius:12px;background:rgba(245,204,48,.22);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🥑</div>
+          <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font-weight:700;color:var(--text-heading);font-size:14px;font-family:var(--font-sans)">Avocado</span><span style="padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--benefit-100);color:var(--benefit-600)">✓</span></div><span style="display:inline-flex;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;background:var(--yellow-100);color:var(--yellow-800);font-family:var(--font-sans)">High cholesterol</span></div>
+        </div>
+        <div class="food-card" style="background:var(--blue-100)" onclick="showDetail('salmon')">
+          <div style="width:52px;height:52px;border-radius:12px;background:rgba(88,120,224,.2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🐟</div>
+          <div style="flex:1;min-width:0"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><span style="font-weight:700;color:var(--text-heading);font-size:14px;font-family:var(--font-sans)">Salmon</span><span style="padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--benefit-100);color:var(--benefit-600)">✓</span></div><span style="display:inline-flex;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;background:var(--blue-100);color:var(--blue-800);font-family:var(--font-sans)">Hypertension</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div id="screen-search" class="screen hidden">
+    <div class="status-bar">
+      <span style="font-family:var(--font-label);font-size:12px;font-weight:700;color:var(--text-muted)">9:41</span>
+      <span style="font-size:11px;color:var(--text-muted)">●●●</span>
+    </div>
+    <div style="padding:0 20px 24px;flex:1">
+      <h2 style="font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--text-heading);margin-bottom:16px;letter-spacing:-.02em">Search foods</h2>
+      <div style="position:relative;margin-bottom:14px">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;color:var(--text-muted);pointer-events:none">🔍</span>
+        <input class="search-input" placeholder="Search foods or conditions" oninput="filterFoods(this.value)">
+      </div>
+      <div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:16px;padding-bottom:4px">
+        <button class="filter-btn active" id="f-all" onclick="setFilter('all')">All foods</button>
+        <button class="filter-btn" id="f-beneficial" style="color:var(--benefit-600)" onclick="setFilter('beneficial')">✓ Beneficial</button>
+        <button class="filter-btn" id="f-limit" style="color:var(--caution-600)" onclick="setFilter('limit')">! Limit</button>
+        <button class="filter-btn" id="f-avoid" style="color:var(--avoid-600)" onclick="setFilter('avoid')">✗ Avoid</button>
+      </div>
+      <div id="search-results" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div id="screen-detail" class="screen hidden">
+    <div class="status-bar">
+      <span style="font-family:var(--font-label);font-size:12px;font-weight:700;color:var(--text-muted)">9:41</span>
+      <span style="font-size:11px;color:var(--text-muted)">●●●</span>
+    </div>
+    <div style="padding:0 20px 24px;flex:1">
+      <button onclick="goBack()" style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:var(--brand-primary);font-family:var(--font-sans);font-size:14px;font-weight:600;margin-bottom:14px;padding:0">← Back</button>
+      <div id="detail-content"></div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="bottom-nav">
+    <div class="tab active" id="tab-home" onclick="goTab('home')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="tlabel" style="color:var(--brand-primary)">Home</span>
+    </div>
+    <div class="tab" id="tab-search" onclick="goTab('search')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--char-300)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span class="tlabel">Search</span>
+    </div>
+    <div class="tab" id="tab-foods" onclick="goTab('foods')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--char-300)" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="tlabel">My Foods</span>
+    </div>
+    <div class="tab" id="tab-profile" onclick="goTab('profile')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--char-300)" stroke-width="2.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span class="tlabel">Profile</span>
+    </div>
+  </nav>
+</div>
+
+<script>
+var FOODS = [
+  {id:'blueberries',emoji:'🫐',name:'Blueberries',signal:'beneficial',bg:'var(--benefit-100)',iconBg:'rgba(47,140,90,.14)',condition:'Type 2 Diabetes',condBg:'var(--forest-100)',condColor:'var(--forest-900)',studies:12,desc:'Rich in anthocyanins, blueberries improve insulin sensitivity and reduce inflammation markers associated with type 2 diabetes.'},
+  {id:'avocado',emoji:'🥑',name:'Avocado',signal:'beneficial',bg:'var(--yellow-100)',iconBg:'rgba(245,204,48,.22)',condition:'High cholesterol',condBg:'var(--yellow-100)',condColor:'var(--yellow-800)',studies:9,desc:'High in monounsaturated fats and plant sterols, avocados reduce LDL cholesterol while raising HDL levels.'},
+  {id:'salmon',emoji:'🐟',name:'Salmon',signal:'beneficial',bg:'var(--blue-100)',iconBg:'rgba(88,120,224,.2)',condition:'Hypertension',condBg:'var(--blue-100)',condColor:'var(--blue-800)',studies:14,desc:'Omega-3 fatty acids in salmon reduce arterial inflammation and help lower blood pressure naturally.'},
+  {id:'spinach',emoji:'🥬',name:'Spinach',signal:'beneficial',bg:'var(--benefit-100)',iconBg:'rgba(47,140,90,.14)',condition:'Hypertension',condBg:'var(--blue-100)',condColor:'var(--blue-800)',studies:11,desc:'High in nitrates and potassium, spinach helps relax blood vessels and reduce blood pressure.'},
+  {id:'brownrice',emoji:'🍚',name:'Brown Rice',signal:'limit',bg:'var(--caution-100)',iconBg:'rgba(201,138,46,.14)',condition:'Type 2 Diabetes',condBg:'var(--forest-100)',condColor:'var(--forest-900)',studies:6,desc:'Better than white rice but still moderate glycemic load. Limit to small portions paired with protein.'},
+  {id:'whitebread',emoji:'🍞',name:'White Bread',signal:'avoid',bg:'var(--avoid-100)',iconBg:'rgba(192,74,47,.12)',condition:'Type 2 Diabetes',condBg:'var(--forest-100)',condColor:'var(--forest-900)',studies:8,desc:'High glycemic index causes rapid blood sugar spikes, worsening insulin resistance over time.'}
+];
+
+var SIG_BG = {beneficial:'var(--benefit-100)',limit:'var(--caution-100)',avoid:'var(--avoid-100)'};
+var SIG_COLOR = {beneficial:'var(--benefit-600)',limit:'var(--caution-600)',avoid:'var(--avoid-600)'};
+var SIG_ICON = {beneficial:'✓',limit:'!',avoid:'✗'};
+var currentFilter = 'all';
+var prevScreen = 'home';
+
+function goTab(tab) {
+  ['home','search'].forEach(function(s) {
+    var el = document.getElementById('screen-' + s);
+    if (el) el.classList.toggle('hidden', s !== tab);
+  });
+  document.getElementById('screen-detail').classList.add('hidden');
+  document.querySelectorAll('.tab').forEach(function(el, i) {
+    var keys = ['home','search','foods','profile'];
+    var isActive = keys[i] === tab;
+    el.classList.toggle('active', isActive);
+    var svg = el.querySelector('svg');
+    if (svg) svg.setAttribute('stroke', isActive ? 'var(--brand-primary)' : 'var(--char-300)');
+    var lbl = el.querySelector('.tlabel');
+    if (lbl) lbl.style.color = isActive ? 'var(--brand-primary)' : 'var(--char-300)';
+  });
+  if (tab === 'search') renderResults(FOODS);
+  prevScreen = tab;
+}
+
+function showDetail(id) {
+  var food = FOODS.find(function(f){ return f.id === id; });
+  if (!food) return;
+  document.getElementById('screen-home').classList.add('hidden');
+  document.getElementById('screen-search').classList.add('hidden');
+  document.getElementById('screen-detail').classList.remove('hidden');
+  var sc = SIG_COLOR[food.signal] || SIG_COLOR.beneficial;
+  var sb = SIG_BG[food.signal] || SIG_BG.beneficial;
+  var si = SIG_ICON[food.signal] || '✓';
+  document.getElementById('detail-content').innerHTML = [
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">',
+      '<div style="width:72px;height:72px;border-radius:16px;background:'+food.iconBg+';display:flex;align-items:center;justify-content:center;font-size:34px;flex-shrink:0">'+food.emoji+'</div>',
+      '<div>',
+        '<h2 style="font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--text-heading);letter-spacing:-.02em;margin-bottom:6px">'+food.name+'</h2>',
+        '<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:999px;font-size:13px;font-weight:600;background:'+sb+';color:'+sc+';font-family:var(--font-sans)">'+si+' '+(food.signal.charAt(0).toUpperCase()+food.signal.slice(1))+'</span>',
+      '</div>',
+    '</div>',
+    '<p style="font-size:15px;line-height:1.6;color:var(--text-secondary);font-family:var(--font-sans);margin-bottom:20px">'+food.desc+'</p>',
+    '<div style="background:var(--forest-100);border-radius:16px;padding:16px;margin-bottom:10px">',
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">',
+        '<span style="display:inline-flex;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:'+food.condBg+';color:'+food.condColor+';font-family:var(--font-sans)">'+food.condition+'</span>',
+        '<span style="display:inline-flex;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;background:'+sb+';color:'+sc+'">'+si+'</span>',
+      '</div>',
+      '<p style="font-size:12px;color:var(--brand-primary);font-weight:700;font-family:var(--font-sans);cursor:pointer">'+food.studies+' studies — See evidence</p>',
+    '</div>',
+    '<div style="background:var(--blue-100);border-radius:16px;padding:16px;">',
+      '<p style="font-family:var(--font-label);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:10px">Serving size</p>',
+      '<div style="display:flex;align-items:center;justify-content:space-between;">',
+        '<div><p style="font-size:14px;color:var(--text-secondary);font-family:var(--font-sans)">128 kcal per cup</p></div>',
+        '<div style="display:flex;align-items:center;gap:14px">',
+          '<button style="width:36px;height:36px;border-radius:50%;background:var(--sand-100);border:none;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center">−</button>',
+          '<div style="text-align:center;min-width:40px"><p style="font-family:var(--font-display);font-size:26px;font-weight:600;color:var(--text-heading);line-height:1">1</p><p style="font-size:9px;color:var(--text-muted);font-family:var(--font-label);text-transform:uppercase;letter-spacing:.08em">cup</p></div>',
+          '<button style="width:36px;height:36px;border-radius:50%;background:var(--brand-primary);border:none;cursor:pointer;font-size:20px;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(98,140,34,.4)">+</button>',
+        '</div>',
+      '</div>',
+    '</div>'
+  ].join('');
+}
+
+function goBack() {
+  document.getElementById('screen-detail').classList.add('hidden');
+  var prev = document.getElementById('screen-' + prevScreen);
+  if (prev) prev.classList.remove('hidden');
+}
+
+function renderResults(foods) {
+  var el = document.getElementById('search-results');
+  if (!el) return;
+  if (foods.length === 0) {
+    el.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-family:var(--font-sans);padding:32px 0">No foods found</p>';
+    return;
+  }
+  el.innerHTML = foods.map(function(food) {
+    var sc = SIG_COLOR[food.signal] || SIG_COLOR.beneficial;
+    var sb = SIG_BG[food.signal] || SIG_BG.beneficial;
+    var si = SIG_ICON[food.signal] || '✓';
+    return '<div class="food-card" style="background:'+food.bg+'" onclick="showDetail(\'' + food.id + '\')">'+
+      '<div style="width:50px;height:50px;border-radius:12px;background:'+food.iconBg+';display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">'+food.emoji+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
+          '<span style="font-weight:700;color:var(--text-heading);font-size:14px;font-family:var(--font-sans)">'+food.name+'</span>'+
+          '<span style="padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;background:'+sb+';color:'+sc+'">'+si+'</span>'+
+        '</div>'+
+        '<span style="display:inline-flex;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;background:'+food.condBg+';color:'+food.condColor+';font-family:var(--font-sans)">'+food.condition+'</span>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function filterFoods(q) {
+  var results = FOODS.filter(function(food) {
+    var matchQ = !q || food.name.toLowerCase().indexOf(q.toLowerCase()) > -1 || food.condition.toLowerCase().indexOf(q.toLowerCase()) > -1;
+    var matchF = currentFilter === 'all' || food.signal === currentFilter;
+    return matchQ && matchF;
+  });
+  renderResults(results);
+}
+
+function setFilter(filter) {
+  currentFilter = filter;
+  var filterColors = {beneficial:'var(--benefit-600)',limit:'var(--caution-600)',avoid:'var(--avoid-600)',all:'var(--text-primary)'};
+  ['all','beneficial','limit','avoid'].forEach(function(f) {
+    var btn = document.getElementById('f-' + f);
+    if (!btn) return;
+    var isActive = f === filter;
+    btn.classList.toggle('active', isActive);
+    if (!isActive) btn.style.color = filterColors[f] || 'var(--text-primary)';
+    else btn.style.color = 'var(--text-on-dark)';
+  });
+  var q = document.querySelector('.search-input');
+  filterFoods(q ? q.value : '');
+}
+</script>
+</body>
+</html>

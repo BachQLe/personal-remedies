@@ -15,20 +15,14 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    scrollbar-color: rgba(0,0,0,0.05) transparent;
-    scrollbar-gutter: stable;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   *::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  *::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  *::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.05);
-    border-radius: 3px;
+    width: 0;
+    height: 0;
+    display: none;
   }
 
   body {
@@ -40,9 +34,17 @@
   }
 
   ::selection {
-    background: #DCE9DF;
-    color: #0F2A21;
+    background: #E6F5C4;
+    color: #1E3208;
   }
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 @keyframes plan-blur-in {
@@ -146,7 +148,6 @@
 
   .display {
     @apply font-display font-medium tracking-tightish text-char-900;
-    font-variation-settings: "opsz" 72;
   }
 
   .pill-btn {

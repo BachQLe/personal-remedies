@@ -1,10 +1,11 @@
 /* ============================================================
    Remedy — Typography tokens
-   Newsreader (editorial serif display) + Hanken Grotesk (sans body)
+   Chillax (display) + Switzer (body sans) + Quantico (ui/label)
    ============================================================ */
 :root {
-  --font-display: "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
-  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Chillax", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: "Switzer", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-label: "Quantico", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   /* Weights */

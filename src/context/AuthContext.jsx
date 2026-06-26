@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 
 const AuthContext = createContext();
 
@@ -7,26 +8,42 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = (email) => {
-    const userData = { email, id: Math.random().toString(36).substr(2, 9) };
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
+  const signInWithEmail = async (email) => {
+    const { error } = await supabase.auth.signInWithOtp({ email });
+    if (error) throw error;
   };
 
-  const signOut = () => {
-    setUser(null);
-    localStorage.removeItem("user");
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) throw error;
+  };
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ user, loading, signInWithEmail, signInWithGoogle, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );

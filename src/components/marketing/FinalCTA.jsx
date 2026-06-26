@@ -1,0 +1,75 @@
+import { useRef } from "react";
+import { Link } from "react-router-dom";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Reveal } from "./Reveal";
+
+export default function FinalCTA() {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 0.35, 0.65, 1],
+    [0.88, 1.06, 1.06, 0.94]
+  );
+  const y = useTransform(
+    scrollYProgress,
+    [0, 0.35, 0.65, 1],
+    [40, 0, 0, 20]
+  );
+  const shadowBlur = useTransform(
+    scrollYProgress,
+    [0, 0.35, 0.65, 1],
+    [0, 80, 80, 0]
+  );
+  const shadowOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.35, 0.65, 1],
+    [0, 0.4, 0.4, 0]
+  );
+  const boxShadow = useTransform(
+    [shadowBlur, shadowOpacity],
+    ([b, o]) => `0 ${b * 0.5}px ${b}px -12px rgba(45,36,24,${o})`
+  );
+
+  return (
+    <motion.section
+      ref={ref}
+      id="start"
+      className="relative overflow-hidden py-28 lg:py-40 bg-forest-900 rounded-xl mx-4 lg:mx-8 mb-8"
+      style={{ scale, y, boxShadow }}
+    >
+      <div className="relative z-10 mx-auto max-w-3xl container-px text-center">
+        <Reveal>
+          <span className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-yellow-400">
+            You don't have to manage this alone
+          </span>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <h2 className="font-display font-medium tracking-tightish mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06] text-white">
+            Take your first step to a healthier life.{" "}
+            <em className="font-display italic font-normal text-yellow-300">
+              Your first diet plan is on us.
+            </em>
+          </h2>
+        </Reveal>
+        <Reveal delay={0.2}>
+          <p className="mt-7 text-[17px] sm:text-[18px] leading-[1.55] font-sans text-white/70">
+            No card. No appointment. No waiting room.
+          </p>
+        </Reveal>
+        <Reveal delay={0.3}>
+          <Link
+            to="/onboarding"
+            className="pill-honey mt-10 inline-flex text-[16px] px-7 py-3"
+          >
+            Start free
+          </Link>
+        </Reveal>
+      </div>
+    </motion.section>
+  );
+}

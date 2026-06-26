@@ -1,51 +1,17 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Raleway:wght@800;900&display=swap");
-@import url("https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap");
+/* ============================================================
+   Personal Remedies Design System — entry point
+   @import this one file in any consuming project.
+   ============================================================ */
+@import "./tokens/colors.css";
+@import "./tokens/typography.css";
+@import "./tokens/effects.css";
+@import "./tokens/semantic.css";
 
-:root {
-  /* Core */
-  --canvas: #FFFFFF;
-  --app-bg: #F7F7F8;
-  --card: #FFFFFF;
-  --primary: #1B3A2D;
-  --ink: #1A1A1A;
-  --muted: #6B7280;
-  --hairline: #ECECEE;
-  --gold: #C9973A;
-  --amber: #D98A4A;
-
-  /* Signal / category */
-  --helpful: #34A853;
-  --avoid: #E5573F;
-  --accent-amber: #E89B3B;
-  --accent-blue: #4A90D9;
-
-  /* Brand */
-  --forest: #1F4A3A;
-  --forest-deep: #163528;
-  --cream: #F5F2EA;
-  --cream-warm: #ECE6D8;
-  --sage: #CFE0D4;
-  --paper: #F5F0E8;
-  --pine: #1B3A2D;
-  --herb: #7A9E7E;
-  --terra: #C4715A;
-  --steel: #4A7C8E;
-  --clay: #8C6B3E;
-
-  /* Shadows */
-  --shadow-card: 0 2px 14px rgba(0,0,0,0.04);
-  --shadow-lift: 0 8px 20px rgba(0,0,0,0.08), 0 24px 60px rgba(0,0,0,0.10);
-  --shadow-sheet: 0 -4px 24px rgba(0,0,0,0.08);
-
-  /* Typography */
-  --font-display: 'Fraunces', ui-serif, Georgia, serif;
-  --font-sans: 'Satoshi', ui-sans-serif, system-ui, sans-serif;
-}
-
+/* Base reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: var(--font-sans);
-  color: var(--ink);
+  color: var(--text-primary);
+  background: var(--surface-page);
   -webkit-font-smoothing: antialiased;
-  background: var(--app-bg);
 }

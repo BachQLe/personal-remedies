@@ -6,11 +6,14 @@ import {
   referencesDb,
   unknownFoodNames,
 } from './mockData.js';
+import { storage } from './storage.js';
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
-let _profile = null;
-let _tasteSignals = null;
+// Browser-persisted client state. Survives refresh today; swaps to a real
+// backend later by replacing the storage calls below — signatures stay put.
+let _profile = storage.get('profile', null);
+let _tasteSignals = storage.get('tasteSignals', null);
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 function toISO(date) {
@@ -85,11 +88,24 @@ export const api = {
   async saveProfile(p) {
     await delay(200);
     _profile = { ...p };
+    storage.set('profile', _profile);
+  },
+
+  async clearProfile() {
+    await delay(100);
+    _profile = null;
+    storage.remove('profile');
+  },
+
+  async hasOnboarded() {
+    await delay(50);
+    return !!_profile;
   },
 
   async saveTasteSignal(signals) {
     await delay(200);
     _tasteSignals = [...signals];
+    storage.set('tasteSignals', _tasteSignals);
   },
 
   async getTasteSignal() {

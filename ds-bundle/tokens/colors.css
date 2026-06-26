@@ -1,0 +1,129 @@
+/* ============================================================
+   Remedy — Color tokens
+   Fresh & vivid: lime forest + navy blue, lavender panels,
+   warm paper neutrals. Base palette first, then semantic aliases.
+   ============================================================ */
+:root {
+  /* ---- Brand: Forest / lime (primary action) ---- */
+  --forest-50:  #F4FAE4;
+  --forest-100: #E6F5C4;
+  --forest-200: #D4EDA0;
+  --forest-300: #C8E87A;
+  --forest-400: #B4D85C;   /* base */
+  --forest-500: #98C040;
+  --forest-600: #7CA830;
+  --forest-700: #628C22;   /* primary action */
+  --forest-800: #4A6E18;
+  --forest-900: #345010;
+  --forest-950: #1E3208;
+
+  /* ---- Brand: Blue / navy (headings, ink accent) ---- */
+  --blue-50:  #F0F4FF;
+  --blue-100: #D8E4FF;
+  --blue-200: #BBCEFF;
+  --blue-300: #98B4F8;
+  --blue-400: #7898F0;
+  --blue-500: #5878E0;   /* base */
+  --blue-600: #3F5EC8;
+  --blue-700: #2E46A8;
+  --blue-800: #1E3080;
+  --blue-900: #111E58;
+  --blue-950: #080E30;   /* deepest ink-navy */
+
+  /* ---- Brand: Lavender (panel surface) ---- */
+  --lavender-50:  #F6F0FC;
+  --lavender-100: #ECE0F8;
+  --lavender-200: #DCC8F0;
+  --lavender-300: #C8A8E8;   /* panel */
+  --lavender-400: #B488DC;
+  --lavender-500: #9D68CC;
+  --lavender-600: #844FB0;
+  --lavender-700: #6A3D8E;
+  --lavender-800: #4F2C68;
+  --lavender-900: #371D48;
+  --lavender-950: #21102C;
+
+  /* ---- Red (alerts / destructive) ---- */
+  --red-50:  #FFF0F0;
+  --red-100: #FFD8D8;
+  --red-200: #FFBABA;
+  --red-300: #F89898;
+  --red-400: #F07070;
+  --red-500: #E04848;   /* base */
+  --red-600: #C83030;
+  --red-700: #A82020;
+  --red-800: #801414;
+  --red-900: #580C0C;
+  --red-950: #300404;
+
+  /* ---- Yellow (gold / caution accent) ---- */
+  --yellow-50:  #FFFBE0;
+  --yellow-100: #FFF5B8;
+  --yellow-200: #FFEC88;
+  --yellow-300: #FFE05C;
+  --yellow-400: #F5CC30;   /* base */
+  --yellow-500: #E0B010;
+  --yellow-600: #C09000;
+  --yellow-700: #9A7000;
+  --yellow-800: #705000;
+  --yellow-900: #483200;
+  --yellow-950: #281A00;
+
+  /* ---- Warm neutrals (charcoal -> paper) ---- */
+  --char-900: #211E1B;     /* ink */
+  --char-700: #423D36;
+  --char-500: #6B645A;
+  --char-400: #8A8377;
+  --char-300: #B7AF9F;
+  --sand-200: #E6E6E0;     /* hairline */
+  --sand-100: #EEEEE9;
+  --paper-200: #F5F5F0;    /* page */
+  --paper-100: #FAFAF8;    /* light page */
+  --white:     #FFFFFF;
+  --paper-card:#FFFFFF;
+
+  /* ---- Signals (food-as-medicine guidance) ---- */
+  --benefit-700: #1F6B43;
+  --benefit-600: #2F8C5A;  /* beneficial / eat freely */
+  --benefit-100: #DCEDE2;
+  --caution-700: #9C6A18;
+  --caution-600: #C98A2E;  /* limit / moderate */
+  --caution-100: #F6E8CB;
+  --avoid-700: #9E3A22;
+  --avoid-600: #C04A2F;    /* avoid / restrict */
+  --avoid-100: #F6DED5;
+  --info-600: #3F6E86;     /* clinical / info */
+  --info-100: #DDE8ED;
+
+  /* ============================================================
+     Semantic aliases — reference these in components
+     ============================================================ */
+  --brand-primary: var(--forest-700);
+  --brand-primary-strong: var(--forest-800);
+  --brand-secondary: var(--blue-950);
+  --brand-accent: var(--yellow-400);
+  --brand-panel: var(--lavender-300);
+
+  --text-primary: var(--char-900);
+  --text-secondary: var(--char-500);
+  --text-muted: var(--char-400);
+  --text-heading: var(--blue-950);
+  --text-on-dark: #F3EFE6;
+  --text-on-dark-muted: #BFC9BD;
+  --text-link: var(--forest-700);
+
+  --surface-page: var(--paper-200);
+  --surface-page-alt: var(--paper-100);
+  --surface-card: var(--white);
+  --surface-card-warm: var(--paper-card);
+  --surface-sunken: var(--sand-100);
+  --surface-forest: var(--forest-700);
+  --surface-panel: var(--lavender-300);
+  --surface-ink: var(--blue-950);
+
+  --border-subtle: var(--sand-200);
+  --border-strong: var(--char-300);
+  --border-focus: var(--forest-600);
+
+  --ring-focus: 0 0 0 3px rgba(180, 216, 92, 0.35);
+}

@@ -1,0 +1,25 @@
+<!-- @dsCard group="Components" viewport="700x320" name="Data" subtitle="NutrientBar · GroceryChecklistRow" -->
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="../../_ds_bundle.js"></script>
+</head><body style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+<div id="nutrients" style="background:var(--forest-100);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px"></div>
+<div id="grocery" style="background:var(--yellow-100);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:8px"></div>
+<script type="text/babel">
+const { NutrientBar, GroceryChecklistRow } = window.RemediDesign || {};
+if (NutrientBar) {
+  ReactDOM.render(<>
+    <NutrientBar label="Protein" value={24} max={50} nutrient="protein"/>
+    <NutrientBar label="Carbohydrates" value={18} max={150} nutrient="carbs"/>
+    <NutrientBar label="Fat" value={8} max={65} nutrient="fat"/>
+    <NutrientBar label="Fiber" value={6} max={25} nutrient="fiber"/>
+  </>, document.getElementById('nutrients'));
+  ReactDOM.render(<>
+    <GroceryChecklistRow name="Blueberries" signal="beneficial"/>
+    <GroceryChecklistRow name="Avocado" signal="beneficial" checked/>
+    <GroceryChecklistRow name="Brown rice" signal="limit"/>
+    <GroceryChecklistRow name="White bread" signal="avoid"/>
+  </>, document.getElementById('grocery'));
+}
+</script>
+</body></html>

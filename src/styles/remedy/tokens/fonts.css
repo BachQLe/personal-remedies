@@ -1,4 +1,6 @@
-/* Remedy webfonts — editorial serif (Newsreader) + clean humanist sans (Hanken Grotesk) + mono (IBM Plex Mono) */
-@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500;1,6..72,600&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap");
+/* Remedy webfonts
+   display → Chillax · ui/label → Quantico · body → Switzer · mono → IBM Plex Mono */
+@import url("https://api.fontshare.com/v2/css?f[]=chillax@400,500,600,700&display=swap");
+@import url("https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700,800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap");

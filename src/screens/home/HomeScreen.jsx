@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/api.js';
-import Card from '../../components/Card.jsx';
-import ConditionTag from '../../components/ConditionTag.jsx';
-import SignalChip from '../../components/SignalChip.jsx';
-import StudyReferences from '../../components/StudyReferences.jsx';
-import BottomSheet from '../../components/BottomSheet.jsx';
-import EmptyState from '../../components/EmptyState.jsx';
+import Card from '../../components/shared/Card.jsx';
+import ConditionTag from '../../components/shared/ConditionTag.jsx';
+import SignalChip from '../../components/shared/SignalChip.jsx';
+import StudyReferences from '../../components/shared/StudyReferences.jsx';
+import BottomSheet from '../../components/shared/BottomSheet.jsx';
+import EmptyState from '../../components/shared/EmptyState.jsx';
+import Icon from '../../components/shared/Icon.jsx';
 import { GHOST_PROFILE, GHOST_TOP_FOODS } from '../../api/ghostData.js';
 
 const DEMO_PROFILE = {
@@ -38,9 +39,9 @@ function getTodayEyebrow() {
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const HOME_SLOT_META = {
-  Breakfast: { icon: 'wb_twilight', bg: 'bg-signal-limit-tint', bgToday: 'bg-white/10' },
-  Lunch:     { icon: 'sunny',      bg: 'bg-signal-info-tint',  bgToday: 'bg-white/10' },
-  Dinner:    { icon: 'nights_stay', bg: 'bg-plum-50',           bgToday: 'bg-white/10' },
+  Breakfast: { icon: 'sun',  bg: 'bg-caution-100',   bgToday: 'bg-white/10' },
+  Lunch:     { icon: 'sun',  bg: 'bg-info-100',      bgToday: 'bg-white/10' },
+  Dinner:    { icon: 'moon', bg: 'bg-lavender-100',  bgToday: 'bg-white/10' },
 };
 
 const DEMO_MEALS = {
@@ -63,7 +64,7 @@ function DaysAtAGlance() {
 
   return (
     <Card className="!p-5">
-      <p className="font-mono text-xs font-semibold uppercase tracking-eyebrow text-char-500 mb-4">
+      <p className="font-label text-xs font-semibold uppercase tracking-eyebrow text-char-500 mb-4">
         Days at a glance
       </p>
       <div className="grid grid-cols-3 gap-3">
@@ -87,14 +88,14 @@ function DaysAtAGlance() {
             >
               <div className="flex items-baseline gap-1.5 mb-3">
                 <span
-                  className={`font-mono text-lg font-bold leading-none ${
-                    isToday ? 'text-white' : 'text-char-900'
+                  className={`font-label text-lg font-bold leading-none ${
+                    isToday ? 'text-white' : 'text-blue-950'
                   }`}
                 >
                   {dateNum}
                 </span>
                 <span
-                  className={`font-mono text-[10px] font-semibold uppercase ${
+                  className={`font-label text-[10px] font-semibold uppercase ${
                     isToday ? 'text-white/60' : 'text-char-500'
                   }`}
                 >
@@ -110,12 +111,11 @@ function DaysAtAGlance() {
                       className={`p-2 flex-1 rounded-sm ${isToday ? meta.bgToday : meta.bg}`}
                     >
                       <div className="flex items-center gap-1 mb-1">
-                        <span
-                          className={`material-symbols-rounded ${isToday ? 'text-white/60' : 'text-char-500'}`}
-                          style={{ fontSize: 13 }}
-                        >
-                          {meta.icon}
-                        </span>
+                        <Icon
+                          name={meta.icon}
+                          size={13}
+                          className={isToday ? 'text-white/60' : 'text-char-500'}
+                        />
                         <span
                           className={`text-[9px] font-bold uppercase tracking-wider ${
                             isToday ? 'text-white/60' : 'text-char-500'
@@ -208,9 +208,7 @@ function FoodDetailSheet({ food, profile, onClose }) {
                 className="text-xs text-forest-700 font-semibold font-sans mt-1 hover:text-forest-800 transition-colors duration-fast"
               >
                 See the studies
-                <span className="material-symbols-rounded align-middle ml-0.5" style={{ fontSize: 14 }}>
-                  arrow_forward
-                </span>
+                <Icon name="arrow-right" size={14} className="inline-block align-middle ml-0.5" />
               </button>
             )}
           </div>
@@ -264,10 +262,10 @@ export default function HomeScreen() {
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-mono text-xs font-semibold uppercase tracking-eyebrow text-char-500">
+            <p className="font-label text-xs font-semibold uppercase tracking-eyebrow text-char-500">
               {getTodayEyebrow()}
             </p>
-            <h1 className="font-display text-[40px] font-semibold text-char-900 mt-1 leading-tight">
+            <h1 className="font-display text-[40px] font-semibold text-blue-950 mt-1 leading-tight">
               {getGreeting()}, Mory.
             </h1>
           </div>
@@ -276,9 +274,7 @@ export default function HomeScreen() {
             className="w-10 h-10 rounded-full hover:bg-char-900/5 flex items-center justify-center transition-colors duration-fast"
             aria-label="Notifications"
           >
-            <span className="material-symbols-rounded text-char-400" style={{ fontSize: 22 }}>
-              notifications
-            </span>
+            <Icon name="bell" size={22} className="text-char-400" />
           </button>
         </div>
         {ghostProfile?.conditions?.length > 0 && (
@@ -296,7 +292,7 @@ export default function HomeScreen() {
       {/* Your food profile — categories + top foods */}
       <Card className="!p-5">
         <div className="flex items-center justify-between mb-4">
-          <p className="font-mono text-xs font-semibold uppercase tracking-eyebrow text-char-500">
+          <p className="font-label text-xs font-semibold uppercase tracking-eyebrow text-char-500">
             Your food profile
           </p>
           <p className="text-[11px] text-char-400 font-sans">
@@ -323,7 +319,7 @@ export default function HomeScreen() {
                       }`}
                   >
                     {cat}
-                    <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white/80' : 'bg-paper-200 text-char-400'}`}>
+                    <span className={`font-label text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white/80' : 'bg-paper-200 text-char-400'}`}>
                       {byCategory[cat].length}
                     </span>
                   </button>
@@ -335,7 +331,7 @@ export default function HomeScreen() {
 
         {/* Most helpful grid */}
         <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-semibold text-char-900 font-sans">
+          <p className="text-sm font-semibold text-blue-950 font-sans">
             {selectedCategory ? selectedCategory : 'Most helpful for you'}
           </p>
           {selectedCategory && (
@@ -354,7 +350,7 @@ export default function HomeScreen() {
             action={
               <button
                 onClick={() => navigate('/onboarding')}
-                className="px-5 py-2.5 rounded-pill bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold font-sans transition-colors duration-fast"
+                className="px-5 py-2.5 rounded-xs bg-forest-700 hover:bg-forest-800 text-white text-sm font-semibold font-sans transition-colors duration-fast"
               >
                 Set up profile
               </button>
@@ -372,8 +368,8 @@ export default function HomeScreen() {
                   active:translate-y-[1px] active:scale-[0.99]"
               >
                 {i < 3 && (
-                  <span className="absolute top-0.5 right-0.5 z-10 flex items-center gap-px px-1 py-px rounded bg-honey-600 text-white text-[7px] font-bold font-mono shadow-sm">
-                    <span className="material-symbols-rounded" style={{ fontSize: 8 }}>kid_star</span>
+                  <span className="absolute top-0.5 right-0.5 z-10 flex items-center gap-px px-1 py-px rounded bg-yellow-400 text-white text-[7px] font-bold font-label shadow-sm">
+                    <Icon name="star" size={8} />
                     #{i + 1}
                   </span>
                 )}
@@ -394,9 +390,9 @@ export default function HomeScreen() {
                   )}
                 </div>
                 <div className="p-1.5 bg-white rounded-t-sm -mt-3 relative">
-                  <p className="text-[10px] font-semibold text-char-900 font-sans truncate">{food.name}</p>
+                  <p className="text-[10px] font-semibold text-blue-950 font-sans truncate">{food.name}</p>
                   {food.referenceCount > 0 && (
-                    <p className="text-[9px] text-char-400 font-mono mt-0.5">
+                    <p className="text-[9px] text-char-400 font-label mt-0.5">
                       {food.referenceCount} {food.referenceCount === 1 ? 'study' : 'studies'}
                     </p>
                   )}
@@ -414,17 +410,16 @@ export default function HomeScreen() {
               className="w-full flex items-center justify-between mt-5 mb-3"
             >
               <div className="flex items-center gap-2">
-                <p className="font-mono text-xs font-semibold uppercase tracking-eyebrow text-signal-avoid">Foods to avoid</p>
-                <span className="px-1.5 py-0.5 bg-signal-avoid-tint text-signal-avoid text-[10px] font-semibold rounded-pill font-mono">
+                <p className="font-label text-xs font-semibold uppercase tracking-eyebrow text-signal-avoid">Foods to avoid</p>
+                <span className="px-1.5 py-0.5 bg-signal-avoid-tint text-signal-avoid text-[10px] font-semibold rounded-pill font-label">
                   {avoid.length}
                 </span>
               </div>
-              <span
-                className={`material-symbols-rounded text-signal-avoid transition-transform duration-base ${avoidOpen ? 'rotate-180' : ''}`}
-                style={{ fontSize: 16 }}
-              >
-                expand_more
-              </span>
+              <Icon
+                name="chevron-down"
+                size={16}
+                className={`text-signal-avoid transition-transform duration-base ${avoidOpen ? 'rotate-180' : ''}`}
+              />
             </button>
 
             <div className={`grid grid-cols-3 gap-2 ${avoidOpen ? 'grid' : 'hidden'}`}>
@@ -454,9 +449,9 @@ export default function HomeScreen() {
                     )}
                   </div>
                   <div className="p-1.5 bg-white rounded-t-sm -mt-3 relative">
-                    <p className="text-[10px] font-semibold text-char-900 font-sans truncate">{food.name}</p>
+                    <p className="text-[10px] font-semibold text-blue-950 font-sans truncate">{food.name}</p>
                     {food.referenceCount > 0 && (
-                      <p className="text-[9px] text-char-400 font-mono mt-0.5">
+                      <p className="text-[9px] text-char-400 font-label mt-0.5">
                         {food.referenceCount} {food.referenceCount === 1 ? 'study' : 'studies'}
                       </p>
                     )}

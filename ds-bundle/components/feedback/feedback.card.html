@@ -1,0 +1,30 @@
+<!-- @dsCard group="Components" viewport="700x400" name="Feedback" subtitle="Toast · EmptyState · AlertBanner · RatingDots" -->
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="../../_ds_bundle.js"></script>
+</head><body style="padding:24px;display:flex;flex-direction:column;gap:16px">
+<div id="toasts" style="display:flex;flex-direction:column;gap:8px;max-width:520px"></div>
+<div id="alerts" style="display:flex;flex-direction:column;gap:8px;max-width:520px"></div>
+<div id="dots" style="display:flex;flex-direction:column;gap:10px;background:var(--yellow-100);border-radius:16px;padding:16px;max-width:360px"></div>
+<script type="text/babel">
+const { Toast, AlertBanner, RatingDots } = window.RemediDesign || {};
+if (Toast) {
+  ReactDOM.render(<>
+    <Toast type="beneficial" title="Added to daily picks" message="Blueberries logged for today"/>
+    <Toast type="limit" title="Limit this food" message="White rice should be eaten sparingly"/>
+    <Toast type="avoid" title="Not recommended" message="Conflicts with your Type 2 Diabetes profile"/>
+    <Toast type="info" title="New research available" message="3 new studies added for Omega-3 foods"/>
+  </>, document.getElementById('toasts'));
+  ReactDOM.render(<>
+    <AlertBanner type="warning" message="Your profile is incomplete — add conditions to get personalized picks" ctaLabel="Complete"/>
+    <AlertBanner type="success" message="Profile complete — your daily picks are ready"/>
+    <AlertBanner type="info" message="5 new studies added to your food recommendations" ctaLabel="See now"/>
+  </>, document.getElementById('alerts'));
+  ReactDOM.render(<>
+    <RatingDots value={5} label="Highly recommended"/>
+    <RatingDots value={3.5} label="Moderate benefit"/>
+    <RatingDots value={1} label="Avoid if possible"/>
+  </>, document.getElementById('dots'));
+}
+</script>
+</body></html>

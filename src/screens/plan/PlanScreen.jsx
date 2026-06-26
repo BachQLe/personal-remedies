@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../../api/api.js';
-import Card from '../../components/Card.jsx';
-import DayStrip from '../../components/DayStrip.jsx';
-import FoodCard from '../../components/FoodCard.jsx';
-import RecipeCard from '../../components/RecipeCard.jsx';
-import ConditionTag from '../../components/ConditionTag.jsx';
-import SignalChip from '../../components/SignalChip.jsx';
-import StudyReferences from '../../components/StudyReferences.jsx';
-import BottomSheet from '../../components/BottomSheet.jsx';
-import EmptyState from '../../components/EmptyState.jsx';
-import Skeleton from '../../components/Skeleton.jsx';
+import Card from '../../components/shared/Card.jsx';
+import DayStrip from './DayStrip.jsx';
+import FoodCard from '../../components/shared/FoodCard.jsx';
+import RecipeCard from '../../components/shared/RecipeCard.jsx';
+import ConditionTag from '../../components/shared/ConditionTag.jsx';
+import SignalChip from '../../components/shared/SignalChip.jsx';
+import StudyReferences from '../../components/shared/StudyReferences.jsx';
+import BottomSheet from '../../components/shared/BottomSheet.jsx';
+import EmptyState from '../../components/shared/EmptyState.jsx';
+import Skeleton from '../../components/shared/Skeleton.jsx';
+import Icon from '../../components/shared/Icon.jsx';
 import { GHOST_PLAN } from '../../api/ghostData.js';
 
 const DEMO_PROFILE = {
@@ -81,9 +82,7 @@ function FoodDetailSheet({ food, profile, onClose }) {
                 className="text-xs text-forest-700 font-semibold mt-1 transition-colors duration-fast hover:text-forest-800"
               >
                 See the studies
-                <span className="material-symbols-rounded align-middle ml-0.5" style={{ fontSize: 14 }}>
-                  arrow_forward
-                </span>
+                <Icon name="arrow-right" size={14} className="inline-block align-middle ml-0.5" />
               </button>
             )}
           </div>
@@ -128,7 +127,7 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
       <div className="flex items-center justify-between mb-4">
         <p className="text-xs text-char-500 font-medium font-sans">{recipe.sourceName}</p>
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-signal-beneficial-tint">
-          <span className="material-symbols-rounded text-signal-beneficial" style={{ fontSize: 14 }}>check_circle</span>
+          <Icon name="check" size={14} className="text-signal-beneficial" />
           <span className="text-xs text-signal-beneficial font-semibold font-sans">Matched to your profile</span>
         </div>
       </div>
@@ -145,14 +144,14 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
       {/* Ingredients */}
       {recipe.ingredients?.length > 0 && (
         <div>
-          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-3 font-sans">Ingredients</p>
+          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-3 font-label">Ingredients</p>
           <div className="flex flex-col gap-3">
             {recipe.ingredients.map((ing, i) => {
               const relevantConds = ing.matchedConditions?.filter((c) => conditions.includes(c)) ?? [];
               return (
                 <div key={i} className="bg-sand-100 rounded-xl p-4">
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="font-sans font-medium text-char-900 text-sm">{ing.name}</span>
+                    <span className="font-sans font-medium text-blue-950 text-sm">{ing.name}</span>
                     {ing.signal && ing.signal !== 'neutral' && <SignalChip signal={ing.signal} compact />}
                   </div>
                   {relevantConds.length > 0 && (
@@ -176,9 +175,7 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
                             className="text-xs text-forest-700 font-semibold mt-1 transition-colors duration-fast hover:text-forest-800"
                           >
                             See the studies
-                            <span className="material-symbols-rounded align-middle ml-0.5" style={{ fontSize: 14 }}>
-                              arrow_forward
-                            </span>
+                            <Icon name="arrow-right" size={14} className="inline-block align-middle ml-0.5" />
                           </button>
                         )}
                       </div>
@@ -196,10 +193,10 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
 
 // ── Meal slot meta (Material Symbols icons, DS tint backgrounds) ─────────────
 const SLOT_META = {
-  Breakfast: { icon: 'wb_twilight', bg: 'bg-signal-limit-tint' },
-  Lunch: { icon: 'sunny', bg: 'bg-signal-info-tint' },
-  Dinner: { icon: 'nights_stay', bg: 'bg-plum-50' },
-  Snack: { icon: 'nutrition', bg: 'bg-signal-beneficial-tint' },
+  Breakfast: { icon: 'sun',  bg: 'bg-caution-100' },
+  Lunch:     { icon: 'sun',  bg: 'bg-info-100' },
+  Dinner:    { icon: 'moon', bg: 'bg-lavender-100' },
+  Snack:     { icon: 'leaf', bg: 'bg-benefit-100' },
 };
 
 // ── Meal slot column (matches home page WeekCalendar square aesthetic) ───────
@@ -220,7 +217,7 @@ function MealSlotColumn({ meal, onFoodSelect, onRecipeSelect, replaceMode, onSlo
         style={{ animation: 'plan-jitter 0.4s ease-in-out infinite' }}
       >
         <div className={`p-2 ${meta.bg} flex items-center gap-1.5`}>
-          <span className="material-symbols-rounded text-char-700" style={{ fontSize: 14 }}>{meta.icon}</span>
+          <Icon name={meta.icon} size={14} className="text-char-700" />
           <span className="text-[10px] font-bold uppercase tracking-wider text-char-700">{meal.slot}</span>
         </div>
         <div className="flex flex-col gap-1 p-2 flex-1">
@@ -231,7 +228,7 @@ function MealSlotColumn({ meal, onFoodSelect, onRecipeSelect, replaceMode, onSlo
           )}
         </div>
         <div className="px-2 pb-2">
-          <span className="material-symbols-rounded text-forest-600 block text-center" style={{ fontSize: 20 }}>swap_horiz</span>
+          <Icon name="refresh-cw" size={20} className="text-forest-600 mx-auto block" />
         </div>
       </button>
     );
@@ -244,7 +241,7 @@ function MealSlotColumn({ meal, onFoodSelect, onRecipeSelect, replaceMode, onSlo
     >
       {/* Slot header (Breakfast / Lunch / Dinner / Snack) */}
       <div className={`p-2 ${meta.bg} flex items-center gap-1.5`}>
-        <span className="material-symbols-rounded text-char-700" style={{ fontSize: 14 }}>{meta.icon}</span>
+        <Icon name={meta.icon} size={14} className="text-char-700" />
         <span className="text-[10px] font-bold uppercase tracking-wider text-char-700">{meal.slot}</span>
       </div>
 
@@ -409,21 +406,20 @@ function RecommendationCard({ recipe, rank, expanded, onToggle, onReplace, onInf
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-sans font-semibold text-char-900 text-sm leading-snug">{recipe.title}</p>
+          <p className="font-sans font-semibold text-blue-950 text-sm leading-snug">{recipe.title}</p>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-xs text-char-500">{recipe.sourceName}</p>
             <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-signal-beneficial-tint">
-              <span className="material-symbols-rounded text-signal-beneficial" style={{ fontSize: 12 }}>favorite</span>
+              <Icon name="heart" size={12} className="text-signal-beneficial" />
               <span className="text-[10px] font-bold text-signal-beneficial">{recipe.healthScore}</span>
             </div>
           </div>
         </div>
-        <span
-          className={`flex-shrink-0 text-char-400 material-symbols-rounded transition-transform duration-fast ${expanded ? 'rotate-180' : ''}`}
-          style={{ fontSize: 18 }}
-        >
-          expand_more
-        </span>
+        <Icon
+          name="chevron-down"
+          size={18}
+          className={`flex-shrink-0 text-char-400 transition-transform duration-fast ${expanded ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {expanded && (
@@ -433,7 +429,7 @@ function RecommendationCard({ recipe, rank, expanded, onToggle, onReplace, onInf
             className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold text-forest-700 font-sans
               transition-colors duration-fast hover:bg-forest-50 active:bg-forest-100 border-r border-sand-200"
           >
-            <span className="material-symbols-rounded" style={{ fontSize: 22 }}>swap_horiz</span>
+            <Icon name="refresh-cw" size={22} />
             Replace a meal
           </button>
           <button
@@ -441,7 +437,7 @@ function RecommendationCard({ recipe, rank, expanded, onToggle, onReplace, onInf
             className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold text-char-600 font-sans
               transition-colors duration-fast hover:bg-sand-50 active:bg-sand-100"
           >
-            <span className="material-symbols-rounded" style={{ fontSize: 22 }}>info</span>
+            <Icon name="info" size={22} />
             View details
           </button>
         </div>
@@ -524,8 +520,8 @@ export default function PlanScreen() {
     >
       {/* Header */}
       <div className="px-5 pt-6 pb-4">
-        <p className="text-[12px] text-char-500 font-bold uppercase tracking-eyebrow mb-1 font-sans">Personal Remedies</p>
-        <h1 className="font-display text-2xl font-semibold text-char-900 tracking-tightish">Meal plan</h1>
+        <p className="text-[12px] text-char-500 font-bold uppercase tracking-eyebrow mb-1 font-label">Personal Remedies</p>
+        <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">Meal plan</h1>
       </div>
 
       <div>
@@ -542,7 +538,7 @@ export default function PlanScreen() {
         {/* Date label + reassurance */}
         <div className="px-5 mb-5" data-ghost-hide>
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="text-sm font-semibold text-char-900 font-sans">
+            <p className="text-sm font-semibold text-blue-950 font-sans">
               {selectedDate === today
                 ? 'Today'
                 : new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
@@ -571,7 +567,7 @@ export default function PlanScreen() {
             {replacingRecipe && (
               <div className="flex items-center justify-between bg-forest-50 border border-forest-300 rounded-xl px-4 py-3">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="material-symbols-rounded text-forest-700" style={{ fontSize: 20 }}>swap_horiz</span>
+                  <Icon name="refresh-cw" size={20} className="text-forest-700" />
                   <p className="text-sm font-semibold text-forest-800 font-sans truncate">
                     Tap a meal to replace with <span className="text-forest-900">{replacingRecipe.title}</span>
                   </p>
@@ -601,8 +597,8 @@ export default function PlanScreen() {
         {!ghost && !dayLoading && recommendations.length > 0 && (
           <div className="px-5 mt-8">
             <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-rounded text-forest-700" style={{ fontSize: 20 }}>recommend</span>
-              <h2 className="font-display text-lg font-semibold text-char-900 tracking-tightish">Top recipes for you</h2>
+              <Icon name="award" size={20} className="text-forest-700" />
+              <h2 className="font-display text-lg font-semibold text-blue-950 tracking-tightish">Top recipes for you</h2>
             </div>
             <p className="text-xs text-char-500 mb-4 font-sans">Sorted by healthiness score. Tap to replace a meal or view details.</p>
             <div className="flex flex-col gap-2.5">

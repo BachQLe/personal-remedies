@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
 import { api } from '../../api/api.js';
-import ConditionTag from '../../components/ConditionTag.jsx';
-import SignalChip from '../../components/SignalChip.jsx';
-import StudyReferences from '../../components/StudyReferences.jsx';
-import BottomSheet from '../../components/BottomSheet.jsx';
-import EmptyState from '../../components/EmptyState.jsx';
+import ConditionTag from '../../components/shared/ConditionTag.jsx';
+import SignalChip from '../../components/shared/SignalChip.jsx';
+import StudyReferences from '../../components/shared/StudyReferences.jsx';
+import BottomSheet from '../../components/shared/BottomSheet.jsx';
+import EmptyState from '../../components/shared/EmptyState.jsx';
+import Icon from '../../components/shared/Icon.jsx';
 import { GHOST_WEEK } from '../../api/ghostData.js';
 
 const DEMO_PROFILE = {
@@ -29,10 +30,10 @@ function recipeUsefulness(recipe, profile) {
 
 // ── Meal slot meta (Material Symbols icons, DS tint backgrounds) ─────────────
 const SLOT_META = {
-  Breakfast: { icon: 'wb_twilight', bg: 'bg-signal-limit-tint', short: 'B' },
-  Lunch: { icon: 'sunny', bg: 'bg-signal-info-tint', short: 'L' },
-  Dinner: { icon: 'nights_stay', bg: 'bg-plum-50', short: 'D' },
-  Snack: { icon: 'nutrition', bg: 'bg-signal-beneficial-tint', short: 'S' },
+  Breakfast: { icon: 'sun',  bg: 'bg-caution-100',   short: 'B' },
+  Lunch:     { icon: 'sun',  bg: 'bg-info-100',      short: 'L' },
+  Dinner:    { icon: 'moon', bg: 'bg-lavender-100',  short: 'D' },
+  Snack:     { icon: 'leaf', bg: 'bg-benefit-100',    short: 'S' },
 };
 const SLOT_ORDER = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
 
@@ -92,9 +93,7 @@ function FoodDetailSheet({ food, profile, onClose }) {
                 className="text-xs text-forest-700 font-semibold mt-1 transition-colors duration-fast hover:text-forest-800"
               >
                 See the studies
-                <span className="material-symbols-rounded align-middle ml-0.5" style={{ fontSize: 14 }}>
-                  arrow_forward
-                </span>
+                <Icon name="arrow-right" size={14} className="inline-block align-middle ml-0.5" />
               </button>
             )}
           </div>
@@ -137,7 +136,7 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
       <div className="flex items-center justify-between mb-4">
         <p className="text-xs text-char-500 font-medium font-sans">{recipe.sourceName}</p>
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-signal-beneficial-tint">
-          <span className="material-symbols-rounded text-signal-beneficial" style={{ fontSize: 14 }}>check_circle</span>
+          <Icon name="check" size={14} className="text-signal-beneficial" />
           <span className="text-xs text-signal-beneficial font-semibold font-sans">Matched to your profile</span>
         </div>
       </div>
@@ -152,14 +151,14 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
 
       {recipe.ingredients?.length > 0 && (
         <div>
-          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-3 font-sans">Ingredients</p>
+          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-3 font-label">Ingredients</p>
           <div className="flex flex-col gap-3">
             {recipe.ingredients.map((ing, i) => {
               const relevantConds = ing.matchedConditions?.filter((c) => conditions.includes(c)) ?? [];
               return (
                 <div key={i} className="bg-sand-100 rounded-xl p-4">
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="font-sans font-medium text-char-900 text-sm">{ing.name}</span>
+                    <span className="font-sans font-medium text-blue-950 text-sm">{ing.name}</span>
                     {ing.signal && ing.signal !== 'neutral' && <SignalChip signal={ing.signal} compact />}
                   </div>
                   {relevantConds.length > 0 && (
@@ -183,9 +182,7 @@ function RecipeDetailSheet({ recipe, profile, onClose }) {
                             className="text-xs text-forest-700 font-semibold mt-1 transition-colors duration-fast hover:text-forest-800"
                           >
                             See the studies
-                            <span className="material-symbols-rounded align-middle ml-0.5" style={{ fontSize: 14 }}>
-                              arrow_forward
-                            </span>
+                            <Icon name="arrow-right" size={14} className="inline-block align-middle ml-0.5" />
                           </button>
                         )}
                       </div>
@@ -227,7 +224,7 @@ function SlotCell({ meal, dayIndex, slot, swap, onFoodSelect, onRecipeSelect, on
         {foods.map((f) => (
           <span key={f.id} className="text-[10px] text-char-500 leading-tight truncate">{f.name}</span>
         ))}
-        <span className="material-symbols-rounded text-forest-600 mt-auto" style={{ fontSize: 16 }}>swap_horiz</span>
+        <Icon name="refresh-cw" size={16} className="text-forest-600 mt-auto" />
       </button>
     );
   }
@@ -244,7 +241,7 @@ function SlotCell({ meal, dayIndex, slot, swap, onFoodSelect, onRecipeSelect, on
           className="flex items-start gap-0.5 text-left rounded bg-forest-100 px-1 py-0.5
             hover:bg-forest-200/70 transition-colors duration-fast"
         >
-          <span className="material-symbols-rounded text-forest-700 mt-px flex-shrink-0" style={{ fontSize: 11 }}>restaurant</span>
+          <Icon name="utensils" size={11} className="text-forest-700 mt-px flex-shrink-0" />
           <span className="text-[10px] font-semibold text-forest-800 leading-tight line-clamp-2">{recipe.title}</span>
         </button>
       )}
@@ -283,7 +280,7 @@ function WeekCalendar({ days, swap, todayISO, onFoodSelect, onRecipeSelect, onPl
           const meta = SLOT_META[slot];
           return (
             <div key={slot} className={`flex items-center justify-center gap-1 rounded-md py-1.5 ${meta.bg}`}>
-              <span className="material-symbols-rounded text-char-700" style={{ fontSize: 13 }}>{meta.icon}</span>
+              <Icon name={meta.icon} size={13} className="text-char-700" />
               <span className="text-[9px] font-bold uppercase tracking-wider text-char-700 hidden min-[380px]:inline">{slot}</span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-char-700 min-[380px]:hidden">{meta.short}</span>
             </div>
@@ -348,11 +345,11 @@ function WeekRecipeRow({ entry, expanded, onToggle, onSwap, onInfo }) {
           <p className="font-sans font-semibold text-char-900 text-sm leading-snug line-clamp-1">{recipe.title}</p>
           <div className="flex items-center gap-2 mt-1">
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-sand-100">
-              <span className="material-symbols-rounded text-char-500" style={{ fontSize: 11 }}>{meta.icon}</span>
+              <Icon name={meta.icon} size={11} className="text-char-500" />
               <span className="text-[10px] font-semibold text-char-600">{weekday} · {slot}</span>
             </span>
             <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-signal-beneficial-tint">
-              <span className="material-symbols-rounded text-signal-beneficial" style={{ fontSize: 12 }}>favorite</span>
+              <Icon name="heart" size={12} className="text-signal-beneficial" />
               <span className="text-[10px] font-bold text-signal-beneficial">{recipe.healthScore}</span>
             </div>
           </div>
