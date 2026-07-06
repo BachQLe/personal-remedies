@@ -1,87 +1,150 @@
+/**
+ * api.js — The single interface every screen imports.
+ *
+ * Exposes the typed Nutridigm adapter functions and a small set of
+ * legacy helpers (profile storage, swipe deck, recipe stub) that
+ * screens still call via `api.*`.
+ */
+
 import {
-  swipeDeckFoods,
-  foods,
-  recipes,
-  dayPlans,
-  referencesDb,
-  unknownFoodNames,
-} from './mockData.js';
+  searchFoods,
+  assessFood,
+  getSuggestions,
+  getWorstFoods,
+  getTopDosAndDonts,
+  getAlternatives,
+  getCategoryDetail,
+  buildMealPlan,
+  getRecipes,
+  getConditions,
+  getFoodGroups,
+  getFoodDictionary,
+  getFoodFacts,
+  getNutritionFacts,
+  getConditionName,
+  getConditionNames,
+  getConditionIdByName,
+  getFoodIdByName,
+  getGroupLabel,
+  getGroupLabels,
+  getCachedRefCount,
+  warmReferenceCount,
+} from './adapter.js';
+import { fetchReferences } from './nutridigm.js';
 import { storage } from './storage.js';
+import { schedulePush } from './profileSync.js';
+
+// ── Re-export typed interface ────────────────────────────────────────────────
+
+export {
+  searchFoods,
+  assessFood,
+  getSuggestions,
+  getWorstFoods,
+  getTopDosAndDonts,
+  getAlternatives,
+  getCategoryDetail,
+  buildMealPlan,
+  getRecipes,
+  getConditions,
+  getFoodGroups,
+  getFoodDictionary,
+  getFoodFacts,
+  getNutritionFacts,
+  getConditionName,
+  getConditionNames,
+  getGroupLabel,
+  getGroupLabels,
+  getCachedRefCount,
+  warmReferenceCount,
+};
+
+// ── Unified search (foods only) ──────────────────────────────────────────────
+
+/**
+ * Search across foods. Returns tagged results with `kind: 'food'`.
+ * @param {string} query
+ * @param {import('./types.js').Profile} [profile]
+ * @returns {Promise<Array<{ kind: 'food', key: string, food: object }>>}
+ */
+export async function searchFoodsAndRecipes(query, profile) {
+  const q = (query || '').trim();
+  if (!q) return [];
+
+  const foods = await searchFoods(q, profile).catch((err) => {
+    console.error('searchFoodsAndRecipes: searchFoods failed', err);
+    return [];
+  });
+
+  return foods.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f }));
+}
+
+// ── Profile / storage helpers ────────────────────────────────────────────────
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Browser-persisted client state. Survives refresh today; swaps to a real
-// backend later by replacing the storage calls below — signatures stay put.
 let _profile = storage.get('profile', null);
-let _tasteSignals = storage.get('tasteSignals', null);
 
-// ── Date helpers ─────────────────────────────────────────────────────────────
-function toISO(date) {
-  return date.toISOString().split('T')[0];
-}
+/**
+ * One-time silent migration: older profiles stored `conditions` as an array
+ * of name strings. Map each name to its healthConditionID (case-insensitive
+ * match on `description`) using the cached conditions dictionary; unmatched
+ * entries are dropped. Numeric profiles pass through untouched.
+ * @param {import('./types.js').Profile|null} profile
+ * @returns {Promise<import('./types.js').Profile|null>}
+ */
+async function migrateProfileConditions(profile) {
+  if (!profile || !Array.isArray(profile.conditions) || !profile.conditions.length) {
+    return profile;
+  }
+  const hasNameStrings = profile.conditions.some((c) => typeof c === 'string');
+  if (!hasNameStrings) return profile;
 
-// Monday-anchored start of the week containing `date`.
-function startOfWeek(date) {
-  const d = new Date(date);
-  const day = d.getDay(); // 0 = Sun … 6 = Sat
-  const diff = (day + 6) % 7; // days since Monday
-  d.setDate(d.getDate() - diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-// Deterministic rotation so a given date always yields the same generic plan.
-function seedFromString(str) {
-  let s = 0;
-  for (let i = 0; i < str.length; i++) s = (s + str.charCodeAt(i) * (i + 1)) >>> 0;
-  return s;
-}
-
-function pickRecipeForMeal(mealType, seed, offset = 0) {
-  const matching = recipes.filter((r) => r.mealType === mealType);
-  const pool = matching.length ? matching : recipes;
-  return pool[(seed + offset) % pool.length];
-}
-
-// Generic, deterministic-per-date meal plan used when a date has no seeded plan.
-function buildGenericPlan(profile, date) {
-  const conditions = profile?.conditions ?? [];
-  const helpful = foods.filter(
-    (f) =>
-      f.signal === 'helpful' &&
-      f.matchedConditions.some((c) => conditions.includes(c)),
+  const dictionary = await getConditions();
+  const byName = new Map(
+    dictionary.map((c) => [c.description.toLowerCase().trim(), c.healthConditionID])
   );
-  const fallback = helpful.length ? helpful : foods.filter((f) => f.signal === 'helpful');
 
-  const seed = seedFromString(date);
-  const rotate = (arr, n) => {
-    if (!arr.length) return arr;
-    const k = n % arr.length;
-    return arr.slice(k).concat(arr.slice(0, k));
-  };
-  const pool = rotate(fallback, seed);
+  const migrated = profile.conditions
+    .map((c) => {
+      if (typeof c === 'number') return c;
+      return byName.get(String(c).toLowerCase().trim());
+    })
+    .filter((id) => typeof id === 'number');
 
-  let idx = 0;
-  const pick = (n) => {
-    const out = pool.slice(idx, idx + n);
-    idx += n;
-    return out.length === n ? out : pool.slice(0, n);
-  };
-
-  return {
-    date,
-    meals: [
-      { slot: 'Breakfast', items: pick(2), recipes: [pickRecipeForMeal('Breakfast', seed, 0)] },
-      { slot: 'Lunch', items: pick(2), recipes: [pickRecipeForMeal('Lunch', seed, 1)] },
-      { slot: 'Dinner', items: pick(2), recipes: [pickRecipeForMeal('Dinner', seed, 2)] },
-      { slot: 'Snack', items: pick(1), recipes: [] },
-    ],
-  };
+  return { ...profile, conditions: migrated };
 }
 
 export const api = {
+  // ── New typed interface (accessible via api.* too) ──────────────────────────
+  searchFoods,
+  assessFood,
+  getSuggestions,
+  getTopDosAndDonts,
+  getAlternatives,
+  getCategoryDetail,
+  buildMealPlan,
+  getConditions,
+  getFoodGroups,
+  getFoodDictionary,
+  getFoodFacts,
+  getNutritionFacts,
+  getConditionName,
+  getConditionNames,
+  searchFoodsAndRecipes,
+  getRecipes,
+  getCachedRefCount,
+  warmReferenceCount,
+
+  // ── Profile ─────────────────────────────────────────────────────────────────
+
   async getProfile() {
     await delay(200);
+    const migrated = await migrateProfileConditions(_profile);
+    if (migrated !== _profile) {
+      _profile = migrated;
+      storage.set('profile', _profile);
+    }
     return _profile;
   },
 
@@ -89,153 +152,57 @@ export const api = {
     await delay(200);
     _profile = { ...p };
     storage.set('profile', _profile);
+    schedulePush();
   },
 
   async clearProfile() {
     await delay(100);
     _profile = null;
     storage.remove('profile');
+    schedulePush();
   },
 
-  async hasOnboarded() {
-    await delay(50);
-    return !!_profile;
-  },
-
-  async saveTasteSignal(signals) {
-    await delay(200);
-    _tasteSignals = [...signals];
-    storage.set('tasteSignals', _tasteSignals);
-  },
-
-  async getTasteSignal() {
-    await delay(200);
-    return _tasteSignals;
-  },
+  // ── Swipe deck (taste calibration) ──────────────────────────────────────────
+  // Returns up to 20 real foods from the dictionary, shaped for SwipeDeck.
 
   async getSwipeDeck() {
-    await delay(200);
-    return swipeDeckFoods;
-  },
-
-  async getTopFoods(profile) {
-    await delay(200);
-    const conditions = profile?.conditions ?? [];
-
-    const rank = (food) =>
-      food.matchedConditions.filter((c) => conditions.includes(c)).length;
-
-    const helpful = foods
-      .filter((f) => f.signal === 'helpful')
-      .sort((a, b) => rank(b) - rank(a));
-
-    const avoid = foods
-      .filter((f) => f.signal === 'avoid')
-      .sort((a, b) => rank(b) - rank(a));
-
-    const byCategory = {};
-    helpful.forEach((f) => {
-      if (!byCategory[f.category]) byCategory[f.category] = [];
-      byCategory[f.category].push(f);
-    });
-
-    return { helpful, avoid, byCategory };
-  },
-
-  async getMealPlan(profile, date) {
-    await delay(200);
-    return dayPlans[date] ?? buildGenericPlan(profile, date);
-  },
-
-  // Full 7-day plan (Monday → Sunday) for the week containing `anchorDate`.
-  async getWeeklyPlan(profile, anchorDate) {
-    await delay(220);
-    const start = startOfWeek(anchorDate ? new Date(anchorDate + 'T00:00:00') : new Date());
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      const iso = toISO(d);
-      const plan = dayPlans[iso] ?? buildGenericPlan(profile, iso);
-      days.push({
-        date: iso,
-        weekday: d.toLocaleDateString('en-US', { weekday: 'short' }),
-        dayNum: d.getDate(),
-        meals: plan.meals,
-      });
-    }
-    return { weekStart: toISO(start), days };
-  },
-
-  async getTopRecipeRecommendations(profile, count = 10) {
-    await delay(200);
-    const conditions = profile?.conditions ?? [];
-    return [...recipes]
-      .map((r) => ({
-        ...r,
-        conditionMatchCount: r.matchedConditions.filter((c) => conditions.includes(c)).length,
+    const foods = await getFoodDictionary();
+    const slice = foods.slice(0, 20);
+    return Promise.all(
+      slice.map(async (f) => ({
+        id: f.id,
+        name: f.name,
+        category: await getGroupLabel(f.fineGroup || f.group),
       }))
-      .sort((a, b) => (b.healthScore ?? 0) - (a.healthScore ?? 0))
-      .slice(0, count);
+    );
   },
 
-  async getRecipes(profile, filters = {}) {
-    await delay(200);
-    const conditions = profile?.conditions ?? [];
-    let result = [...recipes];
+  // ── References ────────────────────────────────────────────────────────────
+  // Used by RecipeDetail (IngredientRow) to lazily load citations for an
+  // ingredient when its studies accordion is expanded.
 
-    if (conditions.length) {
-      const matched = result.filter((r) =>
-        r.matchedConditions.some((c) => conditions.includes(c)),
-      );
-      if (matched.length) result = matched;
+  /**
+   * Resolve an ingredient name + condition (display name, as passed by
+   * RecipeDetail's matchedConditions, or a numeric healthConditionID) to
+   * their Nutridigm IDs and fetch the supporting citations via /references.
+   * Returns [] if either side can't be resolved, or on any fetch error.
+   * @param {string} name - Ingredient/food display name
+   * @param {string|number} condition - Condition display name or healthConditionID
+   * @returns {Promise<string[]>}
+   */
+  async getIngredientReferences(name, condition) {
+    try {
+      const foodId = await getFoodIdByName(name);
+      if (!foodId) return [];
+
+      const conditionId =
+        typeof condition === 'number' ? condition : await getConditionIdByName(condition);
+      if (!conditionId) return [];
+
+      const refs = await fetchReferences(conditionId, foodId);
+      return refs || [];
+    } catch {
+      return [];
     }
-
-    if (filters.mealType && filters.mealType !== 'All') {
-      result = result.filter((r) => r.mealType === filters.mealType);
-    }
-
-    if (filters.condition && filters.condition !== 'All') {
-      result = result.filter((r) => r.matchedConditions.includes(filters.condition));
-    }
-
-    return result;
-  },
-
-  async getRecipe(id) {
-    await delay(200);
-    return recipes.find((r) => r.id === id) ?? null;
-  },
-
-  async getReferences(foodId, condition) {
-    await delay(200);
-    const key = `${foodId}:${condition}`;
-    return referencesDb[key] ?? [];
-  },
-
-  async getIngredientReferences(ingredientName, condition) {
-    await delay(100);
-    const food = foods.find((f) => f.name.toLowerCase() === ingredientName.toLowerCase());
-    if (!food) return [];
-    const key = `${food.id}:${condition}`;
-    return referencesDb[key] ?? [];
-  },
-
-  async lookupFood(query, profile) {
-    await delay(200);
-    const q = query.trim().toLowerCase();
-
-    const isUnknown = unknownFoodNames.some((n) => n.toLowerCase() === q);
-    if (isUnknown) return { known: false, query };
-
-    const food = foods.find((f) => f.name.toLowerCase().includes(q));
-    if (!food) return { known: false, query };
-
-    const perCondition = food.matchedConditions.map((condition) => ({
-      condition,
-      signal: food.signal,
-    }));
-
-    return { known: true, food, perCondition };
   },
 };

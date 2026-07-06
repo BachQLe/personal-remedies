@@ -1,3 +1,10 @@
+// Fallback layer only. The Nutridigm /healthconditions dictionary now
+// carries its own `AKA` field (semicolon-separated aliases, e.g.
+// "Alcohol abuse; AUD"), which ProfileBuilder/ProfileScreen match directly
+// against search queries — that covers most abbreviations. This hand-rolled
+// map stays as a backstop for terms the dictionary's AKA doesn't include
+// (e.g. "t2d", "hbp") or where a domain-specific alias should be surfaced
+// as "Showing results for ..." regardless of AKA coverage.
 export const conditionSynonyms = {
   't2d': 'Type 2 diabetes',
   'type 2': 'Type 2 diabetes',

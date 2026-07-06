@@ -1,18 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../../api/api.js';
-import RecipeCard from '../../components/shared/RecipeCard.jsx';
-import BottomSheet from '../../components/shared/BottomSheet.jsx';
-import ConditionTag from '../../components/shared/ConditionTag.jsx';
-import SignalChip from '../../components/shared/SignalChip.jsx';
-import StudyReferences from '../../components/shared/StudyReferences.jsx';
+import RecipeDetail from '../../components/RecipeDetail.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
 import Pill from '../../components/shared/Pill.jsx';
 import SearchInput from '../../components/shared/SearchInput.jsx';
 import Icon from '../../components/shared/Icon.jsx';
+import DemoDataChip from '../../components/shared/DemoDataChip.jsx';
+import { buildRecipeIngredients } from '../../api/recipeDetail.js';
 import { GHOST_PROFILE, GHOST_RECIPES } from '../../api/ghostData.js';
 
+// Demo key conditions (see api/config.js DEFAULT_DEV_CONDITIONS): 203 = Aging, 244 = Pneumonia.
 const DEMO_PROFILE = {
-  conditions: ['Type 2 Diabetes', 'Hypertension (high blood pressure)', 'High cholesterol'],
+  conditions: [203, 244],
   medications: [],
   allergies: [],
   dietary: [],
@@ -50,159 +49,84 @@ const MEAL_TYPES = [
   { label: 'Snack', icon: 'cookie' },
 ];
 
-// Per-ingredient accordion row inside the detail sheet
-function IngredientRow({ ingredient, profile }) {
-  const [refs, setRefs] = useState(undefined);
-  const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+// ── Tier config (matches IngredientCard's pill pattern) ─────────────────────
 
-  const conditions = profile?.conditions ?? [];
-  const relevantConditions = ingredient.matchedConditions.filter((c) => conditions.includes(c));
-  const displayConditions = relevantConditions.length ? relevantConditions : ingredient.matchedConditions;
+const TIER_CONFIG = {
+  Top: {
+    label: 'Top',
+    bg: 'bg-benefit-100',
+    fg: 'text-benefit-600',
+    dot: 'bg-benefit-600',
+  },
+  Strong: {
+    label: 'Strong',
+    bg: 'bg-forest-50',
+    fg: 'text-forest-700',
+    dot: 'bg-forest-600',
+  },
+  Good: {
+    label: 'Good',
+    bg: 'bg-paper-200',
+    fg: 'text-char-700',
+    dot: 'bg-char-500',
+  },
+};
 
-  async function handleExpand() {
-    if (!expanded && refs === undefined && displayConditions.length > 0) {
-      setLoading(true);
-      const r = await api.getIngredientReferences(ingredient.name, displayConditions[0]);
-      setRefs(r);
-      setLoading(false);
-    }
-    setExpanded((o) => !o);
-  }
+// ── Recipe list row — thumbnail, title, tier pill, source; whole row taps ────
 
-  const isBeneficial = ingredient.signal === 'beneficial';
-
+function RecipeRow({ recipe, onView }) {
+  const tierCfg = recipe.tier ? TIER_CONFIG[recipe.tier] : null;
   return (
-    <div className={`rounded-xl p-3.5 ${isBeneficial ? 'bg-signal-beneficial-tint' : 'bg-sand-100'}`}>
-      <div className="flex items-center gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-semibold text-char-900 font-sans">{ingredient.name}</span>
-            <SignalChip signal={ingredient.signal} compact />
-          </div>
-          {displayConditions.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1.5">
-              {displayConditions.slice(0, 2).map((c) => (
-                <ConditionTag key={c} condition={c} />
-              ))}
-            </div>
-          )}
-        </div>
-        {displayConditions.length > 0 && (
-          <button
-            onClick={handleExpand}
-            className="flex-shrink-0 w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-xs
-              transition-all duration-fast ease-ds-out hover:shadow-sm"
-            aria-label={expanded ? 'Collapse studies' : 'Expand studies'}
-          >
-            <span className={`text-char-500 transition-transform duration-base ${expanded ? 'rotate-180' : ''}`}>
-              <Icon name="chevron-down" size={14} />
-            </span>
-          </button>
-        )}
-      </div>
-
-      {expanded && displayConditions.length > 0 && (
-        <div className="mt-3 pl-1">
-          <StudyReferences references={refs} loading={loading} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function RecipeDetailSheet({ recipe, profile, onClose }) {
-  const helpful = recipe.ingredients.filter((i) => i.signal === 'beneficial');
-  const neutral = recipe.ingredients.filter((i) => i.signal !== 'beneficial');
-
-  const conditions = profile?.conditions ?? [];
-  const matchedToUser = recipe.matchedConditions.filter((c) => conditions.includes(c));
-  const displayConditions = matchedToUser.length ? matchedToUser : recipe.matchedConditions;
-
-  return (
-    <BottomSheet open onClose={onClose}>
-      {/* Hero image */}
-      <div className="-mx-5 -mt-4 mb-5">
-        <div className="w-full h-52 bg-sand-100 overflow-hidden">
+    <button
+      onClick={() => onView(recipe)}
+      className="w-full flex items-center gap-3.5 bg-white rounded-xl border border-sand-200
+        p-3 shadow-xs text-left cursor-pointer
+        transition-all duration-base ease-ds-out
+        hover:border-forest-300 hover:shadow-card hover:-translate-y-[1px]
+        active:translate-y-[1px] active:scale-[0.99]"
+    >
+      {/* Thumbnail */}
+      <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-forest-50 flex items-center justify-center">
+        {recipe.photo ? (
           <img
             src={recipe.photo}
-            alt={recipe.title}
+            alt=""
             className="w-full h-full object-cover"
+            loading="lazy"
             onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
-        </div>
-      </div>
-
-      {/* Title + source */}
-      <div className="mb-5">
-        <h2 className="font-display text-xl font-semibold text-blue-950 tracking-tightish leading-snug">{recipe.title}</h2>
-        <p className="text-sm text-char-500 mt-1 font-sans">
-          from <span className="font-semibold text-char-900">{recipe.sourceName}</span>
-        </p>
-        {/* Prep/cook times in mono if available */}
-        {(recipe.prepTime || recipe.cookTime || recipe.servings) && (
-          <div className="flex items-center gap-4 mt-2.5 font-mono text-xs text-char-500">
-            {recipe.prepTime && (
-              <span className="flex items-center gap-1">
-                <Icon name="clock" size={14} />
-                Prep {recipe.prepTime}
-              </span>
-            )}
-            {recipe.cookTime && (
-              <span className="flex items-center gap-1">
-                <Icon name="zap" size={14} />
-                Cook {recipe.cookTime}
-              </span>
-            )}
-            {recipe.servings && (
-              <span className="flex items-center gap-1">
-                <Icon name="user" size={14} />
-                {recipe.servings}
-              </span>
-            )}
-          </div>
+        ) : (
+          <span className="font-display text-2xl font-semibold text-forest-300">
+            {recipe.title?.[0] || ''}
+          </span>
         )}
       </div>
 
-      {/* Profile match banner */}
-      <div className="bg-signal-beneficial-tint rounded-xl p-4 mb-5">
-        <div className="flex items-center gap-2 mb-2.5">
-          <Icon name="check" size={16} className="text-signal-beneficial" />
-          <span className="text-sm font-bold text-signal-beneficial font-sans">Matched to your profile</span>
-        </div>
-        <div className="flex flex-wrap gap-1.5 mb-2.5">
-          {displayConditions.map((c) => (
-            <ConditionTag key={c} condition={c} />
-          ))}
-        </div>
-        <p className="text-xs text-signal-beneficial font-medium font-sans">
-          <span className="font-mono">{helpful.length}</span> beneficial {helpful.length === 1 ? 'ingredient' : 'ingredients'} · <span className="font-mono">{recipe.ingredients.length}</span> total
-        </p>
-      </div>
-
-      {/* Ingredients */}
-      <div className="mb-6">
-        <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-500 mb-3">Ingredients</p>
-        <div className="flex flex-col gap-2">
-          {helpful.map((ing) => (
-            <IngredientRow key={ing.name} ingredient={ing} profile={profile} />
-          ))}
-          {neutral.map((ing) => (
-            <IngredientRow key={ing.name} ingredient={ing} profile={profile} />
-          ))}
+      {/* Title + tier + source */}
+      <div className="flex-1 min-w-0 flex flex-col gap-[3px]">
+        <span className="font-sans font-semibold text-char-900 text-sm leading-snug line-clamp-2">
+          {recipe.title}
+        </span>
+        <div className="flex items-center gap-2 mt-0.5">
+          {tierCfg && (
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-pill text-[11px] font-semibold ${tierCfg.bg} ${tierCfg.fg}`}>
+              <span className={`w-[6px] h-[6px] rounded-full ${tierCfg.dot}`} />
+              {tierCfg.label}
+            </span>
+          )}
+          {recipe.sourceName && (
+            <span className="text-[11px] text-char-500 font-sans truncate">
+              {recipe.sourceName}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Dismiss */}
-      <button
-        onClick={onClose}
-        className="w-full py-3 rounded-pill border border-sand-200 text-sm font-semibold text-char-500 font-sans
-          transition-all duration-fast ease-ds-out
-          hover:bg-sand-100 active:bg-sand-200"
-      >
-        Dismiss
-      </button>
-    </BottomSheet>
+      {/* Chevron affordance */}
+      <span className="flex-shrink-0 text-char-400">
+        <Icon name="chevron-right" size={16} />
+      </span>
+    </button>
   );
 }
 
@@ -214,26 +138,65 @@ export default function RecipesScreen() {
   const [conditionFilter, setConditionFilter] = useState('All');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  // Display names for the real profile's conditions (healthConditionID[]).
+  const [conditionNames, setConditionNames] = useState([]);
+  const [usedFallback, setUsedFallback] = useState(false);
 
   useEffect(() => {
+    let alive = true;
     async function load() {
       let p = await api.getProfile();
       if (!p) p = DEMO_PROFILE;
+      if (!alive) return;
       setProfile(p);
-      const r = await api.getRecipes(p);
-      setAllRecipes(r);
-      setLoading(false);
+      try {
+        const { recipes, usedFallback: fallback } = await api.getRecipes(p);
+        if (!alive) return;
+        setAllRecipes(recipes ?? []);
+        setUsedFallback(!!fallback);
+      } catch (err) {
+        console.error('RecipesScreen: getRecipes failed', err);
+        if (alive) setAllRecipes([]);
+      } finally {
+        if (alive) setLoading(false);
+      }
     }
     load();
+    return () => { alive = false; };
   }, []);
+
+  useEffect(() => {
+    let alive = true;
+    api
+      .getConditionNames(profile?.conditions ?? [])
+      .then((names) => { if (alive) setConditionNames(names); })
+      .catch(() => { if (alive) setConditionNames([]); });
+    return () => { alive = false; };
+  }, [profile]);
 
   // Ghost mode: render the real layout with placeholder data while loading.
   const ghost = loading;
-  const profileData = ghost ? GHOST_PROFILE : profile;
+  // GHOST_PROFILE already carries display-name strings; the real profile's
+  // conditions are healthConditionIDs, so use the resolved names instead.
+  const conditions = ghost ? (GHOST_PROFILE.conditions ?? []) : conditionNames;
+  const conditionOptions = ['All', ...conditions];
+
   const recipes = ghost ? GHOST_RECIPES : allRecipes;
 
-  const conditions = profileData?.conditions ?? [];
-  const conditionOptions = ['All', ...conditions];
+  // Real recipes (from adapter getRecipes) don't carry a per-ingredient
+  // breakdown yet — enrich with real assessFood/topdoordonts data on open,
+  // via recipeDetail.js's buildRecipeIngredients (mirrors RecipePicksTab's
+  // buildRecipeDetail pattern). Ghost recipes already have `ingredients`.
+  function handleViewRecipe(recipe) {
+    if (recipe.ingredients) {
+      setSelectedRecipe(recipe);
+      return;
+    }
+    setSelectedRecipe({ ...recipe, ingredients: [] });
+    buildRecipeIngredients(recipe, profile)
+      .then(setSelectedRecipe)
+      .catch(() => {});
+  }
 
   const filtered = recipes.filter((r) => {
     const mealOk = mealFilter === 'All' || r.mealType === mealFilter || r.mealType?.toLowerCase() === mealFilter.toLowerCase();
@@ -252,6 +215,11 @@ export default function RecipesScreen() {
         <p className="text-[12px] text-char-500 font-label tracking-[0.14em] uppercase">Personal Remedies</p>
         <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">Recipes</h1>
         <p className="text-sm text-char-500 mt-0.5 font-sans">Condition-approved for your profile</p>
+        {!ghost && usedFallback && (
+          <div className="mt-2">
+            <DemoDataChip />
+          </div>
+        )}
       </div>
 
       {/* Search */}
@@ -314,31 +282,36 @@ export default function RecipesScreen() {
         </p>
       )}
 
-      {/* Recipe grid */}
+      {/* Recipe list */}
       {filtered.length === 0 ? (
         <EmptyState
           icon="menu_book"
-          title="No recipes found"
-          body="Try adjusting the filters above."
+          title={recipes.length === 0 ? 'No recipes yet' : 'No recipes found'}
+          body={
+            recipes.length === 0
+              ? 'Set up your health profile to get condition-matched recipes.'
+              : 'Try adjusting the filters above.'
+          }
           action={
-            <button
-              onClick={() => { setMealFilter('All'); setConditionFilter('All'); setSearchQuery(''); }}
-              className="px-5 py-2.5 rounded-xs bg-forest-700 text-white text-sm font-semibold font-sans
-                transition-all duration-fast ease-ds-out
-                hover:bg-forest-800 active:scale-[0.98]"
-            >
-              Clear filters
-            </button>
+            recipes.length === 0 ? undefined : (
+              <button
+                onClick={() => { setMealFilter('All'); setConditionFilter('All'); setSearchQuery(''); }}
+                className="px-5 py-2.5 rounded-xs bg-forest-700 text-white text-sm font-semibold font-sans
+                  transition-all duration-fast ease-ds-out
+                  hover:bg-forest-800 active:scale-[0.98]"
+              >
+                Clear filters
+              </button>
+            )
           }
         />
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-2.5">
           {filtered.map((recipe) => (
-            <RecipeCard
+            <RecipeRow
               key={recipe.id}
               recipe={recipe}
-              layout="grid"
-              onClick={() => setSelectedRecipe(recipe)}
+              onView={handleViewRecipe}
             />
           ))}
         </div>
@@ -346,7 +319,7 @@ export default function RecipesScreen() {
 
       {/* Recipe detail sheet */}
       {selectedRecipe && (
-        <RecipeDetailSheet
+        <RecipeDetail
           recipe={selectedRecipe}
           profile={profile}
           onClose={() => setSelectedRecipe(null)}

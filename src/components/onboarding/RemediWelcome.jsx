@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
-// Lavender onboarding panel (design system: --lavender-300)
-const BG = '#C8A8E8';
+// Blue onboarding panel (design system: blue-200)
+const BG = '#BBCEFF';
 
 // ----------------------------------------------------------------------------
 // Timing — every beat lives here so the moment can be tuned by feel.
@@ -47,6 +47,9 @@ export default function RemediWelcome({ onNext }) {
   const [showButton, setShowButton] = useState(instant);
   const [showSubtext, setShowSubtext] = useState(instant);
   const [finished, setFinished] = useState(instant);
+  const [firstName, setFirstName] = useState('');
+
+  const canSubmit = finished && firstName.trim().length > 0;
 
   const timersRef = useRef([]);
 
@@ -133,13 +136,36 @@ export default function RemediWelcome({ onNext }) {
         </p>
 
         <div className="mt-9 flex flex-col items-center">
-          <motion.button
-            onClick={finished ? onNext : undefined}
+          <motion.div
             initial={false}
             animate={{ opacity: showButton ? 1 : 0 }}
             transition={{ duration: BUTTON_IN, ease: EASE_OUT }}
-            className="px-12 py-4 rounded-pill text-blue-950 font-semibold text-base bg-white hover:bg-white/90 transition-colors duration-fast min-h-[48px] font-sans shadow-md"
             style={{ pointerEvents: showButton ? 'auto' : 'none' }}
+            className="w-full flex justify-center mb-4"
+          >
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && canSubmit) onNext(firstName.trim());
+              }}
+              placeholder="Your first name"
+              aria-label="Your first name"
+              autoComplete="given-name"
+              enterKeyHint="next"
+              className="w-full max-w-[280px] text-center px-5 py-3.5 rounded-pill border-[1.5px] border-blue-950/15 bg-white/70 text-blue-950 placeholder:text-blue-950/40 text-base font-sans shadow-sm outline-none transition-all duration-fast focus:border-blue-950/40 focus:bg-white"
+            />
+          </motion.div>
+
+          <motion.button
+            onClick={canSubmit ? () => onNext(firstName.trim()) : undefined}
+            disabled={!canSubmit}
+            initial={false}
+            animate={{ opacity: !showButton ? 0 : canSubmit ? 1 : 0.5 }}
+            transition={{ duration: BUTTON_IN, ease: EASE_OUT }}
+            className="px-12 py-4 rounded-pill text-blue-950 font-semibold text-base bg-white hover:bg-white/90 transition-colors duration-fast min-h-[48px] font-sans shadow-md disabled:cursor-not-allowed"
+            style={{ pointerEvents: showButton && canSubmit ? 'auto' : 'none' }}
           >
             Set up my profile
           </motion.button>

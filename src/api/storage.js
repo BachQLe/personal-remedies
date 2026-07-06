@@ -26,6 +26,20 @@ function writeAll(obj) {
   }
 }
 
+/**
+ * Listeners notified after any `storage.set`/`storage.remove` call. Used by
+ * src/api/profileSync.js to schedule a debounced remote push without every
+ * call site needing to know about sync — see `onWrite` below.
+ * @type {Set<(key: string) => void>}
+ */
+const _writeListeners = new Set();
+
+function _notifyWrite(key) {
+  for (const cb of _writeListeners) {
+    try { cb(key); } catch { /* listener error — swallow */ }
+  }
+}
+
 export const storage = {
   get(key, fallback = null) {
     const all = readAll();
@@ -35,13 +49,28 @@ export const storage = {
     const all = readAll();
     all[key] = value;
     writeAll(all);
+    _notifyWrite(key);
   },
   remove(key) {
     const all = readAll();
     delete all[key];
     writeAll(all);
+    _notifyWrite(key);
   },
   clear() {
     writeAll({});
+  },
+  /**
+   * Subscribe to writes (`set`/`remove`) across all keys. Returns an
+   * unsubscribe function. Intended for cross-cutting concerns (e.g. remote
+   * sync) rather than UI — screens should keep using the src/state/ stores.
+   * @param {(key: string) => void} callback
+   * @returns {() => void} unsubscribe
+   */
+  onWrite(callback) {
+    _writeListeners.add(callback);
+    return () => {
+      _writeListeners.delete(callback);
+    };
   },
 };

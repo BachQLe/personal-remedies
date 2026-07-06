@@ -1,644 +1,359 @@
-import { useState, useEffect, useRef } from 'react';
-import { api } from '../../api/api.js';
-import Card from '../../components/shared/Card.jsx';
-import DayStrip from './DayStrip.jsx';
-import FoodCard from '../../components/shared/FoodCard.jsx';
-import RecipeCard from '../../components/shared/RecipeCard.jsx';
-import ConditionTag from '../../components/shared/ConditionTag.jsx';
-import SignalChip from '../../components/shared/SignalChip.jsx';
-import StudyReferences from '../../components/shared/StudyReferences.jsx';
-import BottomSheet from '../../components/shared/BottomSheet.jsx';
-import EmptyState from '../../components/shared/EmptyState.jsx';
-import Skeleton from '../../components/shared/Skeleton.jsx';
-import Icon from '../../components/shared/Icon.jsx';
-import { GHOST_PLAN } from '../../api/ghostData.js';
+/**
+ * PlanScreen — Single-day-focused meal plan view with week strip navigation.
+ *
+ * Features:
+ * - Week strip with 7 day-pills (Mon-Sun), current day selected by default
+ * - Forward/back week navigation that regenerates the plan via buildMealPlan
+ * - Five meal sections: Breakfast / Lunch / Dinner / Snack / Beverages
+ * - RecipeCards in planner variant (context='planner': add to menu + heart)
+ * - Per-day calorie total + per-meal calories
+ * - Celebratory confetti on plan generation
+ */
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Flame, UtensilsCrossed, Coffee, Cookie, GlassWater, Sparkles } from 'lucide-react';
+import { buildMealPlan } from '../../api/api.js';
+import { storage } from '../../api/storage.js';
+import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
+import RecipeCard from '../../components/RecipeCard.jsx';
+import WeekStrip, { getDateForDay, getTodayIndex } from './WeekStrip.jsx';
+import Confetti from './Confetti.jsx';
+import DemoDataChip from '../../components/shared/DemoDataChip.jsx';
 
-const DEMO_PROFILE = {
-  conditions: ['Type 2 Diabetes', 'Hypertension (high blood pressure)', 'High cholesterol'],
-  medications: [],
-  allergies: [],
-  dietary: [],
-  tasteLikes: [],
-  tasteDislikes: [],
-};
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
-function toISO(date) {
-  return date.toISOString().split('T')[0];
+function getProfile() {
+  const stored = storage.get('profile', null);
+  if (stored && stored.conditions && stored.conditions.length > 0) {
+    return stored;
+  }
+  // Fallback dev profile
+  return { conditions: DEFAULT_DEV_CONDITIONS };
 }
 
-// ── Food detail sheet ─────────────────────────────────────────────────────────
-function FoodDetailSheet({ food, profile, onClose }) {
-  const [refsByCondition, setRefsByCondition] = useState({});
-  const [loadingRefs, setLoadingRefs] = useState({});
+// ── Meal section metadata ───────────────────────────────────────────────────
 
-  const conditions = profile?.conditions ?? [];
-  const relevantConditions = food.matchedConditions.filter((c) => conditions.includes(c));
-  const displayConditions = relevantConditions.length ? relevantConditions : food.matchedConditions;
+const MEAL_SECTIONS = [
+  { slot: 'Breakfast', icon: UtensilsCrossed, label: 'Breakfast', color: 'text-amber-600', bg: 'bg-amber-50' },
+  { slot: 'Lunch', icon: UtensilsCrossed, label: 'Lunch', color: 'text-blue-600', bg: 'bg-blue-50' },
+  { slot: 'Dinner', icon: UtensilsCrossed, label: 'Dinner', color: 'text-indigo-600', bg: 'bg-indigo-50' },
+  { slot: 'Snack', icon: Cookie, label: 'Snack', color: 'text-green-600', bg: 'bg-green-50' },
+  { slot: 'Beverages', icon: GlassWater, label: 'Beverages', color: 'text-cyan-600', bg: 'bg-cyan-50' },
+];
 
-  async function loadRefs(condition) {
-    if (refsByCondition[condition] !== undefined || loadingRefs[condition]) return;
-    setLoadingRefs((p) => ({ ...p, [condition]: true }));
-    const refs = await api.getReferences(food.id, condition);
-    setRefsByCondition((p) => ({ ...p, [condition]: refs }));
-    setLoadingRefs((p) => ({ ...p, [condition]: false }));
-  }
+// ── Meal Section Component ──────────────────────────────────────────────────
 
-  return (
-    <BottomSheet open onClose={onClose} title={food.name}>
-      <div className="flex gap-4 mb-5">
-        <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-sand-100">
-          <img
-            src={food.photo}
-            alt={food.name}
-            className="w-full h-full object-cover"
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
-        </div>
-        <div className="flex flex-col gap-2 justify-center">
-          <SignalChip signal={food.signal} />
-          {food.referenceCount > 0 && (
-            <p className="text-xs text-char-500">
-              <span className="font-mono">{food.referenceCount}</span>{' '}
-              {food.referenceCount === 1 ? 'study' : 'studies'} behind this
-            </p>
-          )}
-        </div>
-      </div>
+function MealSection({ mealSlot, meta, onFavorite, onAddToMenu }) {
+  const IconComp = meta.icon;
+  const items = mealSlot?.items || [];
+  const calories = mealSlot?.calories || 0;
 
-      <div className="flex flex-col gap-4">
-        {displayConditions.map((condition) => (
-          <div key={condition} className="bg-sand-100 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <ConditionTag condition={condition} />
-              <SignalChip signal={food.signal} compact />
-            </div>
-            <StudyReferences
-              references={refsByCondition[condition]}
-              loading={loadingRefs[condition]}
-            />
-            {refsByCondition[condition] === undefined && !loadingRefs[condition] && (
-              <button
-                onClick={() => loadRefs(condition)}
-                className="text-xs text-forest-700 font-semibold mt-1 transition-colors duration-fast hover:text-forest-800"
-              >
-                See the studies
-                <Icon name="arrow-right" size={14} className="inline-block align-middle ml-0.5" />
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-    </BottomSheet>
-  );
-}
-
-// ── Recipe detail sheet ───────────────────────────────────────────────────────
-function RecipeDetailSheet({ recipe, profile, onClose }) {
-  const [refsByKey, setRefsByKey] = useState({});
-  const [loadingRefs, setLoadingRefs] = useState({});
-
-  const conditions = profile?.conditions ?? [];
-
-  async function loadIngredientRefs(ingredientName, condition) {
-    const key = `${ingredientName}:${condition}`;
-    if (refsByKey[key] !== undefined || loadingRefs[key]) return;
-    setLoadingRefs((p) => ({ ...p, [key]: true }));
-    const refs = await api.getReferences(ingredientName.toLowerCase().replace(/\s+/g, '-'), condition);
-    setRefsByKey((p) => ({ ...p, [key]: refs }));
-    setLoadingRefs((p) => ({ ...p, [key]: false }));
-  }
-
-  const matchedConditions = recipe.matchedConditions.filter((c) => conditions.includes(c));
-  const displayConditions = matchedConditions.length ? matchedConditions : recipe.matchedConditions;
+  // Convert food items to recipe-like cards for display, keeping a
+  // reference to the underlying Food (id/fineGroup/group).
+  const cards = items.map((food) => ({
+    id: food.id || `food-${food.name}`,
+    title: food.name,
+    photo: null,
+    sourceName: food.groupLabel || undefined,
+    mealType: meta.slot,
+    calories: calories > 0 ? Math.round(calories / Math.max(items.length, 1)) : undefined,
+    _food: food,
+  }));
 
   return (
-    <BottomSheet open onClose={onClose} title={recipe.title}>
-      {/* Recipe photo */}
-      <div className="w-full h-48 rounded-xl overflow-hidden bg-sand-100 mb-5">
-        <img
-          src={recipe.photo}
-          alt={recipe.title}
-          className="w-full h-full object-cover"
-          onError={(e) => { e.currentTarget.style.display = 'none'; }}
-        />
-      </div>
-
-      {/* Source + match pill */}
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-xs text-char-500 font-medium font-sans">{recipe.sourceName}</p>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-pill bg-signal-beneficial-tint">
-          <Icon name="check" size={14} className="text-signal-beneficial" />
-          <span className="text-xs text-signal-beneficial font-semibold font-sans">Matched to your profile</span>
-        </div>
-      </div>
-
-      {/* Condition tags */}
-      {displayConditions.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-5">
-          {displayConditions.map((c) => (
-            <ConditionTag key={c} condition={c} />
-          ))}
-        </div>
-      )}
-
-      {/* Ingredients */}
-      {recipe.ingredients?.length > 0 && (
-        <div>
-          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-3 font-label">Ingredients</p>
-          <div className="flex flex-col gap-3">
-            {recipe.ingredients.map((ing, i) => {
-              const relevantConds = ing.matchedConditions?.filter((c) => conditions.includes(c)) ?? [];
-              return (
-                <div key={i} className="bg-sand-100 rounded-xl p-4">
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="font-sans font-medium text-blue-950 text-sm">{ing.name}</span>
-                    {ing.signal && ing.signal !== 'neutral' && <SignalChip signal={ing.signal} compact />}
-                  </div>
-                  {relevantConds.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {relevantConds.map((c) => (
-                        <ConditionTag key={c} condition={c} />
-                      ))}
-                    </div>
-                  )}
-                  {relevantConds.map((c) => {
-                    const key = `${ing.name}:${c}`;
-                    return (
-                      <div key={c}>
-                        <StudyReferences
-                          references={refsByKey[key]}
-                          loading={loadingRefs[key]}
-                        />
-                        {refsByKey[key] === undefined && !loadingRefs[key] && (
-                          <button
-                            onClick={() => loadIngredientRefs(ing.name, c)}
-                            className="text-xs text-forest-700 font-semibold mt-1 transition-colors duration-fast hover:text-forest-800"
-                          >
-                            See the studies
-                            <Icon name="arrow-right" size={14} className="inline-block align-middle ml-0.5" />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </BottomSheet>
-  );
-}
-
-// ── Meal slot meta (Material Symbols icons, DS tint backgrounds) ─────────────
-const SLOT_META = {
-  Breakfast: { icon: 'sun',  bg: 'bg-caution-100' },
-  Lunch:     { icon: 'sun',  bg: 'bg-info-100' },
-  Dinner:    { icon: 'moon', bg: 'bg-lavender-100' },
-  Snack:     { icon: 'leaf', bg: 'bg-benefit-100' },
-};
-
-// ── Meal slot column (matches home page WeekCalendar square aesthetic) ───────
-function MealSlotColumn({ meal, onFoodSelect, onRecipeSelect, replaceMode, onSlotReplace }) {
-  const meta = SLOT_META[meal.slot] ?? { icon: 'restaurant', bg: 'bg-sand-100' };
-
-  if (replaceMode) {
-    const existing = [
-      ...(meal.items?.map((f) => f.name) ?? []),
-      ...(meal.recipes?.map((r) => r.title) ?? []),
-    ];
-    return (
-      <button
-        onClick={() => onSlotReplace(meal.slot)}
-        className={`relative flex flex-col bg-sand-100 overflow-hidden cursor-pointer
-          border-2 border-dashed border-forest-400 rounded-lg
-          hover:bg-forest-50/40 transition-colors duration-fast`}
-        style={{ animation: 'plan-jitter 0.4s ease-in-out infinite' }}
-      >
-        <div className={`p-2 ${meta.bg} flex items-center gap-1.5`}>
-          <Icon name={meta.icon} size={14} className="text-char-700" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-char-700">{meal.slot}</span>
-        </div>
-        <div className="flex flex-col gap-1 p-2 flex-1">
-          {existing.length > 0 ? existing.map((name, i) => (
-            <p key={i} className="text-[10px] text-char-500 truncate font-sans">{name}</p>
-          )) : (
-            <p className="text-[10px] text-char-300 font-sans">Empty</p>
-          )}
-        </div>
-        <div className="px-2 pb-2">
-          <Icon name="refresh-cw" size={20} className="text-forest-600 mx-auto block" />
-        </div>
-      </button>
-    );
-  }
-
-  return (
-    <div
-      className={`relative flex flex-col bg-sand-100 overflow-hidden ${meal.slot === 'Breakfast' ? 'rounded-tl-md' : meal.slot === 'Snack' ? 'rounded-tr-md' : ''
-        }`}
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="flex flex-col gap-3"
     >
-      {/* Slot header (Breakfast / Lunch / Dinner / Snack) */}
-      <div className={`p-2 ${meta.bg} flex items-center gap-1.5`}>
-        <Icon name={meta.icon} size={14} className="text-char-700" />
-        <span className="text-[10px] font-bold uppercase tracking-wider text-char-700">{meal.slot}</span>
-      </div>
-
-      {/* Content */}
-      <div className="flex flex-col gap-2 p-2 flex-1">
-        {/* Food items */}
-        {meal.items?.map((food) => (
-          <button
-            key={food.id}
-            onClick={() => onFoodSelect(food)}
-            className="w-full text-left rounded-none bg-paper-200 overflow-hidden aspect-[3/4] shadow-card border border-sand-200
-              hover:shadow-lg hover:-translate-y-[1px] transition-all duration-fast active:scale-[0.98]"
-            style={{ animation: 'plan-blur-in 0.125s ease-out both' }}
-          >
-            <div className="w-full h-full flex flex-col">
-              <div className="flex-1 min-h-0">
-                {food.photo ? (
-                  <img src={food.photo} alt={food.name} className="w-full h-full object-cover"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                ) : (
-                  <div className="w-full h-full bg-sand-100" />
-                )}
-              </div>
-              <div className="px-2.5 py-2 rounded-t-sm bg-white -mt-2 relative">
-                <p className="text-xs leading-snug text-char-700 font-sans font-medium">{food.name}</p>
-              </div>
-            </div>
-          </button>
-        ))}
-
-        {/* Recipes */}
-        {meal.recipes?.map((recipe) => (
-          <button
-            key={recipe.id}
-            onClick={() => onRecipeSelect(recipe)}
-            className="w-full text-left rounded-none bg-paper-200 overflow-hidden aspect-[3/4] shadow-card border border-sand-200
-              hover:shadow-lg hover:-translate-y-[1px] transition-all duration-fast active:scale-[0.98]"
-            style={{ animation: 'plan-blur-in 0.125s ease-out both' }}
-          >
-            <div className="w-full h-full flex flex-col">
-              <div className="flex-1 min-h-0">
-                {recipe.photo ? (
-                  <img src={recipe.photo} alt={recipe.title} className="w-full h-full object-cover"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                ) : (
-                  <div className="w-full h-full bg-sand-100" />
-                )}
-              </div>
-              <div className="px-2.5 py-2 rounded-t-sm bg-white -mt-2 relative">
-                <p className="text-xs leading-snug text-char-700 font-sans font-medium line-clamp-2">{recipe.title}</p>
-              </div>
-            </div>
-          </button>
-        ))}
-
-        {!meal.items?.length && !meal.recipes?.length && (
-          <p className="text-xs leading-snug text-char-300 px-2 py-2">—</p>
+      {/* Section header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className={`w-7 h-7 rounded-lg ${meta.bg} flex items-center justify-center`}>
+            <IconComp size={15} className={meta.color} />
+          </div>
+          <h3 className="font-sans font-semibold text-char-900 text-sm">
+            {meta.label}
+          </h3>
+        </div>
+        {calories > 0 && (
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-sand-100">
+            <Flame size={12} className="text-char-500" />
+            <span className="text-[11px] font-mono font-medium text-char-600">
+              {calories} cal
+            </span>
+          </div>
         )}
       </div>
-    </div>
-  );
-}
 
-// ── Meal columns grid (B / L / D / Snack on same Y level) ───────────────────
-function MealColumnsGrid({ meals, onFoodSelect, onRecipeSelect, replaceMode, onSlotReplace }) {
-  const slotOrder = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
-  const mealsBySlot = {};
-  for (const meal of meals) {
-    mealsBySlot[meal.slot] = meal;
-  }
-  const activeSlots = slotOrder.filter((s) => mealsBySlot[s]);
-  const cols = activeSlots.length || 3;
-
-  return (
-    <div
-      className="grid gap-2 items-start"
-      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-    >
-      {(activeSlots.length ? activeSlots : ['Breakfast', 'Lunch', 'Dinner']).map((slot) => {
-        const meal = mealsBySlot[slot] ?? { slot, items: [], recipes: [] };
-        return (
-          <MealSlotColumn
-            key={slot}
-            meal={meal}
-            onFoodSelect={onFoodSelect}
-            onRecipeSelect={onRecipeSelect}
-            replaceMode={replaceMode}
-            onSlotReplace={onSlotReplace}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Skeleton loaders ─────────────────────────────────────────────────────────
-function SkeletonCard() {
-  return (
-    <div className="w-full rounded-none overflow-hidden aspect-[3/4] border border-sand-200">
-      <div className="w-full h-full flex flex-col">
-        <div className="flex-1 min-h-0 bg-sand-200" />
-        <div className="px-2.5 py-2 bg-white -mt-2 relative">
-          <Skeleton shape="text" className="w-3/5" />
+      {/* Cards */}
+      {cards.length > 0 ? (
+        <div className="grid grid-cols-2 gap-2.5">
+          {cards.map((recipe, idx) => (
+            <motion.div
+              key={recipe.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.2, delay: idx * 0.05 }}
+              className="relative"
+            >
+              <RecipeCard
+                recipe={recipe}
+                context="planner"
+                onFavorite={() => onFavorite && onFavorite(recipe)}
+                onAddToPlanner={() => onAddToMenu && onAddToMenu(recipe)}
+                onViewRecipe={() => {}}
+              />
+            </motion.div>
+          ))}
         </div>
-      </div>
-    </div>
+      ) : (
+        <div className="py-4 px-3 rounded-xl bg-sand-50 border border-dashed border-sand-200 text-center">
+          <p className="text-xs text-char-400 font-sans">No items for this meal</p>
+        </div>
+      )}
+    </motion.div>
   );
 }
 
-function SkeletonMealColumn({ slot }) {
-  const meta = SLOT_META[slot] ?? { icon: 'restaurant', bg: 'bg-sand-100' };
-  return (
-    <div className={`flex flex-col bg-sand-100 overflow-hidden ${slot === 'Breakfast' ? 'rounded-tl-md' : slot === 'Snack' ? 'rounded-tr-md' : ''
-      }`}>
-      <div className={`p-2 ${meta.bg}`}>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-char-600">{slot}</span>
-      </div>
-      <div className="flex flex-col gap-2 p-2">
-        <SkeletonCard />
-        {(slot === 'Lunch' || slot === 'Dinner') && <SkeletonCard />}
-      </div>
-    </div>
-  );
-}
+// ── Loading skeleton ────────────────────────────────────────────────────────
 
 function PlanSkeleton() {
-  const slots = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
   return (
-    <div className="px-5">
-      <div className="rounded-xl bg-sand-200/60 border border-sand-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] px-2 py-8">
-        <div
-          className="grid gap-2 items-start"
-          style={{ gridTemplateColumns: `repeat(${slots.length}, minmax(0, 1fr))` }}
-        >
-          {slots.map((slot) => (
-            <SkeletonMealColumn key={slot} slot={slot} />
-          ))}
+    <div className="flex flex-col gap-6 px-5">
+      {MEAL_SECTIONS.map((meta) => (
+        <div key={meta.slot} className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-sand-200 animate-pulse" />
+            <div className="w-20 h-4 rounded bg-sand-200 animate-pulse" />
+          </div>
+          <div className="grid grid-cols-2 gap-2.5">
+            {[1, 2].map((i) => (
+              <div key={i} className="w-full h-44 rounded-xl bg-sand-100 animate-pulse" />
+            ))}
+          </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 }
 
-// ── Recommendation card with replace / info actions ─────────────────────────
-function RecommendationCard({ recipe, rank, expanded, onToggle, onReplace, onInfo }) {
-  return (
-    <div className="bg-white rounded-xl border border-sand-200 shadow-xs overflow-hidden transition-all duration-base">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center gap-3.5 p-3.5 text-left
-          transition-colors duration-fast hover:bg-sand-50"
-      >
-        <div className="relative w-[52px] h-[52px] rounded-md overflow-hidden flex-shrink-0 bg-paper-200">
-          <img
-            src={recipe.photo}
-            alt={recipe.title}
-            className="w-full h-full object-cover"
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
-          <div className="absolute top-0 left-0 w-5 h-5 bg-forest-700 text-white text-[10px] font-bold flex items-center justify-center rounded-br-md">
-            {rank}
-          </div>
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-sans font-semibold text-blue-950 text-sm leading-snug">{recipe.title}</p>
-          <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-xs text-char-500">{recipe.sourceName}</p>
-            <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-signal-beneficial-tint">
-              <Icon name="heart" size={12} className="text-signal-beneficial" />
-              <span className="text-[10px] font-bold text-signal-beneficial">{recipe.healthScore}</span>
-            </div>
-          </div>
-        </div>
-        <Icon
-          name="chevron-down"
-          size={18}
-          className={`flex-shrink-0 text-char-400 transition-transform duration-fast ${expanded ? 'rotate-180' : ''}`}
-        />
-      </button>
+// ── PlanScreen ──────────────────────────────────────────────────────────────
 
-      {expanded && (
-        <div className="flex border-t border-sand-200">
-          <button
-            onClick={onReplace}
-            className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold text-forest-700 font-sans
-              transition-colors duration-fast hover:bg-forest-50 active:bg-forest-100 border-r border-sand-200"
-          >
-            <Icon name="refresh-cw" size={22} />
-            Replace a meal
-          </button>
-          <button
-            onClick={onInfo}
-            className="flex-1 flex items-center justify-center gap-2 py-4 text-sm font-semibold text-char-600 font-sans
-              transition-colors duration-fast hover:bg-sand-50 active:bg-sand-100"
-          >
-            <Icon name="info" size={22} />
-            View details
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ── PlanScreen ────────────────────────────────────────────────────────────────
 export default function PlanScreen() {
-  const today = toISO(new Date());
-  const [profile, setProfile] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(today);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [selectedDay, setSelectedDay] = useState(getTodayIndex());
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [dayLoading, setDayLoading] = useState(false);
-  const [selectedFood, setSelectedFood] = useState(null);
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [recommendations, setRecommendations] = useState([]);
-  const [expandedRec, setExpandedRec] = useState(null);
-  const [replacingRecipe, setReplacingRecipe] = useState(null);
-  const mealGridRef = useRef(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [favorites, setFavorites] = useState(() => storage.get('planFavorites', []));
+  const isFirstLoad = useRef(true);
 
-  useEffect(() => {
-    async function init() {
-      let p = await api.getProfile();
-      if (!p) p = DEMO_PROFILE;
-      setProfile(p);
-      const [dayPlan, recs] = await Promise.all([
-        api.getMealPlan(p, today),
-        api.getTopRecipeRecommendations(p, 10),
-      ]);
-      setPlan(dayPlan);
-      setRecommendations(recs);
-      setLoading(false);
+  // Cache plans by week to avoid refetching when switching days within same week
+  const planCache = useRef({});
+
+  /**
+   * Generate (or retrieve cached) plan for a given week.
+   */
+  const getPlanForWeek = useCallback(async (offset) => {
+    const cacheKey = `week_${offset}`;
+    if (planCache.current[cacheKey]) {
+      return planCache.current[cacheKey];
     }
-    init();
+
+    const profile = getProfile();
+    const dayPlan = await buildMealPlan(profile);
+    planCache.current[cacheKey] = dayPlan;
+    return dayPlan;
   }, []);
 
-  async function handleSelectDate(date) {
-    if (date === selectedDate) return;
-    setSelectedDate(date);
-    setDayLoading(true);
-    const dayPlan = await api.getMealPlan(profile ?? DEMO_PROFILE, date);
-    setPlan(dayPlan);
-    setDayLoading(false);
+  /**
+   * Load plan for current week.
+   */
+  const loadPlan = useCallback(async (offset, showCelebration = false) => {
+    setLoading(true);
+    try {
+      const dayPlan = await getPlanForWeek(offset);
+      setPlan(dayPlan);
+
+      if (showCelebration) {
+        setShowConfetti(true);
+      }
+    } catch (err) {
+      console.error('Failed to build meal plan:', err);
+      setPlan(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [getPlanForWeek]);
+
+  // Initial load
+  useEffect(() => {
+    loadPlan(0, true);
+  }, []);
+
+  // Handle week navigation
+  const handlePrevWeek = useCallback(() => {
+    const newOffset = weekOffset - 1;
+    setWeekOffset(newOffset);
+    setSelectedDay(0); // reset to Monday
+    loadPlan(newOffset, true);
+  }, [weekOffset, loadPlan]);
+
+  const handleNextWeek = useCallback(() => {
+    const newOffset = weekOffset + 1;
+    setWeekOffset(newOffset);
+    setSelectedDay(0); // reset to Monday
+    // Forward weeks regenerate the plan
+    delete planCache.current[`week_${newOffset}`];
+    loadPlan(newOffset, true);
+  }, [weekOffset, loadPlan]);
+
+  // Handle day selection (within same week, same plan just different "view")
+  const handleSelectDay = useCallback((dayIndex) => {
+    setSelectedDay(dayIndex);
+  }, []);
+
+  // Handle favorite
+  const handleFavorite = useCallback((recipe) => {
+    setFavorites((prev) => {
+      const exists = prev.find((f) => f.id === recipe.id);
+      const next = exists
+        ? prev.filter((f) => f.id !== recipe.id)
+        : [...prev, recipe];
+      storage.set('planFavorites', next);
+      return next;
+    });
+  }, []);
+
+  // Derive selected date label
+  const selectedDate = getDateForDay(weekOffset, selectedDay);
+  const today = new Date().toISOString().split('T')[0];
+  const isToday = selectedDate === today;
+
+  const dateLabel = isToday
+    ? 'Today'
+    : new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+      });
+
+  // Get meal data, keyed by slot
+  const mealsBySlot = {};
+  if (plan && plan.meals) {
+    for (const meal of plan.meals) {
+      mealsBySlot[meal.slot] = meal;
+    }
   }
 
-  function startReplace(recipe) {
-    setReplacingRecipe(recipe);
-    setExpandedRec(null);
-    setTimeout(() => {
-      mealGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
-  }
-
-  function handleSlotReplace(slot) {
-    if (!replacingRecipe || !plan) return;
-    setPlan((prev) => ({
-      ...prev,
-      meals: prev.meals.map((meal) => {
-        if (meal.slot !== slot) return meal;
-        return {
-          ...meal,
-          recipes: [replacingRecipe],
-          items: [],
-        };
-      }),
-    }));
-    setReplacingRecipe(null);
-  }
-
-  const ghost = loading;
-  const meals = ghost ? GHOST_PLAN.meals : (plan?.meals ?? []);
+  const totalCalories = plan?.totalCalories || 2000;
 
   return (
-    <div
-      className={`flex flex-col pb-8 bg-paper-200 min-h-full${ghost ? ' rm-ghost' : ''}`}
-      aria-busy={ghost}
-    >
+    <div className="flex flex-col pb-8 bg-paper-200 min-h-full">
+      {/* Confetti celebration */}
+      <Confetti
+        show={showConfetti}
+        onComplete={() => setShowConfetti(false)}
+      />
+
       {/* Header */}
-      <div className="px-5 pt-6 pb-4">
-        <p className="text-[12px] text-char-500 font-bold uppercase tracking-eyebrow mb-1 font-label">Personal Remedies</p>
-        <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">Meal plan</h1>
+      <div className="px-5 pt-6 pb-3">
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <p className="text-[12px] text-char-500 font-bold uppercase tracking-eyebrow font-label">
+            Your Meal Plan
+          </p>
+          <DemoDataChip show={!!plan?.usedFallback} />
+        </div>
+        <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">
+          Plan
+        </h1>
       </div>
 
-      <div>
-        {/* Day strip */}
-        <div className="px-5 mb-5">
-          <Card className="!p-3">
-            <DayStrip
-              selected={selectedDate}
-              onSelect={handleSelectDate}
-            />
-          </Card>
+      {/* Week Strip */}
+      <div className="px-5 mb-4">
+        <div className="bg-white rounded-2xl border border-sand-200 shadow-xs p-3">
+          <WeekStrip
+            weekOffset={weekOffset}
+            selectedDay={selectedDay}
+            onSelectDay={handleSelectDay}
+            onPrevWeek={handlePrevWeek}
+            onNextWeek={handleNextWeek}
+          />
         </div>
+      </div>
 
-        {/* Date label + reassurance */}
-        <div className="px-5 mb-5" data-ghost-hide>
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <p className="text-sm font-semibold text-blue-950 font-sans">
-              {selectedDate === today
-                ? 'Today'
-                : new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                })}
-              <span className="text-char-400 font-mono text-xs ml-2">{selectedDate}</span>
+      {/* Day header with calorie badge */}
+      <div className="px-5 mb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-sans font-semibold text-blue-950 text-base">
+              {dateLabel}
+            </h2>
+            <p className="text-xs text-char-500 font-mono mt-0.5">
+              {selectedDate}
             </p>
           </div>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest-50 border border-forest-200">
+            <Flame size={14} className="text-forest-700" />
+            <span className="text-xs font-semibold text-forest-800 font-mono">
+              {totalCalories} cal
+            </span>
+          </div>
         </div>
-
-        {/* Meal sections */}
-        {dayLoading ? (
-          <PlanSkeleton />
-        ) : meals.length === 0 ? (
-          <div className="px-5">
-            <EmptyState
-              icon="calendar_today"
-              title="No plan for this day"
-              body="Select a different day to see your meal recommendations."
-            />
-          </div>
-        ) : (
-          <div className="px-5 flex flex-col gap-5">
-            {replacingRecipe && (
-              <div className="flex items-center justify-between bg-forest-50 border border-forest-300 rounded-xl px-4 py-3">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Icon name="refresh-cw" size={20} className="text-forest-700" />
-                  <p className="text-sm font-semibold text-forest-800 font-sans truncate">
-                    Tap a meal to replace with <span className="text-forest-900">{replacingRecipe.title}</span>
-                  </p>
-                </div>
-                <button
-                  onClick={() => setReplacingRecipe(null)}
-                  className="flex-shrink-0 ml-2 text-xs font-semibold text-forest-700 px-3 py-1.5 rounded-lg bg-white border border-forest-300
-                    hover:bg-forest-50 transition-colors duration-fast"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-            <div ref={mealGridRef} className="rounded-xl bg-sand-200/60 border border-sand-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.04)] px-2 py-8">
-              <MealColumnsGrid
-                meals={meals}
-                onFoodSelect={setSelectedFood}
-                onRecipeSelect={setSelectedRecipe}
-                replaceMode={!!replacingRecipe}
-                onSlotReplace={handleSlotReplace}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Top recipe recommendations */}
-        {!ghost && !dayLoading && recommendations.length > 0 && (
-          <div className="px-5 mt-8">
-            <div className="flex items-center gap-2 mb-4">
-              <Icon name="award" size={20} className="text-forest-700" />
-              <h2 className="font-display text-lg font-semibold text-blue-950 tracking-tightish">Top recipes for you</h2>
-            </div>
-            <p className="text-xs text-char-500 mb-4 font-sans">Sorted by healthiness score. Tap to replace a meal or view details.</p>
-            <div className="flex flex-col gap-2.5">
-              {recommendations.map((recipe, i) => (
-                <RecommendationCard
-                  key={recipe.id}
-                  recipe={recipe}
-                  rank={i + 1}
-                  expanded={expandedRec === recipe.id}
-                  onToggle={() => setExpandedRec(expandedRec === recipe.id ? null : recipe.id)}
-                  onReplace={() => startReplace(recipe)}
-                  onInfo={() => {
-                    setExpandedRec(null);
-                    setSelectedRecipe(recipe);
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Food detail sheet */}
-      {selectedFood && (
-        <FoodDetailSheet
-          food={selectedFood}
-          profile={profile}
-          onClose={() => setSelectedFood(null)}
-        />
-      )}
+      {/* Meal sections */}
+      <AnimatePresence mode="wait">
+        {loading ? (
+          <motion.div
+            key="skeleton"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <PlanSkeleton />
+          </motion.div>
+        ) : (
+          <motion.div
+            key={`plan-${weekOffset}-${selectedDay}`}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.25 }}
+            className="flex flex-col gap-6 px-5"
+          >
+            {MEAL_SECTIONS.map((meta) => (
+              <MealSection
+                key={meta.slot}
+                mealSlot={mealsBySlot[meta.slot]}
+                meta={meta}
+                onFavorite={handleFavorite}
+                onAddToMenu={() => {}}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Recipe detail sheet */}
-      {selectedRecipe && (
-        <RecipeDetailSheet
-          recipe={selectedRecipe}
-          profile={profile}
-          onClose={() => setSelectedRecipe(null)}
-        />
+      {/* Plan generation note */}
+      {!loading && plan && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="px-5 mt-8 mb-4"
+        >
+          <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-forest-50/60 border border-forest-100">
+            <Sparkles size={16} className="text-forest-600 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-forest-800 font-sans leading-relaxed">
+              Plan generated from your clinical profile. Navigate to a new week to get fresh recommendations.
+            </p>
+          </div>
+        </motion.div>
       )}
-
     </div>
   );
 }

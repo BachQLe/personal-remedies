@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "nutridigm": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/Users/bachle/Desktop/personal-remedies/nutridigm-mcp/server.js"],
+      "env": {
+        "NUTRIDIGM_SUBSCRIPTION_ID": "${NUTRIDIGM_SUBSCRIPTION_ID}"
+      }
+    }
+  }
+}

@@ -3,11 +3,22 @@ import Card from '../components/shared/Card';
 import PrimaryButton from '../components/shared/PrimaryButton';
 import SecondaryButton from '../components/shared/SecondaryButton';
 import SignalChip from '../components/shared/SignalChip';
-import FoodCard from '../components/shared/FoodCard';
 import ConditionTag from '../components/shared/ConditionTag';
 import StatRing from '../components/shared/StatRing';
 import EmptyState from '../components/shared/EmptyState';
-import { foods } from '../api/mockData';
+
+const KITCHEN_SINK_FOODS = [
+  {
+    id: 'ks1', name: 'Salmon', signal: 'helpful',
+    matchedConditions: ['Type 2 Diabetes', 'Hypertension (high blood pressure)', 'Heart failure'],
+    referenceCount: 5,
+  },
+  {
+    id: 'ks2', name: 'Processed Meats', signal: 'avoid',
+    matchedConditions: ['Hypertension (high blood pressure)', 'Heart failure'],
+    referenceCount: 2,
+  },
+];
 
 /* ── Color palette for swatch display ──────────────────────── */
 const PALETTES = {
@@ -62,17 +73,8 @@ export default function KitchenSink() {
   const [inputVal, setInputVal] = useState('');
 
   /* Build a mock food with note + meta for the gallery */
-  const sampleFood = {
-    ...foods[0],
-    note: 'Rich in omega-3 fatty acids',
-    referenceCount: 5,
-  };
-  const avoidFood = foods.find(f => f.signal === 'avoid') || {
-    id: 'x1', name: 'Processed Meats', signal: 'avoid',
-    note: 'High sodium, nitrate concerns',
-    matchedConditions: ['Hypertension (high blood pressure)', 'Heart failure'],
-    referenceCount: 2,
-  };
+  const sampleFood = { ...KITCHEN_SINK_FOODS[0], note: 'Rich in omega-3 fatty acids' };
+  const avoidFood = { ...KITCHEN_SINK_FOODS[1], note: 'High sodium, nitrate concerns' };
 
   return (
     <div className="min-h-screen bg-paper-200 pb-24">
@@ -384,26 +386,7 @@ export default function KitchenSink() {
           </div>
         </GallerySection>
 
-        {/* ══════════════════════════════════════════════
-            FOOD CARD
-           ══════════════════════════════════════════════ */}
-        <GallerySection eyebrow="Components" title="FoodCard">
-          <div className="flex flex-col gap-3 max-w-md">
-            <FoodCard food={sampleFood} onClick={() => {}} />
-            <FoodCard food={avoidFood} onClick={() => {}} />
-            <FoodCard
-              food={{
-                id: 'x2', name: 'Turmeric', signal: 'beneficial',
-                note: 'Anti-inflammatory properties',
-                matchedConditions: ['Osteoarthritis'],
-                referenceCount: 3,
-              }}
-              onClick={() => {}}
-            />
-          </div>
-        </GallerySection>
-
-        {/* ══════════════════════════════════════════════
+{/* ══════════════════════════════════════════════
             CARDS
            ══════════════════════════════════════════════ */}
         <GallerySection eyebrow="Components" title="Card Variants">

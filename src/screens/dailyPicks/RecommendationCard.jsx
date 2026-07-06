@@ -2,8 +2,11 @@
  * RecommendationCard — a single ranked pick.
  *
  * Credibility rule: tier LABEL + reference COUNT only. Never a numeric score.
- *   rank 1 → "Top match" (forest/beneficial emphasis)
+ *   rank 1 → "Top match" (forest/beneficial emphasis) — this is a rank
+ *     callout, not a claim about the underlying data's tier.
  *   tier "strong" → "Strong match"; tier "good" → "Good match"
+ *   tier null/undefined (e.g. topdoordonts-sourced picks, which carry no
+ *     tier data) → no badge is rendered. Never fabricate a label.
  *
  * Props:
  *   rec       — Recommendation { id, name, tier, referenceCount, rank, blurb, matchedConditions }
@@ -27,6 +30,8 @@ const cardEnter = {
 };
 
 function TierBadge({ tier, emphasized }) {
+  // The rank-1 "Top match" badge is a position callout (independent of
+  // whether the source data carries a tier), so it always renders.
   if (emphasized) {
     return (
       <span className="inline-flex items-center gap-[7px] h-[30px] px-3 pl-2.5 rounded-pill font-sans text-sm font-semibold bg-signal-beneficial-tint text-signal-beneficial">
@@ -39,9 +44,12 @@ function TierBadge({ tier, emphasized }) {
       </span>
     );
   }
+  // No real tier data (e.g. topdoordonts-sourced picks) → hide the badge
+  // rather than defaulting to a fabricated "Good match" label.
+  if (!TIER_LABEL[tier]) return null;
   return (
     <span className="inline-flex items-center gap-1.5 h-[30px] px-3 rounded-pill font-sans text-sm font-semibold bg-sand-100 text-char-700">
-      {TIER_LABEL[tier] ?? TIER_LABEL.good}
+      {TIER_LABEL[tier]}
     </span>
   );
 }
@@ -65,11 +73,13 @@ export default function RecommendationCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <TierBadge tier={rec.tier} emphasized={emphasized} />
+          {(emphasized || TIER_LABEL[rec.tier]) && (
+            <TierBadge tier={rec.tier} emphasized={emphasized} />
+          )}
           <h3
-            className={`mt-2.5 font-sans font-semibold text-char-900 leading-tight ${
-              emphasized ? "text-[17px]" : "text-[15px]"
-            }`}
+            className={`font-sans font-semibold text-char-900 leading-tight ${
+              emphasized || TIER_LABEL[rec.tier] ? "mt-2.5" : ""
+            } ${emphasized ? "text-[17px]" : "text-[15px]"}`}
           >
             {rec.name}
           </h3>

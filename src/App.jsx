@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { storage } from "./api/storage";
+import { prefetchAppData } from "./api/prefetch";
 import AnnouncementBar from "./components/marketing/AnnouncementBar";
 import Nav from "./components/marketing/Nav";
 import Hero from "./components/marketing/Hero";
@@ -26,11 +27,12 @@ import OnboardingPage from "./components/onboarding";
 import DailyPicksScreen from "./screens/dailyPicks/DailyPicksScreen";
 // App screens
 import HomeScreen from "./screens/home/HomeScreen";
-import PlanScreen from "./screens/plan/PlanScreen";
-import WeeklyPlanScreen from "./screens/week/WeeklyPlanScreen";
-import RecipesScreen from "./screens/recipes/RecipesScreen";
-import LookupScreen from "./screens/lookup/LookupScreen";
+import SearchScreen from "./screens/search/SearchScreen";
+import SuggestionsScreen from "./screens/suggestions/SuggestionsScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
+import MealQueueScreen from "./screens/plan/MealQueueScreen";
+import TopDosScreen from "./screens/top/TopDosScreen";
+import RecipesScreen from "./screens/recipes/RecipesScreen";
 // App chrome
 import TabBar from "./components/layout/TabBar";
 import FAB from "./components/layout/FAB";
@@ -115,7 +117,8 @@ function RequireOnboarding({ children }) {
 function AppShell({ children }) {
   return (
     <div className="min-h-screen bg-paper-200">
-      <main className="pb-24">
+      {/* bottom inset ≥ floating navbar height + margin so content clears it */}
+      <main className="pb-28">
         <div className="max-w-[430px] mx-auto w-full">
           {children}
         </div>
@@ -126,8 +129,18 @@ function AppShell({ children }) {
   );
 }
 
+function SearchRouteScreen() {
+  const navigate = useNavigate();
+  return <SearchScreen active={true} onClose={() => navigate('/app/home')} />;
+}
+
 function App() {
   const [barVisible, setBarVisible] = useState(true);
+
+  useEffect(() => {
+    const p = storage.get('profile', null);
+    if (p) prefetchAppData(p);
+  }, []);
 
   return (
     <AuthProvider>
@@ -156,10 +169,11 @@ function App() {
           {/* Daily Picks — standalone full screen (own pinned recap, no tab bar) */}
           <Route path="/onboarding/daily-picks" element={<RequireOnboarding><DailyPicksScreen /></RequireOnboarding>} />
           <Route path="/app/home" element={<RequireOnboarding><AppShell><HomeScreen /></AppShell></RequireOnboarding>} />
-          <Route path="/app/plan" element={<RequireOnboarding><AppShell><PlanScreen /></AppShell></RequireOnboarding>} />
-          <Route path="/app/week" element={<RequireOnboarding><AppShell><WeeklyPlanScreen /></AppShell></RequireOnboarding>} />
+          <Route path="/app/search" element={<RequireOnboarding><AppShell><SearchRouteScreen /></AppShell></RequireOnboarding>} />
+          <Route path="/app/suggestions" element={<RequireOnboarding><AppShell><SuggestionsScreen /></AppShell></RequireOnboarding>} />
+          <Route path="/app/top" element={<RequireOnboarding><AppShell><TopDosScreen /></AppShell></RequireOnboarding>} />
           <Route path="/app/recipes" element={<RequireOnboarding><AppShell><RecipesScreen /></AppShell></RequireOnboarding>} />
-          <Route path="/app/lookup" element={<RequireOnboarding><AppShell><LookupScreen /></AppShell></RequireOnboarding>} />
+          <Route path="/app/plan" element={<RequireOnboarding><AppShell><MealQueueScreen /></AppShell></RequireOnboarding>} />
           <Route path="/app/profile" element={<RequireOnboarding><AppShell><ProfileScreen /></AppShell></RequireOnboarding>} />
         </Routes>
       </BrowserRouter>

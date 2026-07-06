@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { getRecommendations, saveDailyPlan } from "../../api/recommendations";
+import { getRecommendations, saveDailyPlan, getUsedFallback } from "../../api/recommendations";
 import { MEAL_SLOTS } from "../../types/recommendations";
 import MealStepCards from "./MealStepCards.jsx";
 import ConfirmationOverview from "./ConfirmationOverview.jsx";
+import DemoDataChip from "../../components/shared/DemoDataChip.jsx";
 
 const CARDS_PER_PAGE = 3;
 const RECS_PER_SLOT = 12;
@@ -187,6 +188,7 @@ export default function DailyPicksScreen() {
   const [direction, setDirection] = useState(1);
   const [swipeAxis, setSwipeAxis] = useState("x");
   const [loadComplete, setLoadComplete] = useState(false);
+  const [usedFallback, setUsedFallback] = useState(false);
 
   const reduceMotion = useReducedMotion();
   const [wordsRevealed, setWordsRevealed] = useState(0);
@@ -256,6 +258,7 @@ export default function DailyPicksScreen() {
         MEAL_SLOTS.map((slot, i) => [slot, results[i]]),
       );
       setAllRecsBySlot(bySlot);
+      setUsedFallback(getUsedFallback());
 
       const elapsed = Date.now() - startTime;
       const remaining = Math.max(0, 8500 - elapsed);
@@ -374,7 +377,7 @@ export default function DailyPicksScreen() {
       const allSelections = MEAL_SLOTS.flatMap((s) => finalPicksBySlot[s] ?? []);
       await saveDailyPlan(allSelections);
     } finally {
-      navigate("/app/week");
+      navigate("/app/plan");
     }
   };
 
@@ -407,6 +410,15 @@ export default function DailyPicksScreen() {
               total={MEAL_SLOTS.length}
               gold={phase === "overview"}
             />
+          </div>
+        )}
+
+        {(phase === "picking" || phase === "overview") && usedFallback && (
+          <div
+            className="flex-none pb-1 relative z-10 flex justify-center"
+            style={{ backgroundColor: BG_COLOR }}
+          >
+            <DemoDataChip dark />
           </div>
         )}
 

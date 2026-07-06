@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import RemediWelcome from './RemediWelcome';
 import ProfileBuilder from './ProfileBuilder';
 import { api } from '../../api/api';
+import { prefetchAppData } from '../../api/prefetch';
 
-const ONBOARDING_BG = '#C8A8E8';
+const ONBOARDING_BG = '#BBCEFF';
 const DAILY_PICKS_BG = '#111E58';
 const STRIPE_COUNT = 5;
 const STRIPE_H = 28;
@@ -15,9 +16,9 @@ function GradientStripes() {
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
       {Array.from({ length: STRIPE_COUNT }).map((_, i) => {
         const t = (i + 1) / (STRIPE_COUNT + 1);
-        const r = Math.round(200 * (1 - t) + 17 * t);
-        const g = Math.round(168 * (1 - t) + 30 * t);
-        const b = Math.round(232 * (1 - t) + 88 * t);
+        const r = Math.round(187 * (1 - t) + 17 * t);
+        const g = Math.round(206 * (1 - t) + 30 * t);
+        const b = Math.round(255 * (1 - t) + 88 * t);
         return (
           <div
             key={i}
@@ -109,8 +110,8 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
-  const [transitioning, setTransitioning] = useState(false);
   const [profile, setProfile] = useState({
+    firstName: '',
     conditions: [],
     allergies: [],
     dietaryPattern: 'omnivore',
@@ -123,6 +124,7 @@ export default function OnboardingPage() {
     setSaving(true);
 
     const payload = {
+      firstName: profile.firstName,
       conditions: profile.conditions,
       allergies: profile.allergies,
       dietaryPattern: profile.dietaryPattern,
@@ -131,14 +133,9 @@ export default function OnboardingPage() {
     };
 
     await api.saveProfile(payload);
-    setTransitioning(true);
+    prefetchAppData(payload);
+    navigate('/app/home');
   };
-
-  useEffect(() => {
-    if (!transitioning) return;
-    const timer = setTimeout(() => navigate('/onboarding/daily-picks'), 600);
-    return () => clearTimeout(timer);
-  }, [transitioning, navigate]);
 
   const slideVariants = {
     enter: { opacity: 0 },
@@ -153,11 +150,9 @@ export default function OnboardingPage() {
       className="min-h-screen flex flex-col overflow-hidden"
       style={{ backgroundColor: DAILY_PICKS_BG }}
     >
-      <motion.div
+      <div
         className="max-w-[430px] mx-auto w-full relative"
         style={{ backgroundColor: DAILY_PICKS_BG }}
-        animate={transitioning ? { y: `calc(-100vh - ${totalStripeH}px)` } : { y: 0 }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       >
         <div
           className="flex flex-col relative overflow-hidden"
@@ -173,7 +168,14 @@ export default function OnboardingPage() {
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-col flex-1 absolute inset-0 overflow-y-auto"
             >
-              {step === 0 && <RemediWelcome onNext={() => setStep(1)} />}
+              {step === 0 && (
+                <RemediWelcome
+                  onNext={(name) => {
+                    setProfile((p) => ({ ...p, firstName: name }));
+                    setStep(1);
+                  }}
+                />
+              )}
               {step === 1 && (
                 <ProfileBuilder
                   profile={profile}
@@ -189,7 +191,7 @@ export default function OnboardingPage() {
         <div style={{ height: totalStripeH, flexShrink: 0 }}>
           <GradientStripes />
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

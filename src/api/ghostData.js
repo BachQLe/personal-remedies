@@ -75,21 +75,3 @@ export const GHOST_PLAN = {
 
 // ── RecipesScreen.getRecipes shape ──────────────────────────────────────────
 export const GHOST_RECIPES = Array.from({ length: 6 }, (_, i) => makeRecipe(i));
-
-// ── WeeklyPlanScreen.getWeeklyPlan shape ────────────────────────────────────
-const GHOST_WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-export const GHOST_WEEK = {
-  weekStart: '2026-06-15',
-  days: GHOST_WEEKDAYS.map((weekday, i) => ({
-    date: `ghost-day-${i}`,
-    weekday,
-    dayNum: 15 + i,
-    meals: [
-      { slot: 'Breakfast', items: [makeFood(i)], recipes: i % 3 === 0 ? [makeRecipe(i)] : [] },
-      { slot: 'Lunch', items: [makeFood(i + 1), makeFood(i + 2)], recipes: [makeRecipe(i + 1)] },
-      { slot: 'Dinner', items: [makeFood(i + 3)], recipes: [makeRecipe(i + 2)] },
-      { slot: 'Snack', items: i % 2 === 0 ? [makeFood(i + 4)] : [], recipes: [] },
-    ],
-  })),
-};
