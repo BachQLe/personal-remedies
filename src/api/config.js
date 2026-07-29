@@ -45,7 +45,7 @@ export const DEFAULT_DEV_CONDITIONS = [203, 244];
  * `isExcludedItem` in adapter.js for the full (defensive) exclusion logic.
  *
  * - 'x', 'j1' = lifestyle/behavior items (Exercise, Sleep, Smoking, etc.)
- * - 'l' = recipes, which have their own surface (RecipesScreen/RecipeDetail)
+ * - 'l' = recipes, which have their own surface (RecipesScreen/FoodDetailCard)
  */
 export const EXCLUDED_FINE_GROUPS = ['x', 'j1', 'l'];
 
@@ -80,3 +80,31 @@ export const MEAL_SLOT_MAP = {
   h2: 'Beverages',
   h1: 'Snack',
 };
+
+/**
+ * Slot-based meal plan configuration (Plan screen — /app/plan).
+ *
+ * Array order IS render order (breakfast → lunch → dinner → snacks →
+ * beverages). Each entry:
+ * - `fineGroups` — /suggest fine food groups whose /suggest results (which
+ *   carry tier-bearing descriptionNumericID data, unlike /topdoordonts-free
+ *   surfaces) are pooled and round-robin interleaved to fill the slot. 10
+ *   unique fine groups total across all slots.
+ * - `recipeMealType` — links to the `mealType` field on Recipe (see
+ *   getRecipes()/guessMealType in adapter.js); `null` means this slot never
+ *   pulls recipes (beverages).
+ * - `recipeLead` — when true, matching recipes are prepended ahead of plain
+ *   foods for this slot (lunch/dinner lead with a recipe); when false they're
+ *   appended (breakfast/snacks/beverages).
+ * - `size` — number of items auto-filled into this slot per generation.
+ */
+export const PLAN_SLOTS = [
+  { key: 'breakfast', label: 'Breakfast', fineGroups: ['f', 'd', 'g1'], recipeMealType: 'breakfast', recipeLead: false, size: 3 },
+  { key: 'lunch',     label: 'Lunch',     fineGroups: ['c2', 'e', 'b1'], recipeMealType: 'lunch',   recipeLead: true,  size: 3 },
+  { key: 'dinner',    label: 'Dinner',    fineGroups: ['b3', 'b1', 'e'], recipeMealType: 'dinner',  recipeLead: true,  size: 3 },
+  { key: 'snacks',    label: 'Snacks',    fineGroups: ['h1', 'c3'],      recipeMealType: 'snack',   recipeLead: false, size: 2 },
+  { key: 'beverages', label: 'Beverages', fineGroups: ['h2'],            recipeMealType: null,      recipeLead: false, size: 2 },
+];
+
+/** Slot keys in render order — `PLAN_SLOTS.map((s) => s.key)`. */
+export const PLAN_SLOT_KEYS = PLAN_SLOTS.map((s) => s.key);

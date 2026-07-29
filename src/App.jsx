@@ -1,17 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { BrowserRouter, Routes, Route, useLocation, useNavigate, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigate, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import { storage } from "./api/storage";
-import { prefetchAppData } from "./api/prefetch";
-import AnnouncementBar from "./components/marketing/AnnouncementBar";
-import Nav from "./components/marketing/Nav";
-import Hero from "./components/marketing/Hero";
-import Differentiators from "./components/marketing/Differentiators";
-import Nutri from "./components/marketing/Nutri";
-import TwoDoors from "./components/marketing/TwoDoors";
-import Pricing from "./components/marketing/Pricing";
-import FinalCTA from "./components/marketing/FinalCTA";
-import Footer from "./components/marketing/Footer";
+import { storage } from "./api/storage.js";
+import { prefetchAppData } from "./api/prefetch.js";
+import Home from "./pages/marketing/Home";
 import Survey from "./pages/marketing/Survey";
 import Providers from "./pages/marketing/Providers";
 import Developers from "./pages/marketing/Developers";
@@ -24,14 +16,13 @@ import TermsOfUse from "./pages/marketing/TermsOfUse";
 import PrivacyPolicy from "./pages/marketing/PrivacyPolicy";
 import AuthCallback from "./pages/marketing/AuthCallback";
 import OnboardingPage from "./components/onboarding";
-import DailyPicksScreen from "./screens/dailyPicks/DailyPicksScreen";
 // App screens
 import HomeScreen from "./screens/home/HomeScreen";
 import SearchScreen from "./screens/search/SearchScreen";
 import SuggestionsScreen from "./screens/suggestions/SuggestionsScreen";
+import GroupDetailScreen from "./screens/suggestions/GroupDetailScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
 import MealQueueScreen from "./screens/plan/MealQueueScreen";
-import TopDosScreen from "./screens/top/TopDosScreen";
 import RecipesScreen from "./screens/recipes/RecipesScreen";
 // App chrome
 import TabBar from "./components/layout/TabBar";
@@ -68,43 +59,6 @@ function SyncParentUrl() {
   return null;
 }
 
-const BAR_H = 44;
-
-function Home({ barVisible, setBarVisible }) {
-  const [barScrollHidden, setBarScrollHidden] = useState(false);
-  const prevStateRef = useRef(false);
-
-  useEffect(() => {
-    const onScroll = () => {
-      const shouldHide = window.scrollY >= 40;
-      if (shouldHide !== prevStateRef.current) {
-        prevStateRef.current = shouldHide;
-        setBarScrollHidden(shouldHide);
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const barShowing = barVisible && !barScrollHidden;
-
-  return (
-    <div className="min-h-screen bg-paper-200 text-char-900">
-      {barVisible && <AnnouncementBar onDismiss={() => setBarVisible(false)} scrollHidden={barScrollHidden} />}
-      <Nav offset={barShowing ? BAR_H : 0} />
-      <main style={{ paddingTop: barVisible ? BAR_H + 64 : 64 }}>
-        <Hero topOffset={barVisible ? BAR_H + 64 : 64} />
-        <Differentiators />
-        <Nutri />
-        <TwoDoors />
-        <Pricing />
-        <FinalCTA />
-      </main>
-      <Footer />
-    </div>
-  );
-}
-
 // Gate the app behind onboarding: un-onboarded users are sent to /onboarding.
 // Reads the browser-persisted profile synchronously to avoid a redirect flash.
 function RequireOnboarding({ children }) {
@@ -129,17 +83,53 @@ function AppShell({ children }) {
   );
 }
 
+// Layout route for the gated PWA app screens: onboarding-gate + phone shell,
+// with the matched child route rendered via Outlet.
+function AppLayout() {
+  return (
+    <RequireOnboarding>
+      <AppShell>
+        <Outlet />
+      </AppShell>
+    </RequireOnboarding>
+  );
+}
+
+// Must match SearchScreen's exit-fade duration: its backdrop/group
+// AnimatePresence `exit` transitions animate opacity out over 250ms (see
+// src/screens/search/SearchScreen.jsx), plus a small buffer before navigating.
+const SEARCH_CLOSE_MS = 260;
+
+// Route wrapper for /app/search — owns the open/close lifecycle only. Which
+// mode is showing (Food Lookup vs Natural Sources) is read by SearchScreen
+// itself from the `?mode=` query param via useSearchParams, and the pill
+// toggle syncs that param back as a side effect — never a navigation, so
+// toggling modes never remounts this wrapper or retriggers the open/close
+// animation. /app/natural redirects here with `?mode=natural` (see routes).
 function SearchRouteScreen() {
   const navigate = useNavigate();
-  return <SearchScreen active={true} onClose={() => navigate('/app/home')} />;
+  const [active, setActive] = useState(true);
+  const closingRef = useRef(false);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, []);
+
+  const handleClose = () => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setActive(false);
+    timerRef.current = setTimeout(() => navigate('/app/home'), SEARCH_CLOSE_MS);
+  };
+
+  return <SearchScreen active={active} onClose={handleClose} />;
 }
 
 function App() {
-  const [barVisible, setBarVisible] = useState(true);
-
   useEffect(() => {
     const p = storage.get('profile', null);
-    if (p) prefetchAppData(p);
+    prefetchAppData(p);
   }, []);
 
   return (
@@ -149,7 +139,7 @@ function App() {
         <SyncParentUrl />
         <Routes>
           {/* Marketing site */}
-          <Route path="/" element={<Home barVisible={barVisible} setBarVisible={setBarVisible} />} />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/survey" element={<Survey />} />
@@ -166,15 +156,19 @@ function App() {
           <Route path="/kitchen-sink" element={<KitchenSink />} />
           {/* PWA App — gated behind onboarding */}
           <Route path="/app" element={<Navigate to="/app/home" replace />} />
-          {/* Daily Picks — standalone full screen (own pinned recap, no tab bar) */}
-          <Route path="/onboarding/daily-picks" element={<RequireOnboarding><DailyPicksScreen /></RequireOnboarding>} />
-          <Route path="/app/home" element={<RequireOnboarding><AppShell><HomeScreen /></AppShell></RequireOnboarding>} />
-          <Route path="/app/search" element={<RequireOnboarding><AppShell><SearchRouteScreen /></AppShell></RequireOnboarding>} />
-          <Route path="/app/suggestions" element={<RequireOnboarding><AppShell><SuggestionsScreen /></AppShell></RequireOnboarding>} />
-          <Route path="/app/top" element={<RequireOnboarding><AppShell><TopDosScreen /></AppShell></RequireOnboarding>} />
-          <Route path="/app/recipes" element={<RequireOnboarding><AppShell><RecipesScreen /></AppShell></RequireOnboarding>} />
-          <Route path="/app/plan" element={<RequireOnboarding><AppShell><MealQueueScreen /></AppShell></RequireOnboarding>} />
-          <Route path="/app/profile" element={<RequireOnboarding><AppShell><ProfileScreen /></AppShell></RequireOnboarding>} />
+          <Route path="/app/natural" element={<Navigate to="/app/search?mode=natural" replace />} />
+          {/* Stale links to the retired glance / Top Dos & Don'ts screens */}
+          <Route path="/app/glance" element={<Navigate to="/app/suggestions" replace />} />
+          <Route path="/app/top" element={<Navigate to="/app/suggestions" replace />} />
+          <Route element={<AppLayout />}>
+            <Route path="/app/home" element={<HomeScreen />} />
+            <Route path="/app/search" element={<SearchRouteScreen />} />
+            <Route path="/app/suggestions" element={<SuggestionsScreen />} />
+            <Route path="/app/suggestions/group/:groupId" element={<GroupDetailScreen />} />
+            <Route path="/app/recipes" element={<RecipesScreen />} />
+            <Route path="/app/plan" element={<MealQueueScreen />} />
+            <Route path="/app/profile" element={<ProfileScreen />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

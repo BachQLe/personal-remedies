@@ -1,0 +1,1899 @@
+[
+  {
+    "healthConditionID": 1,
+    "description": "High Cholesterol",
+    "longDescription": "aka Hypercholesterolemia",
+    "AKA": "Hypercholesterolemia",
+    "ICD10": "E78"
+  },
+  {
+    "healthConditionID": 2,
+    "description": "High Blood Pressure",
+    "longDescription": "aka Hypertension",
+    "AKA": "Hypertension",
+    "ICD10": "I10"
+  },
+  {
+    "healthConditionID": 3,
+    "description": "Gout",
+    "longDescription": "A common and painful form of inflammatory arthritis. It usually affects one joint at a time, often the big toe joint.",
+    "AKA": "",
+    "ICD10": "M10"
+  },
+  {
+    "healthConditionID": 4,
+    "description": "High Triglycerides",
+    "longDescription": "aka Hypertriglyceridemia",
+    "AKA": "Hypertriglyceridemia",
+    "ICD10": "E78.1"
+  },
+  {
+    "healthConditionID": 5,
+    "description": "Vitamin D Deficiency",
+    "longDescription": "common among those who don't get adequate sunshine.",
+    "AKA": "",
+    "ICD10": "E55"
+  },
+  {
+    "healthConditionID": 6,
+    "description": "Breast Cancer",
+    "longDescription": "Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the breast.",
+    "AKA": "",
+    "ICD10": "C50"
+  },
+  {
+    "healthConditionID": 7,
+    "description": "Cervical Cancer",
+    "longDescription": "Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the cervix.",
+    "AKA": "",
+    "ICD10": "C53"
+  },
+  {
+    "healthConditionID": 8,
+    "description": "Ovarian Cancer",
+    "longDescription": "Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the ovaries.",
+    "AKA": "Ovarian Carcinoma",
+    "ICD10": "C56"
+  },
+  {
+    "healthConditionID": 9,
+    "description": "Prostate Cancer",
+    "longDescription": "Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the prostate.",
+    "AKA": "",
+    "ICD10": "C61"
+  },
+  {
+    "healthConditionID": 10,
+    "description": "Esophageal Cancer",
+    "longDescription": "Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the esophagus.",
+    "AKA": "",
+    "ICD10": "C15"
+  },
+  {
+    "healthConditionID": 11,
+    "description": "Colon Cancer",
+    "longDescription": "aka colorectal cancer. Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in colon.",
+    "AKA": "Colorectal cancer",
+    "ICD10": "C18"
+  },
+  {
+    "healthConditionID": 12,
+    "description": "Stomach Cancer",
+    "longDescription": "Gastric cancer aka stomach cancer. Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the stomach.",
+    "AKA": "Gastric cancer",
+    "ICD10": "C16"
+  },
+  {
+    "healthConditionID": 13,
+    "description": "Pancreatic Cancer",
+    "longDescription": "Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the pancreas.",
+    "AKA": "",
+    "ICD10": "C25"
+  },
+  {
+    "healthConditionID": 14,
+    "description": "Lung Cancer",
+    "longDescription": "Small cell and non-small cell lung cancer. Cancer is an uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells).  ",
+    "AKA": "",
+    "ICD10": "C34"
+  },
+  {
+    "healthConditionID": 15,
+    "description": "Rheumatoid Arthritis",
+    "longDescription": "RA. An autoimmune and inflammatory disease causing painful swelling in the affected parts of the body.",
+    "AKA": "RA",
+    "ICD10": "M06"
+  },
+  {
+    "healthConditionID": 16,
+    "description": "Diabetes Type-2",
+    "longDescription": "aka Diabetes Mellitus",
+    "AKA": "Diabetes Mellitus",
+    "ICD10": "E08"
+  },
+  {
+    "healthConditionID": 17,
+    "description": "Excess Weight",
+    "longDescription": "It is an accumulation of excessive fat in the body and an increase in weight above the ideal for body mass index (BMI) as a result of an increased caloric intake and not enough physical activity.",
+    "AKA": "Obesity",
+    "ICD10": "E66"
+  },
+  {
+    "healthConditionID": 18,
+    "description": "Depression",
+    "longDescription": "A mental state of unstable mood in which feelings of sadness, discouragement, and despair interfere with the daily living. ",
+    "AKA": "",
+    "ICD10": "F32"
+  },
+  {
+    "healthConditionID": 19,
+    "description": "Alzheimer's Disease",
+    "longDescription": "A brain disease, an irreversible form of dementia, and functional inability to carry out daily activities.",
+    "AKA": "",
+    "ICD10": "G30"
+  },
+  {
+    "healthConditionID": 20,
+    "description": "Cancer Risk",
+    "longDescription": "Reducing the risk of cancer. Cancer is an uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells).  ",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 21,
+    "description": "Stress",
+    "longDescription": "aka tension",
+    "AKA": "Tension",
+    "ICD10": "Z73"
+  },
+  {
+    "healthConditionID": 22,
+    "description": "Anemia (Iron deficiency)",
+    "longDescription": "A decrease in the number of red cells in the blood caused by too little iron",
+    "AKA": "Iron Deficiency",
+    "ICD10": "D50"
+  },
+  {
+    "healthConditionID": 23,
+    "description": "Heart Disease",
+    "longDescription": "Also referred to as Atherosclerosis.  ",
+    "AKA": "Hardening of arteries; Atherosclerosis",
+    "ICD10": "I70"
+  },
+  {
+    "healthConditionID": 24,
+    "description": "Joints well-being",
+    "longDescription": "Maintaining healthy joints.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 25,
+    "description": "Osteoporosis",
+    "longDescription": "A condition that leads to weak and brittle bones.",
+    "AKA": "",
+    "ICD10": "M81"
+  },
+  {
+    "healthConditionID": 26,
+    "description": "DASH diet",
+    "longDescription": "Dietary Approaches to Stop Hypertension. A diet rich in fruits, veggies, and low-fat dairy foods that can lower blood pressure",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 27,
+    "description": "Celiac Disease",
+    "longDescription": "A hereditary digestive condition triggered by intolerance to gluten. It causes damage to the lining of the small intestine. Gluten is a protein found in foods such as wheat, barley and rye. ",
+    "AKA": "Gluten sensitivity",
+    "ICD10": "K90.0"
+  },
+  {
+    "healthConditionID": 28,
+    "description": "Crohn's Disease",
+    "longDescription": "Chronic inflammation of any part of the digestive tract, from mouth to anus. One of two main forms of inflammatory bowel disease.  ",
+    "AKA": "",
+    "ICD10": "K50"
+  },
+  {
+    "healthConditionID": 29,
+    "description": "Kidney well-being",
+    "longDescription": "Maintaining healthy kidney function.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 30,
+    "description": "Diabetes Type-1",
+    "longDescription": "A chronic disease where the pancreas cannot produce enough insulin ( a hormone that regulates blood sugar), resulting on high levels of sugar in the blood. ",
+    "AKA": "",
+    "ICD10": "E10"
+  },
+  {
+    "healthConditionID": 31,
+    "description": "Diarrhea",
+    "longDescription": "Loose, watery and possibly more frequent bowel movement.",
+    "AKA": "",
+    "ICD10": "R19.7"
+  },
+  {
+    "healthConditionID": 32,
+    "description": "Muscle Cramps",
+    "longDescription": "Muscle Spasms",
+    "AKA": "Muscle Spasms",
+    "ICD10": "R25.2"
+  },
+  {
+    "healthConditionID": 33,
+    "description": "Irritable Bowel Syndrome",
+    "longDescription": "Irritable Bowel Syndrome (IBS) is a problem that affects the large intestine. It is a chronic disorder that interferes with the normal functions of the colon.",
+    "AKA": "IBS",
+    "ICD10": "K58"
+  },
+  {
+    "healthConditionID": 34,
+    "description": "Ulcers",
+    "longDescription": "A sore in the lining of your stomach or the first part of your small intestine.",
+    "AKA": "Peptic Ulcer",
+    "ICD10": "K27"
+  },
+  {
+    "healthConditionID": 35,
+    "description": "Fibromyalgia",
+    "longDescription": "Common condition characterized by widespread pain in joints, muscles, tendons, and other soft tissues.  ",
+    "AKA": "",
+    "ICD10": "M79.7"
+  },
+  {
+    "healthConditionID": 36,
+    "description": "Avoid Pork",
+    "longDescription": "Food choices that do not contain any pork.",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 37,
+    "description": "Acne",
+    "longDescription": "Acne vulgaris. A bacteria called Propionibacterium acnes is considered a cause. ",
+    "AKA": "",
+    "ICD10": "L70.9"
+  },
+  {
+    "healthConditionID": 38,
+    "description": "Low oxalate diet",
+    "longDescription": "Diet that aims for less than 50mg of oxalate per day. Kidney stone patients should follow our separate guidelines for kidney stone (oxalate).",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 39,
+    "description": "Adrenal fatigue",
+    "longDescription": "Adrenal gland w-b",
+    "AKA": "Adrenal gland w-b",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 40,
+    "description": "HIV/AIDS",
+    "longDescription": "Acquired immune deficiency syndrome/ Human immuno-deficiency. Infection with the human immunodeficiency virus (HIV) causing a low count of certain white blood cells resulting in severe damage to the immune system.",
+    "AKA": "AIDS",
+    "ICD10": "B20"
+  },
+  {
+    "healthConditionID": 41,
+    "description": "Alcohol Use Disorder",
+    "longDescription": "aka AUD or alcohol abuse.",
+    "AKA": "Alcohol abuse; AUD",
+    "ICD10": "F10"
+  },
+  {
+    "healthConditionID": 42,
+    "description": "Alkaline diet",
+    "longDescription": "A diet that promotes consumption of foods rich in potassium, calcium and magnesium which get converted to alkaline PH in our body tissue after ingestion; and discourages consumption of acid-forming foods, i.e., those rich in phosphorous and protein.",
+    "AKA": "Diet, Alkaline",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 43,
+    "description": "Allergies - food",
+    "longDescription": "Allergy or Food Hypersensitivity is a response from the immune system to a food that the body believes is harmful. Common food allergens in adults are nuts and seafood.  ",
+    "AKA": "Food Allergy",
+    "ICD10": "Z91.01"
+  },
+  {
+    "healthConditionID": 44,
+    "description": "Allergy to eggs",
+    "longDescription": "Allergy or Food Hypersensitivity is a response from the immune system to a food that the body believes is harmful. ",
+    "AKA": "",
+    "ICD10": "Z91.012"
+  },
+  {
+    "healthConditionID": 45,
+    "description": "Allergy to fish",
+    "longDescription": "But Shellfish and other seafood is OK. Allergy or Food Hypersensitivity is a response from the immune system to a food that the body believes is harmful.",
+    "AKA": "Avoid Fish",
+    "ICD10": "Z91.013"
+  },
+  {
+    "healthConditionID": 46,
+    "description": "Allergy to milk",
+    "longDescription": "Allergy or Food Hypersensitivity is a response from the immune system to a food that the body believes is harmful.",
+    "AKA": "Avoid dairy products",
+    "ICD10": "Z91.011"
+  },
+  {
+    "healthConditionID": 47,
+    "description": "Allergy to peanuts",
+    "longDescription": "But other nuts and seeds are OK. Allergy or Food Hypersensitivity is a response from the immune system to a food that the body believes is harmful.",
+    "AKA": "Avoid peanuts",
+    "ICD10": "Z91.010"
+  },
+  {
+    "healthConditionID": 48,
+    "description": "Allergy to shellfish",
+    "longDescription": "But other fish and seafood is OK. Allergy or Food Hypersensitivity is a response from the immune system to a food that the body believes is harmful.",
+    "AKA": "Avoid shellfish",
+    "ICD10": "Z91.013"
+  },
+  {
+    "healthConditionID": 49,
+    "description": "Allergy to soy",
+    "longDescription": "Allergy or Food Hypersensitivity is a response from the immune system to a food that the body believes is harmful.",
+    "AKA": "Soy Allergy; Avoid soy",
+    "ICD10": "Z91.018"
+  },
+  {
+    "healthConditionID": 50,
+    "description": "Allergy to tree nuts",
+    "longDescription": "But seeds are OK. Allergy or Food Hypersensitivity is a response from the immune system to a food that the body believes is harmful.",
+    "AKA": "Avoid tree nuts",
+    "ICD10": "Z91.018"
+  },
+  {
+    "healthConditionID": 51,
+    "description": "Allergy to wheat",
+    "longDescription": "Allergy or Food Hypersensitivity is a response from the immune system to a food that the body believes is harmful.",
+    "AKA": "Wheat allergy",
+    "ICD10": "K90.41"
+  },
+  {
+    "healthConditionID": 52,
+    "description": "Anal fissures",
+    "longDescription": "A small split, tear or ulcer in the lining of the anus that may cause painful bowel movements and bleeding",
+    "AKA": "",
+    "ICD10": "K60.2"
+  },
+  {
+    "healthConditionID": 53,
+    "description": "Anemia (Folic Acid)",
+    "longDescription": "Folic acid deficiency",
+    "AKA": "Folic acid deficiency",
+    "ICD10": "D52"
+  },
+  {
+    "healthConditionID": 54,
+    "description": "Anemia (pernicious)",
+    "longDescription": "Vitamin B12 deficiency. An autoimmune disease.",
+    "AKA": "Anemia, Megaloblastic; Vitamin B12 deficiency",
+    "ICD10": "D51"
+  },
+  {
+    "healthConditionID": 56,
+    "description": "Angina",
+    "longDescription": "Choking sensation in the chest.  ",
+    "AKA": "",
+    "ICD10": "I20"
+  },
+  {
+    "healthConditionID": 57,
+    "description": "Anorexia",
+    "longDescription": "aka anorexia nervosa. An eating disorder.",
+    "AKA": "Anorexia Nervosa",
+    "ICD10": "F50.0"
+  },
+  {
+    "healthConditionID": 58,
+    "description": "Anti-inflammation diet",
+    "longDescription": "Inflammation is body's immune system natural response to injuries, germs, allergies and the like.",
+    "AKA": "Inflammation",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 59,
+    "description": "Anxiety",
+    "longDescription": "Anxiety disorder. Excessive fear or anxiety. Different from anxiety as the normal reaction to stress.",
+    "AKA": "",
+    "ICD10": "F41"
+  },
+  {
+    "healthConditionID": 60,
+    "description": "Poor appetite",
+    "longDescription": "Need to improve appetite.  ",
+    "AKA": "Appetite loss; Loss of appetite",
+    "ICD10": "R63.0"
+  },
+  {
+    "healthConditionID": 61,
+    "description": "Appetite - to inhibit",
+    "longDescription": "Need to suppress appetite",
+    "AKA": "Suppress appetite",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 62,
+    "description": "Arrhythmia",
+    "longDescription": "Irregular heartbeat.",
+    "AKA": "",
+    "ICD10": "I49"
+  },
+  {
+    "healthConditionID": 63,
+    "description": "Vegan Diet",
+    "longDescription": "No animal, fish, fowl or products derived from them such as dairy products, eggs or honey are allowed. ",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 64,
+    "description": "Osteoarthritis",
+    "longDescription": "Most common form of arthritis or joint pain.",
+    "AKA": "Degenerative Arthritis",
+    "ICD10": "M19"
+  },
+  {
+    "healthConditionID": 65,
+    "description": "Asthma",
+    "longDescription": "A chronic condition that affects the airways in the lungs and makes breathing more difficult.",
+    "AKA": "",
+    "ICD10": "J45"
+  },
+  {
+    "healthConditionID": 66,
+    "description": "Athlete's foot",
+    "longDescription": "Persistent and annoying infection of the foot caused by fungus.",
+    "AKA": "Yeast/fungal infection",
+    "ICD10": "B35.3"
+  },
+  {
+    "healthConditionID": 67,
+    "description": "Athletic performance",
+    "longDescription": "for optimal physical performance",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 68,
+    "description": "Avoid red meat",
+    "longDescription": "But poultry and fowl is OK.",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 69,
+    "description": "Avoid seafood",
+    "longDescription": "Allergic to any type of seafood, fish, shellfish, etc.",
+    "AKA": "Seafood allergy; Allergic to seafood",
+    "ICD10": "Z91.013"
+  },
+  {
+    "healthConditionID": 70,
+    "description": "Back Pain",
+    "longDescription": "Backache",
+    "AKA": "Backache",
+    "ICD10": "M54"
+  },
+  {
+    "healthConditionID": 72,
+    "description": "Balance disorders",
+    "longDescription": "Conditions that make you feel unsteady or dizzy.",
+    "AKA": "",
+    "ICD10": "R26"
+  },
+  {
+    "healthConditionID": 76,
+    "description": "Bloating",
+    "longDescription": "Condition where your belly feels full and tight, often due to gas.",
+    "AKA": "",
+    "ICD10": "R14.0"
+  },
+  {
+    "healthConditionID": 77,
+    "description": "Blood clot prevention",
+    "longDescription": "To prevent formation of blood clots.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 79,
+    "description": "Body fluid retention",
+    "longDescription": "Excess body fluid",
+    "AKA": "Excess body fluid",
+    "ICD10": "E87.7"
+  },
+  {
+    "healthConditionID": 82,
+    "description": "Bones well-being",
+    "longDescription": "Keeping your bones healthy and strong.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 86,
+    "description": "Bronchitis",
+    "longDescription": "Inflammation of the bronchial tubes, the airways that carry air to lungs; normally caused by a virus",
+    "AKA": "",
+    "ICD10": "J20"
+  },
+  {
+    "healthConditionID": 87,
+    "description": "Bruises",
+    "longDescription": "An injury that does not cut the skin but breaks blood vessels under the skin and results in swelling and soreness.",
+    "AKA": "",
+    "ICD10": "R23.3"
+  },
+  {
+    "healthConditionID": 91,
+    "description": "Bursitis and Tendonitis",
+    "longDescription": "Bursitis is a painful inflammation that forms around your body's joints. It is due to inflammation of the fluid-filled sac (bursa) that lies between a tendon and skin, or between a tendon and bone. Tendinitis is inflammation of a tendon.",
+    "AKA": "",
+    "ICD10": "M67, M70"
+  },
+  {
+    "healthConditionID": 92,
+    "description": "Calluses",
+    "longDescription": "Corns and callosities ",
+    "AKA": "",
+    "ICD10": "L84"
+  },
+  {
+    "healthConditionID": 93,
+    "description": "Gastrointestinal cancer",
+    "longDescription": "Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the GI tract.",
+    "AKA": "",
+    "ICD10": "C26"
+  },
+  {
+    "healthConditionID": 94,
+    "description": "Leukemia",
+    "longDescription": "Cancer of blood and bone marrow.",
+    "AKA": "Blood Cancer",
+    "ICD10": "C95"
+  },
+  {
+    "healthConditionID": 95,
+    "description": "Liver cancer",
+    "longDescription": "Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the liver.",
+    "AKA": "",
+    "ICD10": "C22"
+  },
+  {
+    "healthConditionID": 96,
+    "description": "Lymphoma",
+    "longDescription": "Hodgkin's and non-Hodgkin's. A cancer of the lymphatic system which includes the lymph nodes (lymph glands), spleen, thymus gland and bone marrow. ",
+    "AKA": "",
+    "ICD10": "C81, C85"
+  },
+  {
+    "healthConditionID": 97,
+    "description": "Skin cancer",
+    "longDescription": "Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the skin.",
+    "AKA": "",
+    "ICD10": "C44"
+  },
+  {
+    "healthConditionID": 98,
+    "description": "Throat & Nasal cancer",
+    "longDescription": "Oral cancer aka mouth cancer. Uncontrolled growth of normal body cells that turn into malignant cells (cancerous cells) in the oral cavity.",
+    "AKA": "Oral cancer",
+    "ICD10": "C06"
+  },
+  {
+    "healthConditionID": 100,
+    "description": "Uterine cancer",
+    "longDescription": "A cancer that starts in the lining of the uterus (womb).",
+    "AKA": "Endometrial cancer",
+    "ICD10": "C54.1"
+  },
+  {
+    "healthConditionID": 101,
+    "description": "Canker sores",
+    "longDescription": "aka mouth ulcers.",
+    "AKA": "Mouth ulcer",
+    "ICD10": "K12.3"
+  },
+  {
+    "healthConditionID": 102,
+    "description": "Carpal tunnel syndrome",
+    "longDescription": "Compression of nerves in your arm at your wrist that can causes numbness, tingling and pain.",
+    "AKA": "",
+    "ICD10": "G56.03"
+  },
+  {
+    "healthConditionID": 103,
+    "description": "Cataracts",
+    "longDescription": "Clouding of the normally clear lenses of the eye.  ",
+    "AKA": "",
+    "ICD10": "H26"
+  },
+  {
+    "healthConditionID": 105,
+    "description": "Chest congestion",
+    "longDescription": "Inflamed air passages or bronchi in the lungs.",
+    "AKA": "",
+    "ICD10": "R09.89"
+  },
+  {
+    "healthConditionID": 106,
+    "description": "Chronic Fatigue Syndrome",
+    "longDescription": "CFS (Chronic Fatigue Syndrome)",
+    "AKA": "CFS",
+    "ICD10": "R53.8"
+  },
+  {
+    "healthConditionID": 107,
+    "description": "Chronic pain",
+    "longDescription": "A persistent pain that lingers on for longer than 12 weeks even after medication or treatment.",
+    "AKA": "",
+    "ICD10": "G89"
+  },
+  {
+    "healthConditionID": 109,
+    "description": "Cirrhosis",
+    "longDescription": "A condition that causes irreversible destruction of normal liver tissue.",
+    "AKA": "Liver Cirrhosis",
+    "ICD10": "K74.6"
+  },
+  {
+    "healthConditionID": 110,
+    "description": "Common Cold Prevention",
+    "longDescription": "Reducing risk of catching cold.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 111,
+    "description": "Common Cold Treatment",
+    "longDescription": "Measures to treat common cold (virus) and its symptoms.",
+    "AKA": "",
+    "ICD10": "J00"
+  },
+  {
+    "healthConditionID": 113,
+    "description": "Cold sores",
+    "longDescription": "Cold sore aka fever blisters",
+    "AKA": "Fever blisters",
+    "ICD10": "B00.1"
+  },
+  {
+    "healthConditionID": 114,
+    "description": "Congestive Heart Failure",
+    "longDescription": "Inability of heart to pump enough blood.  ",
+    "AKA": "CHF",
+    "ICD10": "I50"
+  },
+  {
+    "healthConditionID": 115,
+    "description": "Constipation",
+    "longDescription": "A condition of having fewer bowel movements; hard stools and difficulty to pass them. ",
+    "AKA": "",
+    "ICD10": "K59.0"
+  },
+  {
+    "healthConditionID": 116,
+    "description": "Coronary Heart Disease",
+    "longDescription": "Plaque build-up in the (coronary) arteries that feed blood to the heart itself. AKA Coronary Artery Disease.  ",
+    "AKA": "CHD",
+    "ICD10": "Q24"
+  },
+  {
+    "healthConditionID": 117,
+    "description": "Cough",
+    "longDescription": "Various forms of cough. Acute and chronic.",
+    "AKA": "",
+    "ICD10": "R05"
+  },
+  {
+    "healthConditionID": 119,
+    "description": "Dehydration",
+    "longDescription": "When you use or lose more fluid than you take in, and your body lacks adequate water or fluid to function properly.",
+    "AKA": "",
+    "ICD10": "E86.0"
+  },
+  {
+    "healthConditionID": 120,
+    "description": "Detoxification",
+    "longDescription": "Removal of toxic substances from our body via dietary measures. ",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 121,
+    "description": "Diabetic Retinopathy",
+    "longDescription": "Retinopathy",
+    "AKA": "Retinopathy",
+    "ICD10": "E11.3"
+  },
+  {
+    "healthConditionID": 122,
+    "description": "Atkins diet",
+    "longDescription": "Atkins diet.",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 123,
+    "description": "Low FODMAP diet",
+    "longDescription": "A new dietary management approach developed by Australian scientists to control symptoms associated with IBS.  ",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 124,
+    "description": "Mediterranean diet",
+    "longDescription": "A plant-heavy diet composed of healthy and unprocessed foods associated with the diet followed by the people living in the southern region of Europe.",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 127,
+    "description": "S. Beach diet Phase I",
+    "longDescription": "South Beach Diet, Phase 1",
+    "AKA": "South Beach Diet, Ph1",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 128,
+    "description": "S. Beach diet Phase II",
+    "longDescription": "South Beach Diet, Phase 2",
+    "AKA": "South Beach Diet, Ph2",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 129,
+    "description": "Vegetarian diet",
+    "longDescription": "Aka lacto-ovo vegetarian diet. No meat, fish, fowl allowed. But dairy products and eggs are OK. ",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 130,
+    "description": "Dietary Guidelines",
+    "longDescription": "Dietary Guidelines for Americans, as defined by USDA & Dept. of Health & Human Services. 2020-2025.",
+    "AKA": "Healthy Eating - US",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 133,
+    "description": "Diverticulitis",
+    "longDescription": "Inflammation or infection of one or more abnormal pouches in the intestinal wall, usually found in the large intestine of older people",
+    "AKA": "",
+    "ICD10": "K57"
+  },
+  {
+    "healthConditionID": 134,
+    "description": "Dry mouth",
+    "longDescription": "Dry mouth. Cause unknown.",
+    "AKA": "Xerostomia",
+    "ICD10": "R68.2"
+  },
+  {
+    "healthConditionID": 139,
+    "description": "Epilepsy",
+    "longDescription": "A brain disorder characterized by recurring seizures.  ",
+    "AKA": "",
+    "ICD10": "G40"
+  },
+  {
+    "healthConditionID": 140,
+    "description": "External inflammation",
+    "longDescription": "localized swelling of skin and tissue",
+    "AKA": "Swelling",
+    "ICD10": "R22"
+  },
+  {
+    "healthConditionID": 142,
+    "description": "Macular Degeneration",
+    "longDescription": "Age-related macular degeneration.",
+    "AKA": "AMD",
+    "ICD10": "H35.31, H35.32"
+  },
+  {
+    "healthConditionID": 143,
+    "description": "Night blindness",
+    "longDescription": "aka Nyctalopia. Inability to see well at night or in poor light.",
+    "AKA": "Nyctalopia",
+    "ICD10": "H53.6"
+  },
+  {
+    "healthConditionID": 144,
+    "description": "Fatigue",
+    "longDescription": "A feeling of constant tiredness or weakness.",
+    "AKA": "",
+    "ICD10": "R53"
+  },
+  {
+    "healthConditionID": 145,
+    "description": "Fever",
+    "longDescription": "A temporary rise in body temperature. A part of an overall response from our immune system.",
+    "AKA": "",
+    "ICD10": "R50"
+  },
+  {
+    "healthConditionID": 146,
+    "description": "Fibrocystic Breast Disea",
+    "longDescription": "Aka fibrocystic breasts or fibrocystic change. A  benign (noncancerous) condition in which the breasts feel lumpy.",
+    "AKA": "Fibrocystic Breasts",
+    "ICD10": "N60.19"
+  },
+  {
+    "healthConditionID": 148,
+    "description": "Food poisoning",
+    "longDescription": "Illness caused by eating contaminated food.",
+    "AKA": "",
+    "ICD10": "A05"
+  },
+  {
+    "healthConditionID": 149,
+    "description": "CKD",
+    "longDescription": "Stage 1-4 chronic kidney disease.  ",
+    "AKA": "Chronic Kidney Disease",
+    "ICD10": "N18"
+  },
+  {
+    "healthConditionID": 151,
+    "description": "Fractures",
+    "longDescription": "Fractures or broken bones",
+    "AKA": "Broken bones",
+    "ICD10": "S52, S62, M84"
+  },
+  {
+    "healthConditionID": 152,
+    "description": "Gallbladder inflammation",
+    "longDescription": "Aka cholecystitis. The disease is caused by inflammation due to irritation of the gallbladder wall.",
+    "AKA": "Gallbladder Disease",
+    "ICD10": "K81.1"
+  },
+  {
+    "healthConditionID": 153,
+    "description": "Gallstones",
+    "longDescription": "hard pieces of material developed in gallbladder.",
+    "AKA": "",
+    "ICD10": "K80"
+  },
+  {
+    "healthConditionID": 154,
+    "description": "Gas/Flatulence",
+    "longDescription": "Flatulence and related conditions",
+    "AKA": "Flatulence",
+    "ICD10": "R14"
+  },
+  {
+    "healthConditionID": 156,
+    "description": "Gastroenteritis",
+    "longDescription": "A group of conditions usually caused by infection (bacterial or viral) or ingestion of contaminated food or water. ",
+    "AKA": "",
+    "ICD10": "K52"
+  },
+  {
+    "healthConditionID": 157,
+    "description": "Glaucoma",
+    "longDescription": "Increased pressure of fluids inside the eye that can lead to partial or complete vision loss.",
+    "AKA": "",
+    "ICD10": "H40"
+  },
+  {
+    "healthConditionID": 158,
+    "description": "Gum disease - gingivitis",
+    "longDescription": "aka gum disease.",
+    "AKA": "Gingivitis",
+    "ICD10": "K05"
+  },
+  {
+    "healthConditionID": 159,
+    "description": "Gums health",
+    "longDescription": "Maintaining healthy gums.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 160,
+    "description": "Hair & scalp health",
+    "longDescription": "Maintaining a healthy hair.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 161,
+    "description": "Hair loss",
+    "longDescription": "Baldness",
+    "AKA": "Baldness",
+    "ICD10": "L65.9"
+  },
+  {
+    "healthConditionID": 162,
+    "description": "Hair dandruff",
+    "longDescription": "Dandruff",
+    "AKA": "Dandruff",
+    "ICD10": "L21.0"
+  },
+  {
+    "healthConditionID": 163,
+    "description": "Endometriosis",
+    "longDescription": "A condition in which the layer of tissue that normally covers the inside of the uterus grows outside of it. Pain and infertility are common symptoms.",
+    "AKA": "",
+    "ICD10": "N80"
+  },
+  {
+    "healthConditionID": 164,
+    "description": "Hashimoto's disease",
+    "longDescription": "aka Hashimoto's thyroiditis (HT) is an chronic autoimmune disease that causes the immune system to attack the thyroid gland.",
+    "AKA": "Autoimmune Thyroiditis",
+    "ICD10": "E06.3"
+  },
+  {
+    "healthConditionID": 165,
+    "description": "Headache",
+    "longDescription": "A pain in your head or face. Tension headache as opposed to migraines.",
+    "AKA": "",
+    "ICD10": "R51"
+  },
+  {
+    "healthConditionID": 166,
+    "description": "Hearing loss",
+    "longDescription": "Common problem caused by noise, aging, disease or genetics.",
+    "AKA": "",
+    "ICD10": "H91"
+  },
+  {
+    "healthConditionID": 167,
+    "description": "Heart Attack",
+    "longDescription": "Injury to the heart muscle when the heart's blood supply is suddenly and severely reduced or cut off.",
+    "AKA": "",
+    "ICD10": "I21"
+  },
+  {
+    "healthConditionID": 168,
+    "description": "Polycystic Ovary Synd.",
+    "longDescription": "Polycystic Ovary Syndrome (PCOS). Common among young women. A set of symptoms due to hormonal imbalance. ",
+    "AKA": "PCOS",
+    "ICD10": "E28.2"
+  },
+  {
+    "healthConditionID": 169,
+    "description": "Heartburn",
+    "longDescription": "Burning and painful sensation in the chest/esophagus. It can be a symptom of indigestion, Acid Reflux or GERD.  ",
+    "AKA": "",
+    "ICD10": "R12"
+  },
+  {
+    "healthConditionID": 170,
+    "description": "Heavy periods",
+    "longDescription": "Excessive menstrual blood flow. AKA menorrhagia.",
+    "AKA": "Excess menstrual blood; Menorrhagia",
+    "ICD10": "N92"
+  },
+  {
+    "healthConditionID": 171,
+    "description": "Hemorrhoids",
+    "longDescription": "aka piles. Swollen veins in anus and lower rectum.",
+    "AKA": "",
+    "ICD10": "K64"
+  },
+  {
+    "healthConditionID": 173,
+    "description": "Genital Herpes",
+    "longDescription": "Herpes simplex.  ",
+    "AKA": "Herpes; Herpes Simplex",
+    "ICD10": "A60"
+  },
+  {
+    "healthConditionID": 175,
+    "description": "Hives",
+    "longDescription": "AKA Urticaria. Raised, often itchy, red welts on the surface of the skin usually triggered by an allergic reaction to food or medicine",
+    "AKA": "Urticaria",
+    "ICD10": "L50"
+  },
+  {
+    "healthConditionID": 177,
+    "description": "Hyperactivity/ADD",
+    "longDescription": "Attention deficit disorder, or ADHD.",
+    "AKA": "Attn. deficit disorder; ADHD",
+    "ICD10": "F90.2"
+  },
+  {
+    "healthConditionID": 178,
+    "description": "Immune System",
+    "longDescription": "Maintaining a healthy and strong immune system.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 179,
+    "description": "Impotence/ED",
+    "longDescription": "Male erectile dysfunction.",
+    "AKA": "Erectile Dysfunction",
+    "ICD10": "N52"
+  },
+  {
+    "healthConditionID": 180,
+    "description": "Incontinence",
+    "longDescription": "Inability to control passage of urine or stool. ",
+    "AKA": "",
+    "ICD10": "N39.4, R15, R32"
+  },
+  {
+    "healthConditionID": 181,
+    "description": "Magnesium Deficiency",
+    "longDescription": "Magnesium deficiency.",
+    "AKA": "Hypomagnesemia",
+    "ICD10": "E83.4"
+  },
+  {
+    "healthConditionID": 182,
+    "description": "Indigestion",
+    "longDescription": "Upset stomach",
+    "AKA": "Upset stomach",
+    "ICD10": "K30"
+  },
+  {
+    "healthConditionID": 183,
+    "description": "Bacterial infection risk",
+    "longDescription": "Reducing the risk of bacterial infection.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 184,
+    "description": "Bact. infection treat.",
+    "longDescription": "Infection (Bacterial), treatment.",
+    "AKA": "",
+    "ICD10": "A49"
+  },
+  {
+    "healthConditionID": 185,
+    "description": "Fungal infection",
+    "longDescription": "E.g., ringworm.",
+    "AKA": "",
+    "ICD10": "B37.9"
+  },
+  {
+    "healthConditionID": 186,
+    "description": "Viral infection",
+    "longDescription": "Various types of Flu, SARS, COVID-19 aka Coronavirus, hepatitis, genital herpes, HIV ... are all examples of viral infections.  .",
+    "AKA": "",
+    "ICD10": "B34"
+  },
+  {
+    "healthConditionID": 188,
+    "description": "Male Infertility",
+    "longDescription": "Inability for a man to be able to start pregnancy with his female partner.",
+    "AKA": "",
+    "ICD10": "N46"
+  },
+  {
+    "healthConditionID": 189,
+    "description": "Injuries",
+    "longDescription": "Damage to your body. Harm caused by accidents, falls, hits, weapons, etc.",
+    "AKA": "",
+    "ICD10": "T14"
+  },
+  {
+    "healthConditionID": 190,
+    "description": "Insomnia",
+    "longDescription": "Sleeplessness",
+    "AKA": "Sleeplessness",
+    "ICD10": "G47.0"
+  },
+  {
+    "healthConditionID": 191,
+    "description": "Intestinal spasm",
+    "longDescription": "Intestinal cramp",
+    "AKA": "Intestinal cramp",
+    "ICD10": "R25.2"
+  },
+  {
+    "healthConditionID": 193,
+    "description": "Iron overload",
+    "longDescription": "aka Hemochromatosis.",
+    "AKA": "Hemochromatosis",
+    "ICD10": "E83.1"
+  },
+  {
+    "healthConditionID": 195,
+    "description": "Jet Lag Prevention",
+    "longDescription": "Jet lag",
+    "AKA": "Jet lag",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 196,
+    "description": "Joint pain",
+    "longDescription": "Joint discomfort common in hands, feet, hips, knees or spine.",
+    "AKA": "",
+    "ICD10": "M25.5"
+  },
+  {
+    "healthConditionID": 197,
+    "description": "Kidney stones (Uric)",
+    "longDescription": "Kidney stones formed from accumulation of urate crystals in kidneys due to high levels of uric acid in your blood. ",
+    "AKA": "",
+    "ICD10": "N20.0"
+  },
+  {
+    "healthConditionID": 198,
+    "description": "Kidney stones (Oxalate)",
+    "longDescription": "Calcium Oxalate stones.  ",
+    "AKA": "",
+    "ICD10": "N20.0"
+  },
+  {
+    "healthConditionID": 199,
+    "description": "Kidney stones (Phosph.)",
+    "longDescription": "Calcium Phosphate stones.  ",
+    "AKA": "",
+    "ICD10": "N20.0"
+  },
+  {
+    "healthConditionID": 200,
+    "description": "Lactation function",
+    "longDescription": "Maintaining healthy lactation function (process of making human milk) for people who are pregnant.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 201,
+    "description": "Leg cramps",
+    "longDescription": "Including night leg cramps.",
+    "AKA": "",
+    "ICD10": "R25.2"
+  },
+  {
+    "healthConditionID": 202,
+    "description": "Coronavirus",
+    "longDescription": "Novel form of viral infection causing a global pandemic in early 2020.",
+    "AKA": "Covid-19",
+    "ICD10": "U07"
+  },
+  {
+    "healthConditionID": 203,
+    "description": "Aging",
+    "longDescription": "Slow down of aging process. Maximal Life Span Potential (MLSP).  ",
+    "AKA": "Life expectancy",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 204,
+    "description": "Fatty Liver (NAFLD)",
+    "longDescription": "Defined as accumulation of more than 5% fat tissue in the liver.",
+    "AKA": "NAFLD",
+    "ICD10": "K76.0"
+  },
+  {
+    "healthConditionID": 205,
+    "description": "Liver well-being",
+    "longDescription": "Liver function well-being. Improvement of liver function.  ",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 206,
+    "description": "Hypoglycemia",
+    "longDescription": "Low blood sugar",
+    "AKA": "Low blood sugar",
+    "ICD10": "E16.2"
+  },
+  {
+    "healthConditionID": 207,
+    "description": "Lupus",
+    "longDescription": "SLE (systematic lupus erythematosus). An autoimmune disease.",
+    "AKA": "SLE",
+    "ICD10": "M32"
+  },
+  {
+    "healthConditionID": 210,
+    "description": "Marathon/Triat. training",
+    "longDescription": "Training for any high intensity aerobic endurance event lasting 90 minutes or more.",
+    "AKA": "Endurance training",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 211,
+    "description": "Meniere disease",
+    "longDescription": "Meniere's disease. A disorder of the inner ear that can lead to vertigo and hearing loss.",
+    "AKA": "",
+    "ICD10": "H81.0"
+  },
+  {
+    "healthConditionID": 212,
+    "description": "Menopause",
+    "longDescription": "the time that marks end of a woman's menstrual cycles around average age of 51.",
+    "AKA": "",
+    "ICD10": "N95.1"
+  },
+  {
+    "healthConditionID": 213,
+    "description": "Menstrual cramps",
+    "longDescription": "Aka dysmenorrhea.  ",
+    "AKA": "Painful menstruation",
+    "ICD10": "N94.6"
+  },
+  {
+    "healthConditionID": 215,
+    "description": "Mental alertness",
+    "longDescription": "Maintaining active attention and being ready to see, understand and act in a particular situation.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 216,
+    "description": "Migraine prevention",
+    "longDescription": "Taking measures to reduce the risk of getting migraines.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 217,
+    "description": "Migraine treatment",
+    "longDescription": "Migraine is a headache that can cause severe throbbing pain usually on one side of the head.",
+    "AKA": "",
+    "ICD10": "G43"
+  },
+  {
+    "healthConditionID": 218,
+    "description": "Mitral valve prolapse",
+    "longDescription": "A disorder that affects one of your heart's valves (the mitral valve does not close properly). ",
+    "AKA": "MVP",
+    "ICD10": "I34.1"
+  },
+  {
+    "healthConditionID": 219,
+    "description": "Mononucleosis",
+    "longDescription": "An infection usually caused by the Epstein-Barr virus. Symptoms include fever, sore throat and swollen lymph glands.",
+    "AKA": "",
+    "ICD10": "B27.9"
+  },
+  {
+    "healthConditionID": 221,
+    "description": "Morning Sickness",
+    "longDescription": "associated with pregnancy",
+    "AKA": "",
+    "ICD10": "O21.9"
+  },
+  {
+    "healthConditionID": 222,
+    "description": "Sea/Motion Sickness",
+    "longDescription": "A condition that often causes cold sweats, nausea and vomiting.",
+    "AKA": "",
+    "ICD10": "T75.3"
+  },
+  {
+    "healthConditionID": 223,
+    "description": "Multiple Sclerosis",
+    "longDescription": "A potentially debilitating disease that affects the central nervous system (i.e., the brain and spinal cord).",
+    "AKA": "MS",
+    "ICD10": "G35"
+  },
+  {
+    "healthConditionID": 224,
+    "description": "Muscle aches/pains",
+    "longDescription": "Muscle pain.",
+    "AKA": "Muscle pain",
+    "ICD10": "M79.1"
+  },
+  {
+    "healthConditionID": 225,
+    "description": "Microbiome Health",
+    "longDescription": "To boost immune system, and to rebuild good gut bacteria after antibiotic consumption.",
+    "AKA": "Gut health",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 226,
+    "description": "Muscle Tone",
+    "longDescription": "Maintaining healthy muscle tone - right amount of tension in muscles for good posture, control, speed and movement. ",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 228,
+    "description": "Nasal congestion",
+    "longDescription": "\"Stuffy nose\". When nasal tissues and blood vessels become swollen with excess fluid.",
+    "AKA": "",
+    "ICD10": "R09.81"
+  },
+  {
+    "healthConditionID": 229,
+    "description": "Nausea",
+    "longDescription": "A feeling of sickness with an inclination to vomit.",
+    "AKA": "",
+    "ICD10": "R11.0"
+  },
+  {
+    "healthConditionID": 230,
+    "description": "Neck pain",
+    "longDescription": "aka Cervicalgia",
+    "AKA": "",
+    "ICD10": "M54.2"
+  },
+  {
+    "healthConditionID": 232,
+    "description": "Nerves Well-being",
+    "longDescription": "Maintaining healthy nerves.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 233,
+    "description": "Brain well-being",
+    "longDescription": "Cognitive fitness",
+    "AKA": "Cognitive fitness",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 234,
+    "description": "Nervousness",
+    "longDescription": "the state of being nervous",
+    "AKA": "",
+    "ICD10": "R45.0"
+  },
+  {
+    "healthConditionID": 236,
+    "description": "Osteomalacia",
+    "longDescription": "Softening of the bones caused by a deficiency of vitamin D or problems with the metabolism of this vitamin. ",
+    "AKA": "",
+    "ICD10": "M83"
+  },
+  {
+    "healthConditionID": 237,
+    "description": "CKD (less Phos)",
+    "longDescription": "For CKD patients who need to lower phosphorus intake.   ",
+    "AKA": "",
+    "ICD10": "N18"
+  },
+  {
+    "healthConditionID": 238,
+    "description": "Aches/Pains",
+    "longDescription": "Aches and pains caused by a variety of factors such as injury, infection, an illness and other health issues.",
+    "AKA": "",
+    "ICD10": "R52"
+  },
+  {
+    "healthConditionID": 239,
+    "description": "Pancreatitis",
+    "longDescription": "Pancreas Inflammation",
+    "AKA": "Pancreas Inflammation",
+    "ICD10": "K85"
+  },
+  {
+    "healthConditionID": 240,
+    "description": "Parkinson's disease",
+    "longDescription": "Disorder that affects nerve cells (neurons) in the part of the brain controlling muscle movement, characterized by shaking (tremor) and difficulty with walking, movement, and coordination.  ",
+    "AKA": "",
+    "ICD10": "G20"
+  },
+  {
+    "healthConditionID": 241,
+    "description": "Low T",
+    "longDescription": "Low testosterone aka male hypogonadism.",
+    "AKA": "Low Testosterone",
+    "ICD10": "E29.1"
+  },
+  {
+    "healthConditionID": 242,
+    "description": "Excessive Perspiration",
+    "longDescription": "Excessive sweating",
+    "AKA": "Excessive sweating",
+    "ICD10": "R61"
+  },
+  {
+    "healthConditionID": 243,
+    "description": "PMS",
+    "longDescription": "Premenstrual Syndrome. ",
+    "AKA": "Premenstrual Synd.",
+    "ICD10": "N94.3"
+  },
+  {
+    "healthConditionID": 244,
+    "description": "Pneumonia",
+    "longDescription": "Infection of the small air sacs of the lungs and the tissues around them",
+    "AKA": "",
+    "ICD10": "J18"
+  },
+  {
+    "healthConditionID": 245,
+    "description": "Post Bariatric Surgery",
+    "longDescription": "Dietary guidelines for the initial few months after bariatric surgery",
+    "AKA": "Gastric bypass diet",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 247,
+    "description": "Pregnant",
+    "longDescription": "An expecting mother.  ",
+    "AKA": "Expecting mother",
+    "ICD10": "Z33"
+  },
+  {
+    "healthConditionID": 248,
+    "description": "BPH",
+    "longDescription": "BPH (Benign Prostate Hypersia) or prostate enlargement. ",
+    "AKA": "Prostate Enlargement",
+    "ICD10": "N40"
+  },
+  {
+    "healthConditionID": 251,
+    "description": "Psoriasis",
+    "longDescription": "An autoimmune disease.",
+    "AKA": "",
+    "ICD10": "L40.9"
+  },
+  {
+    "healthConditionID": 253,
+    "description": "Repetitive stress Inj.",
+    "longDescription": "Repetitive stress injuries",
+    "AKA": "",
+    "ICD10": "X50.3"
+  },
+  {
+    "healthConditionID": 254,
+    "description": "Retinitis Pigmentosa",
+    "longDescription": "Progressive degeneration of the retina is an inherited disorder which affects night vision, peripheral vision.",
+    "AKA": "RP",
+    "ICD10": "H35.52"
+  },
+  {
+    "healthConditionID": 258,
+    "description": "Sciatica",
+    "longDescription": "Pain in lower back, hip & thighs. Pinched nerves.",
+    "AKA": "",
+    "ICD10": "M54.3"
+  },
+  {
+    "healthConditionID": 259,
+    "description": "Scurvy",
+    "longDescription": "A condition caused by severe Vitamin C deficiency in diet",
+    "AKA": "",
+    "ICD10": "E54"
+  },
+  {
+    "healthConditionID": 260,
+    "description": "Seizures",
+    "longDescription": "Symptoms of a brain problem, occurs due to sudden abnormal electrical activity in the brain.  ",
+    "AKA": "Convulsions",
+    "ICD10": "R56"
+  },
+  {
+    "healthConditionID": 262,
+    "description": "Seniors (60+)",
+    "longDescription": "Individuals ages 60 years and older. Based on USDA/HHS Dietary Guidelines for Americans.",
+    "AKA": "Dietary Guidelines - 60+",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 265,
+    "description": "Shoulder pain",
+    "longDescription": "Often caused when a tendon gets trapped under the shoulder's bony area.",
+    "AKA": "",
+    "ICD10": "M25.51"
+  },
+  {
+    "healthConditionID": 268,
+    "description": "Skin Health",
+    "longDescription": "Maintaining a healthy vibrant skin.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 269,
+    "description": "Dry/Irritated skin",
+    "longDescription": "aka Xerosis Cutis.",
+    "AKA": "",
+    "ICD10": "L85.3"
+  },
+  {
+    "healthConditionID": 271,
+    "description": "Sleepiness",
+    "longDescription": "Need to stay awake",
+    "AKA": "Need to stay awake",
+    "ICD10": "R40.0"
+  },
+  {
+    "healthConditionID": 273,
+    "description": "Smoking Addiction",
+    "longDescription": "Nicotine addiction.  ",
+    "AKA": "Nicotine addiction",
+    "ICD10": "F17"
+  },
+  {
+    "healthConditionID": 274,
+    "description": "Sore throat",
+    "longDescription": "Pain, scratchiness or irritation of the throat that often worsens when we swallow.",
+    "AKA": "",
+    "ICD10": "R07.0"
+  },
+  {
+    "healthConditionID": 276,
+    "description": "Sprains and Strains",
+    "longDescription": "Sprain is tear or damage to a ligament. Strain is stretching or tear of a muscle.",
+    "AKA": "",
+    "ICD10": "S13, S23, S29, S33, S39, S43"
+  },
+  {
+    "healthConditionID": 277,
+    "description": "Stiffness",
+    "longDescription": "Joint stiffness. The feeling that the motion of a joint is limited or difficult.",
+    "AKA": "Joint stiffness",
+    "ICD10": "M25.6"
+  },
+  {
+    "healthConditionID": 278,
+    "description": "Stomach ache",
+    "longDescription": "Abdominal pain.",
+    "AKA": "",
+    "ICD10": "R10"
+  },
+  {
+    "healthConditionID": 280,
+    "description": "Stroke prevention",
+    "longDescription": "Reducing the risk of a stroke.",
+    "AKA": "",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 281,
+    "description": "Sunburn",
+    "longDescription": "Overexposure to sun. Inflamed and painful skin that feels hot to the touch.",
+    "AKA": "",
+    "ICD10": "L55"
+  },
+  {
+    "healthConditionID": 282,
+    "description": "Sense of taste",
+    "longDescription": "Maintaining a healthy sense of taste.",
+    "AKA": "Taste, Sense Of",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 284,
+    "description": "CKD (less Potassium)",
+    "longDescription": "For CKD patients who need to lower potassium intake.  ",
+    "AKA": "",
+    "ICD10": "N18"
+  },
+  {
+    "healthConditionID": 285,
+    "description": "Tinnitus",
+    "longDescription": "ringing in the ears",
+    "AKA": "Ringing in the Ears",
+    "ICD10": "H93.1"
+  },
+  {
+    "healthConditionID": 286,
+    "description": "Tooth development",
+    "longDescription": "Developing and maintaining healthy teeth.",
+    "AKA": "Tooth health",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 288,
+    "description": "Toothaches",
+    "longDescription": "Pain in or around a tooth.",
+    "AKA": "",
+    "ICD10": "K08.89"
+  },
+  {
+    "healthConditionID": 290,
+    "description": "Tremors",
+    "longDescription": "A type of involuntary shaking movement",
+    "AKA": "",
+    "ICD10": "R25.1"
+  },
+  {
+    "healthConditionID": 292,
+    "description": "Upper-resp. infection",
+    "longDescription": "Upper-respiratory-tract infection",
+    "AKA": "Respiratory-tract infect.",
+    "ICD10": "J06"
+  },
+  {
+    "healthConditionID": 293,
+    "description": "Urinary tract infection",
+    "longDescription": "Cystitis; UTI; aka bladder infection",
+    "AKA": "Cystitis; UTI",
+    "ICD10": "N39.0"
+  },
+  {
+    "healthConditionID": 294,
+    "description": "Yeast infection",
+    "longDescription": "A fungal infection caused by Candida yeasts in vagina. AKA vaginal candidiasis.",
+    "AKA": "Vaginal yeast infection",
+    "ICD10": "B37.3"
+  },
+  {
+    "healthConditionID": 295,
+    "description": "Varicose Veins",
+    "longDescription": "aka varicoses or varicosities. When your veins become enlarged, dilated and overfilled with blood.",
+    "AKA": "",
+    "ICD10": "I86.8"
+  },
+  {
+    "healthConditionID": 298,
+    "description": "Weight control",
+    "longDescription": "Weight management",
+    "AKA": "Weight management",
+    "ICD10": "WELL"
+  },
+  {
+    "healthConditionID": 299,
+    "description": "Weight loss",
+    "longDescription": "Unexpected decrease in body weight. Loss of weight.",
+    "AKA": "Loss of weight",
+    "ICD10": "R63.4, R63.6"
+  },
+  {
+    "healthConditionID": 301,
+    "description": "Wounds",
+    "longDescription": "Healing of wounds. ",
+    "AKA": "",
+    "ICD10": "S11, S21, S31, S41, S51, S61"
+  },
+  {
+    "healthConditionID": 302,
+    "description": "CKD (more Potassium)",
+    "longDescription": "For CKD patients who need to increase potassium intake.  ",
+    "AKA": "",
+    "ICD10": "N18"
+  },
+  {
+    "healthConditionID": 303,
+    "description": "Paleo diet",
+    "longDescription": "A diet based primarily on the foods presumed available to the prehistoric humans. .",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 304,
+    "description": "Leaky gut",
+    "longDescription": "A phenomenon promoted mostly by the alternative medicine community. Refers to damage to the intestinal wall which allows unwanted toxins and substances to enter the blood stream. ",
+    "AKA": "Intestinal Permeability",
+    "ICD10": "K90.9"
+  },
+  {
+    "healthConditionID": 305,
+    "description": "Specific Carb Diet",
+    "longDescription": "Specific Carbohydrate Diet. Complex carbs (disaccharide, or polysaccharide) are not allowed, only monosaccharide carbs allowed. Per user testimonials, SCD has had success for some conditions such as IBS, Crohn's disease, celiac disease.",
+    "AKA": "SCD",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 306,
+    "description": "Prediabetes",
+    "longDescription": "A condition whereby your blood sugar level is higher than normal but not yet high enough to be type 2 diabetes. Proper diet and lifestyle changes could prevent it from progressing to D-2.  ",
+    "AKA": "",
+    "ICD10": "R73.03"
+  },
+  {
+    "healthConditionID": 307,
+    "description": "Interstitial Cystitis",
+    "longDescription": "Syndrome characterized by pelvic pain, pressure, or discomfort in the bladder and pelvic region, often associated with urinary frequency and urgency.  .",
+    "AKA": "Painful Bladder Syndrome; IC",
+    "ICD10": "N30"
+  },
+  {
+    "healthConditionID": 308,
+    "description": "Metabolic Syndrome",
+    "longDescription": "A group of risk factors that raise your risk for heart disease, stroke and diabetes. These factors are high blood pressure; high blood sugar level; high level of triglycerides; low level of HDL and too much fat around your waist. ",
+    "AKA": "Syndrome X",
+    "ICD10": "E88.81"
+  },
+  {
+    "healthConditionID": 309,
+    "description": "Low Histamine Diet",
+    "longDescription": "aka LHD",
+    "AKA": "LHD",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 310,
+    "description": "Ketogenic Diet",
+    "longDescription": "A high fat, low carb, adequate protein diet with varying degrees of effectiveness for a number of illnesses. .",
+    "AKA": "",
+    "ICD10": "DIET"
+  },
+  {
+    "healthConditionID": 311,
+    "description": "Opioid Use Disorder",
+    "longDescription": "Guidelines for recovering from addiction to Opiate and Opioid drugs.",
+    "AKA": "Opioid Addiction; OUD",
+    "ICD10": "F11"
+  },
+  {
+    "healthConditionID": 700,
+    "description": "Taking ACE Inhibitors",
+    "longDescription": "Angiotensin Converting Enzyme Inhibitors. Examples: captopril, enalapril, lisinopril, moexipril, quinapril, ramipril. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 701,
+    "description": "Taking Analgesics",
+    "longDescription": "Pain relievers/Fever reducers. Examples: acetaminophen. ",
+    "AKA": "Taking Antipyretics",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 702,
+    "description": "Taking Anti-anxiety med",
+    "longDescription": "AKA Panic Disorder Meds. Examples: alprazolam, clonazepam, diazepam, lorazepam. ",
+    "AKA": "Taking Panic Disord. Med",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 703,
+    "description": "Taking Anticoagulants",
+    "longDescription": "Vitamin K Agonists. Example: warfarin.  ",
+    "AKA": "Taking Warfarin",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 704,
+    "description": "Taking Antidepressants",
+    "longDescription": "Examples: citalopram, escitalopram, fluoxetine, paroxetine, sertraline. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 705,
+    "description": "Taking Antihistamines",
+    "longDescription": "Examples: brompheniramine, cetirizine, chlorpheniramine, clemastine, desloratadine, diphenhydramine, fexofenadine, levocetirizine, triprolidine. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 706,
+    "description": "Taking Antiprotozoals",
+    "longDescription": "Examples: metronidazole, tinidazole. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 707,
+    "description": "Taking Antipsychotics",
+    "longDescription": "Examples: aripiprazole, clozapine, olanzapine, quetiapine, risperidone, ziprasidone. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 708,
+    "description": "Taking Bipol disord med",
+    "longDescription": "Examples: carbamazepine, divalproex sodium, lamotrigine, lithium. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 709,
+    "description": "Taking Bronchodilators",
+    "longDescription": "Examples: albuterol, theophylline. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 710,
+    "description": "Taking Ciprofloxacin",
+    "longDescription": "A Quinolone Antibiotic/Antibacterial. Other examples: levofloxacin, moxifloxacin. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 711,
+    "description": "Taking Clozapine",
+    "longDescription": "An Antipsychotic. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 712,
+    "description": "Taking Digoxin",
+    "longDescription": "or Taking Glycosides",
+    "AKA": "Taking Glycosides",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 713,
+    "description": "Taking Divalproex",
+    "longDescription": "used to treat certain types of seizures (epilepsy)",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 714,
+    "description": "Taking Griseofulvin",
+    "longDescription": "An Antifungal. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 715,
+    "description": "Taking Isoniazid",
+    "longDescription": "An Antimycobacterial. Taken alone or with other meds, e.g., rifampin + isoniazid, rifampin + isoniazid + pyrazinamide. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 716,
+    "description": "Taking Linezolid",
+    "longDescription": "An Oxazolidinone Antibiotic/Antibacterials. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 717,
+    "description": "Taking MAOIs",
+    "longDescription": "Antidepressants-Monoamine Oxidase Inhibitors (maois). Examples: phenelzine, tranylcypromine. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 718,
+    "description": "Taking Metronidazole",
+    "longDescription": "An Antibiotic or Antibacterial. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 719,
+    "description": "Taking Narcot analgesic",
+    "longDescription": "Examples: codeine + acetaminophen, hydrocodone + acetaminophen, meperidine, morphine, oxycodone + acetaminophen. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 720,
+    "description": "Taking Nitrates",
+    "longDescription": "AKA Vasodilators-Nitrates. Examples: isosorbide dinitrate or mononitrate,  nitroglycerin. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 721,
+    "description": "Taking NSAID",
+    "longDescription": "Non-Steroidal Anti-Inflammatory Drugs. Examples: aspirin, celecoxib, diclofenac, ibuprofen, ketoprofen, naproxen.  ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 722,
+    "description": "Taking Sleep Meds",
+    "longDescription": "Sedatives and Hypnotics. Examples: eszopiclone, zolpidem. ",
+    "AKA": "Taking Sedatives",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 723,
+    "description": "Taking Statins",
+    "longDescription": "AKA Lipid-Altering Agents. Examples:  atorvastatin, fluvastatin, lovastatin, pravastatin, simvastatin, rosuvastatin.  ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 724,
+    "description": "Taking Tetracycline",
+    "longDescription": "An Antibiotics or Antibacterials. ",
+    "AKA": "",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 725,
+    "description": "Taking Thyroid Medicines",
+    "longDescription": "Example: levothyroxine. Used for Underactive thyroids.",
+    "AKA": "Taking Levothyroxine",
+    "ICD10": "MED"
+  },
+  {
+    "healthConditionID": 726,
+    "description": "Taking Diuretics",
+    "longDescription": "Examples: bumetanide, furosemide, hydrochlorothiazide, metolazone, triamterene, triamterene + hydrochlorothiazide",
+    "AKA": "Taking water pills",
+    "ICD10": "MED"
+  }
+]

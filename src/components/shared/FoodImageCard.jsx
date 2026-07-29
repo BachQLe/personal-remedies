@@ -10,6 +10,12 @@
  *   image           — image URL or React component
  *   imageAlt        — alt text for image (optional)
  *   badge           — { label: string, variant?: 'primary' | 'success' | 'info' } or string
+ *   mealTag         — meal-type corner chip, top-left: a PLAN_SLOT_KEYS
+ *                     string (rendered via MealTypeTag) or a React node
+ *                     rendered as-is. Independent of `badge`/`action`.
+ *   stars           — 0.5-stepped rating, 0–5; renders a small star row above
+ *                     the title. Null/undefined renders nothing (never show a
+ *                     fake rating).
  *   title           — card heading (displayed at bottom)
  *   subtitle        — smaller text below title (lead ingredients, description, etc.)
  *   aspectRatio     — aspect ratio string, default '4/5' (full-screen mobile)
@@ -28,12 +34,17 @@
  *   - Active: press-down (translate-y), slight scale
  */
 
+import StarRating from './StarRating.jsx';
+import MealTypeTag from './mealTypeMeta.jsx';
+
 /**
  * @param {Object} props
  * @param {string} props.id
  * @param {string} props.image
  * @param {string} [props.imageAlt]
  * @param {string | {label: string, variant?: string}} [props.badge]
+ * @param {string | React.ReactNode} [props.mealTag]
+ * @param {number | null} [props.stars]
  * @param {string} props.title
  * @param {string} [props.subtitle]
  * @param {string} [props.aspectRatio]
@@ -50,6 +61,8 @@ export default function FoodImageCard({
   image,
   imageAlt = '',
   badge,
+  mealTag,
+  stars,
   title,
   subtitle,
   aspectRatio = '4/5',
@@ -111,15 +124,30 @@ export default function FoodImageCard({
 
       {/* Badge at top-left */}
       {badgeLabel && (
-        <button
+        <span
+          role="button"
+          tabIndex={0}
           onClick={handleBadgeClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleBadgeClick(e);
+            }
+          }}
           className={`absolute top-3 left-3 inline-flex items-center rounded-full
-            px-2.5 py-1 text-[11px] font-semibold font-sans
+            px-2.5 py-1 text-[11px] font-semibold font-sans cursor-pointer
             transition-all duration-fast hover:scale-105 active:scale-95
             ${badgeVariantClasses[badgeVariant] || badgeVariantClasses.primary}`}
         >
           {badgeLabel}
-        </button>
+        </span>
+      )}
+
+      {/* Meal-type tag at top-left (optional; independent of badge) */}
+      {mealTag && (
+        <div className="absolute top-3 left-3 z-10">
+          {typeof mealTag === 'string' ? <MealTypeTag mealKey={mealTag} /> : mealTag}
+        </div>
       )}
 
       {/* Action button at top-right (optional) */}
@@ -128,21 +156,32 @@ export default function FoodImageCard({
           {typeof action === 'function' ? (
             action()
           ) : (
-            <button
+            <span
+              role="button"
+              tabIndex={0}
               onClick={handleActionClick}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleActionClick(e);
+                }
+              }}
               className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm
-                flex items-center justify-center shadow-sm
+                flex items-center justify-center shadow-sm cursor-pointer
                 transition-all duration-fast
                 hover:bg-white hover:shadow-md active:scale-95"
             >
               {action}
-            </button>
+            </span>
           )}
         </div>
       )}
 
       {/* Content at bottom */}
       <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col gap-1">
+        {stars != null && (
+          <StarRating stars={stars} size={12} showValue={false} className="mb-1" />
+        )}
         <span className="font-display text-base font-semibold text-white leading-snug">
           {title}
         </span>

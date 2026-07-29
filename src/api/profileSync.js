@@ -25,6 +25,7 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
 import { storage } from './storage.js';
 import { reloadLibrary } from '../state/library.js';
+import { reloadPlan } from '../state/dailyPlan.js';
 
 const SYNC_META_KEY = 'syncMeta';
 const DEBOUNCE_MS = 2000;
@@ -192,6 +193,11 @@ export async function pullProfile(user) {
 function notifyStoresReloaded() {
   try {
     reloadLibrary();
+  } catch {
+    /* state store failed to reload — non-fatal */
+  }
+  try {
+    reloadPlan();
   } catch {
     /* state store failed to reload — non-fatal */
   }

@@ -185,12 +185,32 @@ function photoUrl(id) {
 }
 
 /**
- * Return an Unsplash image URL for a Nutridigm food name + coarse group.
+ * Resolve a curation-overlay `imageFile` value (see itemOverlay.json /
+ * localTables.js `getOverlayImageFile`) to a servable URL. Overlay entries
+ * store either a bare filename — served from /public/images/, Vite's static
+ * asset convention — or an already-absolute URL, so an override can point
+ * straight at a CDN image too.
+ * @param {string} imageFile
+ * @returns {string}
+ */
+function resolveOverlayImage(imageFile) {
+  if (/^https?:\/\//.test(imageFile)) return imageFile;
+  return `/images/${imageFile}`;
+}
+
+/**
+ * Return an image URL for a Nutridigm food name + coarse group.
  * @param {string} name - food display name
  * @param {string} [group] - coarse food group letter (b, c, d, e, f, g, h, i, k)
- * @returns {string} Unsplash CDN URL
+ * @param {string} [imageFile] - curation-overlay override (see
+ *   `getOverlayImageFile` in localTables.js); when present it wins over the
+ *   keyword/group lookup below entirely. Items without an overlay entry see
+ *   no change in behavior.
+ * @returns {string} Image URL
  */
-export function getIngredientImage(name, group) {
+export function getIngredientImage(name, group, imageFile) {
+  if (imageFile) return resolveOverlayImage(imageFile);
+
   const lower = (name || '').toLowerCase();
   for (const [keyword, id] of KEYWORD_MAP) {
     if (lower.includes(keyword)) return photoUrl(id);

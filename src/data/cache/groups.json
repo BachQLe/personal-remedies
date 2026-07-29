@@ -1,0 +1,170 @@
+[
+  {
+    "foodGroupID": "a",
+    "description": "Top Five",
+    "isFineFoodGroup": false,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "b",
+    "description": "Meat, Fish & Poultry",
+    "isFineFoodGroup": false,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "b1",
+    "description": "Fish & Seafood",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "b2",
+    "description": "Meat, Red Meat & Organ Meats",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "b3",
+    "description": "Poultry",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "c",
+    "description": "Eggs, Beans, Nuts and Seeds",
+    "isFineFoodGroup": false,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "c1",
+    "description": "Eggs & Preparations",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "c2",
+    "description": "Beans & Legumes",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "c3",
+    "description": "Nuts & Seeds",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "d",
+    "description": "Fruits & Juices",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "e",
+    "description": "Vegetables",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "f",
+    "description": "Breads, Grains, Cereals, Pasta",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "g",
+    "description": "Dairy Products, Fats & Oils",
+    "isFineFoodGroup": false,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "g1",
+    "description": "Dairy Products",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "g2",
+    "description": "Fats & Oils",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "h",
+    "description": "Desserts, Snacks, Beverages",
+    "isFineFoodGroup": false,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "h1",
+    "description": "Sweets & Snacks",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "h2",
+    "description": "Beverages",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "i",
+    "description": "Herbs, Spices & Fast Foods",
+    "isFineFoodGroup": false,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "i1",
+    "description": "Herbs, Spices & Sauces",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "i2",
+    "description": "Fast & Prepared Foods",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "j",
+    "description": "Alternative therapies & Misc.",
+    "isFineFoodGroup": false,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "j1",
+    "description": "Alternative Therapies",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "k",
+    "description": "Key Nutrients & Herbal Meds",
+    "isFineFoodGroup": false,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "k1",
+    "description": "Vitamins, Minerals & Other",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "k2",
+    "description": "Herbal Supplements",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": false
+  },
+  {
+    "foodGroupID": "l",
+    "description": "Recipes (from Food Network)",
+    "isFineFoodGroup": true,
+    "isCoarseFoodGroup": true
+  },
+  {
+    "foodGroupID": "x",
+    "description": "**** Not Used *****",
+    "isFineFoodGroup": false,
+    "isCoarseFoodGroup": false
+  }
+]

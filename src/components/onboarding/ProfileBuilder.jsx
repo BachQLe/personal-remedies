@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { conditionSynonyms } from '../../data/conditionSynonyms';
-import { api } from '../../api/api';
+import { getConditions } from '../../api/api.js';
 import { getConditionMeta } from '../../utils/conditionMeta.js';
 
 const chipSpring = { type: 'spring', stiffness: 500, damping: 30, mass: 0.8 };
@@ -63,14 +63,13 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
 
   const { conditions } = profile;
 
-  // Source the unified list from the Nutridigm dictionary (api.getConditions),
+  // Source the unified list from the Nutridigm dictionary (getConditions),
   // alpha-sorted by description. Falls back to mock conditions via the
   // adapter when offline. `profile.conditions` stores healthConditionID
   // numbers; the objects here are used to resolve id <-> description.
   useEffect(() => {
     let alive = true;
-    api
-      .getConditions()
+    getConditions()
       .then((list) => {
         if (!alive) return;
         const sorted = (list || [])
@@ -208,7 +207,7 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
             {saving ? (
               <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
             ) : (
-              'Show my top foods!'
+              'Continue'
             )}
           </motion.button>
         </div>

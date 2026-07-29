@@ -7,17 +7,21 @@
  * - Filters out non-food items by FINE group (lifestyle 'x'/'j1', recipes 'l')
  *   — see `isExcludedItem` — never by coarse group (coarse 'x' is also used
  *   by real foods like Taro leaves / pork liver)
- * - NEVER exposes value/descriptionNumericID/numeric scores
+ * - Historically NEVER exposed value/descriptionNumericID/numeric scores.
+ *   RELAXED July 2026 (user-approved) for the star-rating feature:
+ *   `assessFood` now also returns `score`/`verdict`/`numericId`/`stars`
+ *   (see `numericIdToStars`) alongside the existing `tier`. Everything else
+ *   this rule protected still holds unchanged: /topdoordonts and /detailed
+ *   items still carry no tier/score data (list membership + rank/listType
+ *   IS the verdict there), and `referenceTotal: null` still means "unknown",
+ *   never "zero".
  *
  * @typedef {import('./types.js')} Types
  */
 
-import { EXCLUDED_FINE_GROUPS, COARSE_GROUP_LABELS, MEAL_SLOT_MAP, DEFAULT_DEV_CONDITIONS } from './config.js';
+import { EXCLUDED_FINE_GROUPS, COARSE_GROUP_LABELS, MEAL_SLOT_MAP, DEFAULT_DEV_CONDITIONS, PLAN_SLOTS, PLAN_SLOT_KEYS } from './config.js';
 import { getIngredientImage } from './ingredientImages.js';
 import {
-  fetchFoodItems,
-  fetchFoodGroups,
-  fetchHealthConditions,
   fetchGoodFor,
   fetchTopDoOrDonts,
   fetchSuggest,
@@ -26,11 +30,9 @@ import {
   NutridigmAuthError,
 } from './nutridigm.js';
 import { cachedFetch, peekCache } from './cache.js';
+import { getItemTable, getConditionTable, getGroupTable, getOverlayImageFile } from './localTables.js';
 
 // ── Cache TTLs ────────────────────────────────────────────────────────────────
-
-/** Dictionaries (fooditems/foodgroups/healthconditions) change rarely. */
-const DICTIONARY_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 
 /** /topdoordonts results — cached per {conditionsCSV, consumeOrAvoid, limit}. */
 const TOPDOORDONTS_TTL_MS = 8 * 60 * 60 * 1000; // 8h
@@ -40,6 +42,12 @@ const RECIPES_TTL_MS = 8 * 60 * 60 * 1000; // 8h
 
 /** /detailed results — cached per {conditionsCSV, coarseGroup, listType}. */
 const DETAILED_TTL_MS = 8 * 60 * 60 * 1000; // 8h
+
+/** /goodfor assessment results — cached per {conditionsCSV, foodId}. */
+const GOODFOR_TTL_MS = 8 * 60 * 60 * 1000; // 8h
+
+/** /suggest results for Plan-slot fine food groups — cached per {conditionsCSV, fineFoodGroup}. */
+const SUGGEST_TTL_MS = 8 * 60 * 60 * 1000; // 8h
 
 /**
  * /references citations — cached per (conditionId, foodId). Citations are
@@ -70,6 +78,21 @@ function cachedTopDoOrDonts(conditionsCSV, consumeOrAvoid, limit) {
 }
 
 /**
+ * Cached wrapper around fetchSuggest, keyed by {conditionsCSV, fineFoodGroup}.
+ * Backs both `getRecipes` (fine group 'l', via its own `recipes:{csv}:l`
+ * key — see `getRecipesRaw`) and `getMealPlanSuggestions` (the 10 Plan-slot
+ * fine groups), so a fallback retry with DEFAULT_DEV_CONDITIONS caches under
+ * its OWN key rather than colliding with the profile's real conditions.
+ * @param {string} conditionsCSV
+ * @param {string} fineFoodGroup
+ * @returns {Promise<Array>}
+ */
+function cachedSuggest(conditionsCSV, fineFoodGroup) {
+  const key = `suggest:${conditionsCSV}:${fineFoodGroup}`;
+  return cachedFetch(key, SUGGEST_TTL_MS, () => fetchSuggest(conditionsCSV, fineFoodGroup));
+}
+
+/**
  * Cache key for a single (conditionId, foodId) /references lookup. Shared
  * between `cachedReferences` (write path) and `getCachedRefCount` (read-only
  * peek path) so the two never drift apart.
@@ -83,7 +106,7 @@ function refsCacheKey(conditionId, foodId) {
 
 /**
  * Cached wrapper around fetchReferences, keyed by (conditionId, foodId).
- * Citations are static curated data, so a 7-day TTL means repeat FoodDetail
+ * Citations are static curated data, so a 7-day TTL means repeat FoodDetailCard
  * opens for the same food+condition cost zero /references calls.
  * @param {number} conditionId
  * @param {number} foodId
@@ -149,47 +172,57 @@ export function numericIdToTier(numericId) {
   }
 }
 
+/** Explicit 7-step verdict ladder → stars-out-of-5 map for numericIdToStars. */
+const STARS_BY_NUMERIC_ID = { 1: 5, 2: 4.5, 3: 4, 4: 3, 5: 2, 6: 1.5, 7: 1 };
+
+/**
+ * Map descriptionNumericID (the Nutridigm 7-step verdict ladder) to a
+ * stars-out-of-5 rating. Intentionally relaxes the former "never expose
+ * numeric scores" rule (user-approved July 2026) — used for the star rating
+ * on FoodDetailCard. Returns null for anything outside 1–7.
+ * @param {number} numericId
+ * @returns {number|null}
+ */
+export function numericIdToStars(numericId) {
+  return STARS_BY_NUMERIC_ID[numericId] ?? null;
+}
+
 // ── Food item cache ──────────────────────────────────────────────────────────
 
 /** @type {Map<number, Object>|null} */
 let _foodItemsCache = null;
-/** @type {Promise<void>|null} */
-let _foodItemsLoading = null;
 
 /**
  * Ensure the food dictionary is loaded and cached.
- * The raw array is persisted via cachedFetch (24h TTL, stale-while-revalidate);
- * the in-memory Map keyed by foodItemID is rebuilt from it on every process
- * start (and again if a background revalidation swaps in fresher data —
- * see the note below).
+ * Source is the local (bundled, zero-network) item table from
+ * localTables.js — the in-memory Map keyed by foodItemID is built from it
+ * once and memoized. Stays `async` (and callers keep `await`ing it)
+ * purely to preserve the existing public call shape downstream; the actual
+ * work is synchronous.
  * @returns {Promise<Map<number, Object>>}
  */
 async function ensureFoodItems() {
   if (_foodItemsCache) return _foodItemsCache;
-  if (_foodItemsLoading) {
-    await _foodItemsLoading;
-    return _foodItemsCache;
+
+  _foodItemsCache = new Map();
+  for (const item of getItemTable()) {
+    _foodItemsCache.set(item.foodItemID, item);
   }
-
-  _foodItemsLoading = (async () => {
-    const items = await cachedFetch('fooditems', DICTIONARY_TTL_MS, fetchFoodItems);
-    _foodItemsCache = new Map();
-    for (const item of items) {
-      _foodItemsCache.set(item.foodItemID, item);
-    }
-  })();
-
-  await _foodItemsLoading;
-  _foodItemsLoading = null;
   return _foodItemsCache;
 }
 
 /** @type {Array|null} */
 let _foodGroupsCache = null;
 
+/**
+ * Ensure the food group dictionary is loaded and cached. Source is the
+ * local food group table from localTables.js. See `ensureFoodItems` for why
+ * this stays `async` despite doing no actual async work.
+ * @returns {Promise<Array>}
+ */
 async function ensureFoodGroups() {
   if (_foodGroupsCache) return _foodGroupsCache;
-  _foodGroupsCache = await cachedFetch('foodgroups', DICTIONARY_TTL_MS, fetchFoodGroups);
+  _foodGroupsCache = getGroupTable();
   return _foodGroupsCache;
 }
 
@@ -218,6 +251,43 @@ export async function getGroupLabels() {
   return _groupLabelsCache;
 }
 
+/** @type {Map<string, string[]>|null} */
+let _fineGroupLabelsByCoarseCache = null;
+
+/**
+ * Fine-group display labels bucketed by their coarse-group letter, sourced
+ * from the same cached /foodgroups dictionary as `getGroupLabels`. Each
+ * bucket is sorted by foodGroupID (e.g. 'b' → ['Fish & Seafood', 'Meat, Red
+ * Meat & Organ Meats', 'Poultry'], from b1/b2/b3).
+ *
+ * Bucketing is a plain `foodGroupID[0]` prefix match — the excluded fine
+ * codes ('x', 'j1', 'l', see `EXCLUDED_FINE_GROUPS`) never prefix-match the
+ * 9 UI grid letters (b,c,d,e,f,g,h,i,k), so no exclusion filtering is needed
+ * here.
+ * @returns {Promise<Map<string, string[]>>}
+ */
+export async function getFineGroupLabelsByCoarse() {
+  if (_fineGroupLabelsByCoarseCache) return _fineGroupLabelsByCoarseCache;
+
+  const groups = await ensureFoodGroups();
+  const byCoarse = new Map();
+  for (const g of groups) {
+    if (!g.isFineFoodGroup) continue;
+    const coarseLetter = g.foodGroupID[0];
+    if (!byCoarse.has(coarseLetter)) byCoarse.set(coarseLetter, []);
+    byCoarse.get(coarseLetter).push(g);
+  }
+
+  const result = new Map();
+  for (const [coarseLetter, fineGroups] of byCoarse) {
+    fineGroups.sort((a, b) => (a.foodGroupID < b.foodGroupID ? -1 : a.foodGroupID > b.foodGroupID ? 1 : 0));
+    result.set(coarseLetter, fineGroups.map((g) => g.description));
+  }
+
+  _fineGroupLabelsByCoarseCache = result;
+  return _fineGroupLabelsByCoarseCache;
+}
+
 /**
  * Resolve a single food group code (fine or coarse) to its real display
  * label. Checks fine groups first (more specific, e.g. 'b1' → 'Fish &
@@ -242,9 +312,16 @@ export async function getGroupLabel(code) {
 /** @type {Array|null} */
 let _healthConditionsCache = null;
 
+/**
+ * Ensure the health condition dictionary is loaded and cached. Source is
+ * the local health condition table from localTables.js. See
+ * `ensureFoodItems` for why this stays `async` despite doing no actual
+ * async work.
+ * @returns {Promise<Array>}
+ */
 async function ensureHealthConditions() {
   if (_healthConditionsCache) return _healthConditionsCache;
-  _healthConditionsCache = await cachedFetch('healthconditions', DICTIONARY_TTL_MS, fetchHealthConditions);
+  _healthConditionsCache = getConditionTable();
   return _healthConditionsCache;
 }
 
@@ -263,7 +340,7 @@ async function ensureHealthConditions() {
  * @param {Object} raw - Raw API item
  * @returns {boolean}
  */
-function isExcludedItem(raw) {
+export function isExcludedItem(raw) {
   const fine = raw.fineFoodGroup;
   if (fine && EXCLUDED_FINE_GROUPS.includes(fine)) return true;
   if (raw.coarseFoodGroup === 'j') return true;
@@ -350,7 +427,7 @@ function normalizeDetailedFood(raw, coarseGroup) {
 /**
  * Attach a resolved `groupLabel` (real human label, fine-group-preferred) to
  * a Food, mutating and returning it. Centralizes label resolution so
- * consumers (PlanScreen, Daily Picks, suggestions) stay dumb and just render
+ * consumers (suggestions, food detail views) stay dumb and just render
  * `food.groupLabel`.
  * @param {import('./types.js').Food} food
  * @returns {Promise<import('./types.js').Food>}
@@ -363,27 +440,17 @@ async function attachGroupLabel(food) {
 // ── Recipe helpers ───────────────────────────────────────────────────────────
 
 /**
- * Parse a recipe's `notes` field into a display sourceName.
- *
- * Observed format: "FN; Giada De Laurentiis;; FN; Giada De Laurentiis;"
- * — semicolon-separated clauses, duplicated, sometimes with extra clauses
- * (e.g. "see also recipe for biscuit crust", "FN Kitchen"). We split on
- * ';', trim, drop empties, dedupe, map the "FN"/"FN Kitchen" network
- * abbreviation to "Food Network", and join the network + first chef name
- * found as "Food Network · <chef>".
- *
- * Examples:
- *   "FN; Giada De Laurentiis;; FN; Giada De Laurentiis;" → "Food Network · Giada De Laurentiis"
- *   "FN Kitchen;; FN Kitchen;"                            → "Food Network"
- *   "FN; Ina Garten;; see also recipe for biscuit crust"  → "Food Network · Ina Garten"
- *   "" / null / undefined                                 → "Food Network"
- *
- * @param {string} [notes]
- * @returns {string}
+ * Split a raw Nutridigm `notes` string on ';', trim each segment, drop
+ * empties, and dedupe case-insensitively (first occurrence's original
+ * casing wins). Shared by `parseSourceName` (recipe source name) here and
+ * by `cleanNotes` in recommendations.js (blurb text) — both see the same
+ * "FN; Giada De Laurentiis;; FN; Giada De Laurentiis;"-shaped duplication
+ * from the API and need it cleaned identically before diverging in what
+ * they do with the result.
+ * @param {string} notes - Non-empty notes string (callers guard the empty case).
+ * @returns {string[]}
  */
-function parseSourceName(notes) {
-  if (!notes) return 'Food Network';
-
+export function dedupeNotes(notes) {
   const segments = notes
     .split(';')
     .map((s) => s.trim())
@@ -398,6 +465,32 @@ function parseSourceName(notes) {
       deduped.push(seg);
     }
   }
+  return deduped;
+}
+
+/**
+ * Parse a recipe's `notes` field into a display sourceName.
+ *
+ * Observed format: "FN; Giada De Laurentiis;; FN; Giada De Laurentiis;"
+ * — semicolon-separated clauses, duplicated, sometimes with extra clauses
+ * (e.g. "see also recipe for biscuit crust", "FN Kitchen"). We split on
+ * ';', trim, drop empties, dedupe (via `dedupeNotes`), map the "FN"/"FN
+ * Kitchen" network abbreviation to "Food Network", and join the network +
+ * first chef name found as "Food Network · <chef>".
+ *
+ * Examples:
+ *   "FN; Giada De Laurentiis;; FN; Giada De Laurentiis;" → "Food Network · Giada De Laurentiis"
+ *   "FN Kitchen;; FN Kitchen;"                            → "Food Network"
+ *   "FN; Ina Garten;; see also recipe for biscuit crust"  → "Food Network · Ina Garten"
+ *   "" / null / undefined                                 → "Food Network"
+ *
+ * @param {string} [notes]
+ * @returns {string}
+ */
+function parseSourceName(notes) {
+  if (!notes) return 'Food Network';
+
+  const deduped = dedupeNotes(notes);
 
   let network = 'Food Network';
   let chef = null;
@@ -478,21 +571,6 @@ export async function getConditionNames(conditionIds) {
 }
 
 /**
- * Resolve a condition display name back to its healthConditionID
- * (case-insensitive match on `description`) via the cached
- * /healthconditions dictionary.
- * @param {string} name
- * @returns {Promise<number|null>}
- */
-export async function getConditionIdByName(name) {
-  if (!name) return null;
-  const conditions = await ensureHealthConditions();
-  const q = String(name).toLowerCase().trim();
-  const found = conditions.find((c) => (c.description || '').toLowerCase().trim() === q);
-  return found ? found.healthConditionID : null;
-}
-
-/**
  * Resolve an ingredient/food display name to its foodItemID (case-insensitive
  * match on displayAs/description) via the cached /fooditems dictionary.
  * @param {string} name
@@ -538,6 +616,35 @@ export async function searchFoods(query, _profile) {
 }
 
 /**
+ * Search Key Nutrients & Herbal Medicines (coarse group 'k', i.e. fine groups
+ * k1/k2) in the food dictionary (client-side filter on cached /fooditems).
+ * Mirrors `searchFoods` but scoped to the coarse group that powers the
+ * Natural Sources screen, so its own search box doesn't surface unrelated
+ * foods. Zero network beyond the already-cached dictionary.
+ * @param {string} query
+ * @returns {Promise<import('./types.js').Food[]>}
+ */
+export async function searchNaturalSources(query) {
+  const cache = await ensureFoodItems();
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+
+  /** @type {import('./types.js').Food[]} */
+  const results = [];
+
+  for (const [, item] of cache) {
+    if (isExcludedItem(item)) continue;
+    if (effectiveCoarseGroup(item) !== 'k') continue;
+    const name = (item.displayAs || item.description || '').toLowerCase();
+    if (name.includes(q)) {
+      results.push(normalizeFood(item));
+    }
+  }
+
+  return results.slice(0, 50);
+}
+
+/**
  * Assess a single food against the user's profile.
  * Calls /goodfor for the reconciled verdict, then /references for each condition.
  * @param {number} foodId
@@ -564,7 +671,9 @@ export async function assessFood(foodId, profile) {
  */
 async function assessFoodRaw(foodId, conditionIds) {
   const conditionIdStr = conditionIds.join(',');
-  const raw = await fetchGoodFor(foodId, conditionIdStr);
+  const raw = await cachedFetch(`goodfor:${conditionIdStr}:${foodId}`, GOODFOR_TTL_MS, () =>
+    fetchGoodFor(foodId, conditionIdStr)
+  );
 
   if (!raw) return null;
 
@@ -598,6 +707,11 @@ async function assessFoodRaw(foodId, conditionIds) {
         conditionId,
         conditionName,
         tier: condTier,
+        // Raw descriptionNumericID for this condition (null if absent from the
+        // /goodfor response), kept ALONGSIDE tier so the UI can distinguish a
+        // real "Neutral / OK" (numericId 4) from missing data — numericIdToTier
+        // maps 4 to null, same as "no data", so tier alone can't tell them apart.
+        numericId: condData?.descriptionNumericID ?? null,
         referenceCount: citations.length,
         citations,
         referenceStatus,
@@ -614,7 +728,15 @@ async function assessFoodRaw(foodId, conditionIds) {
     ? null
     : perCondition.reduce((sum, c) => sum + c.referenceCount, 0);
 
-  return { food, tier, perCondition };
+  return {
+    food,
+    tier,
+    perCondition,
+    score: raw.value ?? null,
+    verdict: raw.description ?? null,
+    numericId: raw.descriptionNumericID ?? null,
+    stars: numericIdToStars(raw.descriptionNumericID),
+  };
 }
 
 /**
@@ -643,25 +765,6 @@ export function getCachedRefCount(foodId, conditionIds) {
     total += (cached || []).length;
   }
   return total;
-}
-
-/**
- * Eagerly fetch (and cache, via `cachedReferences`) the study count for a
- * single food+condition pair. This DOES hit the network on a cache miss —
- * callers are responsible for rate-limit safety (e.g. only warming a small,
- * fixed number of rows). After this resolves, `getCachedRefCount` for the
- * same pair will return a non-null value.
- * @param {number} foodId
- * @param {number} conditionId
- * @returns {Promise<number|null>} Citation count, or null on fetch failure.
- */
-export async function warmReferenceCount(foodId, conditionId) {
-  try {
-    const citations = await cachedReferences(conditionId, foodId);
-    return (citations || []).length;
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -834,60 +937,6 @@ async function getCategoryDetailRaw(conditionIds, coarseGroup, listType) {
 }
 
 /**
- * Get alternatives for a food based on its fine food group via /suggest.
- * @param {number} foodId
- * @param {import('./types.js').Profile} profile
- * @returns {Promise<import('./types.js').Food[]>}
- */
-export async function getAlternatives(foodId, profile) {
-  const conditionIds = profile.conditions || [];
-  if (!conditionIds.length) return [];
-
-  const cache = await ensureFoodItems();
-  const foodItem = cache.get(foodId);
-  if (!foodItem) return [];
-
-  const fineGroup = foodItem.fineFoodGroup;
-  if (!fineGroup) return [];
-
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    getAlternativesRaw(foodId, ids, fineGroup)
-  );
-
-  // Array shape preserved for existing consumers; usedFallback attached as a
-  // non-enumerable property so it doesn't leak into JSON/spread/iteration.
-  // See types.js "usedFallback propagation" for the full rationale.
-  Object.defineProperty(result, 'usedFallback', {
-    value: usedFallback,
-    enumerable: false,
-  });
-
-  return result;
-}
-
-/**
- * Unwrapped getAlternatives body.
- * @param {number} foodId
- * @param {number[]} conditionIds
- * @param {string} fineGroup
- * @returns {Promise<import('./types.js').Food[]>}
- */
-async function getAlternativesRaw(foodId, conditionIds, fineGroup) {
-  const conditionIdStr = conditionIds.join(',');
-  const suggestions = await fetchSuggest(conditionIdStr, fineGroup);
-  if (!suggestions || !suggestions.length) return [];
-
-  return suggestions
-    .filter((s) => s.foodItemID !== foodId)
-    .filter((s) => {
-      const tier = numericIdToTier(s.descriptionNumericID);
-      return tier === 'Top' || tier === 'Strong' || tier === 'Good';
-    })
-    .slice(0, 10)
-    .map((raw) => normalizeFood(raw));
-}
-
-/**
  * Get real, condition-ranked recipes for the profile via /suggest on the
  * 'l' fine food group (Food Network recipes scored against the requested
  * health conditions). Cached 8h per conditionsCSV.
@@ -929,10 +978,281 @@ async function getRecipesRaw(conditionIds) {
       tier: numericIdToTier(item.descriptionNumericID),
       sourceName: parseSourceName(item.notes),
       matchedConditions,
-      photo: getIngredientImage(title, item.coarseFoodGroup),
+      photo: getIngredientImage(title, item.coarseFoodGroup, getOverlayImageFile(item.foodItemID)),
       mealType: guessMealType(title),
     };
   });
+}
+
+/** Recipe tiers eligible to fill a Plan slot — reverse of numericIdToTier for 1/2/3 only. */
+const TIER_TO_NUMERIC_ID = { Top: 1, Strong: 2, Good: 3 };
+
+/**
+ * Normalize one /suggest fine-group response into slot-ready
+ * PlanCandidates. Filters to `descriptionNumericID` 1-4 (CRITICAL — 5-7 are
+ * harmful; a Plan slot must never suggest them) and excluded items (see
+ * `isExcludedItem`), then stable-sorts ascending by descriptionNumericID so
+ * the best matches lead each group's list.
+ * @param {Object[]} raw - Raw /suggest items for one fine food group
+ * @param {string} fineGroup - The fine food group requested (injected, not
+ *   on raw — unlike /topdoordonts, /suggest items carry no
+ *   coarseFoodGroup/fineFoodGroup fields at all, so every item in this batch
+ *   is implicitly that group; without this every Plan candidate's
+ *   group/fineGroup normalizes to '', which silently breaks
+ *   `estimateNutrition`'s calorie estimate for the whole Plan screen).
+ * @returns {import('./types.js').PlanCandidate[]}
+ */
+function normalizePlanGroup(raw, fineGroup) {
+  const filtered = raw.filter(
+    (item) =>
+      item.descriptionNumericID != null &&
+      item.descriptionNumericID >= 1 &&
+      item.descriptionNumericID <= 4 &&
+      !isExcludedItem(item)
+  );
+
+  filtered.sort((a, b) => a.descriptionNumericID - b.descriptionNumericID);
+
+  return filtered.map((item) => {
+    const food = normalizeFood(item);
+    const resolvedFineGroup = food.fineGroup || fineGroup || '';
+    const resolvedGroup = food.group || resolvedFineGroup.charAt(0);
+    return {
+      id: food.id,
+      name: food.name,
+      image: getIngredientImage(food.name, resolvedGroup, getOverlayImageFile(food.id)),
+      group: resolvedGroup,
+      fineGroup: resolvedFineGroup,
+      tier: numericIdToTier(item.descriptionNumericID),
+      numericId: item.descriptionNumericID,
+      kind: 'food',
+    };
+  });
+}
+
+/**
+ * Map a Recipe (from `getRecipesRaw`) to a PlanCandidate for a lunch/dinner
+ * Plan slot. `group`/`fineGroup` are the recipe fine food group code
+ * ('l') — real recipes ARE food items under that group, there's no separate
+ * coarse code to read off the already-mapped Recipe shape.
+ * @param {import('./types.js').Recipe} recipe
+ * @returns {import('./types.js').PlanCandidate}
+ */
+function recipeToPlanCandidate(recipe) {
+  return {
+    id: recipe.id,
+    name: recipe.title,
+    image: recipe.photo,
+    group: RECIPE_FINE_GROUP,
+    fineGroup: RECIPE_FINE_GROUP,
+    tier: recipe.tier,
+    numericId: TIER_TO_NUMERIC_ID[recipe.tier],
+    kind: 'recipe',
+    sourceName: recipe.sourceName,
+  };
+}
+
+/**
+ * Round-robin interleave multiple PlanCandidate lists (index 0 of each
+ * list, then index 1, ...) and dedupe by id (first occurrence wins). Used
+ * to fill a Plan slot from its several /suggest fine-group lists without
+ * one group dominating the front of the slot.
+ * @param {import('./types.js').PlanCandidate[][]} lists
+ * @returns {import('./types.js').PlanCandidate[]}
+ */
+function interleaveAndDedupe(lists) {
+  const result = [];
+  const seen = new Set();
+  const maxLen = Math.max(0, ...lists.map((list) => list.length));
+
+  for (let i = 0; i < maxLen; i++) {
+    for (const list of lists) {
+      const item = list[i];
+      if (item && !seen.has(item.id)) {
+        seen.add(item.id);
+        result.push(item);
+      }
+    }
+  }
+
+  return result;
+}
+
+/** Which flag column on the merged item table (isSnack/isBeverage) each of these two slot keys draws its candidates from. */
+const SLOT_FLAG_KEY = { snacks: 'isSnack', beverages: 'isBeverage' };
+
+/**
+ * Build a slot's candidate pool from flagged items scattered across EVERY
+ * /suggest pool already fetched for the plan, instead of just the slot's
+ * own `fineGroups`. "Snacks & sweets" (fineFoodGroup 'h1') is a food-group
+ * label, not a snackability judgment — it also holds baking ingredients
+ * (frostings, pie crust) that no one eats standalone, while genuine snacks
+ * (nuts, fruit) live in other groups already being fetched for
+ * breakfast/lunch/dinner. `itemsMap` carries the merged isSnack/isBeverage
+ * overlay flags (see scripts/flag-snack-beverage.mjs + localTables.js); a
+ * candidate qualifies only if its flag is true — never inferred.
+ *
+ * Pool is deduped by id and sorted ascending by `numericId` (1 = best
+ * condition-tier match); `Array#sort` is spec-stable, and candidates are
+ * scanned in `byGroup`'s fetch order with each group's list already
+ * ascending by numericId (see `normalizePlanGroup`), so numericId ties keep
+ * their original /suggest rank. Zero new API calls — every candidate here
+ * was already fetched for one of the other 10 PLAN_SLOTS fine groups.
+ * Honesty: if nothing fetched is flagged, the pool is honestly empty — this
+ * never backfills from unflagged items.
+ * @param {Map<string, import('./types.js').PlanCandidate[]>} byGroup
+ * @param {Map<number, Object>} itemsMap - foodItemID -> merged item row (from ensureFoodItems)
+ * @param {'isSnack'|'isBeverage'} flagKey
+ * @returns {import('./types.js').PlanCandidate[]}
+ */
+function flaggedPoolAcrossGroups(byGroup, itemsMap, flagKey) {
+  const seen = new Set();
+  const pool = [];
+  for (const list of byGroup.values()) {
+    for (const candidate of list) {
+      if (seen.has(candidate.id)) continue;
+      const item = itemsMap.get(candidate.id);
+      if (!item?.[flagKey]) continue;
+      seen.add(candidate.id);
+      pool.push(candidate);
+    }
+  }
+  pool.sort((a, b) => a.numericId - b.numericId);
+  return pool;
+}
+
+/**
+ * Get slot-ready candidates for the Plan screen (/app/plan) — see
+ * `PLAN_SLOTS` in config.js for the slot → fine food group mapping.
+ *
+ * Fires one /suggest call per unique fine food group across all slots (10
+ * groups) via `Promise.allSettled` — a failed group resolves to an empty
+ * list for that group (one console.error, logged once) rather than failing
+ * the whole plan — plus the shared recipes call, which reuses the existing
+ * `recipes:{csv}:l` cache (`getRecipesRaw`) instead of making a second 'l'
+ * /suggest call.
+ *
+ * Every candidate is pre-filtered to `descriptionNumericID` 1-4 (never a
+ * harmful 5-7 food) before being surfaced. Never fabricates fields (no
+ * calories, no cook times) — only what the API actually returned.
+ *
+ * @param {import('./types.js').Profile} profile
+ * @returns {Promise<{
+ *   candidates: Record<string, import('./types.js').PlanCandidate[]>,
+ *   conditionIds: number[],
+ *   conditionNames: string[],
+ *   usedFallback: boolean
+ * }>}
+ */
+export async function getMealPlanSuggestions(profile) {
+  const conditionIds = profile?.conditions || [];
+  if (!conditionIds.length) {
+    return {
+      candidates: Object.fromEntries(PLAN_SLOT_KEYS.map((key) => [key, []])),
+      conditionIds: [],
+      conditionNames: [],
+      usedFallback: false,
+    };
+  }
+
+  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
+    getMealPlanSuggestionsRaw(ids)
+  );
+
+  return { ...result, usedFallback };
+}
+
+/**
+ * Unwrapped getMealPlanSuggestions body. `conditionIds`/`conditionNames` on
+ * the result are computed from the `ids` this was CALLED with (not the
+ * profile's original ids), so a demo-fallback retry's resolved ids/names
+ * propagate correctly onto the plan instead of claiming the wrong condition.
+ *
+ * Per-group /suggest failures (and getRecipesRaw failures) normally degrade
+ * to an empty list rather than failing the whole plan — EXCEPT when a
+ * rejection is a NutridigmAuthError with code NOTAUTHORIZEDHEALTHID (the
+ * demo key can't score these conditions at all). That error is rethrown
+ * instead of swallowed, so it propagates up to `withConditionFallback`
+ * (which detects it the same way) and triggers its single retry with
+ * DEFAULT_DEV_CONDITIONS — otherwise every group/recipes call would reject
+ * for the same reason, the raw function would never throw, and the caller
+ * would silently get empty slots with no "Demo data" chip.
+ * APIDAILYLIMITREACHED and all other errors still degrade to [] per group,
+ * since `withConditionFallback` deliberately doesn't retry quota errors.
+ * @param {number[]} conditionIds
+ * @returns {Promise<{
+ *   candidates: Record<string, import('./types.js').PlanCandidate[]>,
+ *   conditionIds: number[],
+ *   conditionNames: string[]
+ * }>}
+ */
+async function getMealPlanSuggestionsRaw(conditionIds) {
+  const csv = conditionIds.join(',');
+
+  const uniqueGroups = [...new Set(PLAN_SLOTS.flatMap((slot) => slot.fineGroups))];
+
+  const settlements = await Promise.allSettled(
+    uniqueGroups.map((group) => cachedSuggest(csv, group))
+  );
+
+  const authFailure = settlements.find((settlement) => {
+    if (settlement.status !== 'rejected') return false;
+    const err = settlement.reason;
+    const isAuthError = err instanceof NutridigmAuthError || err?.name === 'NutridigmAuthError';
+    return isAuthError && err.code === 'NOTAUTHORIZEDHEALTHID';
+  });
+  if (authFailure) {
+    throw authFailure.reason;
+  }
+
+  /** @type {Map<string, import('./types.js').PlanCandidate[]>} */
+  const byGroup = new Map();
+  settlements.forEach((settlement, i) => {
+    const group = uniqueGroups[i];
+    if (settlement.status === 'fulfilled') {
+      byGroup.set(group, normalizePlanGroup(settlement.value || [], group));
+    } else {
+      console.error(`getMealPlanSuggestions: /suggest failed for fine group "${group}"`, settlement.reason);
+      byGroup.set(group, []);
+    }
+  });
+
+  let recipes;
+  try {
+    recipes = await getRecipesRaw(conditionIds);
+  } catch (err) {
+    const isAuthError = err instanceof NutridigmAuthError || err?.name === 'NutridigmAuthError';
+    if (isAuthError && err.code === 'NOTAUTHORIZEDHEALTHID') {
+      throw err;
+    }
+    console.error('getMealPlanSuggestions: getRecipesRaw failed', err);
+    recipes = [];
+  }
+
+  const itemsMap = await ensureFoodItems();
+
+  /** @type {Record<string, import('./types.js').PlanCandidate[]>} */
+  const candidates = {};
+  for (const slot of PLAN_SLOTS) {
+    const flagKey = SLOT_FLAG_KEY[slot.key];
+    const interleaved = flagKey
+      ? flaggedPoolAcrossGroups(byGroup, itemsMap, flagKey)
+      : interleaveAndDedupe(slot.fineGroups.map((g) => byGroup.get(g) || []));
+
+    const slotRecipes = slot.recipeMealType
+      ? recipes
+          .filter((r) => r.mealType === slot.recipeMealType && TIER_TO_NUMERIC_ID[r.tier] != null)
+          .map(recipeToPlanCandidate)
+      : [];
+
+    candidates[slot.key] = slot.recipeLead
+      ? [...slotRecipes, ...interleaved]
+      : [...interleaved, ...slotRecipes];
+  }
+
+  const conditionNames = await getConditionNames(conditionIds).catch(() => []);
+
+  return { candidates, conditionIds, conditionNames };
 }
 
 /**
@@ -1097,28 +1417,10 @@ export async function getFoodFacts(foodId) {
 
   return {
     name,
-    photo: getIngredientImage(name, coarse),
+    photo: getIngredientImage(name, coarse, getOverlayImageFile(foodId)),
     longDescription: trimmed || null,
     groupLabel: await getGroupLabel(item.fineFoodGroup || coarse),
   };
-}
-
-/**
- * Nutrition facts for a food — ALWAYS resolves to null today.
- *
- * A July-2026 probe of the live Nutridigm API (fooditems, /goodfor,
- * /detailed) found NO nutrition-fact fields anywhere in the payloads —
- * items carry only longDescription and group/tier metadata. Per the
- * never-fabricate-data rule, this stub returns null and consumers must
- * render NOTHING nutritional (no placeholder tables). If Nutridigm ever
- * exposes nutrient data, implement this against the `NutritionFacts`
- * typedef in types.js.
- *
- * @param {number} _foodId
- * @returns {Promise<import('./types.js').NutritionFacts|null>} Always null today.
- */
-export function getNutritionFacts(_foodId) {
-  return Promise.resolve(null);
 }
 
 /**

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase, isSupabaseConfigured } from "../../lib/supabase";
-import { storage } from "../../api/storage";
+import { storage } from "../../api/storage.js";
 
 const TIMEOUT_MS = 8000;
 

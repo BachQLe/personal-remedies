@@ -121,22 +121,3 @@ export function peekCache(key) {
   if (!entry || entry.v !== SCHEMA_VERSION) return undefined;
   return entry.data;
 }
-
-/**
- * Clear all cached entries (dev/debugging helper).
- */
-export function clearCache() {
-  _memory.clear();
-  _revalidating.clear();
-  if (typeof window === 'undefined') return;
-  try {
-    const toRemove = [];
-    for (let i = 0; i < window.localStorage.length; i++) {
-      const k = window.localStorage.key(i);
-      if (k && k.startsWith(NS)) toRemove.push(k);
-    }
-    toRemove.forEach((k) => window.localStorage.removeItem(k));
-  } catch {
-    /* ignore */
-  }
-}

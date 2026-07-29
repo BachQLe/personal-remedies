@@ -196,8 +196,8 @@ To customize the gradient for a different image/context:
 />
 ```
 
-### Updating RecipeCard & IngredientCard
-Use `FoodImageCard` when you want the full-frame image layout. Keep the existing components for list-view layouts.
+### Updating other food/recipe cards
+Use `FoodImageCard` when you want the full-frame image layout. Keep list-view components (e.g. `RankedRow`) for list-view layouts.
 
 ## Accessibility
 

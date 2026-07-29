@@ -2,7 +2,7 @@
  * prefetch.js — boot-time / post-onboarding cache warming.
  *
  * Front-loads the same calls the first screens a user lands on (Home,
- * Suggestions/Dietary Guidance, Top Dos & Don'ts, Daily Picks) would make
+ * Suggestions/Dietary Guidance, Glance, Natural Sources) would make
  * anyway, using the EXISTING adapter/api functions so cache keys and the
  * in-flight de-dupe in nutridigm.js line up exactly with what the screens
  * request. This must never add net-new API spend — it only moves the
@@ -13,13 +13,25 @@
  * so a failure here never surfaces to the user and never throws.
  */
 
-import { getSuggestions, getWorstFoods, getFoodDictionary, getFoodGroups } from './adapter.js';
+import { getSuggestions, getWorstFoods, getFoodDictionary, getFoodGroups, getConditions } from './adapter.js';
 import { getRecommendations } from './recommendations.js';
 import { getIngredientImage } from './ingredientImages.js';
 import { IS_CONFIGURED } from './config.js';
 
-/** Guards against StrictMode double-invoked effects and boot/onboarding overlap. */
-let _ran = false;
+/**
+ * Guards dictionary warming (fooditems/foodgroups/healthconditions) — these
+ * don't depend on a profile, so they run once on the very first call
+ * (typically boot, before onboarding has produced a profile).
+ */
+let _warmedDictionaries = false;
+
+/**
+ * Guards profile-scoped warming (suggestions/images/worst-foods/recommendations)
+ * — runs once, the first time a call is made WITH a non-empty profile. Kept
+ * independent from `_warmedDictionaries` so a boot call with no profile can
+ * never block the later post-onboarding call that actually has one.
+ */
+let _warmedProfile = false;
 
 /** How many top foods (round-robined across categories) to pre-warm images for. */
 const IMAGE_WARM_COUNT = 12;
@@ -69,24 +81,40 @@ function warmImages(suggestions) {
 }
 
 /**
- * Fire-and-forget cache warming for the given profile. Safe to call multiple
- * times (or concurrently from boot + onboarding) — only the first call in
- * the page lifetime does any work.
- * @param {import('./types.js').Profile} profile
+ * Fire-and-forget cache warming. Safe to call multiple times (or concurrently
+ * from boot + onboarding) and safe to call with or without a profile:
+ *
+ * - Dictionary warming (getFoodDictionary, getFoodGroups, getConditions) has
+ *   no profile dependency, so it runs on the very first call regardless of
+ *   whether a profile exists yet (e.g. an un-onboarded boot call).
+ * - Profile-scoped warming (getSuggestions→warmImages, getWorstFoods,
+ *   getRecommendations) only runs once a non-empty `profile.conditions` is
+ *   available — which may be on this same call or a later one (e.g. right
+ *   after onboarding completes).
+ *
+ * The two are gated by independent one-shot guards so an early no-profile
+ * boot call can never block the later post-onboarding call from doing its
+ * (separate) warming work.
+ * @param {import('./types.js').Profile} [profile]
  */
 export function prefetchAppData(profile) {
-  if (_ran) return;
-  _ran = true;
-
   if (!IS_CONFIGURED) return;
-  if (!profile?.conditions?.length) return;
 
-  getSuggestions(profile)
-    .then((suggestions) => warmImages(suggestions))
-    .catch(() => {});
+  if (!_warmedDictionaries) {
+    _warmedDictionaries = true;
+    getFoodDictionary().catch(() => {});
+    getFoodGroups().catch(() => {});
+    getConditions().catch(() => {});
+  }
 
-  getWorstFoods(profile).catch(() => {});
-  getFoodDictionary().catch(() => {});
-  getFoodGroups().catch(() => {});
-  getRecommendations('breakfast', 0, 1).catch(() => {});
+  if (!_warmedProfile && profile?.conditions?.length) {
+    _warmedProfile = true;
+
+    getSuggestions(profile)
+      .then((suggestions) => warmImages(suggestions))
+      .catch(() => {});
+
+    getWorstFoods(profile).catch(() => {});
+    getRecommendations('breakfast', 0, 1).catch(() => {});
+  }
 }

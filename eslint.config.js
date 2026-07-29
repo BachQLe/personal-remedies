@@ -17,5 +17,12 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // Underscore-prefixed args mark intentionally-unused parameters kept
+      // for documented API shape (e.g. adapter.js's searchFoods(query, _profile),
+      // getNutritionFacts(_foodId)) — recognize the existing convention instead
+      // of flagging it.
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
   },
 ])

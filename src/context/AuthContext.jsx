@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
-import { initProfileSync } from "../api/profileSync";
+import { initProfileSync } from "../api/profileSync.js";
 
 const AuthContext = createContext();
 

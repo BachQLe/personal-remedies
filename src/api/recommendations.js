@@ -1,16 +1,14 @@
 /**
- * recommendations — Daily Picks data via the real Nutridigm API.
+ * recommendations — Ranked meal recommendations via the real Nutridigm API.
  *
  * Fetches a meal plan from buildMealPlan and transforms each food item
- * into the Recommendation shape the Daily Picks screen expects.
+ * into the Recommendation shape consumed by MealprepCarousel and prefetch.
  */
 
-import { buildMealPlan, getConditionNames } from './adapter.js';
+import { buildMealPlan, getConditionNames, dedupeNotes } from './adapter.js';
 import { DEFAULT_DEV_CONDITIONS } from './config.js';
 import { storage } from './storage.js';
 import { getIngredientImage } from './ingredientImages.js';
-
-const PLAN_KEY = 'dailyPlan';
 
 /** Cap for a cleaned notes-derived blurb, matching the group-label blurb length. */
 const BLURB_MAX_LEN = 90;
@@ -20,11 +18,13 @@ const BLURB_MAX_LEN = 90;
  *
  * /topdoordonts notes sometimes duplicate segments, e.g.
  * "stay hydrated; use spring or filtered water;; stay hydrated; use spring or filtered water;"
- * — split on ';', trim, drop empties, dedupe (case-insensitive), rejoin, sentence-case
- * the result, and cap the length with an ellipsis.
+ * — split on ';', trim, drop empties, dedupe case-insensitively (via
+ * adapter.js's shared `dedupeNotes`), rejoin, sentence-case the result, and
+ * cap the length with an ellipsis.
  *
- * Exported for reuse by note-rendering surfaces (e.g. the Top Dos & Don'ts
- * screen's lifestyle rows) so the cleaning logic isn't duplicated.
+ * Exported for reuse by note-rendering surfaces (e.g.
+ * src/screens/suggestions/TopDosTab.jsx's lifestyle rows) so the cleaning
+ * logic isn't duplicated.
  *
  * @param {string} [notes]
  * @returns {string} '' if notes is empty/whitespace-only.
@@ -32,20 +32,7 @@ const BLURB_MAX_LEN = 90;
 export function cleanNotes(notes) {
   if (!notes) return '';
 
-  const segments = notes
-    .split(';')
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  const seen = new Set();
-  const deduped = [];
-  for (const seg of segments) {
-    const key = seg.toLowerCase();
-    if (!seen.has(key)) {
-      seen.add(key);
-      deduped.push(seg);
-    }
-  }
+  const deduped = dedupeNotes(notes);
 
   let text = deduped.join('; ').trim();
   if (!text) return '';
@@ -67,8 +54,6 @@ let _cachedSlots = null;
  * Home's carousel) share one buildMealPlan call + post-processing pass
  * instead of each running it. */
 let _loading = null;
-/** True when the last load fell back to DEFAULT_DEV_CONDITIONS. */
-let _usedFallback = false;
 
 async function loadSlots() {
   if (_cachedSlots) return _cachedSlots;
@@ -111,7 +96,6 @@ async function loadSlots() {
       }));
     }
 
-    _usedFallback = usedFallback;
     _cachedSlots = slots;
     return _cachedSlots;
   })();
@@ -126,11 +110,6 @@ async function loadSlots() {
   }
 }
 
-/** True if the most recently loaded plan used the demo fallback conditions. */
-export function getUsedFallback() {
-  return _usedFallback;
-}
-
 /**
  * Return the ranked slice for a slot.
  * @param {'breakfast'|'lunch'|'dinner'|'snack'} slot
@@ -141,21 +120,4 @@ export async function getRecommendations(slot, offset, limit = 3) {
   const slots = await loadSlots();
   const all = slots[slot] ?? [];
   return all.slice(offset, offset + limit);
-}
-
-/** How many ranked options exist for a slot. */
-export function getSlotCount(slot) {
-  return _cachedSlots?.[slot]?.length ?? 0;
-}
-
-/** Persist the user's accepted picks to the browser. */
-export async function saveDailyPlan(selections) {
-  const plan = { date: new Date().toISOString().split('T')[0], selections };
-  storage.set(PLAN_KEY, plan);
-  return plan;
-}
-
-/** Load a previously saved Daily Picks plan. */
-export async function getDailyPlan() {
-  return storage.get(PLAN_KEY, null);
 }

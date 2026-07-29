@@ -3,8 +3,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import RemediWelcome from './RemediWelcome';
 import ProfileBuilder from './ProfileBuilder';
-import { api } from '../../api/api';
-import { prefetchAppData } from '../../api/prefetch';
+import BiometricsStep from './BiometricsStep';
+import { saveProfile } from '../../api/api.js';
+import { prefetchAppData } from '../../api/prefetch.js';
 
 const ONBOARDING_BG = '#BBCEFF';
 const DAILY_PICKS_BG = '#111E58';
@@ -119,8 +120,18 @@ export default function OnboardingPage() {
     medications: [],
   });
 
-  const handleSubmit = async () => {
-    if (saving || profile.conditions.length === 0) return;
+  // Step 1 (ProfileBuilder) no longer saves directly — it hands off to the
+  // optional biometrics step. Conditions are still required to proceed.
+  const goToBiometrics = () => {
+    if (profile.conditions.length === 0) return;
+    setStep(2);
+  };
+
+  // Final save, called from BiometricsStep either with a metric biometrics
+  // patch (Save) or an empty object (Skip) — biometrics are always optional,
+  // per the frozen "no required biometrics" rule (see api/calorieNeeds.js).
+  const handleSubmit = async (biometricPatch = {}) => {
+    if (saving) return;
     setSaving(true);
 
     const payload = {
@@ -130,9 +141,10 @@ export default function OnboardingPage() {
       dietaryPattern: profile.dietaryPattern,
       religiousRestriction: profile.religiousRestriction,
       medications: [],
+      ...biometricPatch,
     };
 
-    await api.saveProfile(payload);
+    await saveProfile(payload);
     prefetchAppData(payload);
     navigate('/app/home');
   };
@@ -180,9 +192,18 @@ export default function OnboardingPage() {
                 <ProfileBuilder
                   profile={profile}
                   onChange={setProfile}
-                  onSubmit={handleSubmit}
+                  onSubmit={goToBiometrics}
                   saving={saving}
                   onBack={() => setStep(0)}
+                />
+              )}
+              {step === 2 && (
+                <BiometricsStep
+                  profile={profile}
+                  onSubmit={handleSubmit}
+                  onSkip={() => handleSubmit({})}
+                  saving={saving}
+                  onBack={() => setStep(1)}
                 />
               )}
             </motion.div>

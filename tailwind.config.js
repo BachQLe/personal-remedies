@@ -179,6 +179,23 @@ export default {
         base: "200ms",
         slow: "320ms",
       },
+      keyframes: {
+        // BottomSheet enter — slide up from below + fade in.
+        "sheet-up": {
+          "0%": { transform: "translateY(12%)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        // Backdrop enter — gradual blur + dim fade-in.
+        "backdrop-in": {
+          "0%": { opacity: "0", backdropFilter: "blur(0px)" },
+          "100%": { opacity: "1", backdropFilter: "blur(4px)" },
+        },
+      },
+      animation: {
+        // Quick & snappy — ds-out easing, ~220ms.
+        "sheet-up": "sheet-up 220ms cubic-bezier(0.22, 0.61, 0.36, 1)",
+        "backdrop-in": "backdrop-in 220ms ease-out",
+      },
       maxWidth: {
         prose: "60ch",
       },

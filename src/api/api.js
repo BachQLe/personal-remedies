@@ -1,36 +1,36 @@
 /**
  * api.js — The single interface every screen imports.
  *
- * Exposes the typed Nutridigm adapter functions and a small set of
- * legacy helpers (profile storage, swipe deck, recipe stub) that
- * screens still call via `api.*`.
+ * Named-exports-only surface: the typed Nutridigm adapter functions,
+ * unified search helpers, and profile storage helpers (`getProfile`,
+ * `saveProfile`, `clearProfile`) are all plain module-level exports —
+ * there is no `api` object; import exactly what you need.
  */
 
 import {
   searchFoods,
+  searchNaturalSources,
   assessFood,
   getSuggestions,
   getWorstFoods,
   getTopDosAndDonts,
-  getAlternatives,
   getCategoryDetail,
   buildMealPlan,
   getRecipes,
+  getMealPlanSuggestions,
   getConditions,
   getFoodGroups,
   getFoodDictionary,
   getFoodFacts,
-  getNutritionFacts,
   getConditionName,
   getConditionNames,
-  getConditionIdByName,
-  getFoodIdByName,
   getGroupLabel,
   getGroupLabels,
+  getFineGroupLabelsByCoarse,
   getCachedRefCount,
-  warmReferenceCount,
+  numericIdToStars,
+  getFoodIdByName,
 } from './adapter.js';
-import { fetchReferences } from './nutridigm.js';
 import { storage } from './storage.js';
 import { schedulePush } from './profileSync.js';
 
@@ -38,34 +38,46 @@ import { schedulePush } from './profileSync.js';
 
 export {
   searchFoods,
+  searchNaturalSources,
   assessFood,
   getSuggestions,
   getWorstFoods,
   getTopDosAndDonts,
-  getAlternatives,
   getCategoryDetail,
   buildMealPlan,
   getRecipes,
+  getMealPlanSuggestions,
   getConditions,
   getFoodGroups,
   getFoodDictionary,
   getFoodFacts,
-  getNutritionFacts,
   getConditionName,
   getConditionNames,
   getGroupLabel,
   getGroupLabels,
+  getFineGroupLabelsByCoarse,
   getCachedRefCount,
-  warmReferenceCount,
+  numericIdToStars,
+  getFoodIdByName,
 };
+export { buildRecipeDetail } from './recipeDetail.js';
+export { ensurePlanForWeek, regenerateDay, regenerateWeek, shuffleSlot, inferSlotKey, generatePlanFromPicks } from './planBuilder.js';
 
-// ── Unified search (foods only) ──────────────────────────────────────────────
+// ── Unified search (foods + recipes) ─────────────────────────────────────────
 
 /**
- * Search across foods. Returns tagged results with `kind: 'food'`.
+ * Search across foods and recipes. Foods come from `searchFoods` (client-side
+ * dictionary filter); recipes come from the profile's condition-ranked
+ * `getRecipes` list (already cached), filtered client-side by title substring
+ * (case-insensitive — /suggest has no query param). Recipe entries are
+ * appended after food entries; either side failing degrades to its empty
+ * list rather than failing the whole search.
  * @param {string} query
  * @param {import('./types.js').Profile} [profile]
- * @returns {Promise<Array<{ kind: 'food', key: string, food: object }>>}
+ * @returns {Promise<Array<
+ *   { kind: 'food', key: string, food: object } |
+ *   { kind: 'recipe', key: string, recipe: object }
+ * >>}
  */
 export async function searchFoodsAndRecipes(query, profile) {
   const q = (query || '').trim();
@@ -73,6 +85,38 @@ export async function searchFoodsAndRecipes(query, profile) {
 
   const foods = await searchFoods(q, profile).catch((err) => {
     console.error('searchFoodsAndRecipes: searchFoods failed', err);
+    return [];
+  });
+
+  const { recipes } = await getRecipes(profile).catch((err) => {
+    console.error('searchFoodsAndRecipes: getRecipes failed', err);
+    return { recipes: [] };
+  });
+
+  const qLower = q.toLowerCase();
+  const matchedRecipes = recipes.filter((r) => (r.title || '').toLowerCase().includes(qLower));
+
+  return [
+    ...foods.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f })),
+    ...matchedRecipes.map((r) => ({ kind: 'recipe', key: `recipe-${r.id}`, recipe: r })),
+  ];
+}
+
+/**
+ * Search Natural Sources (Key Nutrients & Herbal Medicines, coarse group 'k')
+ * only. Same result-item contract as `searchFoodsAndRecipes`'s food entries —
+ * foods only, no recipe branch, since recipes live in a different fine group.
+ * @param {string} query
+ * @param {import('./types.js').Profile} [_profile] - Unused; kept for parity
+ *   with `searchFoodsAndRecipes` in case scoping by profile is added later.
+ * @returns {Promise<Array<{ kind: 'food', key: string, food: object }>>}
+ */
+export async function searchNaturalSourceItems(query, _profile) {
+  const q = (query || '').trim();
+  if (!q) return [];
+
+  const foods = await searchNaturalSources(q).catch((err) => {
+    console.error('searchNaturalSourceItems: searchNaturalSources failed', err);
     return [];
   });
 
@@ -115,94 +159,28 @@ async function migrateProfileConditions(profile) {
   return { ...profile, conditions: migrated };
 }
 
-export const api = {
-  // ── New typed interface (accessible via api.* too) ──────────────────────────
-  searchFoods,
-  assessFood,
-  getSuggestions,
-  getTopDosAndDonts,
-  getAlternatives,
-  getCategoryDetail,
-  buildMealPlan,
-  getConditions,
-  getFoodGroups,
-  getFoodDictionary,
-  getFoodFacts,
-  getNutritionFacts,
-  getConditionName,
-  getConditionNames,
-  searchFoodsAndRecipes,
-  getRecipes,
-  getCachedRefCount,
-  warmReferenceCount,
+// ── Profile ──────────────────────────────────────────────────────────────────
 
-  // ── Profile ─────────────────────────────────────────────────────────────────
-
-  async getProfile() {
-    await delay(200);
-    const migrated = await migrateProfileConditions(_profile);
-    if (migrated !== _profile) {
-      _profile = migrated;
-      storage.set('profile', _profile);
-    }
-    return _profile;
-  },
-
-  async saveProfile(p) {
-    await delay(200);
-    _profile = { ...p };
+export async function getProfile() {
+  await delay(200);
+  const migrated = await migrateProfileConditions(_profile);
+  if (migrated !== _profile) {
+    _profile = migrated;
     storage.set('profile', _profile);
-    schedulePush();
-  },
+  }
+  return _profile;
+}
 
-  async clearProfile() {
-    await delay(100);
-    _profile = null;
-    storage.remove('profile');
-    schedulePush();
-  },
+export async function saveProfile(p) {
+  await delay(200);
+  _profile = { ...p };
+  storage.set('profile', _profile);
+  schedulePush();
+}
 
-  // ── Swipe deck (taste calibration) ──────────────────────────────────────────
-  // Returns up to 20 real foods from the dictionary, shaped for SwipeDeck.
-
-  async getSwipeDeck() {
-    const foods = await getFoodDictionary();
-    const slice = foods.slice(0, 20);
-    return Promise.all(
-      slice.map(async (f) => ({
-        id: f.id,
-        name: f.name,
-        category: await getGroupLabel(f.fineGroup || f.group),
-      }))
-    );
-  },
-
-  // ── References ────────────────────────────────────────────────────────────
-  // Used by RecipeDetail (IngredientRow) to lazily load citations for an
-  // ingredient when its studies accordion is expanded.
-
-  /**
-   * Resolve an ingredient name + condition (display name, as passed by
-   * RecipeDetail's matchedConditions, or a numeric healthConditionID) to
-   * their Nutridigm IDs and fetch the supporting citations via /references.
-   * Returns [] if either side can't be resolved, or on any fetch error.
-   * @param {string} name - Ingredient/food display name
-   * @param {string|number} condition - Condition display name or healthConditionID
-   * @returns {Promise<string[]>}
-   */
-  async getIngredientReferences(name, condition) {
-    try {
-      const foodId = await getFoodIdByName(name);
-      if (!foodId) return [];
-
-      const conditionId =
-        typeof condition === 'number' ? condition : await getConditionIdByName(condition);
-      if (!conditionId) return [];
-
-      const refs = await fetchReferences(conditionId, foodId);
-      return refs || [];
-    } catch {
-      return [];
-    }
-  },
-};
+export async function clearProfile() {
+  await delay(100);
+  _profile = null;
+  storage.remove('profile');
+  schedulePush();
+}

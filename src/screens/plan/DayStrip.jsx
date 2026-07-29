@@ -1,109 +1,72 @@
-import { useRef, useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
-const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
+const calmSpring = { type: 'spring', stiffness: 300, damping: 30 };
 
-function getWeek(centerDate) {
-  const d = new Date(centerDate);
-  const day = d.getDay();
-  const week = [];
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(d);
-    date.setDate(d.getDate() - day + i);
-    week.push(date);
-  }
-  return week;
-}
-
-function toISO(date) {
-  return date.toISOString().split("T")[0];
-}
-
-export default function DayStrip({ selected, onSelect, hasplan = {} }) {
-  const containerRef = useRef(null);
-  const buttonRefs = useRef({});
-  const [indicator, setIndicator] = useState(null);
-  const [hasMounted, setHasMounted] = useState(false);
-
-  const measure = useCallback(() => {
-    const container = containerRef.current;
-    const btn = buttonRefs.current[selected];
-    if (!container || !btn) return;
-    const cRect = container.getBoundingClientRect();
-    const bRect = btn.getBoundingClientRect();
-    setIndicator({
-      x: bRect.left - cRect.left,
-      y: bRect.top - cRect.top,
-      width: bRect.width,
-      height: bRect.height,
-    });
-  }, [selected]);
-
-  useEffect(() => {
-    measure();
-    const id = requestAnimationFrame(() => setHasMounted(true));
-    return () => cancelAnimationFrame(id);
-  }, [measure]);
-
-  const today = new Date();
-  const week = getWeek(selected ? new Date(selected) : today);
-
+/**
+ * DayStrip — horizontally scrollable row of day chips (from `nextSevenDays`)
+ * for the Plan screen's day pager. A single sliding highlight (framer-motion
+ * `layoutId`) tracks the selected chip instead of each chip owning its own
+ * background, so it glides between chips rather than popping. Edge fade uses
+ * the repo's stacked-bars convention (see DESIGN_SYSTEM.md) — never a CSS
+ * gradient — matched to `bgClassName` (the strip's own background).
+ *
+ * @param {import('./planDates.js').PlanDay[]} days
+ * @param {string} selected - selected day's `key`
+ * @param {(key: string) => void} onSelect
+ * @param {string} [bgClassName] - Tailwind bg class the strip sits on, used
+ *   for both the strip's own background and the edge-fade bar color.
+ */
+export default function DayStrip({ days, selected, onSelect, bgClassName = 'bg-forest-300' }) {
   return (
-    <div ref={containerRef} className="relative flex items-center justify-between px-1 gap-1">
-      {indicator && (
-        <motion.div
-          className="absolute top-0 left-0 bg-forest-700 rounded-lg z-0 pointer-events-none"
-          animate={{
-            x: indicator.x,
-            y: indicator.y,
-            width: indicator.width,
-            height: indicator.height,
-          }}
-          transition={
-            hasMounted
-              ? { type: "spring", stiffness: 500, damping: 35 }
-              : { duration: 0 }
-          }
-        />
-      )}
-      {week.map((date) => {
-        const iso = toISO(date);
-        const isSelected = iso === selected;
-        const isToday = iso === toISO(today);
-        const hasDot = hasplan[iso];
-        const dayIdx = date.getDay();
+    <div className={`relative -mx-5 ${bgClassName}`}>
+      <div className="flex gap-1.5 overflow-x-auto px-5 pb-1 hide-scrollbar">
+        {days.map((day) => {
+          const isSelected = day.key === selected;
+          return (
+            <button
+              key={day.key}
+              onClick={() => onSelect(day.key)}
+              aria-pressed={isSelected}
+              className="relative shrink-0 flex flex-col items-center gap-0.5 px-3.5 py-2.5
+                rounded-xl overflow-hidden transition-colors duration-fast
+                active:scale-[0.97]"
+            >
+              {isSelected && (
+                <motion.div
+                  layoutId="plan-day-chip-active"
+                  className="absolute inset-0 rounded-xl bg-blue-950"
+                  transition={calmSpring}
+                />
+              )}
+              <span
+                className={`relative z-10 text-[10px] font-semibold font-sans uppercase
+                  tracking-eyebrow whitespace-nowrap
+                  ${isSelected ? 'text-white/70' : 'text-blue-950/50'}`}
+              >
+                {day.label}
+              </span>
+              <span
+                className={`relative z-10 text-sm font-bold font-sans whitespace-nowrap
+                  ${isSelected ? 'text-white' : 'text-blue-950'}`}
+              >
+                {day.sublabel}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-        return (
-          <button
-            key={iso}
-            ref={(el) => { buttonRefs.current[iso] = el; }}
-            onClick={() => onSelect(iso)}
-            data-ghost-shimmer
-            className={`relative flex flex-col items-center gap-1 py-2 px-2.5 rounded-lg min-w-[40px]
-              transition-colors duration-fast ease-ds-out
-              ${isSelected ? "z-[1]" : "z-[1] hover:bg-forest-50/30"}`}
-          >
-            <span
-              className={`text-[10px] font-medium uppercase tracking-eyebrow ${
-                isSelected ? "text-white/70" : "text-char-400"
-              }`}
-            >
-              {DAYS[dayIdx]}
-            </span>
-            <span
-              className={`text-sm font-bold font-mono tabular-nums ${
-                isSelected
-                  ? "text-white"
-                  : isToday
-                    ? "text-forest-700"
-                    : "text-char-900"
-              }`}
-            >
-              {date.getDate()}
-            </span>
-          </button>
-        );
-      })}
+      {/* Edge fade — stacked bars, never a gradient */}
+      <div className="absolute inset-y-0 left-0 flex gap-[2px] items-stretch pointer-events-none z-10 -translate-x-[4px]">
+        {[0.6, 0.38, 0.2, 0.09, 0.03].map((op, i) => (
+          <div key={i} className={`w-[8px] ${bgClassName}`} style={{ opacity: op }} />
+        ))}
+      </div>
+      <div className="absolute inset-y-0 right-0 flex flex-row-reverse gap-[2px] items-stretch pointer-events-none z-10 translate-x-[4px]">
+        {[0.6, 0.38, 0.2, 0.09, 0.03].map((op, i) => (
+          <div key={i} className={`w-[8px] ${bgClassName}`} style={{ opacity: op }} />
+        ))}
+      </div>
     </div>
   );
 }

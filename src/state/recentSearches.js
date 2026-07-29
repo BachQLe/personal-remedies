@@ -6,10 +6,14 @@
  * search) through one place. Whether recents persist across sessions is a
  * data-layer concern handled here, not in the UI.
  *
+ * Scoping: each surface that embeds SearchScreen (Food Lookup, Natural
+ * Sources, …) gets its own namespaced recents list via `scope`. The default
+ * scope keeps the original unnamespaced storage key so existing Food Lookup
+ * user data survives untouched; any other scope reads/writes `<key>:<scope>`.
+ *
  * API:
- *   getRecentSearches()   → string[]   (most-recent-first)
- *   addRecentSearch(term) → void       (dedupes case-insensitively, caps length)
- *   clearRecentSearches() → void
+ *   getRecentSearches(scope?)        → string[]   (most-recent-first)
+ *   addRecentSearch(term, scope?)    → void       (dedupes case-insensitively, caps length)
  */
 
 import { storage } from '../api/storage.js';
@@ -17,12 +21,17 @@ import { storage } from '../api/storage.js';
 const STORAGE_KEY = 'recentSearches';
 const MAX = 8;
 
+function keyFor(scope) {
+  return scope && scope !== 'default' ? `${STORAGE_KEY}:${scope}` : STORAGE_KEY;
+}
+
 /**
  * Get recent search terms, most-recent-first.
+ * @param {string} [scope]
  * @returns {string[]}
  */
-export function getRecentSearches() {
-  const list = storage.get(STORAGE_KEY, []);
+export function getRecentSearches(scope = 'default') {
+  const list = storage.get(keyFor(scope), []);
   return Array.isArray(list) ? list : [];
 }
 
@@ -30,20 +39,14 @@ export function getRecentSearches() {
  * Append a term to recents. Dedupes (case-insensitive) by moving an existing
  * match to the front, and caps the list at MAX entries.
  * @param {string} term
+ * @param {string} [scope]
  */
-export function addRecentSearch(term) {
+export function addRecentSearch(term, scope = 'default') {
   const t = (term || '').trim();
   if (!t) return;
-  const existing = getRecentSearches().filter(
+  const existing = getRecentSearches(scope).filter(
     (x) => x.toLowerCase() !== t.toLowerCase(),
   );
   const next = [t, ...existing].slice(0, MAX);
-  storage.set(STORAGE_KEY, next);
-}
-
-/**
- * Clear all recent searches.
- */
-export function clearRecentSearches() {
-  storage.remove(STORAGE_KEY);
+  storage.set(keyFor(scope), next);
 }

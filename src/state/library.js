@@ -9,12 +9,11 @@
  *   getLibrary()              → Food[]
  *   addToLibrary(food)        → void (no-op if already present)
  *   removeFromLibrary(foodId) → void
- *   clearLibrary()            → void
  *   subscribeLibrary(cb)      → unsubscribe function
  *   reloadLibrary()           → void (re-read from storage; used by profileSync after a remote pull)
  *
- * Used by IngredientCard's onAddToLibrary everywhere in the app,
- * and consumed by LibraryStrip on Home + buildMealPlan.
+ * Used by save/bookmark actions everywhere in the app,
+ * and consumed by FoodDetailCard's save action + buildMealPlan.
  */
 
 import { storage } from '../api/storage.js';
@@ -70,16 +69,6 @@ export function removeFromLibrary(foodId) {
     _persist();
     _notify();
   }
-}
-
-/**
- * Clear all items from the library.
- */
-export function clearLibrary() {
-  if (_items.length === 0) return;
-  _items = [];
-  _persist();
-  _notify();
 }
 
 /**

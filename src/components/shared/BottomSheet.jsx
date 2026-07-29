@@ -22,13 +22,13 @@ export default function BottomSheet({ open, onClose, children, title }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
-      {/* Backdrop — light paper blur */}
+      {/* Backdrop — light paper blur, fades in gradually */}
       <div
-        className="absolute inset-0 bg-char-900/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-char-900/40 backdrop-blur-sm animate-backdrop-in"
         onClick={onClose}
       />
-      {/* Sheet */}
-      <div className="relative bg-white rounded-t-2xl shadow-sheet max-h-[85vh] flex flex-col w-full max-w-[430px]">
+      {/* Sheet — slides up on open */}
+      <div className="relative bg-white rounded-t-2xl shadow-sheet max-h-[85vh] flex flex-col w-full max-w-[430px] animate-sheet-up">
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
           <div className="w-10 h-1 rounded-full bg-sand-200" />

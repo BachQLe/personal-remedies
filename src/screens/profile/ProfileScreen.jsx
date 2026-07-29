@@ -1,132 +1,36 @@
 /**
  * ProfileScreen — layout (top → bottom):
  *   1. Header zone   — page label + identity block (avatar, name, active conditions)
- *   2. Lower shell   — CategoryCarousel, then an inline editor below it:
- *                      condition editor (saves on change), macro-goals stub
- *                      (flagged), and sub-edit rows for the other profile fields.
- *                      Scroll down to reach the editor.
+ *   2. Lower shell   — "Dietary Guidance" button (→ /app/suggestions), then
+ *                      an inline editor below it: condition editor (saves on
+ *                      change), macro-goals stub (flagged), and sub-edit rows
+ *                      for the other profile fields. Scroll down to reach the
+ *                      editor.
  *   3. Sub-edit sheets — BottomSheets for medications / allergies / dietary,
  *                        opened from the sub-edit rows.
  *   4. Navbar        — reused, pinned (AppShell)
  *
- * Mirrors HomeScreen: the shell flexes and the page may scroll (the carousel's
- * 3:4 cards + the inline editor drive height); paper-100 fills to the bottom so
- * no base cream shows.
- * Real /suggest-per-fineFoodGroup wiring for the carousel is a one-line swap
- * once the mock is replaced (getCategoryTopPicks).
+ * Mirrors HomeScreen: the shell flexes and the page may scroll (the inline
+ * editor drives height); paper-100 fills to the bottom so no base cream shows.
+ * The dietary guidance content (Top Dos & Don'ts, food groups, recipes) lives
+ * on SuggestionsScreen now.
  */
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { api } from '../../api/api.js';
+import { getProfile, saveProfile, getConditionNames, getConditions } from '../../api/api.js';
+import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
 import ConditionTag from '../../components/shared/ConditionTag.jsx';
 import Icon from '../../components/shared/Icon.jsx';
 import { getConditionMeta } from '../../utils/conditionMeta.js';
-import { getConditions } from '../../api/api.js';
-import CategoryCarousel from './CategoryCarousel.jsx';
-
-// ── Feature flags ────────────────────────────────────────────────────────────
-
-const ENABLE_MACRO_GOALS = false;
-
-// ── Mock data layer ──────────────────────────────────────────────────────────
-// Shape matches getCategoryTopPicks() → CategoryTopPick[] contract from spec.
-// Swap the function body for real /suggest calls when the API wiring is ready.
-
-const MOCK_TOP_PICKS = [
-  {
-    categoryId: 'd',
-    categoryLabel: 'Fruits & Juices',
-    topIngredient: {
-      id: 'blueberries',
-      name: 'Blueberries',
-      imageUrl:
-        'https://images.unsplash.com/photo-1519996529931-28324d5a630e?fm=jpg&q=80&w=800&auto=format&fit=crop',
-    },
-  },
-  {
-    categoryId: 'e',
-    categoryLabel: 'Vegetables',
-    topIngredient: {
-      id: 'spinach',
-      name: 'Spinach',
-      imageUrl:
-        'https://images.unsplash.com/photo-1576045057995-568f588f82fb?fm=jpg&q=80&w=800&auto=format&fit=crop',
-    },
-  },
-  {
-    categoryId: 'b',
-    categoryLabel: 'Meat, Fish & Poultry',
-    topIngredient: {
-      id: 'salmon',
-      name: 'Salmon',
-      imageUrl:
-        'https://images.unsplash.com/photo-1467003909585-2f8a72700288?fm=jpg&q=80&w=800&auto=format&fit=crop',
-    },
-  },
-  {
-    categoryId: 'c',
-    categoryLabel: 'Nuts & Seeds',
-    topIngredient: {
-      id: 'almonds',
-      name: 'Almonds',
-      imageUrl:
-        'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?fm=jpg&q=80&w=800&auto=format&fit=crop',
-    },
-  },
-  {
-    categoryId: 'f',
-    categoryLabel: 'Grains & Cereals',
-    topIngredient: {
-      id: 'oats',
-      name: 'Rolled Oats',
-      imageUrl:
-        'https://images.unsplash.com/photo-1568254183919-78a4f43a2877?fm=jpg&q=80&w=800&auto=format&fit=crop',
-    },
-  },
-  {
-    categoryId: 'g',
-    categoryLabel: 'Dairy, Fats & Oils',
-    topIngredient: {
-      id: 'olive-oil',
-      name: 'Olive Oil',
-      imageUrl:
-        'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?fm=jpg&q=80&w=800&auto=format&fit=crop',
-    },
-  },
-  {
-    categoryId: 'i',
-    categoryLabel: 'Herbs & Spices',
-    topIngredient: {
-      id: 'turmeric',
-      name: 'Turmeric',
-      imageUrl:
-        'https://images.unsplash.com/photo-1615485925600-97237c4fc1ec?fm=jpg&q=80&w=800&auto=format&fit=crop',
-    },
-  },
-  {
-    categoryId: 'k',
-    categoryLabel: 'Key Nutrients',
-    topIngredient: {
-      id: 'walnuts',
-      name: 'Walnuts',
-      imageUrl:
-        'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?fm=jpg&q=80&w=800&auto=format&fit=crop',
-    },
-  },
-];
-
-async function getCategoryTopPicks() {
-  return MOCK_TOP_PICKS;
-}
+import { ftInToCm, cmToFtIn, lbsToKg, kgToLbs } from '../../api/calorieNeeds.js';
 
 // ── Demo profile fallback ────────────────────────────────────────────────────
 
-// Demo key conditions (see api/config.js DEFAULT_DEV_CONDITIONS): 203 = Aging, 244 = Pneumonia.
+// Demo key conditions (see api/config.js): 203 = Aging, 244 = Pneumonia.
 const DEMO_PROFILE = {
-  conditions: [203, 244],
+  conditions: DEFAULT_DEV_CONDITIONS,
   medications: ['Metformin 500mg', 'Lisinopril 10mg'],
   allergies: ['Shellfish'],
   dietary: ['low-sodium'],
@@ -248,14 +152,173 @@ function EditDietary({ value, onChange, onClose }) {
   );
 }
 
+const SEX_CHOICES = [
+  { value: 'female', label: 'Female' },
+  { value: 'male', label: 'Male' },
+];
+
+const ACTIVITY_CHOICES = [
+  { value: 'sedentary', label: 'Sedentary — little to no exercise' },
+  { value: 'light', label: 'Lightly active — 1-3 workouts/week' },
+  { value: 'moderate', label: 'Moderately active — 3-5 workouts/week' },
+  { value: 'active', label: 'Active — 6-7 workouts/week' },
+  { value: 'very_active', label: 'Very active — physical job or 2x/day' },
+];
+
+const aboutYouInputClass =
+  'flex-1 bg-paper-100 border border-sand-200 rounded-lg px-4 py-3 text-sm font-sans outline-none focus:border-forest-700 transition-colors duration-base';
+
+/**
+ * EditAboutYou — height/weight/age/sex/activity level editor, backing
+ * `estimateDailyNeed`/`computeBMI` (src/api/calorieNeeds.js). Every field is
+ * optional and clearable: blanking a field and saving removes it from the
+ * profile (via an explicit `undefined` in the patch) rather than leaving the
+ * stale value behind, since this is an edit surface (unlike onboarding's
+ * BiometricsStep, which only ever adds fields to a fresh profile).
+ * Values are collected in US units and converted to metric on save — see
+ * ftInToCm/lbsToKg.
+ */
+function EditAboutYou({ profile, onChange, onClose }) {
+  const prefillHeight = cmToFtIn(profile?.heightCm);
+  const [ft, setFt] = useState(profile?.heightCm ? String(prefillHeight.ft) : '');
+  const [inches, setInches] = useState(profile?.heightCm ? String(prefillHeight.inches) : '');
+  const [weightLbs, setWeightLbs] = useState(
+    profile?.weightKg ? String(Math.round(kgToLbs(profile.weightKg))) : ''
+  );
+  const [age, setAge] = useState(profile?.age ? String(profile.age) : '');
+  const [sex, setSex] = useState(profile?.sex ?? '');
+  const [activityLevel, setActivityLevel] = useState(profile?.activityLevel ?? '');
+
+  const save = () => {
+    const patch = {
+      heightCm: undefined,
+      weightKg: undefined,
+      age: undefined,
+      sex: undefined,
+      activityLevel: undefined,
+    };
+
+    if (ft.trim() || inches.trim()) {
+      const cm = ftInToCm(Number(ft), Number(inches));
+      if (cm > 0) patch.heightCm = Math.round(cm * 10) / 10;
+    }
+    if (weightLbs.trim()) {
+      const kg = lbsToKg(Number(weightLbs));
+      if (kg > 0) patch.weightKg = Math.round(kg * 10) / 10;
+    }
+    if (age.trim()) {
+      const ageNum = Number(age);
+      if (Number.isFinite(ageNum) && ageNum > 0) patch.age = ageNum;
+    }
+    if (sex) patch.sex = sex;
+    if (activityLevel) patch.activityLevel = activityLevel;
+
+    onChange(patch);
+    onClose();
+  };
+
+  return (
+    <BottomSheet open onClose={onClose} title="About you">
+      <div className="flex flex-col gap-4">
+        <p className="text-xs text-char-400 font-sans -mt-1">
+          Optional — this sizes your plan's portions. We don't track or log anything you eat.
+        </p>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold font-sans text-char-500">Height</label>
+          <div className="flex gap-2">
+            <input
+              type="number" inputMode="numeric" min="0" value={ft}
+              onChange={(e) => setFt(e.target.value)} placeholder="Feet"
+              className={aboutYouInputClass}
+            />
+            <input
+              type="number" inputMode="numeric" min="0" max="11" value={inches}
+              onChange={(e) => setInches(e.target.value)} placeholder="Inches"
+              className={aboutYouInputClass}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold font-sans text-char-500">Weight (lbs)</label>
+          <input
+            type="number" inputMode="numeric" min="0" value={weightLbs}
+            onChange={(e) => setWeightLbs(e.target.value)} placeholder="e.g. 160"
+            className={aboutYouInputClass}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold font-sans text-char-500">Age</label>
+          <input
+            type="number" inputMode="numeric" min="0" value={age}
+            onChange={(e) => setAge(e.target.value)} placeholder="e.g. 34"
+            className={aboutYouInputClass}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold font-sans text-char-500">Sex</label>
+          <div className="grid grid-cols-2 gap-3">
+            {SEX_CHOICES.map(({ value, label }) => {
+              const isSel = sex === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => setSex(isSel ? '' : value)}
+                  className={`px-4 py-3 rounded-lg border-2 text-center transition-all duration-fast
+                    ${isSel ? 'border-forest-700 bg-forest-50' : 'border-sand-200 bg-white hover:border-forest-300'}`}
+                >
+                  <span className={`text-sm font-semibold font-sans ${isSel ? 'text-forest-700' : 'text-char-900'}`}>
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold font-sans text-char-500">Activity level</label>
+          <div className="flex flex-col gap-2">
+            {ACTIVITY_CHOICES.map(({ value, label }) => {
+              const isSel = activityLevel === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => setActivityLevel(isSel ? '' : value)}
+                  className={`w-full text-left px-4 py-3 rounded-lg border text-sm font-sans transition-all duration-fast
+                    ${isSel ? 'border-forest-700 bg-forest-50 text-forest-700 font-semibold' : 'border-sand-200 bg-white text-char-900 hover:border-forest-300'}`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <button
+          onClick={save}
+          className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base mt-2 bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
+        >
+          Save
+        </button>
+      </div>
+    </BottomSheet>
+  );
+}
+
 // ── Inline editor pieces — condition editor + macro stub + sub-edit nav ───────
 
+/**
+ * ConditionsEditor — the removable chip list of the profile's current
+ * conditions. Adding is handled by ConditionDropdown ("browse all conditions")
+ * above; this surface is just for reviewing and removing what's already set.
+ */
 function ConditionsEditor({ value, onChange }) {
-  const [query, setQuery] = useState('');
   // Full {healthConditionID, description} objects from the Nutridigm dictionary.
   const [apiConditions, setApiConditions] = useState([]);
-  const [focused, setFocused] = useState(false);
-  const inputRef = useRef(null);
 
   useEffect(() => {
     getConditions()
@@ -276,149 +339,201 @@ function ConditionsEditor({ value, onChange }) {
     [apiConditions]
   );
 
-  const filtered = useMemo(() => {
-    if (!query.trim()) return apiConditions.slice(0, 20);
-    const q = query.toLowerCase();
-    // Match on description OR any AKA alias from the Nutridigm dictionary
-    // (semicolon-separated; defensive `c.AKA || ''` in case it's absent).
-    return apiConditions
-      .filter((c) => {
-        if (c.description.toLowerCase().includes(q)) return true;
-        return (c.AKA || '')
-          .split(';')
-          .map((s) => s.trim().toLowerCase())
-          .filter(Boolean)
-          .some((alias) => alias.includes(q));
-      })
-      .slice(0, 20);
-  }, [query, apiConditions]);
-
-  // Reveal the results only while the search is active; exclude already-picked.
-  const open = focused || !!query.trim();
-  const availableResults = filtered.filter((c) => !value.includes(c.healthConditionID));
-
-  const add = (id) => {
-    if (!value.includes(id)) onChange([...value, id]);
-    setQuery('');
-  };
   const remove = (id) => onChange(value.filter((x) => x !== id));
 
+  if (value.length === 0) return null;
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       {/* Filled tags — colored per condition category, with a close ×.
           Subtle longDescription/ICD10 sub-text renders under each tag when
           present, rather than redesigning the chip itself. */}
-      {value.length > 0 && (
-        <div className="flex flex-col gap-2">
-          {value.map((id) => {
-            const label = describeCondition(id);
-            const meta = getConditionMeta(label);
-            const cond = conditionObjById.get(id);
-            return (
-              <div key={id} className="flex flex-col gap-1">
-                <button
-                  onClick={() => remove(id)}
-                  className="self-start flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium font-sans text-white transition-colors duration-fast"
-                  style={{ backgroundColor: `${meta.color}88` }}
-                >
-                  {label}
-                  <span className="opacity-70">
-                    <Icon name="x" size={14} />
+      {value.map((id) => {
+        const label = describeCondition(id);
+        const meta = getConditionMeta(label);
+        const cond = conditionObjById.get(id);
+        return (
+          <div key={id} className="flex flex-col gap-1">
+            <button
+              onClick={() => remove(id)}
+              className="self-start flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium font-sans text-white transition-colors duration-fast"
+              style={{ backgroundColor: `${meta.color}88` }}
+            >
+              {label}
+              <span className="opacity-70">
+                <Icon name="x" size={14} />
+              </span>
+            </button>
+            {(cond?.longDescription || cond?.ICD10) && (
+              <div className="flex items-baseline gap-2 px-3">
+                {cond?.longDescription && (
+                  <span className="text-[11px] text-char-400 font-sans truncate">
+                    {cond.longDescription}
                   </span>
-                </button>
-                {(cond?.longDescription || cond?.ICD10) && (
-                  <div className="flex items-baseline gap-2 px-3">
-                    {cond?.longDescription && (
-                      <span className="text-[11px] text-char-400 font-sans truncate">
-                        {cond.longDescription}
-                      </span>
-                    )}
-                    {cond?.ICD10 && (
-                      <span className="text-[10px] text-char-300 font-mono flex-none">
-                        {cond.ICD10}
-                      </span>
-                    )}
-                  </div>
+                )}
+                {cond?.ICD10 && (
+                  <span className="text-[10px] text-char-300 font-mono flex-none">
+                    {cond.ICD10}
+                  </span>
                 )}
               </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Pill searchbar — leading search icon, blue focus */}
-      <div className="relative group">
-        <span className="material-symbols-rounded absolute left-[15px] top-1/2 -translate-y-1/2 text-[18px] pointer-events-none transition-colors duration-fast text-char-400 group-focus-within:text-blue-900">
-          search
-        </span>
-        <input
-          ref={inputRef}
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          placeholder="Search conditions…"
-          className="w-full pl-11 pr-4 py-[15px] rounded-full border-[1.5px] border-sand-200 bg-white text-[16px] text-char-900 placeholder:text-char-400 font-sans shadow-sm outline-none transition-all duration-fast ease-ds-out focus:border-blue-900"
-        />
-      </div>
-
-      {/* Compact results — reveal on focus, scrolls internally */}
-      {open && (
-        <div
-          className="flex flex-col gap-2 overflow-y-auto pr-1 max-h-[240px]"
-          onMouseDown={(e) => e.preventDefault()}
-        >
-          {availableResults.map((c) => {
-            const meta = getConditionMeta(c.description);
-            return (
-              <button
-                key={c.healthConditionID}
-                onClick={() => add(c.healthConditionID)}
-                className="w-full text-left px-4 py-3 rounded-lg text-sm font-medium font-sans bg-white text-char-900 border border-sand-200 hover:border-blue-900 shadow-sm transition-all duration-fast flex items-center gap-2.5"
-              >
-                <span
-                  className="material-symbols-rounded text-[18px] flex-shrink-0"
-                  style={{ color: meta.color }}
-                >
-                  {meta.icon}
-                </span>
-                <span className="flex-1 min-w-0 flex flex-col gap-0.5">
-                  <span className="truncate">{c.description}</span>
-                  {c.longDescription && (
-                    <span className="block text-[11px] font-normal text-char-400 truncate">
-                      {c.longDescription.length > 70
-                        ? c.longDescription.trim().slice(0, 69).trimEnd() + '…'
-                        : c.longDescription.trim()}
-                    </span>
-                  )}
-                </span>
-              </button>
-            );
-          })}
-          {query.trim() && availableResults.length === 0 && (
-            <p className="text-sm text-char-400 font-sans italic text-center py-6">
-              No conditions found for "{query}"
-            </p>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-function MacroGoalsStub() {
+/**
+ * ConditionDropdown — a fully custom (app-styled) picker over the *full*
+ * /healthconditions dictionary, replacing the native <select> so the option
+ * list matches the design system rather than the OS chrome. A pill trigger
+ * opens a panel with a search field (matches description or AKA aliases) and a
+ * scrollable, category-colored list. This is the stakeholder-demo surface
+ * proving the condition list is driven by the database table (not hardcoded) —
+ * see plan Part 1. Picking a condition adds its ID; already-added conditions
+ * render dimmed with a ✓ and can't be re-added.
+ */
+function ConditionDropdown({ value, onChange }) {
+  const [apiConditions, setApiConditions] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const rootRef = useRef(null);
+
+  useEffect(() => {
+    getConditions()
+      .then((conds) => setApiConditions((conds || []).filter((c) => c && c.description)))
+      .catch(() => {});
+  }, []);
+
+  // Close on outside click / Escape.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => {
+      if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const sortedConditions = useMemo(
+    () => [...apiConditions].sort((a, b) => a.description.localeCompare(b.description)),
+    [apiConditions]
+  );
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return sortedConditions;
+    const q = query.toLowerCase();
+    // Match on description OR any AKA alias (semicolon-separated).
+    return sortedConditions.filter((c) => {
+      if (c.description.toLowerCase().includes(q)) return true;
+      return (c.AKA || '')
+        .split(';')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean)
+        .some((alias) => alias.includes(q));
+    });
+  }, [query, sortedConditions]);
+
+  const loading = sortedConditions.length === 0;
+
+  const add = (id) => {
+    // Number() guard — a stray string ID silently corrupts downstream CSV joins.
+    if (Number.isFinite(id) && !value.includes(id)) onChange([...value, id]);
+    setQuery('');
+  };
+
   return (
-    <div className="rounded-xl bg-paper-100 border border-sand-200 p-4 opacity-60">
-      <div className="flex items-center justify-between mb-1">
-        <p className="text-sm font-semibold font-sans text-char-900">Macro & micro goals</p>
-        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold font-sans bg-sand-200 text-char-500">
-          Coming soon
+    <div className="relative" ref={rootRef}>
+      {/* Pill trigger — mirrors the app's searchbar/select styling */}
+      <button
+        type="button"
+        onClick={() => !loading && setOpen((o) => !o)}
+        disabled={loading}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="w-full flex items-center justify-between gap-2 pl-4 pr-3 py-[15px] rounded-full border-[1.5px] bg-white text-[16px] text-char-500 font-sans shadow-sm outline-none transition-all duration-fast ease-ds-out disabled:opacity-60"
+        style={{ borderColor: open ? '#111E58' : '#E6E6E0' }}
+      >
+        <span className="truncate">
+          {loading ? 'Loading conditions…' : 'Browse all conditions (A–Z)…'}
         </span>
-      </div>
-      <p className="text-xs text-char-400 font-sans">
-        Set personal nutrition targets to guide your daily picks.
-      </p>
+        <span
+          className={`material-symbols-rounded text-[18px] text-char-400 flex-shrink-0 transition-transform duration-fast ease-ds-out ${
+            open ? 'rotate-180' : ''
+          }`}
+        >
+          expand_more
+        </span>
+      </button>
+
+      {/* App-styled panel — search + scrollable colored list */}
+      {open && (
+        <div className="absolute z-30 left-0 right-0 mt-2 rounded-2xl border border-sand-200 bg-white shadow-md overflow-hidden origin-top animate-sheet-up">
+          <div className="p-2 border-b border-sand-200">
+            <div className="relative group">
+              <span className="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-[18px] pointer-events-none transition-colors duration-fast text-char-400 group-focus-within:text-blue-900">
+                search
+              </span>
+              <input
+                autoFocus
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search conditions…"
+                className="w-full pl-10 pr-3 py-2.5 rounded-full border-[1.5px] border-sand-200 bg-paper-100 text-[15px] text-char-900 placeholder:text-char-400 font-sans outline-none transition-colors duration-fast ease-ds-out focus:border-blue-900 focus:bg-white"
+              />
+            </div>
+          </div>
+
+          <div className="max-h-[280px] overflow-y-auto p-1.5 flex flex-col gap-1">
+            {filtered.map((c) => {
+              const isSelected = value.includes(c.healthConditionID);
+              const meta = getConditionMeta(c.description);
+              return (
+                <button
+                  key={c.healthConditionID}
+                  onClick={() => !isSelected && add(c.healthConditionID)}
+                  disabled={isSelected}
+                  className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium font-sans flex items-center gap-2.5 transition-colors duration-fast ${
+                    isSelected ? 'opacity-45 cursor-default' : 'hover:bg-paper-100'
+                  }`}
+                >
+                  <span
+                    className="material-symbols-rounded text-[18px] flex-shrink-0"
+                    style={{ color: meta.color }}
+                  >
+                    {isSelected ? 'check' : meta.icon}
+                  </span>
+                  <span className="flex-1 min-w-0 flex flex-col gap-0.5">
+                    <span className="truncate text-char-900">{c.description}</span>
+                    {c.longDescription && (
+                      <span className="block text-[11px] font-normal text-char-400 truncate">
+                        {c.longDescription.length > 70
+                          ? c.longDescription.trim().slice(0, 69).trimEnd() + '…'
+                          : c.longDescription.trim()}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+            {query.trim() && filtered.length === 0 && (
+              <p className="text-sm text-char-400 font-sans italic text-center py-6">
+                No conditions found for "{query}"
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -427,12 +542,14 @@ function SubEditRow({ icon, label, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 py-4 text-left border-b border-sand-200 last:border-b-0 hover:opacity-80 transition-opacity duration-fast"
+      className="w-full flex items-center gap-3 py-4 text-left border-b border-sand-200 last:border-b-0 transition-opacity duration-fast hover:opacity-80"
     >
-      <span className="text-char-500">
-        <Icon name={icon} size={20} />
+      <span className="flex items-center gap-3 flex-1 min-w-0">
+        <span className="text-char-500">
+          <Icon name={icon} size={20} />
+        </span>
+        <span className="flex-1 text-sm font-medium font-sans text-char-900">{label}</span>
       </span>
-      <span className="flex-1 text-sm font-medium font-sans text-char-900">{label}</span>
       <span className="text-char-400">
         <Icon name="chevron-right" size={18} />
       </span>
@@ -443,33 +560,26 @@ function SubEditRow({ icon, label, onClick }) {
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [profile, setProfile] = useState(null);
-  const [topPicks, setTopPicks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   // Display names for profile.conditions (healthConditionID[]), resolved via
   // the cached conditions dictionary.
   const [conditionNames, setConditionNames] = useState([]);
-  // null | 'medications' | 'allergies' | 'dietary'
+  // null | 'medications' | 'allergies' | 'dietary' | 'about'
   const [sheet, setSheet] = useState(null);
 
   useEffect(() => {
-    Promise.all([
-      api.getProfile(),
-      getCategoryTopPicks(),
-    ]).then(([p, picks]) => {
+    getProfile().then((p) => {
       setProfile(p ?? DEMO_PROFILE);
-      setTopPicks(picks);
       setLoading(false);
     });
   }, []);
 
   useEffect(() => {
     let alive = true;
-    api
-      .getConditionNames(profile?.conditions ?? [])
+    getConditionNames(profile?.conditions ?? [])
       .then((names) => { if (alive) setConditionNames(names); })
       .catch(() => { if (alive) setConditionNames([]); });
     return () => { alive = false; };
@@ -479,13 +589,8 @@ export default function ProfileScreen() {
     const next = { ...profile, ...updates };
     setProfile(next);
     setSaving(true);
-    await api.saveProfile(next);
+    await saveProfile(next);
     setSaving(false);
-  };
-
-  const handleSignOut = () => {
-    signOut();
-    navigate('/');
   };
 
   if (loading) {
@@ -510,9 +615,9 @@ export default function ProfileScreen() {
     <div className="min-h-screen -mb-28 bg-forest-300 flex flex-col">
 
       {/* ── 1. Header zone ─────────────────────────────────────────────────── */}
-      <div className="bg-forest-300 px-5 pt-6 pb-6">
+      <div className="bg-forest-300 px-5 pt-10 pb-6">
         {/* Page label row — mirrors HomeScreen's label + right-side icon pattern */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between">
           <p className="font-label text-xs tracking-widest uppercase text-blue-950/60">Profile</p>
           <div className="w-12 h-12 mt-2 ml-2 rounded-full bg-forest-700 flex items-center justify-center text-white text-base font-bold font-sans flex-shrink-0 shadow-xs">
             {initials}
@@ -543,20 +648,10 @@ export default function ProfileScreen() {
         )}
       </div>
 
-      {/* ── 2. Lower shell — carousel + inline editor ──────────────────────── */}
+      {/* ── 2. Lower shell — glance button + inline editor ─────────────────── */}
       {/* flex-1 stretches paper-100 to the bottom (and behind the navbar via its
           own pb-28) so the base cream never shows. */}
       <div className="flex-1 bg-paper-100 rounded-t-2xl px-4 pt-4 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-5">
-
-        {/* Carousel container — sizes to its content; the 3:4 cards drive height */}
-        <div>
-          <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-3">
-            Your profile at a glance
-          </p>
-          <div className="bg-neutral-50 rounded-xl border border-neutral-300/50 shadow-xs px-3 py-2">
-            <CategoryCarousel picks={topPicks} autoAdvance />
-          </div>
-        </div>
 
         {/* Inline profile editor — scroll down to edit conditions & details.
             Conditions save on change; the header chips update live off profile. */}
@@ -566,20 +661,24 @@ export default function ProfileScreen() {
             <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-3">
               Your conditions
             </p>
-            <ConditionsEditor
-              value={profile?.conditions ?? []}
-              onChange={(v) => save({ conditions: v })}
-            />
+            <div className="flex flex-col gap-3">
+              <ConditionDropdown
+                value={profile?.conditions ?? []}
+                onChange={(v) => save({ conditions: v })}
+              />
+              <ConditionsEditor
+                value={profile?.conditions ?? []}
+                onChange={(v) => save({ conditions: v })}
+              />
+            </div>
           </div>
 
-          {/* Section 2 — Macro goals (flagged) */}
-          {ENABLE_MACRO_GOALS ? null : <MacroGoalsStub />}
-
-          {/* Section 3 — Sub-edit rows (other profile fields) */}
+          {/* Section 2 — Sub-edit rows (other profile fields) */}
           <div>
             <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-1">
               Profile details
             </p>
+            <SubEditRow icon="scale" label="About you" onClick={() => setSheet('about')} />
             <SubEditRow icon="pill" label="Medications" onClick={() => setSheet('medications')} />
             <SubEditRow icon="shield" label="Allergies & intolerances" onClick={() => setSheet('allergies')} />
             <SubEditRow icon="leaf" label="Dietary preferences" onClick={() => setSheet('dietary')} />
@@ -588,6 +687,13 @@ export default function ProfileScreen() {
       </div>
 
       {/* ── Sub-edit sheets (BottomSheet) ─────────────────────────────────── */}
+      {sheet === 'about' && (
+        <EditAboutYou
+          profile={profile}
+          onChange={(patch) => save(patch)}
+          onClose={() => setSheet(null)}
+        />
+      )}
       {sheet === 'medications' && (
         <EditList
           title="Edit medications"

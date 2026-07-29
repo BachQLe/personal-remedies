@@ -9,7 +9,6 @@
  *   addToQueue(item)           → boolean (false if already present — for "Already in queue" snackbar)
  *   removeFromQueue(id)        → void
  *   insertIntoQueue(item, idx) → void (Undo restore)
- *   clearQueue()               → void
  *   subscribeQueue(cb)         → unsubscribe function
  *
  * Items have the same shape as library items: { id, name, image?, group?, tier?, referenceTotal? }
@@ -68,13 +67,6 @@ export function insertIntoQueue(item, index) {
   const next = [..._items];
   next.splice(index, 0, item);
   _items = next;
-  _persist();
-  _notify();
-}
-
-export function clearQueue() {
-  if (_items.length === 0) return;
-  _items = [];
   _persist();
   _notify();
 }

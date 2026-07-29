@@ -2,9 +2,10 @@ import { NavLink } from 'react-router-dom';
 import Icon from '../shared/Icon.jsx';
 
 const TABS = [
-  { to: '/app/home', label: 'Home', icon: 'home' },
-  { to: '/app/search', label: 'Search', icon: 'search' },
   { to: '/app/plan', label: 'Plan', icon: 'clipboard-list' },
+  { to: '/app/search', label: 'Search', icon: 'search' },
+  { to: '/app/home', label: 'Home', icon: 'home' },
+  { to: '/app/suggestions', label: 'Guidance', icon: 'list' },
   { to: '/app/profile', label: 'Profile', icon: 'user' },
 ];
 

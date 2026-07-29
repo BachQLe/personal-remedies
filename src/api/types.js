@@ -2,7 +2,10 @@
  * types.js — JSDoc @typedef definitions for the Remedi API surface.
  *
  * These types define the ONLY shapes screens may consume.
- * No numeric score (value / descriptionNumericID) is ever exposed here.
+ * Historically no numeric score (value / descriptionNumericID) was ever
+ * exposed here. RELAXED July 2026 (user-approved) for the star-rating
+ * feature: `Assessment` now carries score/verdict/numericId/stars — see the
+ * Assessment typedef below. All other shapes remain score-free.
  */
 
 /**
@@ -38,9 +41,9 @@
  *   conditions. `null` means unknown (at least one condition's /references
  *   fetch failed) — render nothing / a neutral state, NOT "0 studies". Only
  *   set on Foods produced by `assessFood` (via `assessFoodRaw`); absent
- *   elsewhere. See `getCachedRefCount`/`warmReferenceCount` in adapter.js
- *   for the rate-limit-safe way to opportunistically populate this outside
- *   of a full assessFood call (e.g. list-view trust signals).
+ *   elsewhere. See `getCachedRefCount` in adapter.js for the cache-only way
+ *   to opportunistically populate this outside of a full assessFood call
+ *   (e.g. list-view trust signals).
  * @property {string} [notes] - Any advisory notes from the engine
  * @property {number} [rank] - 1-based position in a ranked list. Only set by
  *   `getTopDosAndDonts`, assigned AFTER recipe filtering so it matches the
@@ -74,6 +77,19 @@
  *   null if any perCondition entry has referenceStatus 'error')
  * @property {TierOrPoor} tier - Reconciled tier across all profile conditions
  * @property {ConditionAssessment[]} perCondition - Per-condition breakdown (positional)
+ * @property {number|null} score - Raw reconciled /goodfor `value` for this
+ *   food+profile. Intentionally relaxes the former never-expose-numeric-
+ *   scores rule (user-approved July 2026) for the FoodDetailCard star
+ *   rating — don't surface it as a bare number elsewhere without a product
+ *   decision.
+ * @property {string|null} verdict - Reconciled /goodfor `description` — the
+ *   7-step verdict label (e.g. "More Helpful").
+ * @property {number|null} numericId - Reconciled /goodfor
+ *   `descriptionNumericID` (1–7). Feeds `tier` (via `numericIdToTier`) and
+ *   `stars` (via `numericIdToStars`).
+ * @property {number|null} stars - Star rating out of 5 for FoodDetailCard,
+ *   from `numericIdToStars(numericId)` — {1:5, 2:4.5, 3:4, 4:3, 5:2,
+ *   6:1.5, 7:1}, null outside 1–7.
  */
 
 /**
@@ -82,6 +98,21 @@
  * @property {string[]} [dietary] - Dietary preferences
  * @property {string[]} [allergies] - Food allergies
  * @property {string[]} [medications] - Medications
+ * @property {number} [heightCm] - Height in centimeters. Optional biometric
+ *   (July 2026, calorie-needs feature) — always stored as metric even though
+ *   the UI collects ft/in; see `ftInToCm`/`cmToFtIn` in api/calorieNeeds.js.
+ *   Never required: every flow (including `estimateDailyNeed`) must degrade
+ *   gracefully when absent.
+ * @property {number} [weightKg] - Weight in kilograms. Same optionality and
+ *   metric-storage rule as `heightCm`; UI collects lbs, see `lbsToKg`/
+ *   `kgToLbs` in api/calorieNeeds.js.
+ * @property {number} [age] - Age in years. Optional.
+ * @property {'male'|'female'} [sex] - Biological sex, used only for the
+ *   Mifflin-St Jeor BMR constant (+5 male / -161 female). Optional.
+ * @property {'sedentary'|'light'|'moderate'|'active'|'very_active'} [activityLevel] -
+ *   Self-reported activity level, mapped to a BMR multiplier in
+ *   api/calorieNeeds.js. Optional — `estimateDailyNeed` defaults to 'light'
+ *   when the other biometrics are present but this one isn't.
  */
 
 /**
@@ -103,7 +134,7 @@
  * @typedef {Object} Recipe
  * @property {number|string} id - Recipe identifier (Nutridigm foodItemID for real recipes)
  * @property {number} [foodId] - Nutridigm foodItemID — same value as `id` for
- *   real recipes (fine group 'l'); lets consumers call assessFood/getIngredientReferences
+ *   real recipes (fine group 'l'); lets consumers call assessFood/getFoodFacts
  *   on the recipe itself. Absent on ghost/placeholder recipes.
  * @property {string} title - Recipe title
  * @property {TierOrPoor} [tier] - Reconciled tier for the requested conditions
@@ -113,6 +144,29 @@
  * @property {string} mealType - Breakfast/Lunch/Dinner/Snack (best-effort keyword guess for real recipes)
  * @property {Food[]} [ingredients] - Ingredient list as Foods
  * @property {string[]} [matchedConditions] - Display names of conditions this recipe helps
+ */
+
+/**
+ * @typedef {Object} PlanCandidate
+ * Normalized item eligible to fill a Plan screen slot (see config.js
+ * `PLAN_SLOTS` and adapter.js `getMealPlanSuggestions`). A thinner sibling of
+ * Food/Recipe — only the fields the Plan screen actually renders, no
+ * fabricated calories/macros.
+ * @property {number} id - Nutridigm foodItemID (recipes use the same field —
+ *   real Food Network recipes ARE food items, fine group 'l')
+ * @property {string} name - Display name
+ * @property {string} [image] - Image URL, resolved via `getIngredientImage`
+ *   same as other food/recipe surfaces
+ * @property {string} group - Coarse food group code
+ * @property {string} fineGroup - Fine food group code (the /suggest group
+ *   this candidate was fetched under)
+ * @property {TierOrPoor} tier - 'Top'|'Strong'|'Good'|null. `null` = Neutral
+ *   (numericId 4) — render no match claim. Harmful tiers (5-7) never appear
+ *   here; candidates are pre-filtered to numericId 1-4.
+ * @property {number} numericId - Raw descriptionNumericID (1-4 only)
+ * @property {'food'|'recipe'} kind
+ * @property {string} [sourceName] - Attribution (e.g. "Food Network ·
+ *   Giada De Laurentiis") — recipes only
  */
 
 /**
@@ -173,7 +227,7 @@
  * A July-2026 probe of the live Nutridigm API (/fooditems, /goodfor,
  * /detailed) found no nutrition-fact fields anywhere in the payloads, so
  * `getNutritionFacts(foodId)` in adapter.js is a typed stub that always
- * resolves to `null`, and consumers (FoodDetail's Food Facts section) must
+ * resolves to `null`, and consumers (FoodDetailCard's Food Facts section) must
  * render NOTHING nutritional on null — no placeholder tables, per the
  * never-fabricate-data rule. If Nutridigm ever exposes nutrient data,
  * implement against this shape.
@@ -186,7 +240,7 @@
  * ── `usedFallback` propagation ──────────────────────────────────────────────
  *
  * Every adapter function wrapped in `withConditionFallback` (getSuggestions,
- * getWorstFoods, assessFood, buildMealPlan, getAlternatives) can silently
+ * getWorstFoods, assessFood, buildMealPlan) can silently
  * retry with DEFAULT_DEV_CONDITIONS when the demo subscription key can't
  * score the profile's real condition IDs (401 NOTAUTHORIZEDHEALTHID).
  * When that retry happens, the result is flagged so the UI can show a
@@ -196,12 +250,11 @@
  *   `usedFallback: boolean` is set directly as an enumerable property on
  *   the returned object. `assessFood` can also return `null` (no
  *   conditions) — callers must null-check before reading `usedFallback`.
- * - Array-returning functions (`getAlternatives` → Food[]): the array
- *   shape is preserved for existing consumers (`.map`, spread, etc.), and
- *   `usedFallback` is attached as a non-enumerable property via
- *   `Object.defineProperty` so it doesn't show up in JSON.stringify,
- *   spread, or Array iteration, but is still readable via
- *   `result.usedFallback` for callers that care.
+ * - Array-returning functions (Food[]): the array shape is preserved for
+ *   existing consumers (`.map`, spread, etc.), and `usedFallback` is
+ *   attached as a non-enumerable property via `Object.defineProperty` so
+ *   it doesn't show up in JSON.stringify, spread, or Array iteration, but
+ *   is still readable via `result.usedFallback` for callers that care.
  */
 
 // This file is purely for documentation — no runtime exports needed.

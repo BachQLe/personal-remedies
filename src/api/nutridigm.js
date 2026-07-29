@@ -123,6 +123,14 @@ async function performRequest(urlStr) {
   // 400 = bad parameter
   if (res.status === 400) {
     const body = await res.json().catch(() => ({}));
+
+    // /detailed can 400 with NOFOODITEMSFORGROUP when a food group simply has
+    // no items for the given condition(s) — a data gap, not an error, so
+    // resolve to empty instead of throwing (all other 400s still throw).
+    if (body.code === 'NOFOODITEMSFORGROUP') {
+      return [];
+    }
+
     throw new Error(`[nutridigm] Bad request: ${body.code || body.message || res.statusText}`);
   }
 
@@ -141,7 +149,7 @@ async function performRequest(urlStr) {
  * @returns {Promise<Array>} List of all health conditions
  */
 export async function fetchHealthConditions() {
-  return request('healthconditions') || [];
+  return (await request('healthconditions')) ?? [];
 }
 
 /**
@@ -149,7 +157,7 @@ export async function fetchHealthConditions() {
  * @returns {Promise<Array>} Full food dictionary
  */
 export async function fetchFoodItems() {
-  return request('fooditems') || [];
+  return (await request('fooditems')) ?? [];
 }
 
 /**
@@ -157,7 +165,7 @@ export async function fetchFoodItems() {
  * @returns {Promise<Array>} All food group definitions
  */
 export async function fetchFoodGroups() {
-  return request('foodgroups') || [];
+  return (await request('foodgroups')) ?? [];
 }
 
 /**
@@ -181,11 +189,11 @@ export async function fetchGoodFor(foodItemID, healthConditionIDs) {
  * @returns {Promise<Array>} Sorted list of foods
  */
 export async function fetchTopDoOrDonts(healthConditionIDs, consumeOrAvoid, limit = 30) {
-  return request('topdoordonts', {
+  return (await request('topdoordonts', {
     healthConditionID: healthConditionIDs,
     consumeOrAvoid,
     limit: String(limit),
-  }) || [];
+  })) ?? [];
 }
 
 /**
@@ -195,10 +203,10 @@ export async function fetchTopDoOrDonts(healthConditionIDs, consumeOrAvoid, limi
  * @returns {Promise<Array>} Sorted list of suggestions
  */
 export async function fetchSuggest(healthConditionIDs, fineFoodGroup) {
-  return request('suggest', {
+  return (await request('suggest', {
     healthConditionID: healthConditionIDs,
     fineFoodGroup,
-  }) || [];
+  })) ?? [];
 }
 
 /**
@@ -209,11 +217,11 @@ export async function fetchSuggest(healthConditionIDs, fineFoodGroup) {
  * @returns {Promise<Array>} Foods in the group
  */
 export async function fetchDetailed(healthConditionIDs, coarseFoodGroup, listType = 'helpful') {
-  return request('detailed', {
+  return (await request('detailed', {
     healthConditionID: healthConditionIDs,
     coarseFoodGroup,
     listType,
-  }) || [];
+  })) ?? [];
 }
 
 /**
@@ -223,8 +231,8 @@ export async function fetchDetailed(healthConditionIDs, coarseFoodGroup, listTyp
  * @returns {Promise<string[]>} Array of citation strings
  */
 export async function fetchReferences(healthConditionID, foodItemID) {
-  return request('references', {
+  return (await request('references', {
     healthConditionID: String(healthConditionID),
     foodItemID: String(foodItemID),
-  }) || [];
+  })) ?? [];
 }

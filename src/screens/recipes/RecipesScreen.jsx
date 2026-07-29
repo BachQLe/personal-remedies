@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
-import { api } from '../../api/api.js';
-import RecipeDetail from '../../components/RecipeDetail.jsx';
+import { getProfile, getRecipes, getConditionNames, buildRecipeDetail } from '../../api/api.js';
+import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
 import Pill from '../../components/shared/Pill.jsx';
 import SearchInput from '../../components/shared/SearchInput.jsx';
 import Icon from '../../components/shared/Icon.jsx';
-import DemoDataChip from '../../components/shared/DemoDataChip.jsx';
-import { buildRecipeIngredients } from '../../api/recipeDetail.js';
+import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { GHOST_PROFILE, GHOST_RECIPES } from '../../api/ghostData.js';
 
 // Demo key conditions (see api/config.js DEFAULT_DEV_CONDITIONS): 203 = Aging, 244 = Pneumonia.
 const DEMO_PROFILE = {
-  conditions: [203, 244],
+  conditions: DEFAULT_DEV_CONDITIONS,
   medications: [],
   allergies: [],
   dietary: [],
@@ -49,7 +48,7 @@ const MEAL_TYPES = [
   { label: 'Snack', icon: 'cookie' },
 ];
 
-// ── Tier config (matches IngredientCard's pill pattern) ─────────────────────
+// ── Tier config (matches the shared tier pill pattern) ──────────────────────
 
 const TIER_CONFIG = {
   Top: {
@@ -140,20 +139,18 @@ export default function RecipesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   // Display names for the real profile's conditions (healthConditionID[]).
   const [conditionNames, setConditionNames] = useState([]);
-  const [usedFallback, setUsedFallback] = useState(false);
 
   useEffect(() => {
     let alive = true;
     async function load() {
-      let p = await api.getProfile();
+      let p = await getProfile();
       if (!p) p = DEMO_PROFILE;
       if (!alive) return;
       setProfile(p);
       try {
-        const { recipes, usedFallback: fallback } = await api.getRecipes(p);
+        const { recipes } = await getRecipes(p);
         if (!alive) return;
         setAllRecipes(recipes ?? []);
-        setUsedFallback(!!fallback);
       } catch (err) {
         console.error('RecipesScreen: getRecipes failed', err);
         if (alive) setAllRecipes([]);
@@ -167,8 +164,7 @@ export default function RecipesScreen() {
 
   useEffect(() => {
     let alive = true;
-    api
-      .getConditionNames(profile?.conditions ?? [])
+    getConditionNames(profile?.conditions ?? [])
       .then((names) => { if (alive) setConditionNames(names); })
       .catch(() => { if (alive) setConditionNames([]); });
     return () => { alive = false; };
@@ -183,18 +179,43 @@ export default function RecipesScreen() {
 
   const recipes = ghost ? GHOST_RECIPES : allRecipes;
 
-  // Real recipes (from adapter getRecipes) don't carry a per-ingredient
-  // breakdown yet — enrich with real assessFood/topdoordonts data on open,
-  // via recipeDetail.js's buildRecipeIngredients (mirrors RecipePicksTab's
-  // buildRecipeDetail pattern). Ghost recipes already have `ingredients`.
+  // Real recipes (from adapter getRecipes) use title/photo instead of
+  // FoodDetailCard's item shape's name/image, and don't carry a per-ingredient
+  // breakdown yet — seed the card immediately with the mapped shape, then
+  // enrich via recipeDetail.js's buildRecipeDetail (same seed-then-enrich
+  // idiom as MealprepCarousel/SuggestionsScreen). Ghost recipes already carry
+  // `ingredients`, so they're passed through as-is.
   function handleViewRecipe(recipe) {
     if (recipe.ingredients) {
-      setSelectedRecipe(recipe);
+      setSelectedRecipe({
+        foodId: recipe.foodId ?? recipe.id ?? null,
+        name: recipe.title,
+        image: recipe.photo,
+        sourceName: recipe.sourceName ?? null,
+        conditions: recipe.matchedConditions ?? [],
+        ingredients: recipe.ingredients,
+        isRecipe: true,
+      });
       return;
     }
-    setSelectedRecipe({ ...recipe, ingredients: [] });
-    buildRecipeIngredients(recipe, profile)
-      .then(setSelectedRecipe)
+    const card = {
+      foodId: recipe.foodId ?? null,
+      name: recipe.title,
+      image: recipe.photo,
+      sourceName: recipe.sourceName ?? null,
+      matchedConditions: recipe.matchedConditions ?? [],
+    };
+    setSelectedRecipe({
+      foodId: card.foodId,
+      name: card.name,
+      image: card.image,
+      sourceName: card.sourceName,
+      conditions: card.matchedConditions,
+      ingredients: [],
+      isRecipe: true,
+    });
+    buildRecipeDetail(card, profile)
+      .then((detail) => setSelectedRecipe({ ...detail, isRecipe: true }))
       .catch(() => {});
   }
 
@@ -215,11 +236,6 @@ export default function RecipesScreen() {
         <p className="text-[12px] text-char-500 font-label tracking-[0.14em] uppercase">Personal Remedies</p>
         <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">Recipes</h1>
         <p className="text-sm text-char-500 mt-0.5 font-sans">Condition-approved for your profile</p>
-        {!ghost && usedFallback && (
-          <div className="mt-2">
-            <DemoDataChip />
-          </div>
-        )}
       </div>
 
       {/* Search */}
@@ -240,7 +256,7 @@ export default function RecipesScreen() {
         <div>
           <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-500 mb-2">Meal type</p>
           <div className="flex gap-2 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-hide">
-            {MEAL_TYPES.map(({ label, icon }) => (
+            {MEAL_TYPES.map(({ label }) => (
               <Pill
                 key={label}
                 selected={mealFilter === label}
@@ -317,14 +333,12 @@ export default function RecipesScreen() {
         </div>
       )}
 
-      {/* Recipe detail sheet */}
-      {selectedRecipe && (
-        <RecipeDetail
-          recipe={selectedRecipe}
-          profile={profile}
-          onClose={() => setSelectedRecipe(null)}
-        />
-      )}
+      {/* Recipe detail card */}
+      <FoodDetailCard
+        item={selectedRecipe}
+        open={!!selectedRecipe}
+        onClose={() => setSelectedRecipe(null)}
+      />
     </div>
   );
 }
