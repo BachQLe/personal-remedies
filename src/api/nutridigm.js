@@ -44,6 +44,62 @@ export class NutridigmConfigError extends Error {
 /** Track which error codes have been logged (log once per code). */
 const _loggedErrors = new Set();
 
+// ── Request-count instrumentation (dev-only, P1.2 probe P5) ─────────────────
+//
+// In-memory, per-endpoint counter of real network requests — i.e. actual
+// fetches performed by `performRequest`, NOT calls to `request()` that get
+// served by the in-flight de-dupe map (`_inFlight`) or by the persistent
+// TTL cache in cache.js (those never reach `performRequest` at all). Purely
+// additive: no existing export's signature or behavior changes. Not
+// persisted — resets on every page reload / module reload, which is exactly
+// what "per session" instrumentation should do.
+
+/** @type {Map<string, number>} endpoint path (e.g. 'goodfor') -> request count. */
+const _requestCounts = new Map();
+
+/**
+ * Record one real network request against its endpoint's counter. Endpoint
+ * is parsed from the final path segment of the request URL (e.g.
+ * '.../api/v2/goodfor?...' -> 'goodfor') rather than threaded through as an
+ * extra argument, so `performRequest`'s existing signature never changes.
+ * @param {string} urlStr - Full request URL (as built by `request()`)
+ */
+function recordRequest(urlStr) {
+  let endpoint = 'unknown';
+  try {
+    const segments = new URL(urlStr).pathname.split('/').filter(Boolean);
+    endpoint = segments[segments.length - 1] || 'unknown';
+  } catch {
+    // Malformed URL (shouldn't happen — built by `request()` itself) —
+    // count it under 'unknown' rather than throwing.
+  }
+  _requestCounts.set(endpoint, (_requestCounts.get(endpoint) || 0) + 1);
+}
+
+/**
+ * Dev-only per-endpoint request-count snapshot (P5 instrumentation).
+ * Returns a plain object copy of the live counts (not the Map itself), so
+ * callers can inspect but never mutate internal state.
+ *
+ * Read it from:
+ *   - Browser console: `window.__remediRequestCounts()` (dev builds only —
+ *     see the `import.meta.env.DEV` guard below).
+ *   - Playwright: `await page.evaluate(() => window.__remediRequestCounts?.())`.
+ *   - Any module: `import { getRequestCounts } from './nutridigm.js'`.
+ * @returns {Record<string, number>}
+ */
+export function getRequestCounts() {
+  return Object.fromEntries(_requestCounts);
+}
+
+// Dev-only convenience global so counts are readable from the browser
+// console or a Playwright `page.evaluate` without importing this module.
+// `import.meta.env.DEV` is Vite's dev-mode flag (false in production
+// builds), so this is a complete no-op in prod bundles.
+if (import.meta.env?.DEV && typeof window !== 'undefined') {
+  window.__remediRequestCounts = getRequestCounts;
+}
+
 /**
  * In-flight request de-dupe: concurrent calls to the exact same URL share a
  * single network request/promise instead of each firing their own. Keyed by
@@ -99,6 +155,7 @@ async function request(endpoint, params = {}) {
  * @returns {Promise<any>}
  */
 async function performRequest(urlStr) {
+  recordRequest(urlStr);
   const res = await fetch(urlStr);
 
   // 220 = empty but valid

@@ -35,19 +35,19 @@ import { getItemTable, getConditionTable, getGroupTable, getOverlayImageFile } f
 // ── Cache TTLs ────────────────────────────────────────────────────────────────
 
 /** /topdoordonts results — cached per {conditionsCSV, consumeOrAvoid, limit}. */
-const TOPDOORDONTS_TTL_MS = 8 * 60 * 60 * 1000; // 8h
+export const TOPDOORDONTS_TTL_MS = 8 * 60 * 60 * 1000; // 8h
 
 /** /suggest results for the recipe fine food group — cached per conditionsCSV. */
-const RECIPES_TTL_MS = 8 * 60 * 60 * 1000; // 8h
+export const RECIPES_TTL_MS = 8 * 60 * 60 * 1000; // 8h
 
 /** /detailed results — cached per {conditionsCSV, coarseGroup, listType}. */
-const DETAILED_TTL_MS = 8 * 60 * 60 * 1000; // 8h
+export const DETAILED_TTL_MS = 8 * 60 * 60 * 1000; // 8h
 
 /** /goodfor assessment results — cached per {conditionsCSV, foodId}. */
-const GOODFOR_TTL_MS = 8 * 60 * 60 * 1000; // 8h
+export const GOODFOR_TTL_MS = 8 * 60 * 60 * 1000; // 8h
 
 /** /suggest results for Plan-slot fine food groups — cached per {conditionsCSV, fineFoodGroup}. */
-const SUGGEST_TTL_MS = 8 * 60 * 60 * 1000; // 8h
+export const SUGGEST_TTL_MS = 8 * 60 * 60 * 1000; // 8h
 
 /**
  * /references citations — cached per (conditionId, foodId). Citations are
@@ -55,7 +55,7 @@ const SUGGEST_TTL_MS = 8 * 60 * 60 * 1000; // 8h
  * is cached far longer than the request-shaped caches above and is safe to
  * key on the pair alone rather than the full conditionsCSV.
  */
-const REFERENCES_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7d
+export const REFERENCES_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7d
 
 /** Fine food group that holds real Food Network recipes (condition-ranked). */
 const RECIPE_FINE_GROUP = 'l';
