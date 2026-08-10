@@ -63,16 +63,20 @@ async function loadCandidates(profile) {
  * adapter.js's `buildMealPlanRaw` bucketing: fine-group overrides
  * (`MEAL_SLOT_MAP`) win first, then coarse group, defaulting to lunch.
  *
- * `MEAL_SLOT_MAP` still maps fine group 'h2' to 'Beverages' (config.js), but
- * there is no 'beverages' plan slot anymore (removed July 2026) — items that
- * would have landed there now fall through to the group-based switch below
- * instead of being routed to a slot that doesn't exist.
+ * `MEAL_SLOT_MAP` maps fine group 'h2' to 'Beverages' and 'h1' to 'Snack'
+ * (config.js); both short-circuit here before the coarse-group switch runs.
+ * The 'beverages' plan slot was removed July 2026 and restored August 2026
+ * (both user-approved) — the short-circuit below routes fine group 'h2'
+ * items there again instead of letting them fall through to the
+ * group-based switch (which has no 'h' case and would otherwise default
+ * them to 'lunch').
  * @param {{ fineGroup?: string, group?: string }} item
  * @returns {string} one of PLAN_SLOT_KEYS
  */
 export function inferSlotKey(item) {
   const byFine = MEAL_SLOT_MAP[item?.fineGroup];
   if (byFine === 'Snack') return 'snacks';
+  if (byFine === 'Beverages') return 'beverages';
 
   switch (item?.group) {
     case 'f':
@@ -299,9 +303,12 @@ function slotOffsets(candidates, rotation) {
 
 /**
  * Merge any leftover legacy `'queue'` items into a freshly-built day's slots
- * (first-ever-build only — see `ensurePlanForWeek`). Each item is bucketed
- * via `inferSlotKey` and appended after the auto-filled items, deduped by id
- * against everything already in the day.
+ * (first-ever-build only — see `generatePlanFromPicks`, the only place a
+ * WeeklyPlan is built from scratch since the Aug 2026 picks-only default;
+ * this used to be called from `ensurePlanForWeek`'s first-build path, which
+ * no longer exists). Each item is bucketed via `inferSlotKey` and appended
+ * after the picked items, deduped by id against everything already in the
+ * day.
  * @param {Object<string, import('../state/dailyPlan.js').PlanItem[]>} slots
  * @returns {Object<string, import('../state/dailyPlan.js').PlanItem[]>}
  */
@@ -323,6 +330,17 @@ function mergeLegacyQueue(slots) {
  * Ensure a valid 7-day WeeklyPlan exists, building/extending it as needed.
  * Idempotent — safe to call on every mount.
  *
+ * Picks-only default (Aug 2026, decision b): this function no longer builds
+ * a plan from scratch. If no plan exists yet (`getPlan()` returns null — the
+ * user has never run the recipe picker), it returns `{ plan: null,
+ * usedFallback: false }` immediately, with zero network calls and zero
+ * writes. A plan only ever comes into existence via `generatePlanFromPicks`
+ * (the "New meal plan" picker) — see that function's doc for why an
+ * auto-filled, un-picked week is no longer the honest default. Every rule
+ * documented below only applies once a plan already exists; the caller
+ * (Plan screen) is expected to render its own empty state for the null case
+ * and route the user to the picker.
+ *
  * Rolling window: `nextSevenDays()` is the source of truth for which date
  * keys belong in the plan. Any existing day still inside that window carries
  * over completely untouched (pins, eaten, everything) — a day that rolls out
@@ -337,44 +355,51 @@ function mergeLegacyQueue(slots) {
  * week) and share a week-wide `weekUsedIds` set per slot (seeded from days
  * already kept, so a freshly-added trailing day also avoids repeating what
  * the kept days already show) — see `fillSlots`' doc for the two-pass
- * exhaustion behavior.
+ * exhaustion behavior. Skipped for picks-only plans, which spread variety by
+ * rotation instead (`fillFromPicks`).
  *
- * On the very first-ever build (no plan of any kind existed yet), leftover
- * `'queue'` items are merged into TODAY's day (see `mergeLegacyQueue`).
- *
- * Picks-only plans: if the existing plan carries `picksBySlot`, each freshly
- * generated trailing day is built from those picks (`fillFromPicks`) rather
- * than the candidate pools, and `picksBySlot` is carried onto the rebuilt
- * plan. Without this the picks-only guarantee would silently lapse one day
- * later, as tomorrow rolled into the window and got auto-filled. A conditions
- * change still discards everything INCLUDING the picks: those were chosen
- * against a differently-ranked pool and may now be poorly tiered (or outright
- * harmful) for the new condition set, so re-picking is the honest reset.
+ * Picks-only plans: if the existing plan carries `picksBySlot` (true of
+ * every plan built since Aug 2026 — see `generatePlanFromPicks`), each
+ * freshly generated trailing day is built from those picks (`fillFromPicks`)
+ * rather than the candidate pools, and `picksBySlot` is carried onto the
+ * rebuilt plan. Without this the picks-only guarantee would silently lapse
+ * one day later, as tomorrow rolled into the window and got auto-filled. A
+ * conditions change still discards everything INCLUDING the picks: those
+ * were chosen against a differently-ranked pool and may now be poorly
+ * tiered (or outright harmful) for the new condition set, so re-picking is
+ * the honest reset. A pre-Aug-2026 plan with no `picksBySlot` at all is the
+ * one remaining case that still auto-fills its trailing days from the
+ * candidate pools below — the legacy pool-built escape hatch (also see
+ * `regenerateDay`/`regenerateWeek`, which branch the same way).
  *
  * Quota protection: if `getMealPlanSuggestions` comes back with every slot
- * empty (e.g. API/quota outage) but a plan for the SAME conditions already
- * exists, that existing plan is returned unchanged — never let a transient
- * outage wipe (or partially wipe) a good week down to honest-empty days. The
- * next mount retries (candidates are cached 8h, so a real recovery is picked
- * up soon). Picks-only plans skip this guard entirely: their slot content
- * doesn't come from the pools, so an empty pool can't degrade them.
+ * empty (e.g. API/quota outage), the existing plan (for the same
+ * conditions) is returned unchanged — never let a transient outage wipe (or
+ * partially wipe) a good week down to honest-empty days. The next mount
+ * retries (candidates are cached 8h, so a real recovery is picked up soon).
+ * Picks-only plans skip this guard entirely: their slot content doesn't come
+ * from the pools, so an empty pool can't degrade them.
  *
  * @param {import('./types.js').Profile} profile
- * @returns {Promise<{ plan: import('../state/dailyPlan.js').WeeklyPlan, usedFallback: boolean }>}
+ * @returns {Promise<{ plan: import('../state/dailyPlan.js').WeeklyPlan|null, usedFallback: boolean }>}
+ *   `plan` is null ONLY when no plan exists yet (no-plan contract, above) —
+ *   every other path returns a real plan.
  */
 export async function ensurePlanForWeek(profile) {
   const existing = getPlan();
-  const isFirstEverBuild = !existing;
+  if (!existing) {
+    return { plan: null, usedFallback: false };
+  }
 
   const { candidates, conditionIds, conditionNames, usedFallback } = await loadCandidates(profile);
   const conditionsKey = conditionIds.join(',');
-  const conditionsChanged = !!existing && existing.conditionsKey !== conditionsKey;
-  const picksBySlot = conditionsChanged ? null : existing?.picksBySlot;
+  const conditionsChanged = existing.conditionsKey !== conditionsKey;
+  const picksBySlot = conditionsChanged ? null : existing.picksBySlot;
 
   const dayKeys = nextSevenDays().map((d) => d.key);
 
   const keptDays = {};
-  if (existing && !conditionsChanged) {
+  if (!conditionsChanged) {
     for (const key of dayKeys) {
       if (existing.days[key]) keptDays[key] = existing.days[key];
     }
@@ -382,11 +407,11 @@ export async function ensurePlanForWeek(profile) {
   const missingKeys = dayKeys.filter((key) => !keptDays[key]);
 
   const allEmpty = PLAN_SLOT_KEYS.every((key) => (candidates[key] || []).length === 0);
-  if (allEmpty && !picksBySlot && existing && !conditionsChanged) {
+  if (allEmpty && !picksBySlot && !conditionsChanged) {
     return { plan: existing, usedFallback: existing.usedFallback };
   }
 
-  if (missingKeys.length === 0 && existing && !conditionsChanged) {
+  if (missingKeys.length === 0 && !conditionsChanged) {
     return { plan: existing, usedFallback: existing.usedFallback };
   }
 
@@ -407,12 +432,9 @@ export async function ensurePlanForWeek(profile) {
     const dayIndex = dayKeys.indexOf(dateKey);
     const offsets = slotOffsets(candidates, dayIndex);
 
-    let slots = picksBySlot
+    const slots = picksBySlot
       ? fillFromPicks(picksBySlot, dayIndex)
       : fillSlots(PLAN_SLOTS, candidates, offsets, { weekUsedIds });
-    if (isFirstEverBuild && dateKey === dayKeys[0]) {
-      slots = mergeLegacyQueue(slots);
-    }
 
     newDays[dateKey] = { generation: 0, offsets, slots, eaten: [], pinned: [] };
   }
@@ -422,7 +444,7 @@ export async function ensurePlanForWeek(profile) {
     conditionsKey,
     conditionNames,
     usedFallback,
-    generation: existing?.generation ?? 0,
+    generation: existing.generation ?? 0,
     days: { ...keptDays, ...newDays },
     ...(picksBySlot ? { picksBySlot } : {}),
   };
@@ -433,20 +455,32 @@ export async function ensurePlanForWeek(profile) {
 
 /**
  * Build a brand-new 7-day WeeklyPlan seeded from user-picked items — the
- * "New meal plan" recipe picker (`MealPlannerPicker.jsx`). UNLIKE
- * `ensurePlanForWeek`, this always rebuilds every day of the rolling window
- * from scratch (no "keep existing days" carry-over) — the whole point of the
- * picker is to hand back a fresh week reflecting the current picks.
+ * "New meal plan" recipe picker (`MealPlannerPicker.jsx`) and, since Aug
+ * 2026 (decision b, picks-only default), the ONLY function that ever builds
+ * a WeeklyPlan from scratch — `ensurePlanForWeek` no longer does (see its
+ * doc: it returns a null plan when none exists yet). UNLIKE
+ * `ensurePlanForWeek`'s window-maintenance path, this always rebuilds every
+ * day of the rolling window from scratch (no "keep existing days"
+ * carry-over) — the whole point of the picker is to hand back a fresh week
+ * reflecting the current picks.
  *
  * `pickedItems` are bucketed by meal type (`mealTypeForItem` — honors an
  * item's own `fromSlot`/`slotKey` first, so a picker card tagged with the
  * rail it was shown under lands in that exact slot rather than being
  * re-inferred from its food group), and the resulting buckets become the
- * plan's `picksBySlot`. Every day's slots are then drawn from those buckets
- * alone via `fillFromPicks`/`pickWindow` — the ranked candidate pools are
- * NEVER consulted for slot content. A slot's `size` acts as a per-day cap, so
- * picking fewer items than a slot holds yields a short slot (and an
- * under-target day) rather than padding with food the user didn't choose.
+ * plan's `picksBySlot` — ALWAYS attached, even when every bucket is empty,
+ * so a plan built here is unambiguously picks-only from the moment it
+ * exists (see `regenerateDay`/`regenerateWeek`, which branch on
+ * `picksBySlot`'s presence). Every day's slots are then drawn from those
+ * buckets alone via `fillFromPicks`/`pickWindow` — the ranked candidate
+ * pools are NEVER consulted for slot content, not even when `pickedItems`
+ * is empty: a zero-pick call now honestly yields a week of empty days
+ * rather than silently falling back to an auto-generated week nobody asked
+ * for (the picker UI is expected to disable its own submit CTA when nothing
+ * is picked, not rely on this function to degrade gracefully). A slot's
+ * `size` acts as a per-day cap, so picking fewer items than a slot holds
+ * yields a short slot (and an under-target day) rather than padding with
+ * food the user didn't choose.
  *
  * Picks are deliberately NOT auto-pinned. Pinning previously existed only to
  * shield them from the candidate-pool backfill that no longer happens, and
@@ -455,8 +489,12 @@ export async function ensurePlanForWeek(profile) {
  * `picksBySlot` is what protects picks now — see `regenerateDay`/
  * `regenerateWeek`/`ensurePlanForWeek`.
  *
- * An empty `pickedItems` degrades to a fully auto-generated week (no
- * `picksBySlot` written), same as a from-scratch `ensurePlanForWeek` build.
+ * On the very first-ever build (no plan of any kind existed yet — checked
+ * BEFORE this function's own `setPlan` overwrites it), leftover legacy
+ * `'queue'` items are merged into TODAY's day (see `mergeLegacyQueue`) —
+ * this used to live in `ensurePlanForWeek`'s now-removed auto-build path;
+ * it moved here because this is the only remaining place a first-ever plan
+ * gets built.
  *
  * @param {import('./types.js').Profile} profile
  * @param {Array<Object>} pickedItems - user-selected candidate/food items
@@ -464,6 +502,7 @@ export async function ensurePlanForWeek(profile) {
  * @returns {Promise<{ plan: import('../state/dailyPlan.js').WeeklyPlan, usedFallback: boolean }>}
  */
 export async function generatePlanFromPicks(profile, pickedItems) {
+  const isFirstEverBuild = !getPlan();
   const { candidates, conditionIds, conditionNames, usedFallback } = await loadCandidates(profile);
   const dayKeys = nextSevenDays().map((d) => d.key);
 
@@ -475,16 +514,18 @@ export async function generatePlanFromPicks(profile, pickedItems) {
     const bucket = picksBySlot[slotKey] || picksBySlot.lunch;
     bucket.push(toPlanItem(item));
   }
-  const hasPicks = PLAN_SLOT_KEYS.some((key) => picksBySlot[key].length > 0);
 
-  const weekUsedIds = hasPicks ? null : new Map(PLAN_SLOTS.map((s) => [s.key, new Set()]));
   const days = {};
-
   dayKeys.forEach((dateKey, dayIndex) => {
+    // Offsets are still computed from the candidate pools (never consulted
+    // for slot CONTENT here) because `shuffleSlot` — the one sanctioned
+    // escape hatch back to the pools, even on a picks-only plan — walks the
+    // pool from this cursor. See `slotOffsets`' doc.
     const offsets = slotOffsets(candidates, dayIndex);
-    const slots = hasPicks
-      ? fillFromPicks(picksBySlot, dayIndex)
-      : fillSlots(PLAN_SLOTS, candidates, offsets, { weekUsedIds });
+    let slots = fillFromPicks(picksBySlot, dayIndex);
+    if (isFirstEverBuild && dateKey === dayKeys[0]) {
+      slots = mergeLegacyQueue(slots);
+    }
 
     days[dateKey] = { generation: 0, offsets, slots, eaten: [], pinned: [] };
   });
@@ -496,7 +537,7 @@ export async function generatePlanFromPicks(profile, pickedItems) {
     usedFallback,
     generation: 0,
     days,
-    ...(hasPicks ? { picksBySlot } : {}),
+    picksBySlot,
   };
 
   setPlan(plan);

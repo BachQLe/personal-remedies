@@ -1,12 +1,12 @@
 /**
- * mealTypeMeta.jsx — shared meal-type tag foundation (b/l/d/s).
+ * mealTypeMeta.jsx — shared meal-type tag foundation (b/l/d/s/v).
  *
- * The four plan slots (`PLAN_SLOTS` in `src/api/config.js`) are Breakfast,
- * Lunch, Dinner, Snacks (the former Beverages slot was removed July 2026,
- * user-approved).
+ * The five plan slots (`PLAN_SLOTS` in `src/api/config.js`) are Breakfast,
+ * Lunch, Dinner, Snacks & Desserts, Beverages. Beverages was removed July
+ * 2026 and restored August 2026 (both user-approved).
  */
 
-import { Sunrise, Sandwich, UtensilsCrossed, Cookie } from 'lucide-react';
+import { Sunrise, Sandwich, UtensilsCrossed, Cookie, CupSoda } from 'lucide-react';
 import { inferSlotKey } from '../../api/planBuilder.js';
 import { PLAN_SLOT_KEYS } from '../../api/config.js';
 import { getOverlayFlags } from '../../api/localTables.js';
@@ -38,9 +38,15 @@ export const MEAL_TYPE_META = {
   },
   snacks: {
     letter: 'S',
-    label: 'Snack',
+    label: 'Snacks & Desserts',
     Icon: Cookie,
     toneClass: 'bg-yellow-100/95 text-yellow-800',
+  },
+  beverages: {
+    letter: 'V',
+    label: 'Beverages',
+    Icon: CupSoda,
+    toneClass: 'bg-lavender-100/95 text-lavender-800',
   },
 };
 

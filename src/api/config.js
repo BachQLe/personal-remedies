@@ -96,16 +96,22 @@ export const MEAL_SLOT_MAP = {
  *   appended (breakfast/snacks).
  * - `size` — number of items auto-filled into this slot per generation.
  *
- * The `beverages` slot was removed (July 2026, user-approved) — 4 slots
- * total now. Stale `beverages` keys may still exist in old localStorage
- * plans; nothing iterates a day's slots outside of mapping this array, so
- * they're simply never read/rendered.
+ * The `beverages` slot was removed July 2026 (user-approved) and restored
+ * August 2026 (user-approved) — 5 slots total again. Stale `beverages` keys
+ * from PRE-July-2026 localStorage plans were never deleted (nothing purged
+ * them while the slot was gone), so they simply become readable/renderable
+ * again now that this array maps a `beverages` key once more — no migration
+ * needed. Conversely, days built DURING the July–August gap (the 4-slot era)
+ * have no `beverages` key on `day.slots` at all — every read of
+ * `day.slots.beverages` must tolerate `undefined` via `?? []` rather than
+ * assume the key exists.
  */
 export const PLAN_SLOTS = [
   { key: 'breakfast', label: 'Breakfast', fineGroups: ['f', 'd', 'g1'], recipeMealType: 'breakfast', recipeLead: false, size: 3 },
   { key: 'lunch',     label: 'Lunch',     fineGroups: ['c2', 'e', 'b1'], recipeMealType: 'lunch',   recipeLead: true,  size: 3 },
   { key: 'dinner',    label: 'Dinner',    fineGroups: ['b3', 'b1', 'e'], recipeMealType: 'dinner',  recipeLead: true,  size: 3 },
-  { key: 'snacks',    label: 'Snacks',    fineGroups: ['h1', 'c3'],      recipeMealType: 'snack',   recipeLead: false, size: 2 },
+  { key: 'snacks',    label: 'Snacks & Desserts', fineGroups: ['h1', 'c3'], recipeMealType: 'snack',   recipeLead: false, size: 2 },
+  { key: 'beverages', label: 'Beverages', fineGroups: ['h2'],           recipeMealType: 'beverage', recipeLead: false, size: 1 },
 ];
 
 /** Slot keys in render order — `PLAN_SLOTS.map((s) => s.key)`. */

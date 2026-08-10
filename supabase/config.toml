@@ -385,6 +385,12 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+[functions.nutridigm-proxy]
+# Guest-first: profile/plan features work without a signed-in user (see
+# supabase/README.md), so this proxy must be callable without a Supabase
+# JWT. Do not flip to true unless every caller is authenticated.
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

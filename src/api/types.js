@@ -145,9 +145,68 @@
  *   collapses 4 and "no data" to the same null.
  * @property {string} [photo] - Image URL
  * @property {string} [sourceName] - Attribution, e.g. "Food Network · Giada De Laurentiis"
+ * @property {string} [sourceUrl] - Link to the original recipe (MedlinePlus,
+ *   etc.), from the C1 content overlay (src/data/recipeOverlay.json, joined
+ *   in via `joinRecipeOverlay` in src/api/recipeIngestion.js). Recipe
+ *   DIRECTIONS are never republished — this link-out plus `ingredients`
+ *   (facts) is the whole of what the app shows for a recipe's preparation.
+ * @property {string} [attribution] - Source attribution string from the C1
+ *   overlay, e.g. "MedlinePlus". Distinct from `sourceName`, which is parsed
+ *   from the live API's `notes` field independently of the overlay.
+ * @property {number} [servings] - Recipe yield, from the C1 overlay.
+ * @property {{calories:number, protein:number, carbs:number, fat:number}} [nutritionPerServing] -
+ *   Per-serving macros from the C1 overlay, transcribed from the original
+ *   recipe's FDA Nutrition Facts panel (REMEDI_MASTER_PLAN.md Phase 2.3) —
+ *   NOT computed or estimated by this app. Absent for recipes with no C1
+ *   overlay match.
  * @property {string} mealType - Breakfast/Lunch/Dinner/Snack (best-effort keyword guess for real recipes)
- * @property {Food[]} [ingredients] - Ingredient list as Foods
+ * @property {Food[]} [ingredients] - Real ingredient Food refs, hydrated
+ *   from the C1 overlay's `ingredientFoodItemIds` — never fabricated. A
+ *   recipe with no overlay match has no ingredients here, not guessed ones.
  * @property {string[]} [matchedConditions] - Display names of conditions this recipe helps
+ */
+
+/**
+ * @typedef {Object} RecipeOverlayRow
+ * One row of the C1 MedlinePlus recipe content overlay
+ * (src/data/recipeOverlay.json — see src/api/recipeIngestion.js). Pure
+ * editorial/content data: NEVER carries a numericId, tier, or any other
+ * safety-relevant field — those come exclusively from the live Nutridigm
+ * API (`descriptionNumericID` via /suggest). `joinRecipeOverlay` enriches an
+ * already-API-scored Recipe with these fields by matching `foodItemID`; it
+ * can only ever attach content to a recipe the API returned, never invent
+ * one (Track B item 2 / REMEDI_MASTER_PLAN.md).
+ *
+ * SCHEMA NOTE: deliberately has NO directions/instructions column, and must
+ * never gain one — recipe directions are the source's copyrighted
+ * expression. Ingredients (a list of facts) plus `sourceUrl` (link out) is
+ * the frozen shape (REMEDI_MASTER_PLAN.md, "Recipe directions text").
+ * @property {string} name - Editorial recipe title, as given by the source
+ * @property {string} sourceUrl - https:// link to the original recipe
+ * @property {string} attribution - e.g. "MedlinePlus"
+ * @property {'breakfast'|'lunch'|'dinner'|'snack'|'beverage'} mealType -
+ *   Editorial meal-type categorization (ground truth) — distinct from
+ *   `guessMealType`'s keyword heuristic in adapter.js, which is only a
+ *   fallback for recipes the overlay hasn't reached
+ * @property {Array<'breakfast'|'lunch'|'dinner'|'snack'|'beverage'>} [alsoFits] -
+ *   Additional meal types this recipe also fits (multi-category placement)
+ * @property {string[]} rawIngredients - Ingredient lines as written by the
+ *   source (facts, not the source's copyrighted expression — safe to
+ *   republish; directions are not)
+ * @property {number[]} ingredientFoodItemIds - `rawIngredients` mapped to
+ *   Nutridigm foodItemIDs
+ * @property {number} servings - Recipe yield
+ * @property {{calories:number, protein:number, carbs:number, fat:number}} nutritionPerServing -
+ *   Per-serving macros transcribed from the source's FDA Nutrition Facts
+ *   panel — never computed by this app
+ * @property {string[]} [dietaryTags] - e.g. "gluten-free", "vegetarian"
+ * @property {number} totalTimeMinutes - Total prep + cook time
+ * @property {'l'} fineFoodGroup - Always 'l' (recipes are Nutridigm food
+ *   items in fine group 'l')
+ * @property {number} [foodItemID] - Nutridigm foodItemID, assigned by
+ *   Mory/Nutridigm AFTER ingestion + scoring — ABSENT on early drafts. A row
+ *   with no `foodItemID` can never be joined to an API recipe (see
+ *   `joinRecipeOverlay`) and is inert until scored.
  */
 
 /**

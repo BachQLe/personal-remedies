@@ -1,0 +1,14 @@
+{
+  "_meta": {
+    "generatedAt": "2026-08-10T19:52:58.548Z",
+    "fdcDataVersion": "FDC API v1 (accessed 2026-08-10); USDA does not expose a single unified dataset version via the API — each matched item's fdcId links to its own FDC record for provenance.",
+    "fdcIdCount": 0,
+    "lastRun": {
+      "keyTier": "demo",
+      "fetchedThisRun": 0,
+      "stoppedEarly": true,
+      "stopReason": "429 rate limited by FDC API during search phase"
+    }
+  },
+  "nutrients": {}
+}

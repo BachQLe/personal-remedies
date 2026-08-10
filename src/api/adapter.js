@@ -1047,32 +1047,15 @@ function recipeToPlanCandidate(recipe) {
 }
 
 /**
- * Round-robin interleave multiple PlanCandidate lists (index 0 of each
- * list, then index 1, ...) and dedupe by id (first occurrence wins). Used
- * to fill a Plan slot from its several /suggest fine-group lists without
- * one group dominating the front of the slot.
- * @param {import('./types.js').PlanCandidate[][]} lists
- * @returns {import('./types.js').PlanCandidate[]}
+ * Which flag column on the merged item table (isSnack/isBeverage) each of
+ * these two slot keys WOULD draw its candidates from, via
+ * `flaggedPoolAcrossGroups`. Only `beverages` is actually wired to it below
+ * (restored Aug 2026 — zero recipes carry `mealType: 'beverage'` yet, so an
+ * items-only pool is the only way that slot isn't permanently empty);
+ * `snacks` stays recipes-only like breakfast/lunch/dinner, so `isSnack` is
+ * intentionally unused for now — kept here as the fast-follow hook if
+ * Snacks & Desserts ever needs the same items+recipes treatment.
  */
-function interleaveAndDedupe(lists) {
-  const result = [];
-  const seen = new Set();
-  const maxLen = Math.max(0, ...lists.map((list) => list.length));
-
-  for (let i = 0; i < maxLen; i++) {
-    for (const list of lists) {
-      const item = list[i];
-      if (item && !seen.has(item.id)) {
-        seen.add(item.id);
-        result.push(item);
-      }
-    }
-  }
-
-  return result;
-}
-
-/** Which flag column on the merged item table (isSnack/isBeverage) each of these two slot keys draws its candidates from. */
 const SLOT_FLAG_KEY = { snacks: 'isSnack', beverages: 'isBeverage' };
 
 /**
@@ -1091,7 +1074,8 @@ const SLOT_FLAG_KEY = { snacks: 'isSnack', beverages: 'isBeverage' };
  * scanned in `byGroup`'s fetch order with each group's list already
  * ascending by numericId (see `normalizePlanGroup`), so numericId ties keep
  * their original /suggest rank. Zero new API calls — every candidate here
- * was already fetched for one of the other 10 PLAN_SLOTS fine groups.
+ * was already fetched for one of the 10 unique PLAN_SLOTS fine groups
+ * (see `getMealPlanSuggestionsRaw`'s `uniqueGroups`).
  * Honesty: if nothing fetched is flagged, the pool is honestly empty — this
  * never backfills from unflagged items.
  * @param {Map<string, import('./types.js').PlanCandidate[]>} byGroup
@@ -1225,24 +1209,31 @@ async function getMealPlanSuggestionsRaw(conditionIds) {
 
   const itemsMap = await ensureFoodItems();
 
+  // Every slot's candidate pool is recipes-only EXCEPT `beverages`: zero
+  // recipes carry `mealType: 'beverage'` yet (`guessMealType`, above, never
+  // returns it — a fast-follow adds ~20 beverage recipes), so a
+  // recipes-only pool for that slot would be permanently empty. Beverages
+  // is therefore item-driven for now, via `flaggedPoolAcrossGroups`: it
+  // pulls every `isBeverage`-flagged item already fetched across ALL of
+  // this plan's /suggest pools (already numericId 1-4-filtered by
+  // `normalizePlanGroup`) — 'h2' (Beverages) is one of those pools because
+  // it's this slot's own `fineGroups` entry, feeding `uniqueGroups` above.
+  // Items lead (`slot.recipeLead: false`), with any (currently zero)
+  // beverage recipes appended after.
   /** @type {Record<string, import('./types.js').PlanCandidate[]>} */
   const candidates = {};
   for (const slot of PLAN_SLOTS) {
-    const flagKey = SLOT_FLAG_KEY[slot.key];
-    // NOTE: computed but intentionally unused for now — candidate pools are
-    // recipes-only (see below) to avoid mixing plain-food and recipe
-    // candidates in the same slot. Fetching machinery kept in place as a
-    // fast-follow cleanup is planned separately.
-    // eslint-disable-next-line no-unused-vars
-    const interleaved = flagKey
-      ? flaggedPoolAcrossGroups(byGroup, itemsMap, flagKey)
-      : interleaveAndDedupe(slot.fineGroups.map((g) => byGroup.get(g) || []));
-
     const slotRecipes = slot.recipeMealType
       ? recipes
           .filter((r) => r.mealType === slot.recipeMealType && TIER_TO_NUMERIC_ID[r.tier] != null)
           .map(recipeToPlanCandidate)
       : [];
+
+    if (slot.key === 'beverages') {
+      const beverageItems = flaggedPoolAcrossGroups(byGroup, itemsMap, SLOT_FLAG_KEY.beverages);
+      candidates[slot.key] = [...beverageItems, ...slotRecipes];
+      continue;
+    }
 
     candidates[slot.key] = slotRecipes;
   }
