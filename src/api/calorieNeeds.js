@@ -11,19 +11,29 @@
  * a running tally.
  *
  * @typedef {import('./types.js').Profile} Profile
+ *
+ * T3D UPDATE: internally now consults `resolveNutrition` (src/api/nutrition.js)
+ * instead of calling `estimateNutrition` directly, so a plan day's total
+ * automatically incorporates real per-serving data (recipe panel / USDA)
+ * once it exists, without any call-site or timing change here. With both the
+ * USDA tables and the C1 nutrition overlay empty (today), `resolveNutrition`
+ * falls through to the same `estimateNutrition` result on every item, so
+ * this swap is behavior-identical right now — see the equivalence test in
+ * src/api/__tests__/nutrition.test.js.
  */
 
-import { estimateNutrition } from '../data/nutritionEstimates.js';
+import { resolveNutrition } from './nutrition.js';
 
 // ── Plan-day calorie total ───────────────────────────────────────────────────
 
 /**
  * Sum estimated calories across a day's slot-based plan.
  *
- * Foods resolve through `estimateNutrition` (src/data/nutritionEstimates.js),
- * which keys off fine/coarse food group — the same estimate table already
- * used elsewhere in the app (NutritionFactsSheet, SchedulerView), so a food's
- * calorie contribution is consistent everywhere it's shown.
+ * Foods resolve through `resolveNutrition` (src/api/nutrition.js), which
+ * tries real per-serving data first (recipe panel, then USDA) before
+ * falling back to the same food-group estimate table used elsewhere in the
+ * app (NutritionFactsSheet), so a food's calorie contribution is consistent
+ * everywhere it's shown.
  *
  * Recipes ARE counted, via `nutritionEstimates.js`'s per-slot stand-in table
  * (`RECIPE_SLOT_ESTIMATES`). This reverses the original decision to leave them
@@ -61,13 +71,18 @@ export function estimatePlanDayCalories(slotsObject) {
     for (const item of items) {
       if (!item) continue;
 
-      const estimate = estimateNutrition(item, slotKey);
-      if (!estimate) {
+      const resolved = resolveNutrition(item, slotKey);
+      if (!resolved) {
         uncounted += 1;
         continue;
       }
 
-      total += estimate.calories;
+      // Same 0-contribution-not-fabrication handling as resolveDayTotals: a
+      // resolved item's OWN calories field is never invented, but a missing
+      // one (only possible from a per100g USDA hit lacking Energy — never
+      // happens via the estimate tier, which always has calories) doesn't
+      // block the rest of the day's items from contributing to the total.
+      total += resolved.calories ?? 0;
       counted += 1;
     }
   }

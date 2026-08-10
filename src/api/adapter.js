@@ -31,6 +31,7 @@ import {
 } from './nutridigm.js';
 import { cachedFetch, peekCache } from './cache.js';
 import { getItemTable, getConditionTable, getGroupTable, getOverlayImageFile } from './localTables.js';
+import { joinRecipeOverlay } from './recipeIngestion.js';
 
 // ── Cache TTLs ────────────────────────────────────────────────────────────────
 
@@ -949,6 +950,37 @@ export async function getRecipes(profile) {
 
 /**
  * Unwrapped getRecipes body.
+ *
+ * C1 overlay join (Track C / T3C): after building the API-sourced Recipe
+ * objects below, they're passed through `joinRecipeOverlay`
+ * (recipeIngestion.js) to attach editorial content — `sourceUrl`,
+ * `attribution`, `servings`, `nutritionPerServing`, `dietaryTags`,
+ * `totalTimeMinutes`, `alsoFits` — keyed by foodItemID. That join is a
+ * structural no-op (recipes pass through unchanged) whenever the overlay is
+ * empty (src/data/recipeOverlay.json ships as `[]` today) or has no row for
+ * a given foodItemID, so nothing here regresses ahead of Track C content
+ * landing.
+ *
+ * Two overlay fields get resolved into existing Recipe fields rather than
+ * exposed raw:
+ * - `mealType` precedence: the overlay's `overlayMealType` (editorial —
+ *   a human read the source and categorized it) wins over `guessMealType`'s
+ *   keyword heuristic when present, because it's the ONLY way a recipe can
+ *   ever land as 'beverage' — `guessMealType`/RECIPE_MEAL_TYPE_KEYWORDS
+ *   above never returns 'beverage', by design (see
+ *   adapter.beveragesPool.test.js). The keyword guess remains the fallback
+ *   for any recipe the overlay hasn't reached.
+ * - `ingredients`: built from the overlay's parallel `rawIngredients`
+ *   (strings) + `ingredientFoodItemIds` (numbers) arrays, zipped by index
+ *   into a light `{ name, foodItemID? }` shape — NOT the full `Food[]` the
+ *   Recipe typedef currently documents (types.js's `ingredients` doc is
+ *   stale as of this change; see T3C report to orchestrator for the
+ *   recommended typedef update). A fuller Food object would need
+ *   group/fineGroup/etc. we'd have to look up per ingredient id, which adds
+ *   real cost for fields nothing currently renders; the light shape is
+ *   enough for a rendered ingredient list + a future detail-lookup by id.
+ *   Absent entirely (not an empty array) when there's no overlay match —
+ *   never fabricated from the title or elsewhere.
  * @param {number[]} conditionIds
  * @returns {Promise<import('./types.js').Recipe[]>}
  */
@@ -962,7 +994,7 @@ async function getRecipesRaw(conditionIds) {
 
   const matchedConditions = await getConditionNames(conditionIds);
 
-  return raw.map((item) => {
+  const recipes = raw.map((item) => {
     const title = item.foodItemDisplayAs || item.foodDescription || item.description || 'Unknown recipe';
     return {
       id: item.foodItemID,
@@ -975,6 +1007,19 @@ async function getRecipesRaw(conditionIds) {
       photo: getIngredientImage(title, item.coarseFoodGroup, getOverlayImageFile(item.foodItemID)),
       mealType: guessMealType(title),
     };
+  });
+
+  return joinRecipeOverlay(recipes).map((recipe) => {
+    const { overlayMealType, rawIngredients, ingredientFoodItemIds, ...rest } = recipe;
+    const mealType = overlayMealType ?? recipe.mealType;
+
+    if (!rawIngredients) return { ...rest, mealType };
+
+    const ingredients = rawIngredients.map((name, i) => {
+      const foodItemID = ingredientFoodItemIds?.[i];
+      return foodItemID !== undefined ? { name, foodItemID } : { name };
+    });
+    return { ...rest, mealType, ingredients };
   });
 }
 
@@ -1029,6 +1074,14 @@ function normalizePlanGroup(raw, fineGroup) {
  * Plan slot. `group`/`fineGroup` are the recipe fine food group code
  * ('l') — real recipes ARE food items under that group, there's no separate
  * coarse code to read off the already-mapped Recipe shape.
+ *
+ * `sourceUrl`/`attribution` are threaded through unchanged (undefined when
+ * the recipe has no C1 overlay match) purely so the Plan screen's detail
+ * open can use them — this is additive to the PlanCandidate shape (not yet
+ * reflected in the PlanCandidate typedef in types.js; see T3C report to
+ * orchestrator) and never touches the safety fields below (`tier`/
+ * `numericId`), which stay derived from the API's `descriptionNumericID`
+ * only, exactly as before.
  * @param {import('./types.js').Recipe} recipe
  * @returns {import('./types.js').PlanCandidate}
  */
@@ -1043,6 +1096,8 @@ function recipeToPlanCandidate(recipe) {
     numericId: recipe.numericId ?? TIER_TO_NUMERIC_ID[recipe.tier] ?? null,
     kind: 'recipe',
     sourceName: recipe.sourceName,
+    sourceUrl: recipe.sourceUrl,
+    attribution: recipe.attribution,
   };
 }
 
@@ -1210,10 +1265,16 @@ async function getMealPlanSuggestionsRaw(conditionIds) {
   const itemsMap = await ensureFoodItems();
 
   // Every slot's candidate pool is recipes-only EXCEPT `beverages`: zero
-  // recipes carry `mealType: 'beverage'` yet (`guessMealType`, above, never
-  // returns it — a fast-follow adds ~20 beverage recipes), so a
-  // recipes-only pool for that slot would be permanently empty. Beverages
-  // is therefore item-driven for now, via `flaggedPoolAcrossGroups`: it
+  // recipes carry `mealType: 'beverage'` TODAY (`guessMealType`, above,
+  // never returns it — the only path to 'beverage' is the C1 overlay's
+  // editorial `overlayMealType` winning mealType precedence in
+  // `getRecipesRaw`, and the overlay ships empty until Track C content
+  // lands), so a recipes-only pool for that slot would be permanently
+  // empty in the meantime. Beverages is therefore item-driven for now
+  // (this stays correct even once beverage recipes exist: `slotRecipes`
+  // below already includes any recipe whose `mealType` resolves to
+  // 'beverage', appended after the item pool), via
+  // `flaggedPoolAcrossGroups`: it
   // pulls every `isBeverage`-flagged item already fetched across ALL of
   // this plan's /suggest pools (already numericId 1-4-filtered by
   // `normalizePlanGroup`) — 'h2' (Beverages) is one of those pools because

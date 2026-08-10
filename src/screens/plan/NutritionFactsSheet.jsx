@@ -1,10 +1,18 @@
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
-import { estimateDayTotals, estimateNutrition } from '../../data/nutritionEstimates.js';
+import { estimateDayTotals } from '../../data/nutritionEstimates.js';
+import { resolveNutrition } from '../../api/nutrition.js';
 
 /**
- * NutritionFactsSheet — rough per-day nutrition estimate for a Scheduler
- * day's items. Estimates are derived by food group, NOT measured values —
- * every figure here is labeled "Estimated" per the app's honesty rules.
+ * NutritionFactsSheet — per-day nutrition for a Scheduler day's items.
+ *
+ * The day TOTAL still comes from `estimateDayTotals` (unchanged) — it's
+ * always labeled "Estimated" up top, same as before. The PER-ITEM rows
+ * (Task T3D) resolve through `resolveNutrition` (src/api/nutrition.js)
+ * instead, so a real recipe-panel or USDA figure is labeled honestly: no
+ * tilde for real per-serving data, an explicit "per 100 g" note when USDA
+ * only had a 100 g figure (not a serving), and the existing "~N (estimated)"
+ * tilde treatment preserved for stand-in group estimates. An item with no
+ * data anywhere still renders "No estimate" — never a fabricated number.
  */
 export default function NutritionFactsSheet({ open, onClose, dayLabel, items }) {
   const list = items ?? [];
@@ -55,12 +63,18 @@ export default function NutritionFactsSheet({ open, onClose, dayLabel, items }) 
           </p>
           <div className="flex flex-col gap-2">
             {list.map((item) => {
-              const est = estimateNutrition(item, item.fromSlot);
+              const resolved = resolveNutrition(item, item.fromSlot);
               return (
                 <div key={item.id} className="flex items-center justify-between text-sm gap-3">
                   <span className="text-blue-950 truncate">{item.name}</span>
-                  {est ? (
-                    <span className="text-char-500 shrink-0">~{est.calories} kcal</span>
+                  {resolved ? (
+                    <span className="text-char-500 shrink-0">
+                      {resolved.estimated
+                        ? `~${resolved.calories} kcal`
+                        : resolved.basis === 'per100g'
+                          ? `${resolved.calories} kcal per 100 g`
+                          : `${resolved.calories} kcal`}
+                    </span>
                   ) : (
                     <span className="text-char-500/50 shrink-0">No estimate</span>
                   )}

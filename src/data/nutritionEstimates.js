@@ -4,9 +4,18 @@
  * The Nutridigm API has no nutrition data (no calories/macros on food or
  * recipe records) — this table is a deliberate, clearly-labeled stand-in so
  * the Plan screen can show *something* useful today. Every value here is a
- * hand-picked approximation, NOT vendor data. This is a seam: when a real
- * nutrition data source is wired in, this file (and the `estimated: true`
- * flag threaded through consumers) should be the first thing replaced/removed.
+ * hand-picked approximation, NOT vendor data.
+ *
+ * As of Task T3D, this file is no longer "replace me wholesale" — it's the
+ * ESTIMATE tier (the last one before giving up) of the layered resolver in
+ * src/api/nutrition.js (`resolveNutrition`/`resolveDayTotals`), which tries
+ * real per-serving recipe-panel data, then the committed USDA tables, and
+ * only falls through to these hand-picked numbers when neither has a hit.
+ * `estimateNutrition`/`estimateDayTotals` below are unchanged and still used
+ * directly by SchedulerView/CalorieGapSheet — this table still never
+ * fabricates a number without a group to hang it on, and remains fully
+ * replaceable (feed better estimates into these tables, or add a new tier
+ * ahead of it in nutrition.js) as real data sources come online.
  *
  * Lookup order (see `estimateNutrition`):
  *   1. fine food group table, keyed by `item.fineGroup`

@@ -252,3 +252,53 @@ curl -i "http://127.0.0.1:54321/functions/v1/nutridigm-proxy/foodgroups"
 If you set up CI for this repo later, add a step that runs `deno check`
 against every file in `supabase/functions/*/index.ts` — cheap, catches
 typos/type errors before they reach a live deploy.
+
+---
+
+## 8. Client configuration
+
+The client-side switch described prospectively in §5 above is now wired up
+(Task T3B): `src/api/config.js` reads `VITE_NUTRIDIGM_PROXY_URL`, and
+`src/api/nutridigm.js` builds its request URL from it when set. This is the
+one env var that flips the client between the two modes:
+
+| | `VITE_NUTRIDIGM_PROXY_URL` | `VITE_NUTRIDIGM_SUBSCRIPTION_ID` |
+|---|---|---|
+| **Proxy mode (production)** | set to the deployed function URL | not needed — remove from prod env |
+| **Direct mode (local dev)** | unset | set to your Nutridigm key |
+
+If both happen to be set, proxy mode wins — the client never sends a
+`subscriptionID` once a proxy URL is present.
+
+**To point the app at the deployed function:**
+
+1. Set, in your production hosting env (Vercel/Netlify/etc. project
+   settings — **not** a committed `.env` file):
+   ```
+   VITE_NUTRIDIGM_PROXY_URL=https://<project-ref>.supabase.co/functions/v1/nutridigm-proxy
+   ```
+   (No trailing slash needed — the client trims one if present.)
+2. Redeploy the client so the new env var is baked into the build.
+3. Confirm requests are going through the proxy — open the deployed app,
+   check the Network tab for calls to `.../nutridigm-proxy/<endpoint>`
+   instead of the AWS host, and confirm none of them carry a
+   `subscriptionID` query param.
+
+**Remove from production env once confirmed:**
+
+- `VITE_NUTRIDIGM_SUBSCRIPTION_ID` — leaving it set is harmless (unused once
+  `VITE_NUTRIDIGM_PROXY_URL` is present) but defeats the purpose of this
+  whole change if the real key is still baked into the prod bundle. Delete
+  it from the production hosting env, not from `.env.example`.
+
+**Local dev keeps direct mode** — leave `VITE_NUTRIDIGM_PROXY_URL` unset in
+`.env.local` and keep using `VITE_NUTRIDIGM_SUBSCRIPTION_ID` there, so you
+don't need a running Supabase function (local or deployed) just to develop.
+`.env.example` documents both variables; only fill in the one your current
+mode needs.
+
+**Key rotation post-cutover** is a secret update only, per Phase 3.2 — no
+client release:
+```sh
+supabase secrets set NUTRIDIGM_SUBSCRIPTION_ID=<new-value>
+```

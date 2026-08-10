@@ -4,6 +4,12 @@
  * This is the ONLY file that makes network calls to Nutridigm.
  * It returns raw JSON (untyped) — the adapter layer normalizes shapes.
  *
+ * Runs in one of two modes (see config.js for the full picture) — proxy
+ * mode when `NUTRIDIGM_PROXY_URL` is set (production; no subscriptionID
+ * leaves the client), direct mode otherwise (local dev; subscriptionID sent
+ * straight to AWS). Status-code handling below is identical either way —
+ * the proxy passes upstream statuses through verbatim.
+ *
  * Status codes:
  *   200 = success
  *   220 = ok-but-empty (treat as empty array/object, NOT an error)
@@ -11,7 +17,12 @@
  *   401 = NOTAUTHORIZEDHEALTHID or APIDAILYLIMITREACHED
  */
 
-import { NUTRIDIGM_BASE_URL, NUTRIDIGM_SUBSCRIPTION_ID, IS_CONFIGURED } from './config.js';
+import {
+  NUTRIDIGM_BASE_URL,
+  NUTRIDIGM_SUBSCRIPTION_ID,
+  NUTRIDIGM_PROXY_URL,
+  IS_CONFIGURED,
+} from './config.js';
 
 /**
  * Custom error for Nutridigm API failures that should trigger fallback.
@@ -112,22 +123,35 @@ const _inFlight = new Map();
 
 /**
  * Make a GET request to the Nutridigm API.
+ *
+ * Two URL shapes, chosen by which config is present (see config.js):
+ *   - Proxy mode (`NUTRIDIGM_PROXY_URL` set — wins if both are set):
+ *     `<NUTRIDIGM_PROXY_URL>/<endpoint>?<params>` — no `subscriptionID` is
+ *     sent; the deployed Supabase function injects its own from a secret.
+ *   - Direct mode (proxy unset): `<NUTRIDIGM_BASE_URL>/<endpoint>?<params>` +
+ *     `subscriptionID` query param, unchanged from pre-proxy behavior.
  * @param {string} endpoint - Endpoint path (e.g. '/goodfor')
  * @param {Record<string, string>} params - Query parameters (excluding subscriptionID)
  * @returns {Promise<any>} Parsed JSON response
- * @throws {NutridigmConfigError} When VITE_NUTRIDIGM_SUBSCRIPTION_ID is unset
+ * @throws {NutridigmConfigError} When neither VITE_NUTRIDIGM_PROXY_URL nor
+ *   VITE_NUTRIDIGM_SUBSCRIPTION_ID is set
  * @throws {NutridigmAuthError} On 401 responses
  */
 async function request(endpoint, params = {}) {
   if (!IS_CONFIGURED) {
     throw new NutridigmConfigError(
-      `[nutridigm] Cannot call /${endpoint}: VITE_NUTRIDIGM_SUBSCRIPTION_ID is not set. ` +
-      'See .env.example.'
+      `[nutridigm] Cannot call /${endpoint}: neither VITE_NUTRIDIGM_PROXY_URL ` +
+      'nor VITE_NUTRIDIGM_SUBSCRIPTION_ID is set. See .env.example.'
     );
   }
 
-  const url = new URL(`${NUTRIDIGM_BASE_URL}/${endpoint}`);
-  url.searchParams.set('subscriptionID', NUTRIDIGM_SUBSCRIPTION_ID);
+  const url = NUTRIDIGM_PROXY_URL
+    ? new URL(`${NUTRIDIGM_PROXY_URL}/${endpoint}`)
+    : new URL(`${NUTRIDIGM_BASE_URL}/${endpoint}`);
+
+  if (!NUTRIDIGM_PROXY_URL) {
+    url.searchParams.set('subscriptionID', NUTRIDIGM_SUBSCRIPTION_ID);
+  }
 
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null && value !== '') {

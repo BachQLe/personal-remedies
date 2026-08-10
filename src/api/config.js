@@ -1,9 +1,26 @@
 /**
  * config.js — environment configuration for the Nutridigm API layer.
+ *
+ * Two ways to reach Nutridigm, chosen by which env vars are set:
+ *
+ *   - **Proxy mode** (production) — `VITE_NUTRIDIGM_PROXY_URL` points at the
+ *     deployed Supabase Edge Function (`supabase/functions/nutridigm-proxy`,
+ *     REMEDI_MASTER_PLAN.md §3.1/§3.2). The subscription key lives server-side
+ *     as a Supabase secret and is never shipped in the client bundle; the
+ *     proxy injects it and strips any client-supplied `subscriptionID`. Key
+ *     rotation from here on is just `supabase secrets set
+ *     NUTRIDIGM_SUBSCRIPTION_ID=<new-value>` — no client release. See
+ *     docs/deploy-supabase.md "Client configuration" for setup.
+ *   - **Direct mode** (local dev) — `VITE_NUTRIDIGM_SUBSCRIPTION_ID` is sent
+ *     straight to `VITE_NUTRIDIGM_BASE_URL` (AWS) as a `subscriptionID` query
+ *     param, same as before the proxy existed. Convenient for local dev
+ *     without standing up a Supabase function; not meant for production.
+ *
+ * When both are set, proxy mode wins (see `nutridigm.js`'s `request()`).
  */
 
 /**
- * Nutridigm API base URL.
+ * Nutridigm API base URL — used only in direct mode.
  * Reads from VITE_NUTRIDIGM_BASE_URL or falls back to the default endpoint.
  */
 export const NUTRIDIGM_BASE_URL =
@@ -11,23 +28,37 @@ export const NUTRIDIGM_BASE_URL =
   'https://5jocnrfkfb.execute-api.us-east-1.amazonaws.com/PersonalRemedies/nutridigm/api/v2';
 
 /**
- * Nutridigm subscription ID — NEVER hardcoded in source.
+ * Nutridigm subscription ID — NEVER hardcoded in source. Used only in direct
+ * mode (ignored once `NUTRIDIGM_PROXY_URL` is set).
  * Must be set in .env / .env.local as VITE_NUTRIDIGM_SUBSCRIPTION_ID.
  */
 export const NUTRIDIGM_SUBSCRIPTION_ID =
   import.meta.env.VITE_NUTRIDIGM_SUBSCRIPTION_ID || '';
 
 /**
- * True when the Nutridigm subscription ID has been configured.
+ * Deployed Nutridigm proxy URL (Supabase Edge Function) — production mode.
+ * Reads from VITE_NUTRIDIGM_PROXY_URL. Trailing slash trimmed so
+ * `nutridigm.js` can join `${NUTRIDIGM_PROXY_URL}/${endpoint}` without a
+ * double slash regardless of how the env var was entered. Empty string when
+ * unset, which is how `nutridigm.js` detects direct mode.
+ */
+export const NUTRIDIGM_PROXY_URL =
+  (import.meta.env.VITE_NUTRIDIGM_PROXY_URL || '').replace(/\/+$/, '');
+
+/**
+ * True when the Nutridigm client has enough configuration to make a request
+ * — either a proxy URL (production) or a subscription key (direct/dev mode).
  * When false, nutridigm.js fails fast with NutridigmConfigError instead of
  * making a doomed request that would 401.
  */
-export const IS_CONFIGURED = NUTRIDIGM_SUBSCRIPTION_ID !== '';
+export const IS_CONFIGURED = NUTRIDIGM_PROXY_URL !== '' || NUTRIDIGM_SUBSCRIPTION_ID !== '';
 
 if (!IS_CONFIGURED) {
   console.error(
-    '[config] VITE_NUTRIDIGM_SUBSCRIPTION_ID is not set. ' +
-    'Copy .env.example to .env.local and fill in your Nutridigm subscription ID.'
+    '[config] Neither VITE_NUTRIDIGM_PROXY_URL nor VITE_NUTRIDIGM_SUBSCRIPTION_ID ' +
+    'is set. Copy .env.example to .env.local and fill in one of them ' +
+    '(proxy URL for pointing at a deployed function, or a subscription ID ' +
+    'for direct dev access).'
   );
 }
 

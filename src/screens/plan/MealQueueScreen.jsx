@@ -8,6 +8,7 @@ import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import Snackbar from '../../components/shared/Snackbar.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
+import EmptyState from '../../components/shared/EmptyState.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import MealTypeTag, { mealTypeForItem } from '../../components/shared/mealTypeMeta.jsx';
 import SlotSection from './SlotSection.jsx';
@@ -25,6 +26,7 @@ import {
   shuffleSlot,
   inferSlotKey,
   buildRecipeDetail,
+  generatePlanFromPicks,
 } from '../../api/api.js';
 import { estimatePlanDayCalories } from '../../api/calorieNeeds.js';
 import { PLAN_SLOTS, DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
@@ -75,6 +77,62 @@ function cardImage(item) {
 function cardSubtitle(item) {
   if (!item.tier) return undefined;
   return item.referenceTotal ? `${item.tier} · ${item.referenceTotal} studies` : item.tier;
+}
+
+// ── "Build from saved recipes" (1.4) ────────────────────────────────────────
+//
+// A saved-library item comes from `recipeToSaveItem` (src/utils/saveGate.js)
+// — id/name/image/kind:'recipe'/tier/numericId only, with `group`/
+// `fineGroup` always null and no `mealType` at all. Without SOME per-item
+// slot signal, every saved recipe falls through `mealTypeForItem`'s
+// `inferSlotKey` default and lands in Lunch alone. Title-keyword matching
+// only (never invents tier/nutrition data) — same spirit as adapter.js's
+// private `guessMealType`, duplicated in miniature here since that helper
+// isn't exported from core and this track doesn't touch adapter.js.
+const SAVED_RECIPE_SLOT_KEYWORDS = [
+  ['smoothie', 'breakfast'], ['oatmeal', 'breakfast'], ['pancake', 'breakfast'],
+  ['omelet', 'breakfast'], ['granola', 'breakfast'], ['parfait', 'breakfast'], ['waffle', 'breakfast'],
+  ['tea', 'beverages'], ['juice', 'beverages'], ['latte', 'beverages'], ['lemonade', 'beverages'],
+  ['cookie', 'snacks'], ['cake', 'snacks'], ['snack bar', 'snacks'], ['pie', 'snacks'],
+  ['brownie', 'snacks'], ['muffin', 'snacks'], ['pudding', 'snacks'], ['tart', 'snacks'],
+  ['cheesecake', 'snacks'], ['ice cream', 'snacks'], ['dip', 'snacks'],
+  ['soup', 'dinner'], ['stew', 'dinner'], ['chili', 'dinner'], ['roast', 'dinner'],
+  ['salad', 'lunch'], ['sandwich', 'lunch'], ['wrap', 'lunch'],
+];
+
+/**
+ * Best-effort slot guess for a saved recipe, by title keyword. Falls back to
+ * 'dinner' (matching adapter.js's own guessMealType fallback) when nothing
+ * matches.
+ * @param {string} name
+ * @returns {string} one of PLAN_SLOT_KEYS
+ */
+function guessSlotForSavedRecipe(name) {
+  const lower = (name || '').toLowerCase();
+  for (const [keyword, slotKey] of SAVED_RECIPE_SLOT_KEYWORDS) {
+    if (lower.includes(keyword)) return slotKey;
+  }
+  return 'dinner';
+}
+
+/**
+ * Map `getLibrary()` items into `generatePlanFromPicks`-ready picks, tagged
+ * with a guessed `fromSlot` (mealTypeForItem prefers `fromSlot` over
+ * re-inferring — see mealTypeMeta.jsx). Excludes anything
+ * `getSaveBlockReason` would now block (ingredient/harmful/unscored) — the
+ * save gate should already keep those out of the library, but this stays
+ * defensive against rows saved before the gate existed. The numericId 5-7
+ * check is redundant with `getSaveBlockReason`'s 'harmful' case but kept
+ * explicit as a second, independent guard against ever planning a
+ * skull-rated recipe.
+ * @param {import('../../api/types.js').Food[]} library
+ * @returns {Array<Object>}
+ */
+function libraryItemsToPicks(library) {
+  return library
+    .filter((item) => getSaveBlockReason(item) === null)
+    .filter((item) => !(Number.isFinite(item.numericId) && item.numericId >= 5 && item.numericId <= 7))
+    .map((item) => ({ ...item, fromSlot: guessSlotForSavedRecipe(item.name) }));
 }
 
 /**
@@ -180,6 +238,7 @@ export default function MealQueueScreen() {
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [factsTarget, setFactsTarget] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [buildingFromSaved, setBuildingFromSaved] = useState(false);
   const [snackbar, setSnackbar] = useState(null);
   const snackbarRef = useRef(null);
   const snackbarIdRef = useRef(0);
@@ -274,6 +333,14 @@ export default function MealQueueScreen() {
   const dayPinned = dayState?.pinned ?? [];
   const dailyNeed = profile?.calorieTarget ?? 2000;
 
+  // First-run empty state (1.3): `ensurePlanForWeek` returns `{ plan: null }`
+  // immediately on a first-ever run — no network, no auto-fill (see
+  // planBuilder.js's no-plan contract). Once the profile-load effect settles
+  // (`building` false) with still no plan, the user has genuinely never run
+  // the picker or built from saved recipes — render the Day-view empty state
+  // below instead of 5 honest-empty slots.
+  const firstRunEmpty = !building && !plan;
+
   // Plan: shuffle one slot on the selected day
   const handleShuffle = useCallback(async (slotKey) => {
     if (shufflingSlot) return;
@@ -342,8 +409,33 @@ export default function MealQueueScreen() {
     showSnackbar('Meal plan created');
   }, [showSnackbar]);
 
-  // Cookbook: add to the selected day's plan (bucketed by inferSlotKey)
+  // First-run empty state (1.3/1.4): build straight from the saved-recipes
+  // library, skipping the picker entirely. Shares `handlePlanGenerated`'s
+  // landing behavior with the picker's own confirm flow.
+  const handleBuildFromSaved = useCallback(async () => {
+    if (buildingFromSaved) return;
+    setBuildingFromSaved(true);
+    try {
+      await generatePlanFromPicks(profileRef.current, libraryItemsToPicks(library));
+      handlePlanGenerated();
+    } catch (err) {
+      console.error('MealQueueScreen: build from saved recipes failed', err);
+      showSnackbar('Could not build a plan — try again');
+    } finally {
+      setBuildingFromSaved(false);
+    }
+  }, [buildingFromSaved, library, handlePlanGenerated, showSnackbar]);
+
+  // Cookbook: add to the selected day's plan (bucketed by inferSlotKey).
+  // No-ops honestly (rather than lying "Already in plan") when there's no
+  // plan yet at all — `addToSlot` itself no-ops with no day to add into,
+  // reachable here since the Cookbook tab stays browsable during the
+  // first-run empty state (see `firstRunEmpty`, below).
   const handleAddToPlan = useCallback((item) => {
+    if (!plan) {
+      showSnackbar('Build a meal plan first');
+      return;
+    }
     const slotKey = inferSlotKey(item);
     const added = addToSlot(activeDay, slotKey, {
       id: item.id,
@@ -357,7 +449,7 @@ export default function MealQueueScreen() {
     });
     const slotLabel = PLAN_SLOTS.find((s) => s.key === slotKey)?.label ?? slotKey;
     showSnackbar(added ? `Added to ${slotLabel}` : 'Already in plan');
-  }, [showSnackbar, activeDay]);
+  }, [showSnackbar, activeDay, plan]);
 
   // Select: open FoodDetailCard, seeding recipes via buildRecipeDetail
   // exactly like SuggestionsScreen's BestRecipesTab.
@@ -397,7 +489,7 @@ export default function MealQueueScreen() {
           <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} />
         </div>
 
-        {view === 'queue' && (
+        {view === 'queue' && !firstRunEmpty && (
           <div className="mt-4 -mb-2">
             <DayStrip days={days} selected={activeDay} onSelect={handleSelectDay} />
           </div>
@@ -407,72 +499,117 @@ export default function MealQueueScreen() {
       {/* ── Glass panel ──────────────────────────────────────────────────── */}
       <GlassPanel className="mt-4">
         {view === 'queue' ? (
-          <div className="flex flex-col gap-4">
-            <div className="flex items-start justify-between gap-3">
-              <CalorieLine
-                slots={daySlots}
-                need={dailyNeed}
-              />
-              <button
-                onClick={handleRegenerateDay}
-                disabled={showGhost || regeneratingDay}
-                className={`shrink-0 inline-flex items-center gap-1.5 rounded-pill bg-white/40 hover:bg-white/60
-                  px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
-                  ${showGhost || regeneratingDay ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
-              >
-                <RotateCw size={13} className={regeneratingDay ? 'animate-spin' : ''} />
-                Regenerate day
-              </button>
-            </div>
+          firstRunEmpty ? (
+            <EmptyState
+              icon="calendar"
+              title="No meal plan yet"
+              body="Pick recipes you like and we'll build your week around them — nothing gets added automatically."
+              action={
+                <div className="flex flex-col items-center gap-3">
+                  <button
+                    onClick={() => setPickerOpen(true)}
+                    className="inline-flex items-center gap-1.5 rounded-pill bg-blue-950 text-white
+                      text-sm font-semibold font-sans px-5 py-2.5
+                      hover:bg-blue-900 active:scale-[0.99] transition-all duration-fast"
+                  >
+                    <CalendarPlus size={16} />
+                    Build your meal plan
+                  </button>
 
-            <AnimatePresence mode="popLayout" custom={pagerDirection} initial={false}>
-              <motion.div
-                key={activeDay}
-                custom={pagerDirection}
-                variants={daySlideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={calmSpring}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.12}
-                onDragEnd={(_e, info) => handleSwipeDay(info.offset.x)}
-                className="flex flex-col gap-8"
-              >
-                {PLAN_SLOTS.map((slot) => (
-                  <SlotSection
-                    key={slot.key}
-                    slot={slot}
-                    items={daySlots[slot.key] ?? []}
-                    pinnedIds={dayPinned}
-                    conditionNames={conditionNames}
-                    onShuffle={handleShuffle}
-                    onSelect={handleSelect}
-                    onRemove={handleRemove}
-                    onTogglePin={handleTogglePin}
-                    ghost={showGhost}
-                    shuffling={shufflingSlot === slot.key}
-                    onSaveBlocked={showSnackbar}
-                  />
-                ))}
-              </motion.div>
-            </AnimatePresence>
+                  {library.length > 0 ? (
+                    <button
+                      onClick={handleBuildFromSaved}
+                      disabled={buildingFromSaved}
+                      className="text-sm font-semibold font-sans text-blue-950/70 hover:text-blue-950
+                        transition-colors duration-fast disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                      {buildingFromSaved ? 'Building…' : 'Build from saved recipes'}
+                    </button>
+                  ) : (
+                    <div className="flex flex-col items-center gap-1.5">
+                      <p className="text-xs text-char-500 font-sans max-w-[260px] text-center leading-snug">
+                        Save recipes you like, then build a plan from them.
+                      </p>
+                      <button
+                        onClick={() => navigate('/app/recipes')}
+                        className="text-sm font-semibold font-sans text-blue-950/70 hover:text-blue-950
+                          transition-colors duration-fast"
+                      >
+                        Browse recipes
+                      </button>
+                    </div>
+                  )}
+                </div>
+              }
+            />
+          ) : (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <CalorieLine
+                  slots={daySlots}
+                  need={dailyNeed}
+                />
+                <button
+                  onClick={handleRegenerateDay}
+                  disabled={showGhost || regeneratingDay}
+                  className={`shrink-0 inline-flex items-center gap-1.5 rounded-pill bg-white/40 hover:bg-white/60
+                    px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
+                    ${showGhost || regeneratingDay ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
+                >
+                  <RotateCw size={13} className={regeneratingDay ? 'animate-spin' : ''} />
+                  Regenerate day
+                </button>
+              </div>
 
-            {/* Week-level regenerate — discoverable but not dominant */}
-            <div className="flex justify-center pt-2">
-              <button
-                onClick={handleRegenerateWeek}
-                disabled={showGhost || regeneratingWeek}
-                className={`inline-flex items-center gap-1.5 text-xs font-semibold font-sans
-                  text-blue-950/50 hover:text-blue-950/70 transition-colors duration-fast
-                  ${showGhost || regeneratingWeek ? 'opacity-40 pointer-events-none' : ''}`}
-              >
-                <RefreshCw size={12} className={regeneratingWeek ? 'animate-spin' : ''} />
-                Regenerate whole week
-              </button>
+              <AnimatePresence mode="popLayout" custom={pagerDirection} initial={false}>
+                <motion.div
+                  key={activeDay}
+                  custom={pagerDirection}
+                  variants={daySlideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={calmSpring}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.12}
+                  onDragEnd={(_e, info) => handleSwipeDay(info.offset.x)}
+                  className="flex flex-col gap-8"
+                >
+                  {PLAN_SLOTS.map((slot) => (
+                    <SlotSection
+                      key={slot.key}
+                      slot={slot}
+                      items={daySlots[slot.key] ?? []}
+                      pinnedIds={dayPinned}
+                      conditionNames={conditionNames}
+                      onShuffle={handleShuffle}
+                      onSelect={handleSelect}
+                      onRemove={handleRemove}
+                      onTogglePin={handleTogglePin}
+                      ghost={showGhost}
+                      shuffling={shufflingSlot === slot.key}
+                      onSaveBlocked={showSnackbar}
+                    />
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Week-level regenerate — discoverable but not dominant */}
+              <div className="flex justify-center pt-2">
+                <button
+                  onClick={handleRegenerateWeek}
+                  disabled={showGhost || regeneratingWeek}
+                  className={`inline-flex items-center gap-1.5 text-xs font-semibold font-sans
+                    text-blue-950/50 hover:text-blue-950/70 transition-colors duration-fast
+                    ${showGhost || regeneratingWeek ? 'opacity-40 pointer-events-none' : ''}`}
+                >
+                  <RefreshCw size={12} className={regeneratingWeek ? 'animate-spin' : ''} />
+                  Regenerate whole week
+                </button>
+              </div>
             </div>
-          </div>
+          )
         ) : view === 'scheduler' ? (
           <SchedulerView
             planDays={displayPlan?.days ?? {}}

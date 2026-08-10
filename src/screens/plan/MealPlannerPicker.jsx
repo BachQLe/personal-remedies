@@ -7,8 +7,10 @@
  * recipes" (the user's library, grouped by meal type). Both render through
  * the shared `BestRecipesRails` with `showAdd` so cards carry a selectable
  * "+"/check toggle. Picks are handed to `generatePlanFromPicks`, which builds
- * a fresh 7-day plan seeded from them (or a fully auto week if nothing was
- * picked) — see planBuilder.js.
+ * a fresh 7-day plan seeded from them alone (picks-only default, Aug 2026,
+ * decision b — an empty pick list now yields an honestly empty week rather
+ * than pool-filling), so the confirm CTA below is disabled at zero picks —
+ * see planBuilder.js.
  */
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -395,10 +397,17 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
           <div className="absolute inset-x-4 bottom-6 z-20 max-w-[400px] mx-auto safe-area-bottom
             flex items-center justify-between gap-3 px-4 py-3 rounded-pill
             bg-blue-950 text-white shadow-lg">
-            <span className="font-sans text-sm font-medium">{selected.size} selected</span>
+            <span className="font-sans text-sm font-medium">
+              {/* generatePlanFromPicks no longer pool-fills on zero picks (Aug
+                  2026, decision b) — an empty pick list now yields an
+                  honestly empty week, so the CTA is disabled instead of
+                  quietly handing back nothing. This line doubles as that
+                  explanation. */}
+              {selected.size === 0 ? 'Pick at least 1 to continue' : `${selected.size} selected`}
+            </span>
             <button
               onClick={handleCreatePlan}
-              disabled={generating}
+              disabled={generating || selected.size === 0}
               className="inline-flex items-center gap-1.5 rounded-pill bg-white text-blue-950
                 text-sm font-semibold font-sans px-4 py-2
                 hover:bg-sand-50 active:scale-[0.99] transition-all duration-fast
