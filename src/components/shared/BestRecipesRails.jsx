@@ -11,11 +11,11 @@
  * yet" line under its header — never a fabricated/placeholder card.
  */
 
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, ChevronRight } from 'lucide-react';
 import FoodImageCard from './FoodImageCard.jsx';
-import MealTypeTag from './mealTypeMeta.jsx';
+import SaveButton from './SaveButton.jsx';
+import MealTypeTag, { displayTagForItem } from './mealTypeMeta.jsx';
 import { PLAN_SLOTS } from '../../api/config.js';
-import { numericIdToStars } from '../../api/adapter.js';
 
 /**
  * @param {Object} props
@@ -30,6 +30,16 @@ import { numericIdToStars } from '../../api/adapter.js';
  * @param {boolean} [props.showAdd] - render the selectable "+"/check toggle.
  * @param {string} [props.edgeFadeClass] - bg class for the edge-fade bars,
  *   matching the surface this rail sits on (default cream `bg-paper-100`).
+ * @param {boolean} [props.showScrollbar] - render a visible scrollbar beneath
+ *   each rail (see `.rail-scrollbar` in index.css). Off by default — the rails
+ *   read as touch-swipe carousels on mobile — but on a pointer device that bar
+ *   is the only obvious way to get through a 12-card pool.
+ * @param {(slotKey: string) => void} [props.onSeeMore] - shows a "See more"
+ *   link in a slot's header (only when its pool is non-empty) that opens a
+ *   full browse view for that slot.
+ * @param {(message: string) => void} [props.onSaveBlocked] - forwarded to
+ *   every card's `SaveButton`; the consuming screen routes this into its own
+ *   snackbar.
  */
 export default function BestRecipesRails({
   candidatesBySlot,
@@ -38,6 +48,9 @@ export default function BestRecipesRails({
   onToggleSelect,
   showAdd = false,
   edgeFadeClass = 'bg-paper-100',
+  showScrollbar = false,
+  onSeeMore,
+  onSaveBlocked,
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -46,9 +59,21 @@ export default function BestRecipesRails({
 
         return (
           <section key={slot.key}>
-            <div className="flex items-center gap-2 mb-3">
-              <MealTypeTag mealKey={slot.key} />
-              <p className="font-display text-sm font-semibold text-char-900">{slot.label}</p>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <MealTypeTag mealKey={slot.key} />
+                <p className="font-display text-sm font-semibold text-char-900">{slot.label}</p>
+              </div>
+              {onSeeMore && pool.length > 0 && (
+                <button
+                  onClick={() => onSeeMore(slot.key)}
+                  className="inline-flex items-center gap-0.5 text-xs font-semibold font-sans
+                    text-blue-950/70 hover:text-blue-950 transition-colors duration-fast"
+                >
+                  See more
+                  <ChevronRight size={14} />
+                </button>
+              )}
             </div>
 
             {pool.length === 0 ? (
@@ -56,8 +81,14 @@ export default function BestRecipesRails({
             ) : (
               <div className="relative">
                 <div
-                  className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1
-                    [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                  className={`flex gap-3 overflow-x-auto snap-x ${
+                    showScrollbar
+                      // `snap-proximity`, not `-mandatory`: mandatory snapping
+                      // re-snaps on every frame of a scrollbar-thumb drag,
+                      // which reads as the bar fighting the pointer.
+                      ? 'snap-proximity pb-3 rail-scrollbar'
+                      : 'snap-mandatory pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
+                  }`}
                 >
                   {pool.map((item) => {
                     const isSelected = showAdd && selectedIds?.has(item.id);
@@ -66,13 +97,14 @@ export default function BestRecipesRails({
                       <div key={item.id} className="snap-start shrink-0 w-[150px]" style={{ aspectRatio: '4/5' }}>
                         <FoodImageCard
                           id={item.id}
-                          mealTag={slot.key}
+                          mealTag={displayTagForItem(item, slot.key)}
                           image={item.image}
                           title={item.name}
                           subtitle={item.sourceName || item.tier || undefined}
-                          stars={numericIdToStars(item.numericId)}
+                          numericId={item.numericId}
                           onClick={() => onSelectCard?.(item)}
                           className="w-full h-full"
+                          saveAction={() => <SaveButton item={item} onBlocked={onSaveBlocked} />}
                           action={
                             showAdd
                               ? () => (
@@ -105,13 +137,16 @@ export default function BestRecipesRails({
 
                 {/* Edge fade — fading vertical bars matching the parent bg
                     (project convention, see DESIGN_SYSTEM.md — never a CSS
-                    gradient). */}
-                <div className="absolute inset-y-0 left-0 flex gap-[2px] items-stretch pointer-events-none z-10 -translate-x-[4px]">
+                    gradient). Stops short of the bottom when a scrollbar is
+                    shown, so the bars don't paint over its two ends. */}
+                <div className={`absolute top-0 ${showScrollbar ? 'bottom-3' : 'bottom-0'} left-0
+                  flex gap-[2px] items-stretch pointer-events-none z-10 -translate-x-[4px]`}>
                   {[0.6, 0.38, 0.2, 0.09, 0.03].map((op, i) => (
                     <div key={i} className={`w-[8px] ${edgeFadeClass}`} style={{ opacity: op }} />
                   ))}
                 </div>
-                <div className="absolute inset-y-0 right-0 flex flex-row-reverse gap-[2px] items-stretch pointer-events-none z-10 translate-x-[4px]">
+                <div className={`absolute top-0 ${showScrollbar ? 'bottom-3' : 'bottom-0'} right-0
+                  flex flex-row-reverse gap-[2px] items-stretch pointer-events-none z-10 translate-x-[4px]`}>
                   {[0.6, 0.38, 0.2, 0.09, 0.03].map((op, i) => (
                     <div key={i} className={`w-[8px] ${edgeFadeClass}`} style={{ opacity: op }} />
                   ))}

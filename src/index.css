@@ -47,6 +47,34 @@
   display: none;
 }
 
+/**
+ * .rail-scrollbar — opts a horizontal rail BACK IN to a visible scrollbar,
+ * overriding the global `*::-webkit-scrollbar { display: none }` above. Used
+ * on desktop, where there's no touch swipe, so an overflowing rail has a
+ * grabbable affordance instead of looking like a truncated row.
+ */
+.rail-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(23, 37, 84, 0.3) rgba(255, 255, 255, 0.35);
+  -ms-overflow-style: auto;
+}
+.rail-scrollbar::-webkit-scrollbar {
+  display: block;
+  height: 8px;
+  width: 8px;
+}
+.rail-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+}
+.rail-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(23, 37, 84, 0.3);
+  border-radius: 999px;
+}
+.rail-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(23, 37, 84, 0.5);
+}
+
 @keyframes plan-blur-in {
   from { filter: blur(6px); opacity: 0; }
   to   { filter: blur(0);   opacity: 1; }

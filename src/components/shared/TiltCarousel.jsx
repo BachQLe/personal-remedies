@@ -35,7 +35,6 @@ const MAX_TILT = 20;   // peak lean, degrees
 const TILT_GAIN = 22;  // scroll velocity (px/ms) → degrees
 const SMOOTH = 0.18;   // per-frame lerp toward the velocity-driven target
 const AUTO_ADVANCE_MS = 6400;
-const STEP_RATIO = 0.48;
 
 export default function TiltCarousel({
   children,
@@ -160,19 +159,42 @@ export default function TiltCarousel({
     };
   }, [ensureRaf, infinite]);
 
-  // Infinite mode always steps forward — teleport logic handles wrapping.
-  // Non-infinite mode steps forward then loops back to the start at the end.
-  const advance = useCallback(() => {
+  // Steps land on a card, not on a fraction of the lane: find the slot whose
+  // center is nearest the lane's center right now, then scroll so the slot one
+  // over sits exactly centered. Measuring live DOM geometry (rather than a
+  // fixed ratio) keeps every step snap-aligned even if a previous scroll left
+  // the lane mid-card.
+  const step = useCallback((dir) => {
     const lane = laneRef.current;
-    if (!lane || pausedRef.current || !autoAdvance) return;
-    const step = lane.clientWidth * STEP_RATIO;
-    if (infinite) {
-      lane.scrollTo({ left: lane.scrollLeft + step, behavior: 'smooth' });
-    } else {
-      const atEnd = lane.scrollLeft + lane.clientWidth >= lane.scrollWidth - 8;
-      lane.scrollTo({ left: atEnd ? 0 : lane.scrollLeft + step, behavior: 'smooth' });
+    if (!lane) return;
+    const slots = Array.from(lane.children);
+    if (!slots.length) return;
+
+    const center = lane.scrollLeft + lane.clientWidth / 2;
+    let nearest = 0;
+    let bestDist = Infinity;
+    slots.forEach((el, i) => {
+      const dist = Math.abs(el.offsetLeft + el.offsetWidth / 2 - center);
+      if (dist < bestDist) { bestDist = dist; nearest = i; }
+    });
+
+    let next = nearest + dir;
+    if (next < 0 || next > slots.length - 1) {
+      // Non-infinite lanes wrap to the far end; infinite lanes never get here
+      // in practice (the teleport keeps play in both directions).
+      next = next < 0 ? slots.length - 1 : 0;
     }
-  }, [autoAdvance, infinite]);
+
+    const target = slots[next];
+    const left = target.offsetLeft + target.offsetWidth / 2 - lane.clientWidth / 2;
+    const max = lane.scrollWidth - lane.clientWidth;
+    lane.scrollTo({ left: Math.max(0, Math.min(max, left)), behavior: 'smooth' });
+  }, []);
+
+  const advance = useCallback(() => {
+    if (pausedRef.current || !autoAdvance) return;
+    step(1);
+  }, [autoAdvance, step]);
 
   useEffect(() => {
     if (!autoAdvance) return;
@@ -194,9 +216,7 @@ export default function TiltCarousel({
   };
 
   const scrollByStep = (dir) => {
-    const lane = laneRef.current;
-    if (!lane) return;
-    lane.scrollBy({ left: dir * lane.clientWidth * STEP_RATIO, behavior: 'smooth' });
+    step(dir);
     pauseForOneInterval();
   };
 
@@ -237,7 +257,7 @@ export default function TiltCarousel({
         type="button"
         onClick={() => scrollByStep(-1)}
         aria-label="Scroll left"
-        className="absolute left-1 top-1/2 -translate-y-1/2 z-20 h-9 px-5 rounded-pill
+        className="absolute left-1 top-1/2 -translate-y-1/2 z-20 h-20 px-4 rounded-pill
           bg-white/85 backdrop-blur-sm shadow-sm text-char-700
           flex items-center justify-center
           transition-all duration-fast hover:bg-white active:scale-[0.94]"
@@ -248,7 +268,7 @@ export default function TiltCarousel({
         type="button"
         onClick={() => scrollByStep(1)}
         aria-label="Scroll right"
-        className="absolute right-1 top-1/2 -translate-y-1/2 z-20 h-9 px-5 rounded-pill
+        className="absolute right-1 top-1/2 -translate-y-1/2 z-20 h-20 px-4 rounded-pill
           bg-white/85 backdrop-blur-sm shadow-sm text-char-700
           flex items-center justify-center
           transition-all duration-fast hover:bg-white active:scale-[0.94]"

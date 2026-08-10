@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getMealPlanSuggestions, getProfile, buildRecipeDetail } from '../../api/api.js';
@@ -8,6 +8,7 @@ import PageHeader from '../../components/shared/PageHeader.jsx';
 import GlassPanel from '../../components/shared/GlassPanel.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import BestRecipesRails from '../../components/shared/BestRecipesRails.jsx';
+import Snackbar from '../../components/shared/Snackbar.jsx';
 import TopDosTab from './TopDosTab.jsx';
 import GroupsTab from './GroupsTab.jsx';
 
@@ -84,6 +85,22 @@ function BestRecipesTab({ profile }) {
   const [candidates, setCandidates] = useState(emptySlotMap);
   const [loading, setLoading] = useState(true);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [snackbar, setSnackbar] = useState(null);
+  const snackbarRef = useRef(null);
+  const snackbarIdRef = useRef(0);
+
+  const showSnackbar = useCallback((message, canUndo = false, undoFn = null) => {
+    snackbarIdRef.current += 1;
+    const id = snackbarIdRef.current;
+    snackbarRef.current = undoFn;
+    setSnackbar({ id, message, canUndo });
+  }, []);
+
+  const handleSnackbarUndo = useCallback(() => {
+    if (snackbarRef.current) snackbarRef.current();
+    snackbarRef.current = null;
+    setSnackbar(null);
+  }, []);
 
   // Fetch once the profile arrives — `loading` starts true and profile is
   // resolved a single time by the parent, so no synchronous reset needed.
@@ -139,6 +156,7 @@ function BestRecipesTab({ profile }) {
           candidatesBySlot={candidates}
           onSelectCard={openRecipe}
           edgeFadeClass="bg-lavender-200"
+          onSaveBlocked={showSnackbar}
         />
       )}
 
@@ -147,6 +165,8 @@ function BestRecipesTab({ profile }) {
         open={!!selectedRecipe}
         onClose={() => setSelectedRecipe(null)}
       />
+
+      <Snackbar snackbar={snackbar} onUndo={handleSnackbarUndo} onDismiss={() => setSnackbar(null)} />
     </div>
   );
 }

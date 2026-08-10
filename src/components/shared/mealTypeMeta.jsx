@@ -1,18 +1,15 @@
 /**
- * mealTypeMeta.jsx — shared meal-type tag foundation (b/l/d/s/b).
+ * mealTypeMeta.jsx — shared meal-type tag foundation (b/l/d/s).
  *
- * The five plan slots (`PLAN_SLOTS` in `src/api/config.js`) are Breakfast,
- * Lunch, Dinner, Snacks, Beverages — two of which start with "B". Rather than
- * inventing a second letter (which would break the "one-letter corner tag"
- * idea the rest of the app leans on), Breakfast and Beverages are
- * disambiguated by ICON instead: Breakfast uses a sunrise glyph, Beverages a
- * cup glyph. Both still render the letter "B"; the icon carries the
- * distinction. Keep that pairing in mind if new slot types are ever added.
+ * The four plan slots (`PLAN_SLOTS` in `src/api/config.js`) are Breakfast,
+ * Lunch, Dinner, Snacks (the former Beverages slot was removed July 2026,
+ * user-approved).
  */
 
-import { Sunrise, Sandwich, UtensilsCrossed, Cookie, CupSoda } from 'lucide-react';
+import { Sunrise, Sandwich, UtensilsCrossed, Cookie } from 'lucide-react';
 import { inferSlotKey } from '../../api/planBuilder.js';
 import { PLAN_SLOT_KEYS } from '../../api/config.js';
+import { getOverlayFlags } from '../../api/localTables.js';
 
 /**
  * Meal-type metadata keyed by plan slot key. Each entry drives `MealTypeTag`
@@ -45,19 +42,13 @@ export const MEAL_TYPE_META = {
     Icon: Cookie,
     toneClass: 'bg-yellow-100/95 text-yellow-800',
   },
-  beverages: {
-    letter: 'B',
-    label: 'Beverage',
-    Icon: CupSoda,
-    toneClass: 'bg-lavender-100/95 text-lavender-800',
-  },
 };
 
 const isValidSlotKey = (key) => typeof key === 'string' && PLAN_SLOT_KEYS.includes(key);
 
 /**
- * Resolve the plan slot key ('breakfast' | 'lunch' | 'dinner' | 'snacks' |
- * 'beverages') that best represents an item, for meal-type tagging.
+ * Resolve the plan slot key ('breakfast' | 'lunch' | 'dinner' | 'snacks')
+ * that best represents an item, for meal-type tagging.
  *
  * Resolution order: an explicit `fromSlot`/`slotKey` the item already carries
  * (e.g. plan/queue items placed by the user) wins over derived data; next,
@@ -79,6 +70,31 @@ export function mealTypeForItem(item) {
   }
 
   return inferSlotKey(item);
+}
+
+/**
+ * Pick which meal-type chip a card should show, given the slot it is being
+ * rendered under. Returns `slotKey` unchanged unless the item is a curated
+ * snack sitting in some OTHER slot, in which case the snack chip wins.
+ *
+ * Why: the snack overlay flag is ADDITIVE, not exclusive — a food can
+ * legitimately fill (say) a Breakfast slot by fine group while also being
+ * flagged `isSnack`. Since the card already sits under a section header
+ * naming its slot, the slot chip is the redundant one — so it yields.
+ *
+ * Flags are read by id straight off the curation overlay
+ * (`getOverlayFlags`), because they never survive onto a PlanItem.
+ *
+ * @param {Object} item
+ * @param {string} slotKey - the slot this card is rendered under
+ * @returns {string} a PLAN_SLOT_KEYS value to pass to `MealTypeTag`
+ */
+// eslint-disable-next-line react-refresh/only-export-components
+export function displayTagForItem(item, slotKey) {
+  if (item?.id == null) return slotKey;
+  const { isSnack } = getOverlayFlags(item.id);
+  if (isSnack && slotKey !== 'snacks') return 'snacks';
+  return slotKey;
 }
 
 /**

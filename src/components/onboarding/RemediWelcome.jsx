@@ -28,6 +28,98 @@ const PHRASES = [
   { text: 'we want to know you.', gap: BEAT_LONG },
 ];
 
+const AGE_OPTIONS = [
+  { value: 'adult', label: 'Adult' },
+  { value: 'senior', label: 'Senior (65+)' },
+];
+
+// Two-position slider for the age band. The knob rests in the middle until a
+// side is picked, so "no answer yet" stays a real state (the Continue button
+// gates on it) instead of a silent default.
+function AgeSlider({ value, onChange }) {
+  const trackRef = useRef(null);
+  const draggingRef = useRef(false);
+
+  const valueAt = (clientX) => {
+    const rect = trackRef.current?.getBoundingClientRect();
+    if (!rect) return null;
+    return clientX - rect.left < rect.width / 2 ? 'adult' : 'senior';
+  };
+
+  const handlePointerDown = (e) => {
+    draggingRef.current = true;
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    const next = valueAt(e.clientX);
+    if (next) onChange(next);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!draggingRef.current) return;
+    const next = valueAt(e.clientX);
+    if (next && next !== value) onChange(next);
+  };
+
+  const endDrag = () => {
+    draggingRef.current = false;
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      onChange('adult');
+    } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      onChange('senior');
+    }
+  };
+
+  // 0 → left half, '100%' → right half (knob is one half wide), '50%' → unset.
+  const knobX = value === 'adult' ? 0 : value === 'senior' ? '100%' : '50%';
+
+  return (
+    <div
+      ref={trackRef}
+      role="radiogroup"
+      aria-label="Age group"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onKeyDown={handleKeyDown}
+      className="relative w-full max-w-[280px] h-[46px] p-[3px] rounded-pill border-[1.5px] border-blue-950/15 bg-white/40 shadow-sm touch-none select-none cursor-pointer"
+    >
+      <motion.div
+        aria-hidden="true"
+        initial={false}
+        animate={{ x: knobX, opacity: value ? 1 : 0.55 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+        className="absolute top-[3px] bottom-[3px] left-[3px] rounded-pill bg-white shadow-md"
+        style={{ width: 'calc(50% - 3px)' }}
+      />
+
+      <div className="relative flex h-full">
+        {AGE_OPTIONS.map((opt) => {
+          const selected = value === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(opt.value)}
+              className={`flex-1 h-full rounded-pill bg-transparent text-sm font-sans transition-colors duration-fast outline-none focus-visible:ring-2 focus-visible:ring-blue-950/30 ${
+                selected ? 'text-blue-950 font-semibold' : 'text-blue-950/55'
+              }`}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const CHUNKS = (() => {
   let start = 0;
   return PHRASES.map((p) => {
@@ -48,8 +140,9 @@ export default function RemediWelcome({ onNext }) {
   const [showSubtext, setShowSubtext] = useState(instant);
   const [finished, setFinished] = useState(instant);
   const [firstName, setFirstName] = useState('');
+  const [ageBand, setAgeBand] = useState(null);
 
-  const canSubmit = finished && firstName.trim().length > 0;
+  const canSubmit = finished && firstName.trim().length > 0 && !!ageBand;
 
   const timersRef = useRef([]);
 
@@ -148,7 +241,7 @@ export default function RemediWelcome({ onNext }) {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && canSubmit) onNext(firstName.trim());
+                if (e.key === 'Enter' && canSubmit) onNext(firstName.trim(), ageBand);
               }}
               placeholder="Your first name"
               aria-label="Your first name"
@@ -158,8 +251,18 @@ export default function RemediWelcome({ onNext }) {
             />
           </motion.div>
 
+          <motion.div
+            initial={false}
+            animate={{ opacity: showButton ? 1 : 0 }}
+            transition={{ duration: BUTTON_IN, ease: EASE_OUT }}
+            style={{ pointerEvents: showButton ? 'auto' : 'none' }}
+            className="w-full flex justify-center mb-4"
+          >
+            <AgeSlider value={ageBand} onChange={setAgeBand} />
+          </motion.div>
+
           <motion.button
-            onClick={canSubmit ? () => onNext(firstName.trim()) : undefined}
+            onClick={canSubmit ? () => onNext(firstName.trim(), ageBand) : undefined}
             disabled={!canSubmit}
             initial={false}
             animate={{ opacity: !showButton ? 0 : canSubmit ? 1 : 0.5 }}

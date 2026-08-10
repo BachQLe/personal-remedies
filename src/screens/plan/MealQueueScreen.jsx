@@ -2,11 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, BookmarkPlus, ArrowRight, RotateCw, RefreshCw, CalendarPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Icon from '../../components/shared/Icon.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import GlassPanel from '../../components/shared/GlassPanel.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
+import Snackbar from '../../components/shared/Snackbar.jsx';
+import SaveButton from '../../components/shared/SaveButton.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import MealTypeTag, { mealTypeForItem } from '../../components/shared/mealTypeMeta.jsx';
 import SlotSection from './SlotSection.jsx';
@@ -25,8 +26,7 @@ import {
   inferSlotKey,
   buildRecipeDetail,
 } from '../../api/api.js';
-import { numericIdToStars } from '../../api/adapter.js';
-import { estimateDailyNeed, estimatePlanDayCalories } from '../../api/calorieNeeds.js';
+import { estimatePlanDayCalories } from '../../api/calorieNeeds.js';
 import { PLAN_SLOTS, DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import {
   getPlan,
@@ -38,6 +38,7 @@ import {
 } from '../../state/dailyPlan.js';
 import { getLibrary, subscribeLibrary } from '../../state/library.js';
 import { GHOST_PLAN } from '../../api/ghostData.js';
+import { getSaveBlockReason } from '../../utils/saveGate.js';
 
 const calmSpring = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
 
@@ -81,76 +82,21 @@ function cardSubtitle(item) {
  * screen shows (never a badge, never a bar, never per-food). Omits itself
  * entirely when nothing is countable (`total <= 0`) rather than show "~0".
  */
-function CalorieLine({ slots, need, onAddDetails }) {
-  const { total, uncounted } = estimatePlanDayCalories(slots);
+function CalorieLine({ slots, need }) {
+  const { total } = estimatePlanDayCalories(slots);
   if (total <= 0) return null;
-
-  const partial = uncounted > 0 ? ' (partial — recipes not counted)' : '';
 
   return (
     <p className="text-xs font-sans text-blue-950/60 leading-relaxed">
-      {`~${Math.round(total).toLocaleString()} cal planned`}
-      {need != null && ` · your estimated need ~${need.toLocaleString()}`}
-      {partial}
-      {need == null && (
-        <>
-          {' · '}
-          <button
-            onClick={onAddDetails}
-            className="underline underline-offset-2 decoration-blue-950/30 hover:decoration-blue-950/60
-              text-blue-950/60 hover:text-blue-950/80 transition-colors duration-fast"
-          >
-            Add your details for a personal target
-          </button>
-        </>
-      )}
+      {`~${Math.round(total).toLocaleString()} cal planned (estimated)`}
+      {` · your estimated need ~${need.toLocaleString()}`}
     </p>
-  );
-}
-
-// ── Snackbar ──────────────────────────────────────────────────────────────────
-
-function Snackbar({ snackbar, onUndo, onDismiss }) {
-  useEffect(() => {
-    if (!snackbar) return;
-    const t = setTimeout(onDismiss, 3500);
-    return () => clearTimeout(t);
-  }, [snackbar, onDismiss]);
-
-  return (
-    <AnimatePresence>
-      {snackbar && (
-        <motion.div
-          key={snackbar.id}
-          initial={{ y: 80, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 40, opacity: 0 }}
-          transition={calmSpring}
-          className="fixed bottom-[88px] left-1/2 -translate-x-1/2 z-50
-            max-w-[360px] w-[calc(100%-40px)]
-            flex items-center justify-between gap-3
-            px-4 py-3 rounded-xl
-            bg-char-900 text-white shadow-lg"
-        >
-          <span className="font-sans text-sm font-medium">{snackbar.message}</span>
-          {snackbar.canUndo && (
-            <button
-              onClick={onUndo}
-              className="font-sans text-sm font-semibold text-forest-300 hover:text-forest-200
-                transition-colors duration-fast shrink-0"
-            >
-              Undo
-            </button>
-          )}
-        </motion.div>
-      )}
-    </AnimatePresence>
   );
 }
 
 // ── Cookbook card grid ───────────────────────────────────────────────────────
 
-function CardGrid({ items, actionIcon, onAction, emptyMessage, emptyAction }) {
+function CardGrid({ items, actionIcon, onAction, onBlocked, emptyMessage, emptyAction }) {
   if (items.length === 0) {
     return (
       <div className="flex items-start gap-3 px-4 py-4 rounded-xl border border-dashed border-blue-950/30">
@@ -176,29 +122,38 @@ function CardGrid({ items, actionIcon, onAction, emptyMessage, emptyAction }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       <AnimatePresence mode="popLayout">
-        {items.map((item) => (
-          <motion.div
-            key={item.id}
-            layout
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.88 }}
-            transition={calmSpring}
-          >
-            <FoodImageCard
-              id={item.id}
-              image={cardImage(item)}
-              stars={numericIdToStars(item.numericId)}
-              title={item.name}
-              subtitle={cardSubtitle(item)}
-              mealTag={mealTypeForItem(item)}
-              aspectRatio="4/5"
-              action={actionIcon}
-              actionOnClick={() => onAction(item)}
-              className="w-full"
-            />
-          </motion.div>
-        ))}
+        {items.map((item) => {
+          // A blocked item is a legacy harmful-recipe or ingredient sitting
+          // in the library from before the save gate existed (see
+          // src/utils/saveGate.js) — its normal add-to-plan action is
+          // suppressed (an ingredient/harmful recipe shouldn't be plannable
+          // either), and SaveButton becomes the only way to remove it.
+          const blocked = getSaveBlockReason(item);
+          return (
+            <motion.div
+              key={item.id}
+              layout
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.88 }}
+              transition={calmSpring}
+            >
+              <FoodImageCard
+                id={item.id}
+                image={cardImage(item)}
+                numericId={item.numericId}
+                title={item.name}
+                subtitle={cardSubtitle(item)}
+                mealTag={mealTypeForItem(item)}
+                aspectRatio="4/5"
+                action={blocked ? undefined : actionIcon}
+                actionOnClick={blocked ? undefined : () => onAction(item)}
+                saveAction={<SaveButton item={item} onBlocked={onBlocked} />}
+                className="w-full"
+              />
+            </motion.div>
+          );
+        })}
       </AnimatePresence>
     </div>
   );
@@ -317,7 +272,7 @@ export default function MealQueueScreen() {
   const dayState = displayPlan?.days?.[activeDay] ?? null;
   const daySlots = dayState?.slots ?? {};
   const dayPinned = dayState?.pinned ?? [];
-  const dailyNeed = estimateDailyNeed(profile);
+  const dailyNeed = profile?.calorieTarget ?? 2000;
 
   // Plan: shuffle one slot on the selected day
   const handleShuffle = useCallback(async (slotKey) => {
@@ -398,7 +353,7 @@ export default function MealQueueScreen() {
       fineGroup: item.fineGroup || '',
       tier: item.tier ?? null,
       numericId: item.numericId ?? null,
-      kind: 'food',
+      kind: item.kind ?? 'food',
     });
     const slotLabel = PLAN_SLOTS.find((s) => s.key === slotKey)?.label ?? slotKey;
     showSnackbar(added ? `Added to ${slotLabel}` : 'Already in plan');
@@ -437,18 +392,6 @@ export default function MealQueueScreen() {
         label="Plan"
         title="My Meal Plan"
         className="bg-forest-300"
-        right={
-          <button
-            onClick={() => navigate('/app/profile')}
-            aria-label="Profile"
-            className="w-12 h-12 mt-2 ml-2 flex items-center justify-center rounded-full
-              bg-white border border-sand-200 shadow-xs text-char-500
-              transition-all duration-fast hover:border-forest-400 hover:text-forest-600 hover:shadow-sm
-              active:scale-95"
-          >
-            <Icon name="user" size={18} />
-          </button>
-        }
       >
         <div className="mt-4">
           <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} />
@@ -469,7 +412,6 @@ export default function MealQueueScreen() {
               <CalorieLine
                 slots={daySlots}
                 need={dailyNeed}
-                onAddDetails={() => navigate('/app/profile')}
               />
               <button
                 onClick={handleRegenerateDay}
@@ -511,6 +453,7 @@ export default function MealQueueScreen() {
                     onTogglePin={handleTogglePin}
                     ghost={showGhost}
                     shuffling={shufflingSlot === slot.key}
+                    onSaveBlocked={showSnackbar}
                   />
                 ))}
               </motion.div>
@@ -572,6 +515,7 @@ export default function MealQueueScreen() {
                         items={slotItems}
                         actionIcon={plusIcon}
                         onAction={handleAddToPlan}
+                        onBlocked={(msg) => showSnackbar(msg)}
                         emptyMessage=""
                       />
                     </div>
@@ -584,6 +528,7 @@ export default function MealQueueScreen() {
                   items={visibleCookbook}
                   actionIcon={plusIcon}
                   onAction={handleAddToPlan}
+                  onBlocked={(msg) => showSnackbar(msg)}
                   emptyMessage="Your saved recipes list is empty — save foods and recipes from Food Lookup."
                   emptyAction={{ label: 'Food Lookup', onClick: () => navigate('/app/search') }}
                 />

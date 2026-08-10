@@ -3,9 +3,9 @@
  *
  * These types define the ONLY shapes screens may consume.
  * Historically no numeric score (value / descriptionNumericID) was ever
- * exposed here. RELAXED July 2026 (user-approved) for the star-rating
- * feature: `Assessment` now carries score/verdict/numericId/stars — see the
- * Assessment typedef below. All other shapes remain score-free.
+ * exposed here. RELAXED July 2026 (user-approved) for the rating feature:
+ * `Assessment` now carries score/verdict/numericId — see the Assessment
+ * typedef below. All other shapes remain score-free.
  */
 
 /**
@@ -79,17 +79,14 @@
  * @property {ConditionAssessment[]} perCondition - Per-condition breakdown (positional)
  * @property {number|null} score - Raw reconciled /goodfor `value` for this
  *   food+profile. Intentionally relaxes the former never-expose-numeric-
- *   scores rule (user-approved July 2026) for the FoodDetailCard star
- *   rating — don't surface it as a bare number elsewhere without a product
- *   decision.
+ *   scores rule (user-approved July 2026) for the FoodDetailCard rating —
+ *   don't surface it as a bare number elsewhere without a product decision.
  * @property {string|null} verdict - Reconciled /goodfor `description` — the
  *   7-step verdict label (e.g. "More Helpful").
  * @property {number|null} numericId - Reconciled /goodfor
- *   `descriptionNumericID` (1–7). Feeds `tier` (via `numericIdToTier`) and
- *   `stars` (via `numericIdToStars`).
- * @property {number|null} stars - Star rating out of 5 for FoodDetailCard,
- *   from `numericIdToStars(numericId)` — {1:5, 2:4.5, 3:4, 4:3, 5:2,
- *   6:1.5, 7:1}, null outside 1–7.
+ *   `descriptionNumericID` (1–7). Feeds `tier` (via `numericIdToTier` in
+ *   adapter.js) and the FoodRating display (via `numericIdToRating` in
+ *   src/utils/rating.js).
  */
 
 /**
@@ -98,21 +95,25 @@
  * @property {string[]} [dietary] - Dietary preferences
  * @property {string[]} [allergies] - Food allergies
  * @property {string[]} [medications] - Medications
- * @property {number} [heightCm] - Height in centimeters. Optional biometric
- *   (July 2026, calorie-needs feature) — always stored as metric even though
- *   the UI collects ft/in; see `ftInToCm`/`cmToFtIn` in api/calorieNeeds.js.
- *   Never required: every flow (including `estimateDailyNeed`) must degrade
- *   gracefully when absent.
- * @property {number} [weightKg] - Weight in kilograms. Same optionality and
- *   metric-storage rule as `heightCm`; UI collects lbs, see `lbsToKg`/
- *   `kgToLbs` in api/calorieNeeds.js.
- * @property {number} [age] - Age in years. Optional.
- * @property {'male'|'female'} [sex] - Biological sex, used only for the
- *   Mifflin-St Jeor BMR constant (+5 male / -161 female). Optional.
+ * @property {'adult'|'senior'} [ageBand] - Collected once during onboarding
+ *   (RemediWelcome). Informational only — no calculation reads it. It exists
+ *   to implicitly signal that the app does not address children. Distinct
+ *   from the legacy `age` field below, which is dead.
+ * @property {number} [heightCm] - Height in centimeters. Legacy biometric
+ *   field from the removed Mifflin-St Jeor calorie-need feature (July 2026).
+ *   No longer collected or read by any calculation — may still be present on
+ *   profiles saved before the removal.
+ * @property {number} [weightKg] - Weight in kilograms. Same legacy status as
+ *   `heightCm`.
+ * @property {number} [age] - Age in years. Legacy, same status as `heightCm`.
+ * @property {'male'|'female'} [sex] - Biological sex. Legacy, same status as
+ *   `heightCm`.
  * @property {'sedentary'|'light'|'moderate'|'active'|'very_active'} [activityLevel] -
- *   Self-reported activity level, mapped to a BMR multiplier in
- *   api/calorieNeeds.js. Optional — `estimateDailyNeed` defaults to 'light'
- *   when the other biometrics are present but this one isn't.
+ *   Self-reported activity level. Legacy, same status as `heightCm`.
+ * @property {number} [calorieTarget] - Daily calorie target, defaults to
+ *   2000. Fixed and user-editable from the Profile screen ("Daily calorie
+ *   target" sheet) — replaces the removed Mifflin-St Jeor estimate as the
+ *   number `estimatePlanDayCalories`'s plan total is compared against.
  */
 
 /**
@@ -139,6 +140,9 @@
  * @property {string} title - Recipe title
  * @property {TierOrPoor} [tier] - Reconciled tier for the requested conditions
  *   (from descriptionNumericID via numericIdToTier — never the raw numeric value)
+ * @property {number|null} [numericId] - Raw descriptionNumericID (1-7). Feeds
+ *   `tier` and the FoodRating display; kept alongside `tier` because `tier`
+ *   collapses 4 and "no data" to the same null.
  * @property {string} [photo] - Image URL
  * @property {string} [sourceName] - Attribution, e.g. "Food Network · Giada De Laurentiis"
  * @property {string} mealType - Breakfast/Lunch/Dinner/Snack (best-effort keyword guess for real recipes)

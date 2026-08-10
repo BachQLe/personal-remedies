@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import RemediWelcome from './RemediWelcome';
 import ProfileBuilder from './ProfileBuilder';
-import BiometricsStep from './BiometricsStep';
 import { saveProfile } from '../../api/api.js';
 import { prefetchAppData } from '../../api/prefetch.js';
 
@@ -113,6 +112,7 @@ export default function OnboardingPage() {
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState({
     firstName: '',
+    ageBand: null,
     conditions: [],
     allergies: [],
     dietaryPattern: 'omnivore',
@@ -120,28 +120,21 @@ export default function OnboardingPage() {
     medications: [],
   });
 
-  // Step 1 (ProfileBuilder) no longer saves directly — it hands off to the
-  // optional biometrics step. Conditions are still required to proceed.
-  const goToBiometrics = () => {
-    if (profile.conditions.length === 0) return;
-    setStep(2);
-  };
-
-  // Final save, called from BiometricsStep either with a metric biometrics
-  // patch (Save) or an empty object (Skip) — biometrics are always optional,
-  // per the frozen "no required biometrics" rule (see api/calorieNeeds.js).
-  const handleSubmit = async (biometricPatch = {}) => {
+  // Final save, called directly from ProfileBuilder once conditions are set
+  // (ProfileBuilder's own Continue button is disabled until conditions.length
+  // > 0, so no separate gate is needed here).
+  const handleSubmit = async () => {
     if (saving) return;
     setSaving(true);
 
     const payload = {
       firstName: profile.firstName,
+      ageBand: profile.ageBand,
       conditions: profile.conditions,
       allergies: profile.allergies,
       dietaryPattern: profile.dietaryPattern,
       religiousRestriction: profile.religiousRestriction,
       medications: [],
-      ...biometricPatch,
     };
 
     await saveProfile(payload);
@@ -182,8 +175,8 @@ export default function OnboardingPage() {
             >
               {step === 0 && (
                 <RemediWelcome
-                  onNext={(name) => {
-                    setProfile((p) => ({ ...p, firstName: name }));
+                  onNext={(name, ageBand) => {
+                    setProfile((p) => ({ ...p, firstName: name, ageBand }));
                     setStep(1);
                   }}
                 />
@@ -192,18 +185,9 @@ export default function OnboardingPage() {
                 <ProfileBuilder
                   profile={profile}
                   onChange={setProfile}
-                  onSubmit={goToBiometrics}
+                  onSubmit={handleSubmit}
                   saving={saving}
                   onBack={() => setStep(0)}
-                />
-              )}
-              {step === 2 && (
-                <BiometricsStep
-                  profile={profile}
-                  onSubmit={handleSubmit}
-                  onSkip={() => handleSubmit({})}
-                  saving={saving}
-                  onBack={() => setStep(1)}
                 />
               )}
             </motion.div>

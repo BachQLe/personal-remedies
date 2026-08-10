@@ -84,26 +84,28 @@ export const MEAL_SLOT_MAP = {
 /**
  * Slot-based meal plan configuration (Plan screen — /app/plan).
  *
- * Array order IS render order (breakfast → lunch → dinner → snacks →
- * beverages). Each entry:
+ * Array order IS render order (breakfast → lunch → dinner → snacks). Each
+ * entry:
  * - `fineGroups` — /suggest fine food groups whose /suggest results (which
  *   carry tier-bearing descriptionNumericID data, unlike /topdoordonts-free
- *   surfaces) are pooled and round-robin interleaved to fill the slot. 10
- *   unique fine groups total across all slots.
+ *   surfaces) are pooled and round-robin interleaved to fill the slot.
  * - `recipeMealType` — links to the `mealType` field on Recipe (see
- *   getRecipes()/guessMealType in adapter.js); `null` means this slot never
- *   pulls recipes (beverages).
+ *   getRecipes()/guessMealType in adapter.js).
  * - `recipeLead` — when true, matching recipes are prepended ahead of plain
  *   foods for this slot (lunch/dinner lead with a recipe); when false they're
- *   appended (breakfast/snacks/beverages).
+ *   appended (breakfast/snacks).
  * - `size` — number of items auto-filled into this slot per generation.
+ *
+ * The `beverages` slot was removed (July 2026, user-approved) — 4 slots
+ * total now. Stale `beverages` keys may still exist in old localStorage
+ * plans; nothing iterates a day's slots outside of mapping this array, so
+ * they're simply never read/rendered.
  */
 export const PLAN_SLOTS = [
   { key: 'breakfast', label: 'Breakfast', fineGroups: ['f', 'd', 'g1'], recipeMealType: 'breakfast', recipeLead: false, size: 3 },
   { key: 'lunch',     label: 'Lunch',     fineGroups: ['c2', 'e', 'b1'], recipeMealType: 'lunch',   recipeLead: true,  size: 3 },
   { key: 'dinner',    label: 'Dinner',    fineGroups: ['b3', 'b1', 'e'], recipeMealType: 'dinner',  recipeLead: true,  size: 3 },
   { key: 'snacks',    label: 'Snacks',    fineGroups: ['h1', 'c3'],      recipeMealType: 'snack',   recipeLead: false, size: 2 },
-  { key: 'beverages', label: 'Beverages', fineGroups: ['h2'],            recipeMealType: null,      recipeLead: false, size: 2 },
 ];
 
 /** Slot keys in render order — `PLAN_SLOTS.map((s) => s.key)`. */

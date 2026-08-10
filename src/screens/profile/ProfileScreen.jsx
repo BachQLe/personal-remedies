@@ -6,8 +6,8 @@
  *                      change), macro-goals stub (flagged), and sub-edit rows
  *                      for the other profile fields. Scroll down to reach the
  *                      editor.
- *   3. Sub-edit sheets — BottomSheets for medications / allergies / dietary,
- *                        opened from the sub-edit rows.
+ *   3. Sub-edit sheets — BottomSheet for medications, opened from the
+ *                        sub-edit row.
  *   4. Navbar        — reused, pinned (AppShell)
  *
  * Mirrors HomeScreen: the shell flexes and the page may scroll (the inline
@@ -24,7 +24,6 @@ import BottomSheet from '../../components/shared/BottomSheet.jsx';
 import ConditionTag from '../../components/shared/ConditionTag.jsx';
 import Icon from '../../components/shared/Icon.jsx';
 import { getConditionMeta } from '../../utils/conditionMeta.js';
-import { ftInToCm, cmToFtIn, lbsToKg, kgToLbs } from '../../api/calorieNeeds.js';
 
 // ── Demo profile fallback ────────────────────────────────────────────────────
 
@@ -37,16 +36,6 @@ const DEMO_PROFILE = {
   tasteLikes: [],
   tasteDislikes: [],
 };
-
-const DIETARY_OPTIONS = [
-  { value: 'vegetarian', label: 'Vegetarian', icon: 'leaf' },
-  { value: 'vegan', label: 'Vegan', icon: 'sun' },
-  { value: 'pescatarian', label: 'Pescatarian', icon: 'utensils' },
-  { value: 'avoid-pork', label: 'Avoid Pork', icon: 'shield' },
-  { value: 'gluten-free', label: 'Gluten-Free', icon: 'zap' },
-  { value: 'dairy-free', label: 'Dairy-Free', icon: 'cloud' },
-  { value: 'low-sodium', label: 'Low Sodium', icon: 'activity' },
-];
 
 // ── Sub-edit sheets (unchanged from prior screen) ────────────────────────────
 
@@ -110,197 +99,50 @@ function EditList({ title, value, placeholder, onChange, onClose }) {
   );
 }
 
-function EditDietary({ value, onChange, onClose }) {
-  const [selected, setSelected] = useState([...value]);
-
-  const toggle = (v) => {
-    if (selected.includes(v)) setSelected(selected.filter((x) => x !== v));
-    else setSelected([...selected, v]);
-  };
-
-  return (
-    <BottomSheet open onClose={onClose} title="Dietary preferences">
-      <div className="flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-3">
-          {DIETARY_OPTIONS.map(({ value: v, label, icon }) => {
-            const isSel = selected.includes(v);
-            return (
-              <button
-                key={v}
-                onClick={() => toggle(v)}
-                className={`flex items-center gap-3 px-4 py-4 rounded-lg border-2 text-left transition-all duration-fast
-                  ${isSel ? 'border-forest-700 bg-forest-50' : 'border-sand-200 bg-white hover:border-forest-300'}`}
-              >
-                <span style={{ color: isSel ? '#628C22' : '#8A8377' }}>
-                  <Icon name={icon} size={22} />
-                </span>
-                <span className={`text-sm font-semibold font-sans ${isSel ? 'text-forest-700' : 'text-char-900'}`}>
-                  {label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        <button
-          onClick={() => { onChange(selected); onClose(); }}
-          className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
-        >
-          Save
-        </button>
-      </div>
-    </BottomSheet>
-  );
-}
-
-const SEX_CHOICES = [
-  { value: 'female', label: 'Female' },
-  { value: 'male', label: 'Male' },
-];
-
-const ACTIVITY_CHOICES = [
-  { value: 'sedentary', label: 'Sedentary — little to no exercise' },
-  { value: 'light', label: 'Lightly active — 1-3 workouts/week' },
-  { value: 'moderate', label: 'Moderately active — 3-5 workouts/week' },
-  { value: 'active', label: 'Active — 6-7 workouts/week' },
-  { value: 'very_active', label: 'Very active — physical job or 2x/day' },
-];
-
-const aboutYouInputClass =
-  'flex-1 bg-paper-100 border border-sand-200 rounded-lg px-4 py-3 text-sm font-sans outline-none focus:border-forest-700 transition-colors duration-base';
-
 /**
- * EditAboutYou — height/weight/age/sex/activity level editor, backing
- * `estimateDailyNeed`/`computeBMI` (src/api/calorieNeeds.js). Every field is
- * optional and clearable: blanking a field and saving removes it from the
- * profile (via an explicit `undefined` in the patch) rather than leaving the
- * stale value behind, since this is an edit surface (unlike onboarding's
- * BiometricsStep, which only ever adds fields to a fresh profile).
- * Values are collected in US units and converted to metric on save — see
- * ftInToCm/lbsToKg.
+ * EditCalorieTarget — single-field editor for `Profile.calorieTarget`, the
+ * fixed, user-editable daily calorie baseline that replaced the removed
+ * Mifflin-St Jeor estimate (see src/api/calorieNeeds.js). Defaults to 2000
+ * when somehow absent. Light validation only: must be a finite number > 0
+ * before Save is enabled — mirrors the light "don't save garbage" checks the
+ * old biometrics fields used, without inventing new rules.
  */
-function EditAboutYou({ profile, onChange, onClose }) {
-  const prefillHeight = cmToFtIn(profile?.heightCm);
-  const [ft, setFt] = useState(profile?.heightCm ? String(prefillHeight.ft) : '');
-  const [inches, setInches] = useState(profile?.heightCm ? String(prefillHeight.inches) : '');
-  const [weightLbs, setWeightLbs] = useState(
-    profile?.weightKg ? String(Math.round(kgToLbs(profile.weightKg))) : ''
-  );
-  const [age, setAge] = useState(profile?.age ? String(profile.age) : '');
-  const [sex, setSex] = useState(profile?.sex ?? '');
-  const [activityLevel, setActivityLevel] = useState(profile?.activityLevel ?? '');
+function EditCalorieTarget({ profile, onChange, onClose }) {
+  const [value, setValue] = useState(String(profile?.calorieTarget ?? 2000));
+
+  const parsed = Number(value);
+  const isValid = Number.isFinite(parsed) && parsed > 0;
 
   const save = () => {
-    const patch = {
-      heightCm: undefined,
-      weightKg: undefined,
-      age: undefined,
-      sex: undefined,
-      activityLevel: undefined,
-    };
-
-    if (ft.trim() || inches.trim()) {
-      const cm = ftInToCm(Number(ft), Number(inches));
-      if (cm > 0) patch.heightCm = Math.round(cm * 10) / 10;
-    }
-    if (weightLbs.trim()) {
-      const kg = lbsToKg(Number(weightLbs));
-      if (kg > 0) patch.weightKg = Math.round(kg * 10) / 10;
-    }
-    if (age.trim()) {
-      const ageNum = Number(age);
-      if (Number.isFinite(ageNum) && ageNum > 0) patch.age = ageNum;
-    }
-    if (sex) patch.sex = sex;
-    if (activityLevel) patch.activityLevel = activityLevel;
-
-    onChange(patch);
+    if (!isValid) return;
+    onChange({ calorieTarget: Math.round(parsed) });
     onClose();
   };
 
   return (
-    <BottomSheet open onClose={onClose} title="About you">
+    <BottomSheet open onClose={onClose} title="Daily calorie target">
       <div className="flex flex-col gap-4">
         <p className="text-xs text-char-400 font-sans -mt-1">
-          Optional — this sizes your plan's portions. We don't track or log anything you eat.
+          Used to gauge whether your plan has enough — you can change this any time.
         </p>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold font-sans text-char-500">Height</label>
-          <div className="flex gap-2">
-            <input
-              type="number" inputMode="numeric" min="0" value={ft}
-              onChange={(e) => setFt(e.target.value)} placeholder="Feet"
-              className={aboutYouInputClass}
-            />
-            <input
-              type="number" inputMode="numeric" min="0" max="11" value={inches}
-              onChange={(e) => setInches(e.target.value)} placeholder="Inches"
-              className={aboutYouInputClass}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold font-sans text-char-500">Weight (lbs)</label>
+          <label className="text-xs font-semibold font-sans text-char-500">Calories per day</label>
           <input
-            type="number" inputMode="numeric" min="0" value={weightLbs}
-            onChange={(e) => setWeightLbs(e.target.value)} placeholder="e.g. 160"
-            className={aboutYouInputClass}
+            type="number"
+            inputMode="numeric"
+            min="1"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="e.g. 2000"
+            className="flex-1 bg-paper-100 border border-sand-200 rounded-lg px-4 py-3 text-sm font-sans outline-none focus:border-forest-700 transition-colors duration-base"
           />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold font-sans text-char-500">Age</label>
-          <input
-            type="number" inputMode="numeric" min="0" value={age}
-            onChange={(e) => setAge(e.target.value)} placeholder="e.g. 34"
-            className={aboutYouInputClass}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold font-sans text-char-500">Sex</label>
-          <div className="grid grid-cols-2 gap-3">
-            {SEX_CHOICES.map(({ value, label }) => {
-              const isSel = sex === value;
-              return (
-                <button
-                  key={value}
-                  onClick={() => setSex(isSel ? '' : value)}
-                  className={`px-4 py-3 rounded-lg border-2 text-center transition-all duration-fast
-                    ${isSel ? 'border-forest-700 bg-forest-50' : 'border-sand-200 bg-white hover:border-forest-300'}`}
-                >
-                  <span className={`text-sm font-semibold font-sans ${isSel ? 'text-forest-700' : 'text-char-900'}`}>
-                    {label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold font-sans text-char-500">Activity level</label>
-          <div className="flex flex-col gap-2">
-            {ACTIVITY_CHOICES.map(({ value, label }) => {
-              const isSel = activityLevel === value;
-              return (
-                <button
-                  key={value}
-                  onClick={() => setActivityLevel(isSel ? '' : value)}
-                  className={`w-full text-left px-4 py-3 rounded-lg border text-sm font-sans transition-all duration-fast
-                    ${isSel ? 'border-forest-700 bg-forest-50 text-forest-700 font-semibold' : 'border-sand-200 bg-white text-char-900 hover:border-forest-300'}`}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         <button
           onClick={save}
-          className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base mt-2 bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
+          disabled={!isValid}
+          className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base mt-2 bg-forest-700 hover:bg-forest-800 disabled:opacity-40 transition-colors duration-fast"
         >
           Save
         </button>
@@ -464,7 +306,7 @@ function ConditionDropdown({ value, onChange }) {
         style={{ borderColor: open ? '#111E58' : '#E6E6E0' }}
       >
         <span className="truncate">
-          {loading ? 'Loading conditions…' : 'Browse all conditions (A–Z)…'}
+          {loading ? 'Loading conditions…' : 'Select your conditions'}
         </span>
         <span
           className={`material-symbols-rounded text-[18px] text-char-400 flex-shrink-0 transition-transform duration-fast ease-ds-out ${
@@ -567,7 +409,7 @@ export default function ProfileScreen() {
   // Display names for profile.conditions (healthConditionID[]), resolved via
   // the cached conditions dictionary.
   const [conditionNames, setConditionNames] = useState([]);
-  // null | 'medications' | 'allergies' | 'dietary' | 'about'
+  // null | 'medications' | 'calorieTarget'
   const [sheet, setSheet] = useState(null);
 
   useEffect(() => {
@@ -604,7 +446,6 @@ export default function ProfileScreen() {
     );
   }
 
-  const initials = user?.email ? user.email[0].toUpperCase() : 'P';
   const displayName = profile?.firstName?.trim() || user?.email?.split('@')[0] || 'Your profile';
 
   return (
@@ -616,24 +457,25 @@ export default function ProfileScreen() {
 
       {/* ── 1. Header zone ─────────────────────────────────────────────────── */}
       <div className="bg-forest-300 px-5 pt-10 pb-6">
-        {/* Page label row — mirrors HomeScreen's label + right-side icon pattern */}
-        <div className="flex items-start justify-between">
-          <p className="font-label text-xs tracking-widest uppercase text-blue-950/60">Profile</p>
-          <div className="w-12 h-12 mt-2 ml-2 rounded-full bg-forest-700 flex items-center justify-center text-white text-base font-bold font-sans flex-shrink-0 shadow-xs">
-            {initials}
-          </div>
-        </div>
+        {/* Page label row */}
+        <p className="font-label text-xs tracking-widest uppercase text-blue-950/60">Edit profile</p>
 
         {/* Display name — same size as HomeScreen's "Hi there, [name]" greeting */}
         <h1 className="font-display text-[32px] font-semibold text-blue-950 leading-tight mt-2">
           {displayName}
         </h1>
 
-        {/* Active conditions — stacked vertically, bigger chips */}
+        {/* Active conditions — single horizontal scrollable line */}
         {profile?.conditions?.length > 0 && (
-          <div className="flex flex-col gap-2 mt-3 items-start">
+          <div className="flex flex-nowrap gap-2 mt-3 overflow-x-auto">
             {profile.conditions.map((id, i) => (
-              <ConditionTag key={id} condition={conditionNames[i] ?? `Condition ${id}`} solid truncate className="max-w-[50%]" />
+              <ConditionTag
+                key={id}
+                condition={conditionNames[i] ?? `Condition ${id}`}
+                solid
+                truncate
+                className="shrink-0 max-w-[220px]"
+              />
             ))}
           </div>
         )}
@@ -678,17 +520,15 @@ export default function ProfileScreen() {
             <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-1">
               Profile details
             </p>
-            <SubEditRow icon="scale" label="About you" onClick={() => setSheet('about')} />
+            <SubEditRow icon="scale" label="Daily calorie target" onClick={() => setSheet('calorieTarget')} />
             <SubEditRow icon="pill" label="Medications" onClick={() => setSheet('medications')} />
-            <SubEditRow icon="shield" label="Allergies & intolerances" onClick={() => setSheet('allergies')} />
-            <SubEditRow icon="leaf" label="Dietary preferences" onClick={() => setSheet('dietary')} />
           </div>
         </div>
       </div>
 
       {/* ── Sub-edit sheets (BottomSheet) ─────────────────────────────────── */}
-      {sheet === 'about' && (
-        <EditAboutYou
+      {sheet === 'calorieTarget' && (
+        <EditCalorieTarget
           profile={profile}
           onChange={(patch) => save(patch)}
           onClose={() => setSheet(null)}
@@ -700,22 +540,6 @@ export default function ProfileScreen() {
           value={profile?.medications ?? []}
           placeholder="e.g. Metformin 500mg"
           onChange={(v) => save({ medications: v })}
-          onClose={() => setSheet(null)}
-        />
-      )}
-      {sheet === 'allergies' && (
-        <EditList
-          title="Edit allergies & intolerances"
-          value={profile?.allergies ?? []}
-          placeholder="e.g. Shellfish, Peanuts"
-          onChange={(v) => save({ allergies: v })}
-          onClose={() => setSheet(null)}
-        />
-      )}
-      {sheet === 'dietary' && (
-        <EditDietary
-          value={profile?.dietary ?? []}
-          onChange={(v) => save({ dietary: v })}
           onClose={() => setSheet(null)}
         />
       )}

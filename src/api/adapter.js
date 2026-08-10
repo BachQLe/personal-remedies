@@ -8,10 +8,10 @@
  *   — see `isExcludedItem` — never by coarse group (coarse 'x' is also used
  *   by real foods like Taro leaves / pork liver)
  * - Historically NEVER exposed value/descriptionNumericID/numeric scores.
- *   RELAXED July 2026 (user-approved) for the star-rating feature:
- *   `assessFood` now also returns `score`/`verdict`/`numericId`/`stars`
- *   (see `numericIdToStars`) alongside the existing `tier`. Everything else
- *   this rule protected still holds unchanged: /topdoordonts and /detailed
+ *   RELAXED July 2026 (user-approved) for the rating feature: `assessFood`
+ *   now also returns `score`/`verdict`/`numericId` alongside the existing
+ *   `tier`. `numericId` feeds the 3-star/3-skull rating row — see
+ *   `numericIdToRating` in src/utils/rating.js. Everything else
  *   items still carry no tier/score data (list membership + rank/listType
  *   IS the verdict there), and `referenceTotal: null` still means "unknown",
  *   never "zero".
@@ -170,21 +170,6 @@ export function numericIdToTier(numericId) {
     case 4:
     default: return null;
   }
-}
-
-/** Explicit 7-step verdict ladder → stars-out-of-5 map for numericIdToStars. */
-const STARS_BY_NUMERIC_ID = { 1: 5, 2: 4.5, 3: 4, 4: 3, 5: 2, 6: 1.5, 7: 1 };
-
-/**
- * Map descriptionNumericID (the Nutridigm 7-step verdict ladder) to a
- * stars-out-of-5 rating. Intentionally relaxes the former "never expose
- * numeric scores" rule (user-approved July 2026) — used for the star rating
- * on FoodDetailCard. Returns null for anything outside 1–7.
- * @param {number} numericId
- * @returns {number|null}
- */
-export function numericIdToStars(numericId) {
-  return STARS_BY_NUMERIC_ID[numericId] ?? null;
 }
 
 // ── Food item cache ──────────────────────────────────────────────────────────
@@ -526,6 +511,15 @@ const RECIPE_MEAL_TYPE_KEYWORDS = [
   ['guacamole', 'snack'],
   ['dip', 'snack'],
   ['bar', 'snack'],
+  ['cake', 'snack'],
+  ['cookie', 'snack'],
+  ['pie', 'snack'],
+  ['brownie', 'snack'],
+  ['pudding', 'snack'],
+  ['tart', 'snack'],
+  ['ice cream', 'snack'],
+  ['cheesecake', 'snack'],
+  ['muffin', 'snack'],
 ];
 
 /**
@@ -735,7 +729,6 @@ async function assessFoodRaw(foodId, conditionIds) {
     score: raw.value ?? null,
     verdict: raw.description ?? null,
     numericId: raw.descriptionNumericID ?? null,
-    stars: numericIdToStars(raw.descriptionNumericID),
   };
 }
 
@@ -976,6 +969,7 @@ async function getRecipesRaw(conditionIds) {
       foodId: item.foodItemID,
       title,
       tier: numericIdToTier(item.descriptionNumericID),
+      numericId: item.descriptionNumericID ?? null,
       sourceName: parseSourceName(item.notes),
       matchedConditions,
       photo: getIngredientImage(title, item.coarseFoodGroup, getOverlayImageFile(item.foodItemID)),
@@ -1046,7 +1040,7 @@ function recipeToPlanCandidate(recipe) {
     group: RECIPE_FINE_GROUP,
     fineGroup: RECIPE_FINE_GROUP,
     tier: recipe.tier,
-    numericId: TIER_TO_NUMERIC_ID[recipe.tier],
+    numericId: recipe.numericId ?? TIER_TO_NUMERIC_ID[recipe.tier] ?? null,
     kind: 'recipe',
     sourceName: recipe.sourceName,
   };
@@ -1235,6 +1229,11 @@ async function getMealPlanSuggestionsRaw(conditionIds) {
   const candidates = {};
   for (const slot of PLAN_SLOTS) {
     const flagKey = SLOT_FLAG_KEY[slot.key];
+    // NOTE: computed but intentionally unused for now — candidate pools are
+    // recipes-only (see below) to avoid mixing plain-food and recipe
+    // candidates in the same slot. Fetching machinery kept in place as a
+    // fast-follow cleanup is planned separately.
+    // eslint-disable-next-line no-unused-vars
     const interleaved = flagKey
       ? flaggedPoolAcrossGroups(byGroup, itemsMap, flagKey)
       : interleaveAndDedupe(slot.fineGroups.map((g) => byGroup.get(g) || []));
@@ -1245,9 +1244,7 @@ async function getMealPlanSuggestionsRaw(conditionIds) {
           .map(recipeToPlanCandidate)
       : [];
 
-    candidates[slot.key] = slot.recipeLead
-      ? [...slotRecipes, ...interleaved]
-      : [...interleaved, ...slotRecipes];
+    candidates[slot.key] = slotRecipes;
   }
 
   const conditionNames = await getConditionNames(conditionIds).catch(() => []);

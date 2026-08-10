@@ -9,23 +9,26 @@ import { getRecentSearches, addRecentSearch } from '../../state/recentSearches.j
 import Icon from '../../components/shared/Icon.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
+import SaveButton from '../../components/shared/SaveButton.jsx';
+import Snackbar from '../../components/shared/Snackbar.jsx';
+import { recipeToSaveItem } from '../../utils/saveGate.js';
 
 // Mode configs — Food Lookup vs Natural Sources. Backdrop colors are the
 // exact hex values behind the `yellow-200`/`blue-200` Tailwind tokens
 // (see tailwind.config.js) so framer-motion can animate between them as
 // real color values instead of instant class swaps. `accentFocusClass` /
 // `spinnerClass` key the input's focus ring and loading spinner to the same
-// hue as the backdrop; `examples` feed the ghost-typing placeholder below.
+// hue as the backdrop.
 const MODES = {
   food: {
     label: 'Food Lookup',
-    heading: 'Look up foods and recipes',
+    heading: 'Ingredients and Recipes',
     searchFn: searchFoodsAndRecipes,
     recentsScope: 'default',
     backdropColor: '#FFEC88',
     accentFocusClass: 'focus:border-yellow-500',
     spinnerClass: 'text-yellow-600',
-    examples: ['grilled salmon', 'greek yogurt', 'oatmeal', 'is dark chocolate good for me?'],
+    placeholder: 'Enter foods and recipes.',
   },
   natural: {
     label: 'Natural Sources',
@@ -35,7 +38,7 @@ const MODES = {
     backdropColor: '#BBCEFF',
     accentFocusClass: 'focus:border-blue-500',
     spinnerClass: 'text-blue-600',
-    examples: ['vitamin D', 'omega-3', 'magnesium', 'fiber'],
+    placeholder: 'Enter natural sources and supplements.',
   },
 };
 
@@ -44,7 +47,7 @@ const MODE_OPTIONS = [
   { key: 'natural', label: MODES.natural.label },
 ];
 
-function ResultRow({ kind, title, subtitle, onClick }) {
+function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked }) {
   const isRecipe = kind === 'recipe';
   return (
     <motion.button
@@ -65,6 +68,8 @@ function ResultRow({ kind, title, subtitle, onClick }) {
         <p className="font-semibold text-sm text-char-900 truncate leading-tight">{title}</p>
         {subtitle && <p className="text-xs text-char-500 mt-0.5 truncate">{subtitle}</p>}
       </div>
+
+      <SaveButton item={saveItem} onBlocked={onSaveBlocked} className="flex-shrink-0" />
     </motion.button>
   );
 }
@@ -83,74 +88,6 @@ function getProfile() {
   return { conditions: DEFAULT_DEV_CONDITIONS };
 }
 
-const GHOST_TYPE_MS = 45;
-const GHOST_DELETE_MS = 26;
-const GHOST_HOLD_MS = 1400;
-
-// True once and cached for the session — reduced-motion preference doesn't
-// need live updates for a decorative placeholder cycle.
-const prefersReducedMotion =
-  typeof window !== 'undefined' && typeof window.matchMedia === 'function'
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    : false;
-
-// Types out each example query char-by-char, holds, deletes, then moves to
-// the next — a lightweight "what can I search here?" hint. Drives the
-// input's `placeholder` attr directly (rather than an overlay element) since
-// nothing else needs to occupy that space. Disabled (returns the bare first
-// example, static) whenever `enabled` is false or the user prefers reduced
-// motion.
-function useGhostPlaceholder(examples, enabled) {
-  const [text, setText] = useState('');
-  const animating = enabled && examples?.length > 0 && !prefersReducedMotion;
-
-  useEffect(() => {
-    if (!animating) return undefined;
-
-    let cancelled = false;
-    let timer = null;
-    let phraseIndex = 0;
-    let charIndex = 0;
-    let deleting = false;
-
-    const tick = () => {
-      if (cancelled) return;
-      const phrase = examples[phraseIndex];
-      if (!deleting) {
-        charIndex += 1;
-        setText(phrase.slice(0, charIndex));
-        if (charIndex >= phrase.length) {
-          timer = setTimeout(() => {
-            deleting = true;
-            timer = setTimeout(tick, GHOST_DELETE_MS);
-          }, GHOST_HOLD_MS);
-          return;
-        }
-        timer = setTimeout(tick, GHOST_TYPE_MS);
-      } else {
-        charIndex -= 1;
-        setText(phrase.slice(0, charIndex));
-        if (charIndex <= 0) {
-          deleting = false;
-          phraseIndex = (phraseIndex + 1) % examples.length;
-          timer = setTimeout(tick, GHOST_TYPE_MS);
-          return;
-        }
-        timer = setTimeout(tick, GHOST_DELETE_MS);
-      }
-    };
-
-    timer = setTimeout(tick, GHOST_TYPE_MS);
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-    };
-  }, [animating, examples]);
-
-  if (!enabled || !examples?.length) return '';
-  return animating ? text : examples[0];
-}
-
 export default function SearchScreen({ active, onClose }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlMode = searchParams.get('mode') === 'natural' ? 'natural' : 'food';
@@ -159,10 +96,17 @@ export default function SearchScreen({ active, onClose }) {
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [snackbar, setSnackbar] = useState(null);
 
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
+  const snackbarIdRef = useRef(0);
   const profile = useRef(getProfile());
+
+  const showSnackbar = useCallback((message) => {
+    snackbarIdRef.current += 1;
+    setSnackbar({ id: snackbarIdRef.current, message });
+  }, []);
 
   const {
     heading,
@@ -171,11 +115,10 @@ export default function SearchScreen({ active, onClose }) {
     backdropColor,
     accentFocusClass,
     spinnerClass,
-    examples,
+    placeholder,
   } = MODES[mode];
 
   const hasQuery = query.trim().length > 0;
-  const ghostPlaceholder = useGhostPlaceholder(examples, active && !hasQuery);
   // Derived straight from storage on every render rather than mirrored into
   // state — addRecentSearch() writes synchronously, so by the time any
   // re-render happens (triggered by the same handler's other setState calls)
@@ -377,7 +320,7 @@ export default function SearchScreen({ active, onClose }) {
                   onChange={(e) => handleChange(e.target.value)}
                   onKeyDown={handleKeyDown}
                   autoFocus
-                  placeholder={ghostPlaceholder}
+                  placeholder={placeholder}
                   className={`w-full pl-12 pr-12 py-4 rounded-xl bg-white border-[1.5px] border-sand-200
                     text-base text-char-900 placeholder:text-char-400 font-sans
                     shadow-[0_2px_8px_rgba(45,36,24,0.06)]
@@ -423,6 +366,8 @@ export default function SearchScreen({ active, onClose }) {
                                 title={item.food.name}
                                 subtitle={item.food.category || 'Ingredient'}
                                 onClick={() => openFood(item.food)}
+                                saveItem={{ ...item.food, kind: 'food' }}
+                                onSaveBlocked={showSnackbar}
                               />
                             ) : (
                               <ResultRow
@@ -431,6 +376,8 @@ export default function SearchScreen({ active, onClose }) {
                                 title={item.recipe.title}
                                 subtitle={item.recipe.sourceName}
                                 onClick={() => openRecipe(item.recipe)}
+                                saveItem={recipeToSaveItem(item.recipe)}
+                                onSaveBlocked={showSnackbar}
                               />
                             ),
                           )
@@ -488,6 +435,8 @@ export default function SearchScreen({ active, onClose }) {
         open={!!selectedItem}
         onClose={() => setSelectedItem(null)}
       />
+
+      <Snackbar snackbar={snackbar} onDismiss={() => setSnackbar(null)} />
     </>
   );
 }

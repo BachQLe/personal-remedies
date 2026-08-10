@@ -16,6 +16,7 @@ import TermsOfUse from "./pages/marketing/TermsOfUse";
 import PrivacyPolicy from "./pages/marketing/PrivacyPolicy";
 import AuthCallback from "./pages/marketing/AuthCallback";
 import OnboardingPage from "./components/onboarding";
+import ErrorBoundary from "./components/shared/ErrorBoundary";
 // App screens
 import HomeScreen from "./screens/home/HomeScreen";
 import SearchScreen from "./screens/search/SearchScreen";
@@ -133,45 +134,47 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <ScrollToTop />
-        <SyncParentUrl />
-        <Routes>
-          {/* Marketing site */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/survey" element={<Survey />} />
-          <Route path="/providers" element={<Providers />} />
-          <Route path="/developers" element={<Developers />} />
-          <Route path="/science" element={<Science />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/news" element={<News />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/terms" element={<TermsOfUse />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/onboarding" element={<OnboardingPage />} />
-          {/* Dev */}
-          <Route path="/kitchen-sink" element={<KitchenSink />} />
-          {/* PWA App — gated behind onboarding */}
-          <Route path="/app" element={<Navigate to="/app/home" replace />} />
-          <Route path="/app/natural" element={<Navigate to="/app/search?mode=natural" replace />} />
-          {/* Stale links to the retired glance / Top Dos & Don'ts screens */}
-          <Route path="/app/glance" element={<Navigate to="/app/suggestions" replace />} />
-          <Route path="/app/top" element={<Navigate to="/app/suggestions" replace />} />
-          <Route element={<AppLayout />}>
-            <Route path="/app/home" element={<HomeScreen />} />
-            <Route path="/app/search" element={<SearchRouteScreen />} />
-            <Route path="/app/suggestions" element={<SuggestionsScreen />} />
-            <Route path="/app/suggestions/group/:groupId" element={<GroupDetailScreen />} />
-            <Route path="/app/recipes" element={<RecipesScreen />} />
-            <Route path="/app/plan" element={<MealQueueScreen />} />
-            <Route path="/app/profile" element={<ProfileScreen />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <SyncParentUrl />
+          <Routes>
+            {/* Marketing site */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/survey" element={<Survey />} />
+            <Route path="/providers" element={<Providers />} />
+            <Route path="/developers" element={<Developers />} />
+            <Route path="/science" element={<Science />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/news" element={<News />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/terms" element={<TermsOfUse />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            {/* Dev */}
+            <Route path="/kitchen-sink" element={<KitchenSink />} />
+            {/* PWA App — gated behind onboarding */}
+            <Route path="/app" element={<Navigate to="/app/home" replace />} />
+            <Route path="/app/natural" element={<Navigate to="/app/search?mode=natural" replace />} />
+            {/* Stale links to the retired glance / Top Dos & Don'ts screens */}
+            <Route path="/app/glance" element={<Navigate to="/app/suggestions" replace />} />
+            <Route path="/app/top" element={<Navigate to="/app/suggestions" replace />} />
+            <Route element={<AppLayout />}>
+              <Route path="/app/home" element={<HomeScreen />} />
+              <Route path="/app/search" element={<SearchRouteScreen />} />
+              <Route path="/app/suggestions" element={<SuggestionsScreen />} />
+              <Route path="/app/suggestions/group/:groupId" element={<GroupDetailScreen />} />
+              <Route path="/app/recipes" element={<RecipesScreen />} />
+              <Route path="/app/plan" element={<MealQueueScreen />} />
+              <Route path="/app/profile" element={<ProfileScreen />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 

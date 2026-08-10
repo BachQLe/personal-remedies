@@ -100,3 +100,29 @@ export function getOverlayImageFile(foodItemID) {
   }
   return imageFile;
 }
+
+/**
+ * Look up the curated snack/beverage flags for a single foodItemID. Same
+ * by-ID, layer-ordered read as `getOverlayImageFile` — deliberately NOT off an
+ * already-merged item row, so the UI can ask about any id it holds, including
+ * one restored from a plan persisted before these flags existed.
+ *
+ * This is the only path by which `isSnack`/`isBeverage` reach the UI at all:
+ * `flaggedPoolAcrossGroups` (src/api/adapter.js) consumes them as a filter
+ * predicate and discards them, and `toPlanItem` (src/api/planBuilder.js) keeps
+ * a strict nine-field whitelist that excludes them.
+ * @param {number|string} foodItemID
+ * @returns {{isSnack: boolean, isBeverage: boolean}}
+ */
+export function getOverlayFlags(foodItemID) {
+  const key = String(foodItemID);
+  let isSnack = false;
+  let isBeverage = false;
+  for (const layer of ITEM_OVERLAY_LAYERS) {
+    const row = layer[key];
+    if (!row) continue;
+    if (row.isSnack !== undefined) isSnack = !!row.isSnack;
+    if (row.isBeverage !== undefined) isBeverage = !!row.isBeverage;
+  }
+  return { isSnack, isBeverage };
+}

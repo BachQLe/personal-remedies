@@ -3,12 +3,14 @@ import { X, Bookmark, ChevronLeft, ExternalLink } from 'lucide-react';
 import ConditionTag from './shared/ConditionTag.jsx';
 import Icon from './shared/Icon.jsx';
 import Skeleton from './shared/Skeleton.jsx';
-import StarRating from './shared/StarRating.jsx';
+import FoodRating from './shared/FoodRating.jsx';
 import StudyReferences from './shared/StudyReferences.jsx';
 import { getLibrary, addToLibrary, removeFromLibrary } from '../state/library.js';
 import { getFoodFacts, assessFood, getFoodIdByName } from '../api/api.js';
 import { storage } from '../api/storage.js';
 import { DEFAULT_DEV_CONDITIONS } from '../api/config.js';
+import { getSaveBlockReason, SAVE_BLOCK_MESSAGES } from '../utils/saveGate.js';
+import Snackbar from './shared/Snackbar.jsx';
 
 const DISMISS_THRESHOLD = 100;
 
@@ -132,10 +134,40 @@ export default function FoodDetailCard({ item, open, onClose }) {
   const [dragging, setDragging] = useState(false);
   const dragOriginY = useRef(0);
 
+  const [snackbar, setSnackbar] = useState(null);
+  const snackbarIdRef = useRef(0);
+  const undoFnRef = useRef(null);
+  const showSnackbar = useCallback((message, canUndo = false, undoFn = null) => {
+    snackbarIdRef.current += 1;
+    undoFnRef.current = undoFn;
+    setSnackbar({ id: snackbarIdRef.current, message, canUndo });
+  }, []);
+  const handleSnackbarUndo = useCallback(() => {
+    undoFnRef.current?.();
+    setSnackbar(null);
+  }, []);
+
   const isRecipe = item
     ? (item.isRecipe ?? (item.ingredients?.length > 0 || !!item.sourceName))
     : false;
+  // Hoisted so both the save gate below AND handleSave's addToLibrary
+  // payload use the exact same value — addToLibrary previously omitted
+  // `kind` entirely, so items saved from this card recomputed as
+  // 'ingredient' later (getSaveBlockReason short-circuits on a missing kind).
+  const kind = isRecipe ? 'recipe' : 'food';
   const combinedFoodId = item?.foodId ?? resolvedFoodId ?? null;
+
+  // Save-gate: translate this card's item shape (isRecipe + async assessment)
+  // into the { kind, tier, numericId } shape getSaveBlockReason expects.
+  // Non-recipes don't depend on assessment.tier/numericId at all
+  // (getSaveBlockReason short-circuits to 'ingredient' for any non-recipe
+  // kind), so only recipes need to wait on the assessment settling. While
+  // detailLoading is true, we don't yet know assessment.tier/numericId for a
+  // recipe, so withhold the blocked state rather than show it then flip it
+  // off once the assessment resolves. Passing numericId (not just tier)
+  // makes this exact rather than relying on saveGate's tier-only fallback.
+  const gateItem = { kind, tier: assessment?.tier, numericId: assessment?.numericId };
+  const blockReason = (isRecipe && detailLoading) ? null : getSaveBlockReason(gateItem);
 
   // Lock body scroll while the card is open
   useEffect(() => {
@@ -223,10 +255,11 @@ export default function FoodDetailCard({ item, open, onClose }) {
         fineGroup: assessment?.food?.fineGroup ?? null,
         tier: assessment?.tier ?? null,
         numericId: assessment?.numericId ?? null,
+        kind,
       });
     }
     setSaved((s) => !s);
-  }, [saved, combinedFoodId, item, facts, assessment]);
+  }, [saved, combinedFoodId, item, facts, assessment, kind]);
 
   const onHandleDown = (e) => {
     isDragging.current = true;
@@ -347,16 +380,36 @@ export default function FoodDetailCard({ item, open, onClose }) {
               <div className="w-14 h-1.5 rounded-full bg-white/60" />
             </div>
 
-            {/* Save — top-left */}
+            {/* Save — top-left. Blocked (not-yet-saved, gated) items render a
+                slashed bookmark and toast the reason instead of saving —
+                see saveGate.js. Removal is always allowed regardless of
+                blockReason. */}
             <button
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={handleSave}
+              onClick={() => {
+                if (!saved && blockReason) {
+                  showSnackbar(SAVE_BLOCK_MESSAGES[blockReason]);
+                  return;
+                }
+                handleSave();
+              }}
               className={`absolute top-4 left-4 z-20 w-11 h-11 rounded-full flex items-center justify-center
                 shadow-md transition-all duration-fast backdrop-blur-sm
                 ${saved ? 'bg-white text-forest-700' : 'bg-white/90 text-char-500 hover:text-char-900'}`}
-              aria-label={saved ? 'Remove from saved recipes' : 'Save recipe'}
+              aria-label={saved ? 'Remove from saved recipes' : (blockReason ? SAVE_BLOCK_MESSAGES[blockReason] : 'Save recipe')}
             >
-              <Bookmark size={20} fill={saved ? 'currentColor' : 'none'} />
+              {!saved && blockReason ? (
+                <span className="relative inline-flex items-center justify-center" style={{ width: 20, height: 20 }}>
+                  <Bookmark size={20} />
+                  <span
+                    aria-hidden="true"
+                    className="absolute left-0 top-1/2 h-[1.5px] w-[141%] bg-current"
+                    style={{ transform: 'translateY(-50%) rotate(-45deg)', transformOrigin: 'center' }}
+                  />
+                </span>
+              ) : (
+                <Bookmark size={20} fill={saved ? 'currentColor' : 'none'} />
+              )}
             </button>
 
             {/* X close — top-right */}
@@ -379,13 +432,10 @@ export default function FoodDetailCard({ item, open, onClose }) {
               className="absolute bottom-0 left-0 right-0 z-20 bg-neutral-900/70 backdrop-blur-sm rounded-t-2xl px-5 pt-4 pb-5 flex flex-col gap-2 min-h-[250px]"
               onPointerDown={(e) => e.stopPropagation()}
             >
-              {/* Star rating — pinned to top-right of the info panel */}
-              {(detailLoading || assessment?.stars != null) && (
+              {/* Verdict rating — pinned to top-right of the info panel */}
+              {(detailLoading || assessment?.numericId != null) && (
                 <div className="absolute top-3 right-4">
-                  <StarRating
-                    stars={assessment?.stars}
-                    loading={detailLoading}
-                  />
+                  <FoodRating numericId={assessment?.numericId} size={18} loading={detailLoading} showNeutralLabel />
                 </div>
               )}
 
@@ -542,6 +592,11 @@ export default function FoodDetailCard({ item, open, onClose }) {
 
         </div>
       </div>
+
+      {/* Mounted outside the (transformed) card wrapper — a `transform` on an
+          ancestor creates a new containing block for `fixed` descendants,
+          which would break Snackbar's viewport-anchored positioning. */}
+      <Snackbar snackbar={snackbar} onUndo={handleSnackbarUndo} onDismiss={() => setSnackbar(null)} />
     </div>
   );
 }

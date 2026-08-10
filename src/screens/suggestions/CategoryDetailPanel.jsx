@@ -26,10 +26,11 @@
  *                 own header row)
  *   onSelectFood — callback(food) — tap a row → parent opens FoodDetailCard
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getCategoryDetail, getGroupLabel } from '../../api/api.js';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
+import Snackbar from '../../components/shared/Snackbar.jsx';
 
 const LIST_TYPES = [
   { key: 'helpful', label: 'Eat', tone: 'positive' },
@@ -50,6 +51,22 @@ export default function CategoryDetailPanel({ profile, group, groupLabel: groupL
   // network call) so re-opening this panel for the same group doesn't refetch.
   const [resultsByType, setResultsByType] = useState({}); // { [listType]: { items, usedFallback } }
   const [loading, setLoading] = useState(false);
+
+  // Snackbar wiring (see Snackbar.jsx's 3-piece pattern) — own instance,
+  // separate from TopDosTab's — used here only for SaveButton's onBlocked
+  // toast; no undo action on this screen.
+  const [snackbar, setSnackbar] = useState(null);
+  const snackbarIdRef = useRef(0);
+  const undoFnRef = useRef(null);
+  const showSnackbar = useCallback((message, canUndo = false, undoFn = null) => {
+    snackbarIdRef.current += 1;
+    undoFnRef.current = undoFn;
+    setSnackbar({ id: snackbarIdRef.current, message, canUndo });
+  }, []);
+  const handleUndo = useCallback(() => {
+    undoFnRef.current?.();
+    setSnackbar(null);
+  }, []);
 
   // Reset per-group state when the panel is pointed at a (possibly new)
   // group. Adjusted during render (React's documented escape hatch for
@@ -131,10 +148,13 @@ export default function CategoryDetailPanel({ profile, group, groupLabel: groupL
               food={food}
               studyCount={food.referenceTotal}
               onSelect={onSelectFood}
+              onSaveBlocked={showSnackbar}
             />
           ))}
         </div>
       )}
+
+      <Snackbar snackbar={snackbar} onUndo={handleUndo} onDismiss={() => setSnackbar(null)} />
     </div>
   );
 }

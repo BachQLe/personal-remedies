@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shuffle, X, BookmarkPlus } from 'lucide-react';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
+import SaveButton from '../../components/shared/SaveButton.jsx';
 import { getIngredientImage } from '../../api/ingredientImages.js';
-import { numericIdToStars } from '../../api/adapter.js';
+import { displayTagForItem } from '../../components/shared/mealTypeMeta.jsx';
 
 const calmSpring = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
 
@@ -16,7 +17,8 @@ function cardImage(item) {
  * or a dashed-border empty state when the slot has no items.
  *
  * Each card carries a meal-type corner tag (the slot IS its meal type) and
- * one circular action: Remove (drop from the plan, with Undo upstream).
+ * two circular actions: Remove (drop from the plan, with Undo upstream, top
+ * corner) and Save (bookmark to the user's library, bottom corner).
  */
 export default function SlotSection({
   slot,
@@ -31,6 +33,7 @@ export default function SlotSection({
   onRemove,
   ghost,
   shuffling,
+  onSaveBlocked,
 }) {
   const allPinned = items.length > 0 && items.every((item) => pinnedIds?.includes(item.id));
   const shuffleDisabled = ghost || items.length === 0 || shuffling || allPinned;
@@ -78,12 +81,13 @@ export default function SlotSection({
                   <FoodImageCard
                     id={item.id}
                     image={cardImage(item)}
-                    stars={numericIdToStars(item.numericId)}
+                    numericId={item.numericId}
                     title={item.name}
                     subtitle={item.kind === 'recipe' ? item.sourceName : undefined}
-                    mealTag={slot.key}
+                    mealTag={displayTagForItem(item, slot.key)}
                     aspectRatio="4/5"
                     onClick={() => onSelect(item)}
+                    saveAction={() => <SaveButton item={item} onBlocked={onSaveBlocked} />}
                     action={() => (
                       <span
                         role="button"

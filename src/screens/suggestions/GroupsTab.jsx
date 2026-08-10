@@ -43,7 +43,7 @@ function CategoryGrid({ coarseLabels, fineLabelsByGroup, onOpen }) {
           <button
             key={group}
             onClick={() => onOpen(group)}
-            className="flex flex-col items-start gap-2 px-3 py-4 rounded-xl bg-white border border-sand-200 text-left
+            className="flex flex-col items-start gap-2 px-3 py-4 rounded-sm bg-white border border-sand-200 text-left
               transition-colors duration-fast hover:border-forest-300 active:scale-[0.99]"
           >
             <div className="w-11 h-11 rounded-lg bg-forest-50 flex items-center justify-center flex-shrink-0">

@@ -13,9 +13,9 @@
  *   mealTag         — meal-type corner chip, top-left: a PLAN_SLOT_KEYS
  *                     string (rendered via MealTypeTag) or a React node
  *                     rendered as-is. Independent of `badge`/`action`.
- *   stars           — 0.5-stepped rating, 0–5; renders a small star row above
- *                     the title. Null/undefined renders nothing (never show a
- *                     fake rating).
+ *   numericId       — Nutridigm verdict ladder id (1-7); renders a 3-star /
+ *                     3-skull row above the title. Null/undefined or 4
+ *                     (neutral) renders nothing (never show a fake rating).
  *   title           — card heading (displayed at bottom)
  *   subtitle        — smaller text below title (lead ingredients, description, etc.)
  *   aspectRatio     — aspect ratio string, default '4/5' (full-screen mobile)
@@ -25,6 +25,13 @@
  *   gradient        — optional gradient direction, default 'from-char-900/85 via-char-900/20 to-transparent'
  *   action          — optional action element (renders in top-right overlay)
  *   actionOnClick   — callback for action button
+ *   saveAction      — optional save-button element (renders in bottom-right
+ *                     overlay; independent of `action`/`badge`). Supports a
+ *                     plain node or a function (same convention as `action`),
+ *                     but — unlike `action` — is rendered as-is with no extra
+ *                     click wrapper, since a `saveAction` node (e.g.
+ *                     SaveButton) is expected to be self-contained and handle
+ *                     its own click/keyboard/stopPropagation.
  *   loading         — 'lazy' | 'eager', default 'lazy'
  *
  * Styling:
@@ -34,7 +41,7 @@
  *   - Active: press-down (translate-y), slight scale
  */
 
-import StarRating from './StarRating.jsx';
+import FoodRating from './FoodRating.jsx';
 import MealTypeTag from './mealTypeMeta.jsx';
 
 /**
@@ -44,7 +51,7 @@ import MealTypeTag from './mealTypeMeta.jsx';
  * @param {string} [props.imageAlt]
  * @param {string | {label: string, variant?: string}} [props.badge]
  * @param {string | React.ReactNode} [props.mealTag]
- * @param {number | null} [props.stars]
+ * @param {number | null} [props.numericId]
  * @param {string} props.title
  * @param {string} [props.subtitle]
  * @param {string} [props.aspectRatio]
@@ -54,6 +61,7 @@ import MealTypeTag from './mealTypeMeta.jsx';
  * @param {string} [props.gradient]
  * @param {React.ReactNode} [props.action]
  * @param {() => void} [props.actionOnClick]
+ * @param {React.ReactNode | (() => React.ReactNode)} [props.saveAction]
  * @param {'lazy' | 'eager'} [props.loading]
  */
 export default function FoodImageCard({
@@ -62,7 +70,7 @@ export default function FoodImageCard({
   imageAlt = '',
   badge,
   mealTag,
-  stars,
+  numericId,
   title,
   subtitle,
   aspectRatio = '4/5',
@@ -72,6 +80,7 @@ export default function FoodImageCard({
   gradient = 'from-char-900/85 via-char-900/20 to-transparent',
   action,
   actionOnClick,
+  saveAction,
   loading = 'lazy',
 }) {
   const badgeLabel = typeof badge === 'string' ? badge : badge?.label;
@@ -177,11 +186,19 @@ export default function FoodImageCard({
         </div>
       )}
 
+      {/* Save button at bottom-right (optional; independent of action/badge).
+          Rendered as-is (no extra click wrapper) — the node is expected to
+          be self-contained (e.g. SaveButton), handling its own
+          click/keyboard/stopPropagation. */}
+      {saveAction && (
+        <div className="absolute bottom-3 right-3 z-10">
+          {typeof saveAction === 'function' ? saveAction() : saveAction}
+        </div>
+      )}
+
       {/* Content at bottom */}
       <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col gap-1">
-        {stars != null && (
-          <StarRating stars={stars} size={12} showValue={false} className="mb-1" />
-        )}
+        <FoodRating numericId={numericId} size={14} className="mb-1" />
         <span className="font-display text-base font-semibold text-white leading-snug">
           {title}
         </span>

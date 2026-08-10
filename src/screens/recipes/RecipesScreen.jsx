@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getProfile, getRecipes, getConditionNames, buildRecipeDetail } from '../../api/api.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
 import Pill from '../../components/shared/Pill.jsx';
 import SearchInput from '../../components/shared/SearchInput.jsx';
 import Icon from '../../components/shared/Icon.jsx';
+import SaveButton from '../../components/shared/SaveButton.jsx';
+import Snackbar from '../../components/shared/Snackbar.jsx';
+import { recipeToSaveItem } from '../../utils/saveGate.js';
 import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { GHOST_PROFILE, GHOST_RECIPES } from '../../api/ghostData.js';
 
@@ -69,11 +72,17 @@ const TIER_CONFIG = {
     fg: 'text-char-700',
     dot: 'bg-char-500',
   },
+  poor: {
+    label: 'Use caution',
+    bg: 'bg-caution-100',
+    fg: 'text-caution-700',
+    dot: 'bg-caution-600',
+  },
 };
 
 // ── Recipe list row — thumbnail, title, tier pill, source; whole row taps ────
 
-function RecipeRow({ recipe, onView }) {
+function RecipeRow({ recipe, onView, onSaveBlocked }) {
   const tierCfg = recipe.tier ? TIER_CONFIG[recipe.tier] : null;
   return (
     <button
@@ -121,9 +130,15 @@ function RecipeRow({ recipe, onView }) {
         </div>
       </div>
 
-      {/* Chevron affordance */}
-      <span className="flex-shrink-0 text-char-400">
-        <Icon name="chevron-right" size={16} />
+      {/* Save + chevron affordance */}
+      <span className="flex-shrink-0 flex items-center gap-2">
+        <SaveButton
+          item={recipeToSaveItem(recipe)}
+          onBlocked={onSaveBlocked}
+        />
+        <span className="text-char-400">
+          <Icon name="chevron-right" size={16} />
+        </span>
       </span>
     </button>
   );
@@ -139,6 +154,13 @@ export default function RecipesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   // Display names for the real profile's conditions (healthConditionID[]).
   const [conditionNames, setConditionNames] = useState([]);
+  const [snackbar, setSnackbar] = useState(null);
+  const snackbarIdRef = useRef(0);
+
+  const showSnackbar = useCallback((message, canUndo = false) => {
+    snackbarIdRef.current += 1;
+    setSnackbar({ id: snackbarIdRef.current, message, canUndo });
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -328,6 +350,7 @@ export default function RecipesScreen() {
               key={recipe.id}
               recipe={recipe}
               onView={handleViewRecipe}
+              onSaveBlocked={showSnackbar}
             />
           ))}
         </div>
@@ -338,6 +361,12 @@ export default function RecipesScreen() {
         item={selectedRecipe}
         open={!!selectedRecipe}
         onClose={() => setSelectedRecipe(null)}
+      />
+
+      {/* Save-gate feedback */}
+      <Snackbar
+        snackbar={snackbar}
+        onDismiss={() => setSnackbar(null)}
       />
     </div>
   );

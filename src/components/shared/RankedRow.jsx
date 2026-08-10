@@ -11,12 +11,17 @@
  *     no tier data, so this stays invisible there).
  *
  * Props:
- *   food       — { name, groupLabel?, notes?, isLifestyle?, tier? }
- *   studyCount — number | null/undefined — rendered as "N studies" when a real number
- *   onSelect   — callback(food)
+ *   food          — { id, name, groupLabel?, notes?, isLifestyle?, tier? }
+ *   studyCount    — number | null/undefined — rendered as "N studies" when a real number
+ *   onSelect      — callback(food)
+ *   onSaveBlocked — callback(message) — threaded through to SaveButton's onBlocked.
+ *                   Both callers of RankedRow only ever fetch plain foods/lifestyle
+ *                   items (recipes are structurally excluded from both endpoints),
+ *                   so SaveButton's `item.kind` is hardcoded to 'food' here.
  */
 import { ChevronRight } from 'lucide-react';
 import { cleanNotes } from '../../api/recommendations.js';
+import SaveButton from './SaveButton.jsx';
 
 // ── Tier config (colors match the existing SignalChip benefit tokens) ───────
 
@@ -41,7 +46,7 @@ const TIER_CONFIG = {
   },
 };
 
-export default function RankedRow({ food, studyCount, onSelect }) {
+export default function RankedRow({ food, studyCount, onSelect, onSaveBlocked }) {
   const notes = food.isLifestyle ? cleanNotes(food.notes) : '';
   const tierCfg = food.tier ? TIER_CONFIG[food.tier] : null;
 
@@ -90,6 +95,12 @@ export default function RankedRow({ food, studyCount, onSelect }) {
           {studyCount} {studyCount === 1 ? 'study' : 'studies'}
         </span>
       )}
+
+      <SaveButton
+        item={{ ...food, kind: 'food' }}
+        onBlocked={onSaveBlocked}
+        className="flex-shrink-0 self-center"
+      />
 
       <ChevronRight size={16} className="text-char-400 shrink-0 self-center" />
     </button>

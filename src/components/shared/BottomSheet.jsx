@@ -1,12 +1,16 @@
 /**
  * BottomSheet — modal drawer (bottom on mobile, centered on desktop).
  *
- * Props (unchanged): open, onClose, children, title
+ * Props: open, onClose, children, title, zClass
+ *
+ * `zClass` exists because the default `z-50` sits BELOW the full-screen
+ * MealPlannerPicker overlay (`z-[60]`); a sheet opened from inside that
+ * overlay must pass a higher layer or it renders behind it.
  */
 import { useEffect } from "react";
 import Icon from "./Icon.jsx";
 
-export default function BottomSheet({ open, onClose, children, title }) {
+export default function BottomSheet({ open, onClose, children, title, zClass = "z-50" }) {
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -21,7 +25,7 @@ export default function BottomSheet({ open, onClose, children, title }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className={`fixed inset-0 ${zClass} flex items-end justify-center`}>
       {/* Backdrop — light paper blur, fades in gradually */}
       <div
         className="absolute inset-0 bg-char-900/40 backdrop-blur-sm animate-backdrop-in"

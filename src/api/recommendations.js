@@ -5,7 +5,7 @@
  * into the Recommendation shape consumed by MealprepCarousel and prefetch.
  */
 
-import { buildMealPlan, getConditionNames, dedupeNotes } from './adapter.js';
+import { buildMealPlan, getConditionNames, dedupeNotes, getTopDosAndDonts } from './adapter.js';
 import { DEFAULT_DEV_CONDITIONS } from './config.js';
 import { storage } from './storage.js';
 import { getIngredientImage } from './ingredientImages.js';
@@ -120,4 +120,22 @@ export async function getRecommendations(slot, offset, limit = 3) {
   const slots = await loadSlots();
   const all = slots[slot] ?? [];
   return all.slice(offset, offset + limit);
+}
+
+/**
+ * Home carousel feed — same underlying list as the Top Dos & Don'ts "Do"
+ * tab (getTopDosAndDonts(profile, 'consume')), so the home carousel and
+ * Dietary Guidance stay consistent: both keep lifestyle/non-food items
+ * (flagged via `isLifestyle`), unlike getRecommendations above which is
+ * food-only. Returns raw Food-shaped items ({ id, name, group, fineGroup,
+ * notes, isLifestyle, rank, groupLabel, ... }) — no `tier` field, and no
+ * card-shape mapping here; callers adapt to their own card shape.
+ *
+ * @param {import('./types.js').Profile} profile
+ * @param {number} [limit=8]
+ * @returns {Promise<import('./types.js').Food[]>}
+ */
+export async function getHomeRecommendations(profile, limit = 8) {
+  const { items } = await getTopDosAndDonts(profile, 'consume');
+  return items.slice(0, limit);
 }

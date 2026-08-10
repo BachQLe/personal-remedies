@@ -11,17 +11,22 @@
  * picked) — see planBuilder.js.
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, RefreshCw } from 'lucide-react';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import BestRecipesRails from '../../components/shared/BestRecipesRails.jsx';
+import Snackbar from '../../components/shared/Snackbar.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import { getMealPlanSuggestions, generatePlanFromPicks, buildRecipeDetail } from '../../api/api.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import { getLibrary, subscribeLibrary } from '../../state/library.js';
 import { mealTypeForItem } from '../../components/shared/mealTypeMeta.jsx';
 import { PLAN_SLOT_KEYS } from '../../api/config.js';
+import { estimatePlanDayCalories } from '../../api/calorieNeeds.js';
+import { todayKey } from './planDates.js';
+import CalorieGapSheet from './CalorieGapSheet.jsx';
+import SlotBrowseSheet from './SlotBrowseSheet.jsx';
 
 const calmSpring = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
 
@@ -34,6 +39,14 @@ const TAB_OPTIONS = [
   { key: 'best', label: 'Best recipes' },
   { key: 'saved', label: 'Saved recipes' },
 ];
+
+// Fraction of the user's estimated daily need below which the plan is treated
+// as too thin to hand over without comment. Deliberately not 100% — these are
+// coarse estimates on both sides, so only a clear shortfall is worth a prompt.
+const CALORIE_GAP_RATIO = 0.8;
+
+/** Cap on quick-add cards in the gap sheet — it's a nudge, not a second picker. */
+const GAP_SUGGESTION_LIMIT = 24;
 
 function emptySlotMap() {
   return Object.fromEntries(PLAN_SLOT_KEYS.map((key) => [key, []]));
@@ -85,8 +98,28 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
   const [selected, setSelected] = useState(() => new Map());
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [generating, setGenerating] = useState(false);
+  /** @type {[{need: number, total: number}|null, Function]} */
+  const [gap, setGap] = useState(null);
+  const gapOpen = gap !== null;
+  const [browseSlot, setBrowseSlot] = useState(null);
+  const [snackbar, setSnackbar] = useState(null);
+  const snackbarRef = useRef(null);
+  const snackbarIdRef = useRef(0);
 
   useEffect(() => subscribeLibrary(setLibrary), []);
+
+  const showSnackbar = useCallback((message, canUndo = false, undoFn = null) => {
+    snackbarIdRef.current += 1;
+    const id = snackbarIdRef.current;
+    snackbarRef.current = undoFn;
+    setSnackbar({ id, message, canUndo });
+  }, []);
+
+  const handleSnackbarUndo = useCallback(() => {
+    if (snackbarRef.current) snackbarRef.current();
+    snackbarRef.current = null;
+    setSnackbar(null);
+  }, []);
 
   // Reset transient session state each time the overlay OPENS (guarded
   // render-time state adjustment — same escape hatch SuggestionsScreen uses
@@ -100,6 +133,8 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
     setActiveTab('best');
     setSelectedRecipe(null);
     setLoading(true);
+    setGap(null);
+    setBrowseSlot(null);
   } else if (!open && sessionOpen) {
     setSessionOpen(false);
   }
@@ -151,6 +186,17 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
     return out;
   }, [library]);
 
+  // Full (un-windowed) pool for whichever slot the "See more" sheet is open
+  // for. 'best' pulls straight from `pools` (not `visibleCandidates`, which
+  // is capped to WINDOW_SIZE) and tags each item with `fromSlot` manually,
+  // same as `visibleCandidates` does; 'saved' reuses `savedBySlot` as-is,
+  // since it's already the full, already-tagged pool.
+  const browsePool = useMemo(() => {
+    if (!browseSlot) return [];
+    if (activeTab === 'saved') return savedBySlot[browseSlot] || [];
+    return (pools[browseSlot] || []).map((item) => ({ ...item, fromSlot: browseSlot }));
+  }, [browseSlot, activeTab, pools, savedBySlot]);
+
   const handleRefresh = useCallback(() => {
     setOffset((o) => o + WINDOW_SIZE);
   }, []);
@@ -191,18 +237,74 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
       .catch(() => {});
   }, []);
 
+  const finish = useCallback(() => {
+    setGap(null);
+    onGenerated?.();
+    onClose?.();
+  }, [onGenerated, onClose]);
+
   const handleCreatePlan = useCallback(async () => {
     setGenerating(true);
     try {
-      await generatePlanFromPicks(profile, [...selected.values()]);
-      onGenerated?.();
-      onClose?.();
+      const { plan } = await generatePlanFromPicks(profile, [...selected.values()]);
+
+      const need = profile.calorieTarget ?? 2000;
+      const { total } = estimatePlanDayCalories(plan.days[todayKey()]?.slots);
+      if (total < need * CALORIE_GAP_RATIO) {
+        setGap({ need, total });
+        return;
+      }
+      finish();
     } catch (err) {
       console.error('MealPlannerPicker: generatePlanFromPicks failed', err);
     } finally {
       setGenerating(false);
     }
-  }, [profile, selected, onGenerated, onClose]);
+  }, [profile, selected, finish]);
+
+  // While the gap sheet is open, quick-adds mutate `selected` — rebuild the
+  // plan so the running total reflects the real planner output rather than a
+  // parallel estimate that could drift from it. Free: `generatePlanFromPicks`
+  // makes no network call once the candidate pools are memoized.
+  useEffect(() => {
+    if (!gapOpen || !profile) return;
+    let cancelled = false;
+    generatePlanFromPicks(profile, [...selected.values()])
+      .then(({ plan }) => {
+        if (cancelled) return;
+        const { total } = estimatePlanDayCalories(plan.days[todayKey()]?.slots);
+        setGap((prev) => (prev ? { ...prev, total } : prev));
+      })
+      .catch((err) => console.error('MealPlannerPicker: quick-add recompute failed', err));
+    return () => {
+      cancelled = true;
+    };
+  }, [gapOpen, profile, selected]);
+
+  // Quick-add candidates: the user's saved recipes first (their own food beats
+  // our ranking when the ask is "add something you'd actually eat"), then the
+  // ranked pools already in memory. Already-selected items stay in the list,
+  // rendered checked, so the sheet doesn't reshuffle under the user's finger.
+  const gapSuggestions = useMemo(() => {
+    if (!gapOpen) return [];
+    const out = [];
+    const seen = new Set();
+    for (const key of PLAN_SLOT_KEYS) {
+      for (const item of savedBySlot[key] || []) {
+        if (seen.has(item.id)) continue;
+        seen.add(item.id);
+        out.push(item);
+      }
+    }
+    for (const key of PLAN_SLOT_KEYS) {
+      for (const item of pools[key] || []) {
+        if (seen.has(item.id)) continue;
+        seen.add(item.id);
+        out.push({ ...item, fromSlot: key });
+      }
+    }
+    return out.slice(0, GAP_SUGGESTION_LIMIT);
+  }, [gapOpen, savedBySlot, pools]);
 
   return (
     <AnimatePresence>
@@ -266,6 +368,9 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
                   onToggleSelect={handleToggleSelect}
                   showAdd
                   edgeFadeClass="bg-paper-100"
+                  showScrollbar
+                  onSeeMore={setBrowseSlot}
+                  onSaveBlocked={showSnackbar}
                 />
               )
             ) : (
@@ -276,6 +381,9 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
                 onToggleSelect={handleToggleSelect}
                 showAdd
                 edgeFadeClass="bg-paper-100"
+                showScrollbar
+                onSeeMore={setBrowseSlot}
+                onSaveBlocked={showSnackbar}
               />
             )}
           </div>
@@ -305,6 +413,33 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
             open={!!selectedRecipe}
             onClose={() => setSelectedRecipe(null)}
           />
+
+          {gap && (
+            <CalorieGapSheet
+              open
+              need={gap.need}
+              total={gap.total}
+              suggestions={gapSuggestions}
+              selectedIds={selectedIds}
+              onToggleSelect={handleToggleSelect}
+              onBack={() => setGap(null)}
+              onContinue={finish}
+              onSaveBlocked={showSnackbar}
+            />
+          )}
+
+          <SlotBrowseSheet
+            open={!!browseSlot}
+            slotKey={browseSlot}
+            pool={browsePool}
+            selectedIds={selectedIds}
+            onToggleSelect={handleToggleSelect}
+            onSelectCard={handleSelectCard}
+            onClose={() => setBrowseSlot(null)}
+            onSaveBlocked={showSnackbar}
+          />
+
+          <Snackbar snackbar={snackbar} onUndo={handleSnackbarUndo} onDismiss={() => setSnackbar(null)} />
         </motion.div>
       )}
     </AnimatePresence>

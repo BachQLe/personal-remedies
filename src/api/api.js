@@ -28,7 +28,6 @@ import {
   getGroupLabels,
   getFineGroupLabelsByCoarse,
   getCachedRefCount,
-  numericIdToStars,
   getFoodIdByName,
 } from './adapter.js';
 import { storage } from './storage.js';
@@ -57,7 +56,6 @@ export {
   getGroupLabels,
   getFineGroupLabelsByCoarse,
   getCachedRefCount,
-  numericIdToStars,
   getFoodIdByName,
 };
 export { buildRecipeDetail } from './recipeDetail.js';
@@ -163,7 +161,10 @@ async function migrateProfileConditions(profile) {
 
 export async function getProfile() {
   await delay(200);
-  const migrated = await migrateProfileConditions(_profile);
+  let migrated = await migrateProfileConditions(_profile);
+  if (migrated && migrated.calorieTarget == null) {
+    migrated = { ...migrated, calorieTarget: 2000 };
+  }
   if (migrated !== _profile) {
     _profile = migrated;
     storage.set('profile', _profile);

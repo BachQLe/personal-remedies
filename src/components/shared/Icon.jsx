@@ -150,3 +150,41 @@ export function BackArrow({ className, ...props }) {
     </svg>
   );
 }
+
+/**
+ * SkullGlyph — hand-authored inline-SVG skull, filled (not stroked) so it
+ * reads as a solid glyph alongside lucide's filled `Star` in FoodRating's
+ * 3-star / 3-skull row (see src/utils/rating.js, src/components/shared/
+ * FoodRating.jsx). Deliberately NOT lucide's `Skull` icon: lucide's is a
+ * stroked line-icon that goes muddy at the ~14-16px sizes this glyph is used
+ * at, and its teeth grooves disappear into sub-pixel mush there anyway.
+ *
+ * The eye sockets and nose are real negative-space holes (via `fillRule`/
+ * `clipRule="evenodd"`), not overlaid shapes, so the card photo underneath
+ * shows through them. Eye sockets are deliberately oversized (r ≈ 2.8 in the
+ * 24-unit viewBox) so the silhouette still reads at small sizes. No teeth
+ * grooves by design — at 14px a 1-unit gap is sub-pixel and turns to mush;
+ * the sockets + nose triangle alone carry the read.
+ *
+ * @param {Object} props
+ * @param {number} [props.size] - Width/height in px, default 16.
+ * @param {string} [props.className]
+ */
+export function SkullGlyph({ size = 16, className, ...props }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      fillRule="evenodd"
+      clipRule="evenodd"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      {...props}
+    >
+      <path d="M12 1.5C6.2 1.5 2.5 5.4 2.5 10.3c0 2.9 1.4 5.3 3.6 6.8.3.2.4.5.4.8V20a2.5 2.5 0 0 0 2.5 2.5h6a2.5 2.5 0 0 0 2.5-2.5v-2.1c0-.3.1-.6.4-.8 2.2-1.5 3.6-3.9 3.6-6.8C21.5 5.4 17.8 1.5 12 1.5ZM8.2 8a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6Zm7.6 0a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6Zm-3.8 6.4-1.6 2.8h3.2l-1.6-2.8Z" />
+    </svg>
+  );
+}

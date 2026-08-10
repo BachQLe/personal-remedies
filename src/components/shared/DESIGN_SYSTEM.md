@@ -48,6 +48,7 @@ import FoodImageCard from '@/components/shared/FoodImageCard.jsx';
 | `id` | string | required | Unique identifier |
 | `image` | string \| React component | required | Image URL or component |
 | `imageAlt` | string | `''` | Alt text for image |
+| `numericId` | number \| null | optional | Verdict ladder id 1-7 → 3-star / 3-skull row above the title |
 | `badge` | string \| `{label, variant?}` | optional | Badge label or object |
 | `title` | string | required | Card heading |
 | `subtitle` | string | optional | Secondary text (ingredients, source) |

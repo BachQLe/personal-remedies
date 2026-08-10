@@ -13,10 +13,11 @@
  * - Lifestyle items (Exercise, Smoking, …) stay inline in rank order with a
  *   "Lifestyle" chip and their cleaned advisory notes.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getTopDosAndDonts, getCachedRefCount } from '../../api/api.js';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
+import Snackbar from '../../components/shared/Snackbar.jsx';
 
 /** Max rows shown per direction. */
 const MAX_ROWS = 20;
@@ -41,6 +42,21 @@ function SkeletonRows() {
 export default function TopDosTab({ profile, onSelectFood }) {
   const [results, setResults] = useState({ consume: null, avoid: null });
   const [direction, setDirection] = useState('consume');
+
+  // Snackbar wiring (see Snackbar.jsx's 3-piece pattern) — used here only for
+  // SaveButton's onBlocked toast; no undo action on this screen.
+  const [snackbar, setSnackbar] = useState(null);
+  const snackbarIdRef = useRef(0);
+  const undoFnRef = useRef(null);
+  const showSnackbar = useCallback((message, canUndo = false, undoFn = null) => {
+    snackbarIdRef.current += 1;
+    undoFnRef.current = undoFn;
+    setSnackbar({ id: snackbarIdRef.current, message, canUndo });
+  }, []);
+  const handleUndo = useCallback(() => {
+    undoFnRef.current?.();
+    setSnackbar(null);
+  }, []);
 
   // Fetch both directions in parallel once profile is ready — cheap, shares
   // the cached /topdoordonts call with the rest of the app.
@@ -101,10 +117,13 @@ export default function TopDosTab({ profile, onSelectFood }) {
                   : null
               }
               onSelect={onSelectFood}
+              onSaveBlocked={showSnackbar}
             />
           ))}
         </div>
       )}
+
+      <Snackbar snackbar={snackbar} onUndo={handleUndo} onDismiss={() => setSnackbar(null)} />
     </div>
   );
 }

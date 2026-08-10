@@ -73,6 +73,12 @@ import { storage } from '../api/storage.js';
  *   (produced via `toLocaleDateString('en-CA')` — NEVER `toISOString`) →
  *   PlanDayState. A rolling 7-day window: see `ensurePlanForWeek` in
  *   src/api/planBuilder.js for how days enter/leave this map.
+ * @property {Object<string, PlanItem[]>} [picksBySlot] - slotKey → the items the
+ *   user hand-picked in MealPlannerPicker. Present only on picks-built plans, and
+ *   its presence is what puts the whole plan into picks-only mode: every day's
+ *   slots are drawn from here and NEVER backfilled from the suggestion pools
+ *   (see `pickWindow` in src/api/planBuilder.js). Absent on auto-built plans,
+ *   including every plan persisted before this field existed.
  */
 
 const STORAGE_KEY = 'dailyPlan';
