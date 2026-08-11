@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, X } from 'lucide-react';
-import { searchFoods, searchNaturalSources, getRecipes, buildRecipeDetail } from '../../api/api.js';
+import { searchFoodsAndRecipes, searchNaturalSourceItems, buildRecipeDetail } from '../../api/api.js';
 import { storage } from '../../api/storage.js';
 import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { getRecentSearches, addRecentSearch } from '../../state/recentSearches.js';
@@ -15,35 +15,6 @@ import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import { recipeToSaveItem } from '../../utils/saveGate.js';
 
-// ── Per-mode search, composed locally from api.js's lower-level exports —
-// deliberately NOT api.js's own searchFoodsAndRecipes/searchNaturalSourceItems,
-// which catch internally and always resolve (even on a real failure), so a
-// down API/network would silently render as "no results" instead of an
-// honest error. searchFoods/searchNaturalSources are a client-side filter
-// over the already-cached food dictionary and essentially never reject;
-// getRecipes goes through the network+cache layer and is the one that can
-// genuinely fail — Promise.all lets that failure propagate to useAsyncData
-// below instead of being swallowed (guardrail: an error must never render
-// as "no results").
-async function searchFoodMode(query, profile) {
-  const q = query.trim();
-  if (!q) return [];
-  const [foods, { recipes }] = await Promise.all([searchFoods(q, profile), getRecipes(profile)]);
-  const qLower = q.toLowerCase();
-  const matchedRecipes = recipes.filter((r) => (r.title || '').toLowerCase().includes(qLower));
-  return [
-    ...foods.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f })),
-    ...matchedRecipes.map((r) => ({ kind: 'recipe', key: `recipe-${r.id}`, recipe: r })),
-  ];
-}
-
-async function searchNaturalMode(query) {
-  const q = query.trim();
-  if (!q) return [];
-  const foods = await searchNaturalSources(q);
-  return foods.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f }));
-}
-
 // Mode configs — Food Lookup vs Natural Sources. Backdrop colors are the
 // exact hex values behind the `yellow-200`/`blue-200` Tailwind tokens
 // (see tailwind.config.js) so framer-motion can animate between them as
@@ -54,7 +25,7 @@ const MODES = {
   food: {
     label: 'Food Lookup',
     heading: 'Ingredients and Recipes',
-    searchFn: searchFoodMode,
+    searchFn: searchFoodsAndRecipes,
     recentsScope: 'default',
     backdropColor: '#FFEC88',
     accentFocusClass: 'focus:border-yellow-500',
@@ -64,7 +35,7 @@ const MODES = {
   natural: {
     label: 'Natural Sources',
     heading: 'Look up natural sources and supplements',
-    searchFn: searchNaturalMode,
+    searchFn: searchNaturalSourceItems,
     recentsScope: 'natural',
     backdropColor: '#BBCEFF',
     accentFocusClass: 'focus:border-blue-500',

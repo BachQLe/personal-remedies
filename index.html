@@ -3,7 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="manifest" href="/manifest.json" />
+    <!-- No hand-written <link rel="manifest">: vite-plugin-pwa injects the
+         manifest link (pointing at the generated manifest.webmanifest, built
+         from vite.config.js's `manifest` option) into every build's <head>
+         automatically. A second, hand-written public/manifest.json used to
+         ship alongside it — removed (T7A) so there's exactly one manifest
+         source of truth, version-controlled in vite.config.js. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />

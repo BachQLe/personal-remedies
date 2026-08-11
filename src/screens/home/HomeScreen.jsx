@@ -1,9 +1,13 @@
 /**
  * HomeScreen — containment / ordering / sizing hierarchy.
  *
- * The screen fills exactly one viewport and never scrolls above the fold. Its
- * height is the viewport minus the AppShell's bottom navbar reserve (pb-28 =
- * 7rem), so the content sits flush above the pinned TabBar with no overflow.
+ * The screen targets exactly one viewport and doesn't scroll at default text
+ * size. Its height is the viewport minus the AppShell's bottom navbar reserve
+ * (pb-28 = 7rem), so the content sits flush above the pinned TabBar with no
+ * overflow. At larger root font sizes (Dynamic Type / browser zoom), the
+ * natural-height rows (2a/2b/2c) grow and can exceed that budget — rather
+ * than clip that content, the root allows vertical scroll (`overflow-y-auto`)
+ * so it stays reachable; see the comment on the root div below.
  *
  * Two layers:
  *   • Content layer — everything below; one fixed-height vertical column.
@@ -79,13 +83,22 @@ export default function HomeScreen() {
   };
 
   return (
-    // Content layer — a vertical column locked to exactly one viewport; never
-    // scrolls. `h-[100dvh] overflow-hidden` ensures the colored background always
-    // reaches the bottom and content never overflows; `-mb-28` cancels the
-    // AppShell main's pb-28 navbar reserve so the lower shell's own pb-28 becomes
-    // the navbar clearance and its paper-100 paints behind the navbar (no base
-    // cream ever peeks through).
-    <div className="bg-forest-300 flex flex-col h-[100dvh] overflow-hidden -mb-28">
+    // Content layer — a vertical column sized to exactly one viewport (`h-[100dvh]`;
+    // this fixed height, not `overflow-hidden`, is what keeps the colored background
+    // reaching the bottom at default text size). `-mb-28` cancels the AppShell main's
+    // pb-28 navbar reserve so the lower shell's own pb-28 becomes the navbar
+    // clearance and its paper-100 paints behind the navbar (no base cream ever peeks
+    // through) — this margin is load-bearing, don't remove it.
+    //
+    // `overflow-y-auto` (not `overflow-hidden`): at default text size content fits
+    // inside the fixed 100dvh box exactly as designed, so this is a no-op — no
+    // scrollbar, identical look. At larger root font sizes the natural-height rows
+    // above the carousel (2a/2b/2c) grow past that budget; instead of clipping them
+    // (unreachable content behind the TabBar — a real Dynamic Type bug, see
+    // docs/a11y-checklist.md §4), the box now scrolls internally to reveal them.
+    // `overflow-x-hidden` guards against any incidental horizontal scroll from that
+    // growth; nothing in this layout is meant to scroll sideways.
+    <div className="bg-forest-300 flex flex-col h-[100dvh] overflow-y-auto overflow-x-hidden -mb-28">
       {/* ── 1. Header zone (above the shell) ──────────────────────────────── */}
       <PageHeader
         label="Home"
@@ -112,7 +125,7 @@ export default function HomeScreen() {
               <span className="block font-display text-lg font-semibold text-blue-950 leading-tight">
                 Dietary Guidance
               </span>
-              <span className="block text-xs text-char-500 font-sans mt-0.5 truncate">
+              <span className="text-xs text-char-500 font-sans mt-0.5 line-clamp-2">
                 Top Dos &amp; Don&apos;ts, best recipes &amp; foods for you
               </span>
             </span>
@@ -134,7 +147,7 @@ export default function HomeScreen() {
               <span className="block font-display text-base font-semibold text-blue-950 leading-tight">
                 Meal Planner
               </span>
-              <span className="block text-xs text-char-500 font-sans mt-0.5 truncate">
+              <span className="text-xs text-char-500 font-sans mt-0.5 line-clamp-2">
                 Queue &amp; saved recipes
               </span>
             </span>
