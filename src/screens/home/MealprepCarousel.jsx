@@ -5,8 +5,20 @@
  * TiltCarousel engine (see src/components/shared/TiltCarousel.jsx for the
  * tilt/velocity/teleport mechanics). This file owns the data fetching, card
  * rendering, and the food/recipe detail popup.
+ *
+ * State matrix (T5A): fetch runs through `useAsyncData` so a failed load
+ * gets a real error panel + working Retry instead of a silently empty lane
+ * (previously `.catch(console.error)`), and going offline with nothing
+ * loaded yet says so honestly instead of just showing zero cards. The
+ * 'loading' status is rendered with a bespoke `CarouselGhost` — sized to
+ * TiltCarousel's own `h-full aspect-[3/4]` card slots — rather than
+ * DataState's generic page skeleton, which is built for a full page, not
+ * this fixed-height lane (see DataState.jsx's doc: screens with their own
+ * loading treatment should just never pass 'loading' through it). Every
+ * other status (success, empty, the error statuses, offline-cached,
+ * offline-no-cache) goes through DataState.
  */
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Leaf } from 'lucide-react';
 import { getHomeRecommendations, cleanNotes } from '../../api/recommendations.js';
@@ -17,7 +29,10 @@ import { getIngredientImage } from '../../api/ingredientImages.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import TiltCarousel from '../../components/shared/TiltCarousel.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
-import Snackbar from '../../components/shared/Snackbar.jsx';
+import DataState from '../../components/shared/DataState.jsx';
+import Skeleton from '../../components/shared/Skeleton.jsx';
+import { useAsyncData } from '../../hooks/useAsyncData.js';
+import { useSnackbar } from '../../context/SnackbarContext.jsx';
 
 function getProfile() {
   const saved = storage.get('profile', null);
@@ -62,35 +77,48 @@ function CarouselCard({ card, onClick, onSaveBlocked }) {
   );
 }
 
+/** Loading ghost sized to TiltCarousel's own card slots (h-full, 3:4 portrait) — see file doc. */
+function CarouselGhost() {
+  return (
+    <div
+      className="h-full flex items-center gap-3 overflow-hidden"
+      role="status"
+      aria-label="Loading recommendations"
+    >
+      {[0, 1, 2].map((i) => (
+        <Skeleton key={i} shape="card" className="h-full aspect-[3/4] shrink-0" />
+      ))}
+    </div>
+  );
+}
+
 export default function MealprepCarousel() {
   const navigate = useNavigate();
-  const [cards, setCards] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const profile = useRef(getProfile());
-  const [snackbar, setSnackbar] = useState(null);
-  const snackbarIdRef = useRef(0);
+  const { show } = useSnackbar();
 
-  const showSnackbar = useCallback((message, canUndo = false) => {
-    snackbarIdRef.current += 1;
-    setSnackbar({ id: snackbarIdRef.current, message, canUndo });
-  }, []);
+  const fetcher = useCallback(
+    () =>
+      getHomeRecommendations(profile.current, 8).then((items) =>
+        items.map((item) => ({
+          id: item.id,
+          foodId: item.id,
+          name: item.name,
+          // Lifestyle items (Exercise, Smoking, …) never get a stock food
+          // photo — leaving image unset routes CarouselCard to the Leaf-icon
+          // fallback tile instead of a mismatched image.
+          image: item.isLifestyle ? undefined : getIngredientImage(item.name, item.group),
+          blurb: cleanNotes(item.notes) || item.groupLabel || undefined,
+          isLifestyle: item.isLifestyle,
+          kind: 'food',
+        }))
+      ),
+    []
+  );
 
-  useEffect(() => {
-    getHomeRecommendations(profile.current, 8)
-      .then((items) => setCards(items.map((item) => ({
-        id: item.id,
-        foodId: item.id,
-        name: item.name,
-        // Lifestyle items (Exercise, Smoking, …) never get a stock food
-        // photo — leaving image unset routes CarouselCard to the Leaf-icon
-        // fallback tile instead of a mismatched image.
-        image: item.isLifestyle ? undefined : getIngredientImage(item.name, item.group),
-        blurb: cleanNotes(item.notes) || item.groupLabel || undefined,
-        isLifestyle: item.isLifestyle,
-        kind: 'food',
-      }))))
-      .catch(console.error);
-  }, []);
+  const { status, data, retry } = useAsyncData(fetcher, [], {});
+  const cards = data ?? [];
 
   return (
     <>
@@ -112,43 +140,52 @@ export default function MealprepCarousel() {
           </button>
         </div>
 
-        <TiltCarousel autoAdvance infinite edgeFadeClass="bg-neutral-100">
-          {cards.map((card, i) => (
-            <CarouselCard
-              key={i}
-              card={card}
-              onSaveBlocked={showSnackbar}
-              onClick={() => {
-                // Open immediately with minimal data; enrich async
-                setSelectedItem({
-                  foodId: card.foodId ?? null,
-                  name: card.name,
-                  image: card.image,
-                  sourceName: card.sourceName ?? null,
-                  conditions: card.matchedConditions ?? [],
-                  ingredients: [],
-                  isRecipe: false,
-                });
-                // Cards here are always plain foods/lifestyle items (Top Dos &
-                // Don'ts never returns recipes) — buildRecipeDetail still
-                // fabricates a companion-ingredients list for its "similar
-                // items" display, so isRecipe must be pinned false explicitly
-                // rather than left to FoodDetailCard's ingredients-based
-                // fallback (which would otherwise misread that list as proof
-                // this is a recipe, breaking the save-gate's kind check).
-                buildRecipeDetail(card, profile.current)
-                  .then((detail) => setSelectedItem({ ...detail, isRecipe: false }))
-                  .catch(() => { });
-              }}
-            />
-          ))}
-        </TiltCarousel>
+        <div className="flex-1 min-h-0 flex flex-col justify-center">
+          {status === 'loading' ? (
+            <CarouselGhost />
+          ) : (
+            <DataState
+              status={status}
+              onRetry={retry}
+              emptyTitle="No recommendations yet"
+              emptyBody="There's nothing to recommend right now."
+              screenName="home recommendations"
+            >
+              <TiltCarousel autoAdvance infinite edgeFadeClass="bg-neutral-100">
+                {cards.map((card, i) => (
+                  <CarouselCard
+                    key={i}
+                    card={card}
+                    onSaveBlocked={show}
+                    onClick={() => {
+                      // Open immediately with minimal data; enrich async
+                      setSelectedItem({
+                        foodId: card.foodId ?? null,
+                        name: card.name,
+                        image: card.image,
+                        sourceName: card.sourceName ?? null,
+                        conditions: card.matchedConditions ?? [],
+                        ingredients: [],
+                        isRecipe: false,
+                      });
+                      // Cards here are always plain foods/lifestyle items (Top Dos &
+                      // Don'ts never returns recipes) — buildRecipeDetail still
+                      // fabricates a companion-ingredients list for its "similar
+                      // items" display, so isRecipe must be pinned false explicitly
+                      // rather than left to FoodDetailCard's ingredients-based
+                      // fallback (which would otherwise misread that list as proof
+                      // this is a recipe, breaking the save-gate's kind check).
+                      buildRecipeDetail(card, profile.current)
+                        .then((detail) => setSelectedItem({ ...detail, isRecipe: false }))
+                        .catch(() => { });
+                    }}
+                  />
+                ))}
+              </TiltCarousel>
+            </DataState>
+          )}
+        </div>
       </div>
-
-      <Snackbar
-        snackbar={snackbar}
-        onDismiss={() => setSnackbar(null)}
-      />
     </>
   );
 }

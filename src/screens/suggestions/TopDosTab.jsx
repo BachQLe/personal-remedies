@@ -5,24 +5,37 @@
  * API request per direction across the whole app.
  *
  * Product rules honored here:
- * - NO tier badges: /topdoordonts carries no tier data; list membership +
+ * - NO tier badges: /topdoordonts carries no tier data — list membership +
  *   rank IS the verdict.
  * - "N studies" is cache-only (getCachedRefCount) — this tab NEVER warms
  *   /references (rate-limit safety); counts appear opportunistically when
  *   some other surface (FoodDetailCard, Food Groups) already cached them.
  * - Lifestyle items (Exercise, Smoking, …) stay inline in rank order with a
  *   "Lifestyle" chip and their cleaned advisory notes.
+ *
+ * State-matrix (T5B): both directions are fetched together through a single
+ * useAsyncData call (src/hooks/useAsyncData.js) so loading/error/offline/
+ * no-profile render via the shared DataState — a real Retry affordance
+ * replaces the old silent "degrade to empty items on error" behavior.
+ * Switching Do/Don't is a pure client-side selection over already-fetched
+ * data, not a new fetch.
  */
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState } from 'react';
 import { getTopDosAndDonts, getCachedRefCount } from '../../api/api.js';
+import { useAsyncData } from '../../hooks/useAsyncData.js';
+import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
-import Snackbar from '../../components/shared/Snackbar.jsx';
+import DataState from '../../components/shared/DataState.jsx';
+import CoverageNotice from './CoverageNotice.jsx';
+import ProfileSetupAction from './ProfileSetupAction.jsx';
+import { resolveProfileWithConditions } from './profileFallback.js';
 
 /** Max rows shown per direction. */
 const MAX_ROWS = 20;
 
-// ── Skeleton (card-shaped rows to match the button-card list) ───────────────
+// ── Skeleton (card-shaped rows to match the button-card list; bespoke —
+// kept for 'loading' per DataState's docblock rather than its generic one) ──
 
 function SkeletonRows() {
   return (
@@ -37,55 +50,40 @@ function SkeletonRows() {
   );
 }
 
+// ── Fetch ────────────────────────────────────────────────────────────────────
+
+async function fetchBothDirections() {
+  const profile = await resolveProfileWithConditions();
+  const [consume, avoid] = await Promise.all([
+    getTopDosAndDonts(profile, 'consume'),
+    getTopDosAndDonts(profile, 'avoid'),
+  ]);
+  return { consume, avoid, requestedConditionIds: profile.conditions };
+}
+
+// Genuinely empty only when BOTH directions came back with nothing — a
+// single empty direction (e.g. nothing currently flagged to avoid) is a
+// legitimate partial result rendered inline below, not a full empty state.
+function isBothDirectionsEmpty(data) {
+  return !(data?.consume?.items?.length) && !(data?.avoid?.items?.length);
+}
+
 // ── Tab ──────────────────────────────────────────────────────────────────────
 
-export default function TopDosTab({ profile, onSelectFood }) {
-  const [results, setResults] = useState({ consume: null, avoid: null });
+export default function TopDosTab({ onSelectFood }) {
   const [direction, setDirection] = useState('consume');
+  const { show } = useSnackbar();
 
-  // Snackbar wiring (see Snackbar.jsx's 3-piece pattern) — used here only for
-  // SaveButton's onBlocked toast; no undo action on this screen.
-  const [snackbar, setSnackbar] = useState(null);
-  const snackbarIdRef = useRef(0);
-  const undoFnRef = useRef(null);
-  const showSnackbar = useCallback((message, canUndo = false, undoFn = null) => {
-    snackbarIdRef.current += 1;
-    undoFnRef.current = undoFn;
-    setSnackbar({ id: snackbarIdRef.current, message, canUndo });
-  }, []);
-  const handleUndo = useCallback(() => {
-    undoFnRef.current?.();
-    setSnackbar(null);
-  }, []);
+  const { status, data, retry } = useAsyncData(fetchBothDirections, [], {
+    isEmpty: isBothDirectionsEmpty,
+    requiresProfile: true,
+  });
 
-  // Fetch both directions in parallel once profile is ready — cheap, shares
-  // the cached /topdoordonts call with the rest of the app.
-  useEffect(() => {
-    if (!profile) return;
-    let cancelled = false;
-
-    for (const dir of ['consume', 'avoid']) {
-      getTopDosAndDonts(profile, dir)
-        .then((res) => {
-          if (!cancelled) setResults((prev) => ({ ...prev, [dir]: res }));
-        })
-        .catch((err) => {
-          console.error('TopDosTab: getTopDosAndDonts failed', err);
-          if (!cancelled) {
-            setResults((prev) => ({ ...prev, [dir]: { items: [], usedFallback: false } }));
-          }
-        });
-    }
-
-    return () => { cancelled = true; };
-  }, [profile]);
-
-  const loading = !results.consume && !results.avoid;
-  const firstConditionId = profile?.conditions?.[0] ?? null;
-
-  const activeResult = results[direction];
+  const activeResult = data?.[direction];
   const items = activeResult?.items ?? [];
   const visibleItems = items.slice(0, MAX_ROWS);
+  const usedFallback = !!(data?.consume?.usedFallback || data?.avoid?.usedFallback);
+  const firstConditionId = data?.requestedConditionIds?.[0] ?? null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -99,31 +97,44 @@ export default function TopDosTab({ profile, onSelectFood }) {
         size="sm"
       />
 
-      {loading ? (
+      {status === 'loading' ? (
         <SkeletonRows />
-      ) : items.length === 0 ? (
-        <p className="text-sm text-char-500 font-sans text-center py-6">
-          Nothing here yet. Set up your health profile first.
-        </p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {visibleItems.map((food) => (
-            <RankedRow
-              key={food.id}
-              food={food}
-              studyCount={
-                firstConditionId != null
-                  ? getCachedRefCount(food.id, [firstConditionId])
-                  : null
-              }
-              onSelect={onSelectFood}
-              onSaveBlocked={showSnackbar}
-            />
-          ))}
-        </div>
-      )}
+        <DataState
+          status={status}
+          onRetry={retry}
+          screenName="Top Dos & Don'ts"
+          emptyTitle="Nothing here yet"
+          emptyBody="We don't have dos & don'ts for your conditions right now."
+          emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
+        >
+          <div className="flex flex-col gap-2">
+            <CoverageNotice usedFallback={usedFallback} requestedConditionIds={data?.requestedConditionIds} />
 
-      <Snackbar snackbar={snackbar} onUndo={handleUndo} onDismiss={() => setSnackbar(null)} />
+            {visibleItems.length === 0 ? (
+              <p className="text-sm text-char-500 font-sans text-center py-6">
+                {direction === 'consume'
+                  ? 'Nothing specific to add right now.'
+                  : 'Nothing flagged to avoid right now.'}
+              </p>
+            ) : (
+              visibleItems.map((food) => (
+                <RankedRow
+                  key={food.id}
+                  food={food}
+                  studyCount={
+                    firstConditionId != null
+                      ? getCachedRefCount(food.id, [firstConditionId])
+                      : null
+                  }
+                  onSelect={onSelectFood}
+                  onSaveBlocked={show}
+                />
+              ))
+            )}
+          </div>
+        </DataState>
+      )}
     </div>
   );
 }

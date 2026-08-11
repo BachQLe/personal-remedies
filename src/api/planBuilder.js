@@ -6,6 +6,11 @@
  * `regenerateWeek` / `shuffleSlot`. Zero network beyond the first
  * `getMealPlanSuggestions` call for a given condition set — everything else
  * here is in-memory bookkeeping over the memoized candidate pools.
+ *
+ * `purgeDerivedDataForConditionsChange` is the one synchronous, network-free
+ * export in the mix — called from `profileSync.js`'s profile write hook so a
+ * conditions change discards the plan the instant it's saved, not just the
+ * next time `ensurePlanForWeek` happens to run (storage-map.md §6 gap 1).
  */
 
 import { getMealPlanSuggestions } from './adapter.js';
@@ -341,14 +346,33 @@ function mergeLegacyQueue(slots) {
  * (Plan screen) is expected to render its own empty state for the null case
  * and route the user to the picker.
  *
+ * Conditions-change contract (product rule, storage-map.md §6 gap 3, closed
+ * this wave): if the profile's resolved conditions no longer match the
+ * existing plan's `conditionsKey`, the plan is DISCARDED outright — it is
+ * never regenerated from the candidate pools — and this returns the exact
+ * same `{ plan: null, usedFallback: false }` shape as the no-plan-yet case
+ * above, so the caller lands on the same first-run empty state / picker CTA
+ * either way. This used to rebuild every day from the candidate pools
+ * (dropping `picksBySlot` in the process); that silently downgraded a
+ * picks-only plan into an auto-filled one, which contradicts the picks-only
+ * default — the user always chooses what goes in the plan, and re-picking
+ * (not auto-filling) is the honest reset after conditions change (see
+ * `generatePlanFromPicks`'s doc). Rolling-window carry-over/variety-spreading
+ * below only ever runs once conditions are confirmed unchanged.
+ *
+ * See also `purgeDerivedDataForConditionsChange`, which performs the same
+ * discard eagerly — the moment a profile's conditions are saved, rather than
+ * waiting for this function's next call (which only happens on
+ * `MealQueueScreen`'s mount) — so a stale plan never even transiently exists
+ * locally or gets pushed to Supabase paired with the new conditions
+ * (storage-map.md §6 gap 1).
+ *
  * Rolling window: `nextSevenDays()` is the source of truth for which date
  * keys belong in the plan. Any existing day still inside that window carries
  * over completely untouched (pins, eaten, everything) — a day that rolls out
  * of the window (yesterday, once today advances) is simply dropped by not
  * being copied into the new `days` map. Only the missing trailing day(s) get
- * freshly generated. A profile conditions change discards every existing day
- * (full rebuild) — a plan built for a different condition set isn't a
- * "window" of the current one, it's stale.
+ * freshly generated.
  *
  * Variety spreading: newly generated days advance each slot's offset by
  * `dayIndex * slot.size` (dayIndex = 0..6, its absolute position in the
@@ -364,13 +388,10 @@ function mergeLegacyQueue(slots) {
  * rather than the candidate pools, and `picksBySlot` is carried onto the
  * rebuilt plan. Without this the picks-only guarantee would silently lapse
  * one day later, as tomorrow rolled into the window and got auto-filled. A
- * conditions change still discards everything INCLUDING the picks: those
- * were chosen against a differently-ranked pool and may now be poorly
- * tiered (or outright harmful) for the new condition set, so re-picking is
- * the honest reset. A pre-Aug-2026 plan with no `picksBySlot` at all is the
- * one remaining case that still auto-fills its trailing days from the
- * candidate pools below — the legacy pool-built escape hatch (also see
- * `regenerateDay`/`regenerateWeek`, which branch the same way).
+ * pre-Aug-2026 plan with no `picksBySlot` at all is the one remaining case
+ * that still auto-fills its trailing days from the candidate pools below —
+ * the legacy pool-built escape hatch (also see `regenerateDay`/
+ * `regenerateWeek`, which branch the same way).
  *
  * Quota protection: if `getMealPlanSuggestions` comes back with every slot
  * empty (e.g. API/quota outage), the existing plan (for the same
@@ -382,8 +403,9 @@ function mergeLegacyQueue(slots) {
  *
  * @param {import('./types.js').Profile} profile
  * @returns {Promise<{ plan: import('../state/dailyPlan.js').WeeklyPlan|null, usedFallback: boolean }>}
- *   `plan` is null ONLY when no plan exists yet (no-plan contract, above) —
- *   every other path returns a real plan.
+ *   `plan` is null when no plan exists yet OR the profile's conditions
+ *   changed since the existing plan was built (both share the no-plan
+ *   contract, above) — every other path returns a real plan.
  */
 export async function ensurePlanForWeek(profile) {
   const existing = getPlan();
@@ -393,25 +415,31 @@ export async function ensurePlanForWeek(profile) {
 
   const { candidates, conditionIds, conditionNames, usedFallback } = await loadCandidates(profile);
   const conditionsKey = conditionIds.join(',');
-  const conditionsChanged = existing.conditionsKey !== conditionsKey;
-  const picksBySlot = conditionsChanged ? null : existing.picksBySlot;
+
+  if (existing.conditionsKey !== conditionsKey) {
+    // Conditions changed since this plan was built — discard it entirely
+    // (never regenerate from pools, never carry picks over) and hand back
+    // the same no-plan shape a first-ever build returns. See the doc above.
+    setPlan(null);
+    return { plan: null, usedFallback: false };
+  }
+
+  const picksBySlot = existing.picksBySlot;
 
   const dayKeys = nextSevenDays().map((d) => d.key);
 
   const keptDays = {};
-  if (!conditionsChanged) {
-    for (const key of dayKeys) {
-      if (existing.days[key]) keptDays[key] = existing.days[key];
-    }
+  for (const key of dayKeys) {
+    if (existing.days[key]) keptDays[key] = existing.days[key];
   }
   const missingKeys = dayKeys.filter((key) => !keptDays[key]);
 
   const allEmpty = PLAN_SLOT_KEYS.every((key) => (candidates[key] || []).length === 0);
-  if (allEmpty && !picksBySlot && !conditionsChanged) {
+  if (allEmpty && !picksBySlot) {
     return { plan: existing, usedFallback: existing.usedFallback };
   }
 
-  if (missingKeys.length === 0 && !conditionsChanged) {
+  if (missingKeys.length === 0) {
     return { plan: existing, usedFallback: existing.usedFallback };
   }
 
@@ -451,6 +479,53 @@ export async function ensurePlanForWeek(profile) {
 
   setPlan(plan);
   return { plan, usedFallback };
+}
+
+/**
+ * Discard the stored plan the instant a profile's conditions change, rather
+ * than waiting for `ensurePlanForWeek`'s next call — which only happens on
+ * `MealQueueScreen`'s mount effect (storage-map.md §6, gap 1). Intended to be
+ * called from the profile write path (see `profileSync.js`'s
+ * `storage.onWrite('profile', ...)` hook, which fires on EVERY write to the
+ * `profile` key from ANY call site — `saveProfile`/`clearProfile` in api.js
+ * today, anything else tomorrow — not just a Profile-screen edit) so a
+ * conditions change purges the plan no matter which screen made it, and a
+ * mismatched `{ conditions: NEW, daily_plan: <built for OLD> }` pair never
+ * even transiently exists to be pushed to Supabase.
+ *
+ * Deliberately synchronous and network-free — unlike `ensurePlanForWeek`,
+ * this cannot await `loadCandidates`/`getMealPlanSuggestions` to resolve the
+ * profile's conditions (that would mean a network round-trip on every
+ * profile save, racing the caller's own write). Instead it compares the RAW
+ * `newConditions` (joined in the same order `ensurePlanForWeek` uses to
+ * derive `conditionsKey` when no condition-fallback is in play) against the
+ * existing plan's `conditionsKey`. The one case this can diverge from
+ * `ensurePlanForWeek`'s fully fallback-resolved comparison is when the demo
+ * condition-fallback (`withConditionFallback` in adapter.js) is active for
+ * BOTH the old and new conditions — this may then purge a plan that would
+ * have resolved to the identical fallback candidate set. That is the safe
+ * direction to be wrong in: it never leaves a stale/mismatched plan in
+ * place, it only occasionally asks for an extra re-pick in that narrow
+ * fallback-collision case.
+ *
+ * No-op (returns false, writes nothing) if there's no plan to purge, or the
+ * conditions didn't actually change.
+ *
+ * @param {number[]|null|undefined} newConditions - the profile's new
+ *   `conditions` array (as just saved — see `saveProfile` in api.js).
+ * @returns {boolean} true if a plan was purged.
+ */
+export function purgeDerivedDataForConditionsChange(newConditions) {
+  const existing = getPlan();
+  if (!existing) return false;
+
+  const newKey = (Array.isArray(newConditions) ? newConditions : [])
+    .filter((c) => typeof c === 'number')
+    .join(',');
+  if (existing.conditionsKey === newKey) return false;
+
+  setPlan(null);
+  return true;
 }
 
 /**

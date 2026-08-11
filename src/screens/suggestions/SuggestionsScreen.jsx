@@ -1,14 +1,19 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getMealPlanSuggestions, getProfile, buildRecipeDetail } from '../../api/api.js';
-import { DEFAULT_DEV_CONDITIONS, PLAN_SLOT_KEYS } from '../../api/config.js';
+import { getMealPlanSuggestions, buildRecipeDetail } from '../../api/api.js';
+import { PLAN_SLOT_KEYS } from '../../api/config.js';
+import { useAsyncData } from '../../hooks/useAsyncData.js';
+import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import GlassPanel from '../../components/shared/GlassPanel.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import BestRecipesRails from '../../components/shared/BestRecipesRails.jsx';
-import Snackbar from '../../components/shared/Snackbar.jsx';
+import DataState from '../../components/shared/DataState.jsx';
+import CoverageNotice from './CoverageNotice.jsx';
+import ProfileSetupAction from './ProfileSetupAction.jsx';
+import { resolveProfileWithConditions } from './profileFallback.js';
 import TopDosTab from './TopDosTab.jsx';
 import GroupsTab from './GroupsTab.jsx';
 
@@ -81,38 +86,31 @@ function emptySlotMap() {
   return Object.fromEntries(PLAN_SLOT_KEYS.map((key) => [key, []]));
 }
 
-function BestRecipesTab({ profile }) {
-  const [candidates, setCandidates] = useState(emptySlotMap);
-  const [loading, setLoading] = useState(true);
+async function fetchBestRecipes() {
+  const profile = await resolveProfileWithConditions();
+  const res = await getMealPlanSuggestions(profile);
+  return {
+    candidates: res?.candidates ?? emptySlotMap(),
+    usedFallback: !!res?.usedFallback,
+    requestedConditionIds: profile.conditions,
+  };
+}
+
+function isCandidatesEmpty(data) {
+  const candidates = data?.candidates ?? emptySlotMap();
+  return PLAN_SLOT_KEYS.every((key) => (candidates[key]?.length ?? 0) === 0);
+}
+
+function BestRecipesTab() {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [snackbar, setSnackbar] = useState(null);
-  const snackbarRef = useRef(null);
-  const snackbarIdRef = useRef(0);
+  const { show } = useSnackbar();
 
-  const showSnackbar = useCallback((message, canUndo = false, undoFn = null) => {
-    snackbarIdRef.current += 1;
-    const id = snackbarIdRef.current;
-    snackbarRef.current = undoFn;
-    setSnackbar({ id, message, canUndo });
-  }, []);
+  const { status, data, retry } = useAsyncData(fetchBestRecipes, [], {
+    isEmpty: isCandidatesEmpty,
+    requiresProfile: true,
+  });
 
-  const handleSnackbarUndo = useCallback(() => {
-    if (snackbarRef.current) snackbarRef.current();
-    snackbarRef.current = null;
-    setSnackbar(null);
-  }, []);
-
-  // Fetch once the profile arrives — `loading` starts true and profile is
-  // resolved a single time by the parent, so no synchronous reset needed.
-  useEffect(() => {
-    if (!profile) return;
-    getMealPlanSuggestions(profile)
-      .then((res) => {
-        setCandidates(res?.candidates ?? emptySlotMap());
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [profile]);
+  const candidates = data?.candidates ?? emptySlotMap();
 
   // PlanCandidates use name/image/sourceName/id instead of the FoodDetailCard
   // item shape's name/image — seed the card immediately with the mapped
@@ -141,23 +139,29 @@ function BestRecipesTab({ profile }) {
       .catch(() => { });
   }, []);
 
-  const isEmpty = !loading && PLAN_SLOT_KEYS.every((key) => (candidates[key]?.length ?? 0) === 0);
-
   return (
     <div className="flex flex-col gap-4">
-      {loading ? (
+      {status === 'loading' ? (
         <SkeletonRails />
-      ) : isEmpty ? (
-        <p className="text-sm font-sans text-center py-12 text-char-500">
-          No recipes yet. Set up your health profile first.
-        </p>
       ) : (
-        <BestRecipesRails
-          candidatesBySlot={candidates}
-          onSelectCard={openRecipe}
-          edgeFadeClass="bg-lavender-200"
-          onSaveBlocked={showSnackbar}
-        />
+        <DataState
+          status={status}
+          onRetry={retry}
+          screenName="Best Recipes"
+          emptyTitle="No recipes yet"
+          emptyBody="We don't have recipes ranked for your conditions right now."
+          emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
+        >
+          <div className="flex flex-col gap-3">
+            <CoverageNotice usedFallback={!!data?.usedFallback} requestedConditionIds={data?.requestedConditionIds} />
+            <BestRecipesRails
+              candidatesBySlot={candidates}
+              onSelectCard={openRecipe}
+              edgeFadeClass="bg-lavender-200"
+              onSaveBlocked={show}
+            />
+          </div>
+        </DataState>
       )}
 
       <FoodDetailCard
@@ -165,8 +169,6 @@ function BestRecipesTab({ profile }) {
         open={!!selectedRecipe}
         onClose={() => setSelectedRecipe(null)}
       />
-
-      <Snackbar snackbar={snackbar} onUndo={handleSnackbarUndo} onDismiss={() => setSnackbar(null)} />
     </div>
   );
 }
@@ -176,15 +178,7 @@ function BestRecipesTab({ profile }) {
 export default function SuggestionsScreen() {
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(() => resolveTab(searchParams));
-  const [profile, setProfile] = useState(null);
   const [selectedFood, setSelectedFood] = useState(null);
-
-  useEffect(() => {
-    getProfile().then((p) => {
-      const conditions = p?.conditions?.length ? p.conditions : DEFAULT_DEV_CONDITIONS;
-      setProfile({ ...(p ?? {}), conditions });
-    });
-  }, []);
 
   // Re-resolve the active tab whenever the URL's search params change (e.g.
   // another route linking in with a new ?tab=), so an in-page navigation
@@ -254,11 +248,11 @@ export default function SuggestionsScreen() {
             exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeOut' } }}
           >
             {activeTab === 'top' ? (
-              <TopDosTab profile={profile} onSelectFood={setSelectedFood} />
+              <TopDosTab onSelectFood={setSelectedFood} />
             ) : activeTab === 'groups' ? (
               <GroupsTab />
             ) : (
-              <BestRecipesTab profile={profile} />
+              <BestRecipesTab />
             )}
           </motion.div>
         </AnimatePresence>

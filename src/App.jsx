@@ -26,6 +26,7 @@ import GroupDetailScreen from "./screens/suggestions/GroupDetailScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
 import MealQueueScreen from "./screens/plan/MealQueueScreen";
 import RecipesScreen from "./screens/recipes/RecipesScreen";
+import PaywallScreen from "./screens/paywall/PaywallScreen";
 // App chrome
 import TabBar from "./components/layout/TabBar";
 import FAB from "./components/layout/FAB";
@@ -189,6 +190,7 @@ function App() {
               <Route path="/app/recipes" element={<RecipesScreen />} />
               <Route path="/app/plan" element={<MealQueueScreen />} />
               <Route path="/app/profile" element={<ProfileScreen />} />
+              <Route path="/app/upgrade" element={<PaywallScreen />} />
             </Route>
           </Routes>
         </BrowserRouter>

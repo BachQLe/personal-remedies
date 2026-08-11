@@ -20,12 +20,21 @@
  *     mutations (swipes, queue edits) don't each trigger a network call.
  *   - Never throws into callers and never blocks the UI: Supabase errors are
  *     logged once via console.warn and swallowed.
+ *   - Conditions-change purge (storage-map.md §6, gaps 1/2): a profile write
+ *     that changes `conditions` discards the stored plan the instant it's
+ *     saved (`purgeDerivedDataForConditionsChange`, planBuilder.js) via a
+ *     `storage.onWrite('profile', ...)` hook — registered even signed-out /
+ *     Supabase-unconfigured, so it's a universal guard, not sync-specific.
+ *     Symmetrically, `pullProfile` refuses to hydrate a remote `daily_plan`
+ *     whose `conditionsKey` disagrees with that same row's `conditions` —
+ *     profile/library still hydrate, the stale plan is dropped instead.
  */
 
 import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
 import { storage } from './storage.js';
 import { reloadLibrary } from '../state/library.js';
 import { reloadPlan } from '../state/dailyPlan.js';
+import { purgeDerivedDataForConditionsChange } from './planBuilder.js';
 
 const SYNC_META_KEY = 'syncMeta';
 const DEBOUNCE_MS = 2000;
@@ -68,6 +77,24 @@ function joinProfile(row) {
   const preferences = row.preferences && typeof row.preferences === 'object' ? row.preferences : {};
   const conditions = Array.isArray(row.conditions) ? row.conditions : [];
   return { ...preferences, conditions };
+}
+
+/**
+ * True when a remote row's `daily_plan` (if any) was actually built for the
+ * SAME conditions the row itself carries. Guards against hydrating a
+ * locally-consistent device with a row whose `conditions` and `daily_plan`
+ * disagree — a real, if transient, shape a row can be in (storage-map.md §6,
+ * gap 2): e.g. another device pushed a conditions edit but hadn't yet had its
+ * own purge-on-save land, or an older client (pre this wave's gap-1 fix)
+ * wrote the row. `daily_plan: null`/`undefined` is trivially consistent —
+ * there's no derived data to be stale.
+ * @param {{ conditions?: number[], daily_plan?: Object|null }} row
+ * @returns {boolean}
+ */
+function isDailyPlanConsistent(row) {
+  if (!row.daily_plan) return true;
+  const remoteConditionsKey = Array.isArray(row.conditions) ? row.conditions.join(',') : '';
+  return row.daily_plan.conditionsKey === remoteConditionsKey;
 }
 
 /**
@@ -175,7 +202,25 @@ export async function pullProfile(user) {
         storage.set('profile', joinProfile(row));
       }
       if (row.library) storage.set('library', row.library);
-      if (row.daily_plan !== undefined) storage.set('dailyPlan', row.daily_plan);
+      if (row.daily_plan !== undefined) {
+        // Gap 2 (storage-map.md §6): never hydrate a `daily_plan` that
+        // disagrees with the SAME row's own `conditions` — that's known-stale
+        // derived data, not a real plan for the conditions we're about to
+        // hydrate. Profile/library still hydrate either way; the plan is
+        // dropped to the honest empty state instead (user re-picks), same UX
+        // as a fresh conditions-change purge.
+        if (isDailyPlanConsistent(row)) {
+          storage.set('dailyPlan', row.daily_plan);
+        } else {
+          if (import.meta.env?.DEV) {
+            console.warn(
+              '[profileSync] pullProfile: remote daily_plan.conditionsKey does not match remote conditions on the same row — dropping the stale plan instead of hydrating it.',
+              { conditionsKey: row.daily_plan?.conditionsKey, conditions: row.conditions }
+            );
+          }
+          storage.set('dailyPlan', null);
+        }
+      }
     } finally {
       _hydrating = false;
     }
@@ -219,11 +264,33 @@ function reconcile(user) {
  * Call once at app level (see src/context/AuthContext.jsx). Subscribes to
  * Supabase auth state: on SIGNED_IN, pulls + reconciles the remote profile;
  * while signed in, local storage writes (profile/library/dailyPlan) schedule
- * a debounced push. No-ops entirely when Supabase isn't configured.
+ * a debounced push. The conditions-change purge guard below is registered
+ * regardless of Supabase config/sign-in state; everything past that point
+ * no-ops entirely when Supabase isn't configured.
  * @returns {() => void} teardown function
  */
 export function initProfileSync() {
-  if (!isSupabaseConfigured || !supabase) return () => {};
+  // Purge guard (storage-map.md §6, gap 1): registered unconditionally,
+  // BEFORE the Supabase-config check below, so a conditions edit discards a
+  // now-stale plan immediately — even signed-out, even with Supabase
+  // unconfigured. The local profile/dailyPlan mismatch this closes is a real
+  // bug independent of sync (it's just how the mismatch previously got
+  // PUSHED that motivated the gap in the first place); closing it here means
+  // whatever DOES eventually get pushed, once sync is configured and the
+  // user is signed in, is already consistent. Fires for every write to the
+  // `profile` key from ANY call site — `saveProfile`/`clearProfile` (api.js)
+  // today, anything else tomorrow — not just a Profile-screen edit; see
+  // `purgeDerivedDataForConditionsChange`'s own doc for why this is the
+  // right seam. Skipped while `_hydrating`: `pullProfile`'s own write-back
+  // already enforces this invariant directly against the row's authoritative
+  // pair (see `isDailyPlanConsistent`) — re-deriving it here from the write
+  // it just caused would be redundant.
+  const purgeUnsubscribe = storage.onWrite((key) => {
+    if (key !== 'profile' || _hydrating) return;
+    purgeDerivedDataForConditionsChange(storage.get('profile', null)?.conditions);
+  });
+
+  if (!isSupabaseConfigured || !supabase) return purgeUnsubscribe;
 
   // Hook local writes → debounced push while signed in. storage.onWrite fires
   // for every key (profile, library, dailyPlan, recentSearches, ...); only
@@ -261,6 +328,7 @@ export function initProfileSync() {
     subscription.unsubscribe();
     _storageUnsubscribe?.();
     _storageUnsubscribe = null;
+    purgeUnsubscribe();
     if (_pushTimer) {
       clearTimeout(_pushTimer);
       _pushTimer = null;

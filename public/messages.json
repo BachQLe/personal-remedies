@@ -1,0 +1,20 @@
+[
+  {
+    "id": "discover-best-recipes",
+    "title": "Discover your Best Recipes",
+    "body": "Top recipes matched to your profile — tap to browse.",
+    "startsAt": null,
+    "endsAt": null,
+    "severity": "info",
+    "dismissible": true
+  },
+  {
+    "id": "placeholder-plus-announcement",
+    "title": "PLACEHOLDER — Remedi Plus is on the way",
+    "body": "PLACEHOLDER COPY. This entry exists only to exercise the news/alerts channel end to end (severity + dismissible variety) — replace or remove before this ever ships to a real user. No pricing or feature claims here are final.",
+    "startsAt": null,
+    "endsAt": null,
+    "severity": "notice",
+    "dismissible": true
+  }
+]

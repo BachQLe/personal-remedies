@@ -17,6 +17,7 @@
  */
 
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getProfile, saveProfile, getConditionNames, getConditions } from '../../api/api.js';
 import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -511,6 +512,7 @@ function BackupSheet({ onClose }) {
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -647,6 +649,17 @@ export default function ProfileScreen() {
             </p>
             <SubEditRow icon="scale" label="Daily calorie target" onClick={() => setSheet('calorieTarget')} />
             <SubEditRow icon="pill" label="Medications" onClick={() => setSheet('medications')} />
+          </div>
+
+          {/* Section 2.5 — Remedi Plus. Scaffolding-only entry point (Task
+              T5C, master plan §6.2): everything in the app is unlocked
+              today, so this just opens the placeholder paywall screen —
+              never auto-triggered, never an interstitial. */}
+          <div>
+            <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-1">
+              Upgrade
+            </p>
+            <SubEditRow icon="award" label="Remedi Plus" onClick={() => navigate('/app/upgrade')} />
           </div>
 
           {/* Section 3 — Account. Auth stays entirely optional (master plan

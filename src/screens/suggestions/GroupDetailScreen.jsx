@@ -11,8 +11,8 @@
  */
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
-import { getProfile, getGroupLabel } from '../../api/api.js';
-import { DEFAULT_DEV_CONDITIONS, COARSE_GROUP_LABELS } from '../../api/config.js';
+import { getGroupLabel } from '../../api/api.js';
+import { COARSE_GROUP_LABELS } from '../../api/config.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import GlassPanel from '../../components/shared/GlassPanel.jsx';
@@ -26,16 +26,8 @@ const LAVENDER_BG_COLOR = '#DCC8F0';
 export default function GroupDetailScreen() {
   const { groupId } = useParams();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
   const [selectedFood, setSelectedFood] = useState(null);
   const [groupLabel, setGroupLabel] = useState(() => COARSE_GROUP_LABELS[groupId] ?? groupId);
-
-  useEffect(() => {
-    getProfile().then((p) => {
-      const conditions = p?.conditions?.length ? p.conditions : DEFAULT_DEV_CONDITIONS;
-      setProfile({ ...(p ?? {}), conditions });
-    });
-  }, []);
 
   // Resolve the real group label (CATEGORY_GRID_GROUPS's coarse codes only
   // ever hit the `coarse` half of getGroupLabels, but go through the shared
@@ -80,7 +72,6 @@ export default function GroupDetailScreen() {
       {/* Tab content — glass panel bleeds behind the navbar (appshell-cream-fix) */}
       <GlassPanel>
         <CategoryDetailPanel
-          profile={profile}
           group={groupId}
           groupLabel={groupLabel}
           hideTitle

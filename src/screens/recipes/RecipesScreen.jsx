@@ -1,15 +1,17 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getProfile, getRecipes, getConditionNames, buildRecipeDetail } from '../../api/api.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
+import DataState from '../../components/shared/DataState.jsx';
 import Pill from '../../components/shared/Pill.jsx';
 import SearchInput from '../../components/shared/SearchInput.jsx';
 import Icon from '../../components/shared/Icon.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
-import Snackbar from '../../components/shared/Snackbar.jsx';
 import { recipeToSaveItem } from '../../utils/saveGate.js';
 import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { GHOST_PROFILE, GHOST_RECIPES } from '../../api/ghostData.js';
+import { useAsyncData } from '../../hooks/useAsyncData.js';
+import { useSnackbar } from '../../context/SnackbarContext.jsx';
 
 // Demo key conditions (see api/config.js DEFAULT_DEV_CONDITIONS): 203 = Aging, 244 = Pneumonia.
 const DEMO_PROFILE = {
@@ -145,44 +147,34 @@ function RecipeRow({ recipe, onView, onSaveBlocked }) {
 }
 
 export default function RecipesScreen() {
-  const [profile, setProfile] = useState(null);
-  const [allRecipes, setAllRecipes] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [mealFilter, setMealFilter] = useState('All');
   const [conditionFilter, setConditionFilter] = useState('All');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   // Display names for the real profile's conditions (healthConditionID[]).
   const [conditionNames, setConditionNames] = useState([]);
-  const [snackbar, setSnackbar] = useState(null);
-  const snackbarIdRef = useRef(0);
+  const { show } = useSnackbar();
 
-  const showSnackbar = useCallback((message, canUndo = false) => {
-    snackbarIdRef.current += 1;
-    setSnackbar({ id: snackbarIdRef.current, message, canUndo });
+  // Primary data fetch (T5A): profile + condition-ranked recipes, via
+  // useAsyncData so a real failure gets an honest error panel + working
+  // Retry instead of silently collapsing to "no recipes" (the previous
+  // `catch(...) { setAllRecipes([]) }`). Bundled into one object because
+  // both are needed together and `getProfile()` itself never rejects (it
+  // always resolves to a profile or null — see api.js) — only `getRecipes`
+  // can genuinely fail (network/API), and that failure now propagates.
+  const fetcher = useCallback(async () => {
+    let p = await getProfile();
+    if (!p) p = DEMO_PROFILE;
+    const { recipes } = await getRecipes(p);
+    return { profile: p, recipes: recipes ?? [] };
   }, []);
 
-  useEffect(() => {
-    let alive = true;
-    async function load() {
-      let p = await getProfile();
-      if (!p) p = DEMO_PROFILE;
-      if (!alive) return;
-      setProfile(p);
-      try {
-        const { recipes } = await getRecipes(p);
-        if (!alive) return;
-        setAllRecipes(recipes ?? []);
-      } catch (err) {
-        console.error('RecipesScreen: getRecipes failed', err);
-        if (alive) setAllRecipes([]);
-      } finally {
-        if (alive) setLoading(false);
-      }
-    }
-    load();
-    return () => { alive = false; };
-  }, []);
+  const { status, data, retry } = useAsyncData(fetcher, [], {
+    isEmpty: (d) => !d?.recipes?.length,
+  });
+
+  const profile = data?.profile ?? null;
+  const fetchedRecipes = data?.recipes ?? [];
 
   useEffect(() => {
     let alive = true;
@@ -193,13 +185,16 @@ export default function RecipesScreen() {
   }, [profile]);
 
   // Ghost mode: render the real layout with placeholder data while loading.
-  const ghost = loading;
+  // Kept as its own bespoke treatment (not DataState's generic skeleton) —
+  // every OTHER status (success/empty/error-network/error-api/
+  // offline-cached/offline-no-cache) routes through DataState below instead.
+  const ghost = status === 'loading';
   // GHOST_PROFILE already carries display-name strings; the real profile's
   // conditions are healthConditionIDs, so use the resolved names instead.
   const conditions = ghost ? (GHOST_PROFILE.conditions ?? []) : conditionNames;
   const conditionOptions = ['All', ...conditions];
 
-  const recipes = ghost ? GHOST_RECIPES : allRecipes;
+  const recipes = ghost ? GHOST_RECIPES : fetchedRecipes;
 
   // Real recipes (from adapter getRecipes) use title/photo instead of
   // FoodDetailCard's item shape's name/image, and don't carry a per-ingredient
@@ -247,6 +242,8 @@ export default function RecipesScreen() {
     const searchOk = !searchQuery.trim() || r.title.toLowerCase().includes(searchQuery.toLowerCase());
     return mealOk && condOk && searchOk;
   });
+
+  const clearFilters = () => { setMealFilter('All'); setConditionFilter('All'); setSearchQuery(''); };
 
   return (
     <div
@@ -320,40 +317,61 @@ export default function RecipesScreen() {
         </p>
       )}
 
-      {/* Recipe list */}
-      {filtered.length === 0 ? (
-        <EmptyState
-          icon="menu_book"
-          title={recipes.length === 0 ? 'No recipes yet' : 'No recipes found'}
-          body={
-            recipes.length === 0
-              ? 'Set up your health profile to get condition-matched recipes.'
-              : 'Try adjusting the filters above.'
-          }
-          action={
-            recipes.length === 0 ? undefined : (
-              <button
-                onClick={() => { setMealFilter('All'); setConditionFilter('All'); setSearchQuery(''); }}
-                className="px-5 py-2.5 rounded-xs bg-forest-700 text-white text-sm font-semibold font-sans
-                  transition-all duration-fast ease-ds-out
-                  hover:bg-forest-800 active:scale-[0.98]"
-              >
-                Clear filters
-              </button>
-            )
-          }
-        />
+      {/* Recipe list — ghost keeps its own placeholder-data treatment (see
+          `ghost` above); every other status goes through DataState, whose
+          'empty' branch covers a genuinely empty FETCH (no recipes at all —
+          e.g. no profile conditions) and whose error/offline-no-cache
+          branches cover a real failure with a working Retry. A successful
+          fetch that the user's own meal-type/condition/search filters have
+          narrowed to zero matches is a separate, purely local case (NOT part
+          of the state matrix) — handled inside DataState's children, same
+          "Clear filters" action as before. */}
+      {ghost ? (
+        filtered.length === 0 ? (
+          <EmptyState
+            icon="menu_book"
+            title="No recipes found"
+            body="Try adjusting the filters above."
+          />
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            {filtered.map((recipe) => (
+              <RecipeRow key={recipe.id} recipe={recipe} onView={handleViewRecipe} onSaveBlocked={show} />
+            ))}
+          </div>
+        )
       ) : (
-        <div className="flex flex-col gap-2.5">
-          {filtered.map((recipe) => (
-            <RecipeRow
-              key={recipe.id}
-              recipe={recipe}
-              onView={handleViewRecipe}
-              onSaveBlocked={showSnackbar}
+        <DataState
+          status={status}
+          onRetry={retry}
+          emptyTitle="No recipes yet"
+          emptyBody="Set up your health profile to get condition-matched recipes."
+          screenName="recipes"
+        >
+          {filtered.length === 0 ? (
+            <EmptyState
+              icon="menu_book"
+              title="No recipes found"
+              body="Try adjusting the filters above."
+              action={
+                <button
+                  onClick={clearFilters}
+                  className="px-5 py-2.5 rounded-xs bg-forest-700 text-white text-sm font-semibold font-sans
+                    transition-all duration-fast ease-ds-out
+                    hover:bg-forest-800 active:scale-[0.98]"
+                >
+                  Clear filters
+                </button>
+              }
             />
-          ))}
-        </div>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {filtered.map((recipe) => (
+                <RecipeRow key={recipe.id} recipe={recipe} onView={handleViewRecipe} onSaveBlocked={show} />
+              ))}
+            </div>
+          )}
+        </DataState>
       )}
 
       {/* Recipe detail card */}
@@ -361,12 +379,6 @@ export default function RecipesScreen() {
         item={selectedRecipe}
         open={!!selectedRecipe}
         onClose={() => setSelectedRecipe(null)}
-      />
-
-      {/* Save-gate feedback */}
-      <Snackbar
-        snackbar={snackbar}
-        onDismiss={() => setSnackbar(null)}
       />
     </div>
   );

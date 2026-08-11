@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, X } from 'lucide-react';
-import { searchFoodsAndRecipes, searchNaturalSourceItems, buildRecipeDetail } from '../../api/api.js';
+import { searchFoods, searchNaturalSources, getRecipes, buildRecipeDetail } from '../../api/api.js';
 import { storage } from '../../api/storage.js';
 import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { getRecentSearches, addRecentSearch } from '../../state/recentSearches.js';
@@ -10,8 +10,39 @@ import Icon from '../../components/shared/Icon.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
-import Snackbar from '../../components/shared/Snackbar.jsx';
+import DataState from '../../components/shared/DataState.jsx';
+import { useAsyncData } from '../../hooks/useAsyncData.js';
+import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import { recipeToSaveItem } from '../../utils/saveGate.js';
+
+// ── Per-mode search, composed locally from api.js's lower-level exports —
+// deliberately NOT api.js's own searchFoodsAndRecipes/searchNaturalSourceItems,
+// which catch internally and always resolve (even on a real failure), so a
+// down API/network would silently render as "no results" instead of an
+// honest error. searchFoods/searchNaturalSources are a client-side filter
+// over the already-cached food dictionary and essentially never reject;
+// getRecipes goes through the network+cache layer and is the one that can
+// genuinely fail — Promise.all lets that failure propagate to useAsyncData
+// below instead of being swallowed (guardrail: an error must never render
+// as "no results").
+async function searchFoodMode(query, profile) {
+  const q = query.trim();
+  if (!q) return [];
+  const [foods, { recipes }] = await Promise.all([searchFoods(q, profile), getRecipes(profile)]);
+  const qLower = q.toLowerCase();
+  const matchedRecipes = recipes.filter((r) => (r.title || '').toLowerCase().includes(qLower));
+  return [
+    ...foods.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f })),
+    ...matchedRecipes.map((r) => ({ kind: 'recipe', key: `recipe-${r.id}`, recipe: r })),
+  ];
+}
+
+async function searchNaturalMode(query) {
+  const q = query.trim();
+  if (!q) return [];
+  const foods = await searchNaturalSources(q);
+  return foods.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f }));
+}
 
 // Mode configs — Food Lookup vs Natural Sources. Backdrop colors are the
 // exact hex values behind the `yellow-200`/`blue-200` Tailwind tokens
@@ -23,7 +54,7 @@ const MODES = {
   food: {
     label: 'Food Lookup',
     heading: 'Ingredients and Recipes',
-    searchFn: searchFoodsAndRecipes,
+    searchFn: searchFoodMode,
     recentsScope: 'default',
     backdropColor: '#FFEC88',
     accentFocusClass: 'focus:border-yellow-500',
@@ -33,7 +64,7 @@ const MODES = {
   natural: {
     label: 'Natural Sources',
     heading: 'Look up natural sources and supplements',
-    searchFn: searchNaturalSourceItems,
+    searchFn: searchNaturalMode,
     recentsScope: 'natural',
     backdropColor: '#BBCEFF',
     accentFocusClass: 'focus:border-blue-500',
@@ -93,20 +124,25 @@ export default function SearchScreen({ active, onClose }) {
   const urlMode = searchParams.get('mode') === 'natural' ? 'natural' : 'food';
   const [mode, setMode] = useState(urlMode);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [searching, setSearching] = useState(false);
+  // The query a fetch actually runs against — updated 300ms after the last
+  // keystroke (handleChange's debounce), or immediately on Enter/a
+  // recent-search chip. Kept separate from `query` (the raw input value) so
+  // useAsyncData's deps array only re-fires once the debounce settles, not
+  // on every keystroke.
+  const [committedQuery, setCommittedQuery] = useState('');
+  // True only while a debounce timer is pending. useAsyncData's own
+  // `status` only reports 'loading' for the hook's very first fetch — later
+  // dep-driven refetches are stale-while-revalidate by design (see
+  // useAsyncData.js), so it can't alone reproduce the old per-keystroke
+  // input spinner. This flag covers the debounce wait; `status === 'loading'`
+  // covers a fetch actually in flight; the input spinner shows for either.
+  const [debouncePending, setDebouncePending] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [snackbar, setSnackbar] = useState(null);
 
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
-  const snackbarIdRef = useRef(0);
   const profile = useRef(getProfile());
-
-  const showSnackbar = useCallback((message) => {
-    snackbarIdRef.current += 1;
-    setSnackbar({ id: snackbarIdRef.current, message });
-  }, []);
+  const { show } = useSnackbar();
 
   const {
     heading,
@@ -119,6 +155,16 @@ export default function SearchScreen({ active, onClose }) {
   } = MODES[mode];
 
   const hasQuery = query.trim().length > 0;
+  const trimmedCommitted = committedQuery.trim();
+
+  const fetcher = useCallback(() => {
+    if (!trimmedCommitted) return Promise.resolve([]);
+    return searchFn(trimmedCommitted, profile.current);
+  }, [trimmedCommitted, searchFn]);
+
+  const { status, data, retry } = useAsyncData(fetcher, [trimmedCommitted, mode], {});
+  const results = data ?? [];
+
   // Derived straight from storage on every render rather than mirrored into
   // state — addRecentSearch() writes synchronously, so by the time any
   // re-render happens (triggered by the same handler's other setState calls)
@@ -135,59 +181,40 @@ export default function SearchScreen({ active, onClose }) {
     return () => {
       clearTimeout(t);
       setQuery('');
-      setResults([]);
-      setSearching(false);
+      setCommittedQuery('');
+      setDebouncePending(false);
       setSelectedItem(null);
     };
   }, [active]);
 
   useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
 
-  // Whichever path changed `mode` (pill toggle or the URL-driven sync below),
-  // any debounced search still in flight was queued against the previous
-  // mode's searchFn — cancel it. A ref mutation, not state, so this belongs
-  // in an effect rather than the render-time branch that adjusts state.
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-  }, [mode]);
-
-  const runSearch = useCallback(async (q) => {
-    const trimmed = q.trim();
-    if (!trimmed) {
-      setResults([]);
-      setSearching(false);
-      return;
-    }
-    setSearching(true);
-    try {
-      const r = await searchFn(trimmed, profile.current);
-      setResults(r);
-    } catch (err) {
-      console.error('SearchScreen: search failed', err);
-      setResults([]);
-    } finally {
-      setSearching(false);
-    }
-  }, [searchFn]);
-
   const handleChange = (val) => {
     setQuery(val);
     setSelectedItem(null);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => runSearch(val), 300);
+    const trimmed = val.trim();
+    if (!trimmed) {
+      setDebouncePending(false);
+      setCommittedQuery('');
+      return;
+    }
+    setDebouncePending(true);
+    debounceRef.current = setTimeout(() => {
+      setDebouncePending(false);
+      setCommittedQuery(val);
+    }, 300);
   };
 
   // Switching modes changes searchFn/recentsScope, so any in-flight query and
   // its results (scoped to the previous mode) are stale — clear them rather
   // than showing e.g. recipe results under the Natural Sources searchFn.
-  // Only used from the event handler below (touches the debounce ref, which
-  // render-phase code may not do — see the render-time branch further down).
   const resetForModeChange = (nextMode) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setMode(nextMode);
     setQuery('');
-    setResults([]);
-    setSearching(false);
+    setCommittedQuery('');
+    setDebouncePending(false);
     setSelectedItem(null);
   };
 
@@ -206,13 +233,14 @@ export default function SearchScreen({ active, onClose }) {
   // a prop changes") rather than in an effect — `mode` catches up to
   // `urlMode` within the same render pass instead of committing a stale
   // frame first. Only plain setState here (no ref access, which render-phase
-  // code isn't allowed) — the debounce timer is cancelled separately by the
-  // `mode`-keyed effect above.
+  // code isn't allowed) — the debounce timer isn't touched here since this
+  // URL-driven path never has one in flight from itself (only the
+  // handler-driven paths above set one).
   if (urlMode !== mode) {
     setMode(urlMode);
     setQuery('');
-    setResults([]);
-    setSearching(false);
+    setCommittedQuery('');
+    setDebouncePending(false);
     setSelectedItem(null);
   }
 
@@ -220,7 +248,8 @@ export default function SearchScreen({ active, onClose }) {
     setQuery(term);
     addRecentSearch(term, recentsScope);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    runSearch(term);
+    setDebouncePending(false);
+    setCommittedQuery(term);
   };
 
   const commitRecent = useCallback((term) => {
@@ -233,7 +262,8 @@ export default function SearchScreen({ active, onClose }) {
     if (e.key === 'Enter') {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       commitRecent(query);
-      runSearch(query);
+      setDebouncePending(false);
+      setCommittedQuery(query);
     } else if (e.key === 'Escape') {
       onClose();
     }
@@ -273,7 +303,7 @@ export default function SearchScreen({ active, onClose }) {
   };
 
   const padTarget = PAD_CENTER;
-  const showNoResults = hasQuery && !searching && results.length === 0;
+  const searching = debouncePending || status === 'loading';
 
   return (
     <>
@@ -353,12 +383,18 @@ export default function SearchScreen({ active, onClose }) {
                         transition={{ duration: 0.18, ease: 'easeOut' }}
                         className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-2.5"
                       >
-                        {showNoResults ? (
-                          <p className="font-sans text-sm text-char-700 text-center py-12">
-                            No matches for "{query.trim()}" — try a different term.
-                          </p>
-                        ) : (
-                          results.map((item) =>
+                        {/* Idle-vs-no-results distinction (must survive): this
+                            DataState only ever mounts once `hasQuery` is true —
+                            the idle recents/hint view below is a completely
+                            separate branch, never routed through 'empty'. */}
+                        <DataState
+                          status={status}
+                          onRetry={retry}
+                          emptyTitle="No matches"
+                          emptyBody={`No matches for "${query.trim()}" — try a different term.`}
+                          screenName="search results"
+                        >
+                          {results.map((item) =>
                             item.kind === 'food' ? (
                               <ResultRow
                                 key={item.key}
@@ -367,7 +403,7 @@ export default function SearchScreen({ active, onClose }) {
                                 subtitle={item.food.category || 'Ingredient'}
                                 onClick={() => openFood(item.food)}
                                 saveItem={{ ...item.food, kind: 'food' }}
-                                onSaveBlocked={showSnackbar}
+                                onSaveBlocked={show}
                               />
                             ) : (
                               <ResultRow
@@ -377,11 +413,11 @@ export default function SearchScreen({ active, onClose }) {
                                 subtitle={item.recipe.sourceName}
                                 onClick={() => openRecipe(item.recipe)}
                                 saveItem={recipeToSaveItem(item.recipe)}
-                                onSaveBlocked={showSnackbar}
+                                onSaveBlocked={show}
                               />
                             ),
-                          )
-                        )}
+                          )}
+                        </DataState>
                       </motion.div>
                     ) : (
                       <motion.div
@@ -415,7 +451,10 @@ export default function SearchScreen({ active, onClose }) {
 
                         {/* Fills the leftover space below the recents (or the whole
                             area when there are none) with a quiet empty-state hint
-                            rather than leaving it blank. */}
+                            rather than leaving it blank. Not a DataState/empty
+                            status — this is the idle view, shown whenever there's
+                            no query at all, distinct from a completed search that
+                            found zero results (the DataState branch above). */}
                         <div className="flex-1 flex flex-col items-center justify-center gap-2">
                           <Search size={32} strokeWidth={1.5} className="text-blue-950/25" />
                           <p className="text-sm font-sans text-blue-950/30">Searches appear here</p>
@@ -435,8 +474,6 @@ export default function SearchScreen({ active, onClose }) {
         open={!!selectedItem}
         onClose={() => setSelectedItem(null)}
       />
-
-      <Snackbar snackbar={snackbar} onDismiss={() => setSnackbar(null)} />
     </>
   );
 }
