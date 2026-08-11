@@ -16,7 +16,8 @@ import TermsOfUse from "./pages/marketing/TermsOfUse";
 import PrivacyPolicy from "./pages/marketing/PrivacyPolicy";
 import AuthCallback from "./pages/marketing/AuthCallback";
 import OnboardingPage from "./components/onboarding";
-import ErrorBoundary from "./components/shared/ErrorBoundary";
+import ErrorBoundary, { RouteErrorBoundary } from "./components/shared/ErrorBoundary";
+import { SnackbarProvider } from "./context/SnackbarContext.jsx";
 // App screens
 import HomeScreen from "./screens/home/HomeScreen";
 import SearchScreen from "./screens/search/SearchScreen";
@@ -86,12 +87,30 @@ function AppShell({ children }) {
 
 // Layout route for the gated PWA app screens: onboarding-gate + phone shell,
 // with the matched child route rendered via Outlet.
+//
+// SnackbarProvider is mounted here (not per-screen) so every app screen
+// shares one toast instance via useSnackbar() — see src/context/
+// SnackbarContext.jsx. It sits outside RouteErrorBoundary so a route-level
+// render error doesn't unmount it.
+//
+// RouteErrorBoundary wraps ONLY the Outlet, keyed by the current pathname:
+// a render throw on one screen shows an inline error panel in place of that
+// screen while TabBar/FAB (siblings inside AppShell) stay mounted, and
+// navigating to a different route (the key changing) remounts the boundary
+// fresh rather than staying broken. The root ErrorBoundary (mounted once at
+// the very top, see `App` below) remains the last-resort catch-all for
+// failures outside the gated app shell entirely.
 function AppLayout() {
+  const location = useLocation();
   return (
     <RequireOnboarding>
-      <AppShell>
-        <Outlet />
-      </AppShell>
+      <SnackbarProvider>
+        <AppShell>
+          <RouteErrorBoundary key={location.pathname}>
+            <Outlet />
+          </RouteErrorBoundary>
+        </AppShell>
+      </SnackbarProvider>
     </RequireOnboarding>
   );
 }

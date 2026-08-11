@@ -184,6 +184,40 @@ function photoUrl(id) {
   return `https://images.unsplash.com/photo-${id}?w=600&q=80&auto=format&fit=crop`;
 }
 
+// ── Non-food category rule (REMEDI_MASTER_PLAN.md 1.10, decision j) ─────────
+//
+// Items in coarse group 'k' (Key Nutrients & Herbal Medicines) or fine group
+// 'x'/'j1' (lifestyle/behavior entries — Exercise, Smoking, Sleep, etc.) must
+// NEVER render with a stock food photo — a category icon renders instead.
+// A curated turmeric-latte photo standing in for "Vitamin D" or a jogger
+// photo standing in for "Exercise" reads as a real product photo the app
+// doesn't have, which is exactly the kind of fabricated specificity this
+// app avoids everywhere else (numeric scores, nutrition facts, recipe
+// directions...). `getNonFoodIcon` is the single choke point for this rule
+// — every caller that wants sentinel-aware image resolution should call it
+// (directly, or via `getIngredientImageOrIcon` below) rather than
+// reimplementing the k/x/j1 check.
+const NON_FOOD_ICONS = {
+  nutrient: 'flask-conical', // coarse 'k' — Key Nutrients & Herbal Medicines
+  lifestyle: 'activity',     // fine 'x' / 'j1' — lifestyle/behavior entries
+};
+
+/**
+ * Resolve the lucide icon name (from `Icon.jsx`'s ICON_MAP) a non-food
+ * category should render instead of a photo, or `null` when `group`/
+ * `fineGroup` don't identify one (i.e. the normal photo path applies).
+ * Fine-group lifestyle check runs first since a lifestyle item's coarse
+ * group ('j') is a different code than 'k' and shouldn't fall through.
+ * @param {string} [group] - coarse food group code
+ * @param {string} [fineGroup] - fine food group code
+ * @returns {string|null}
+ */
+export function getNonFoodIcon(group, fineGroup) {
+  if (fineGroup === 'x' || fineGroup === 'j1') return NON_FOOD_ICONS.lifestyle;
+  if (group === 'k') return NON_FOOD_ICONS.nutrient;
+  return null;
+}
+
 /**
  * Resolve a curation-overlay `imageFile` value (see itemOverlay.json /
  * localTables.js `getOverlayImageFile`) to a servable URL. Overlay entries
@@ -217,4 +251,42 @@ export function getIngredientImage(name, group, imageFile) {
   }
   const fallbackId = GROUP_FALLBACKS[group] || DEFAULT_FALLBACK;
   return photoUrl(fallbackId);
+}
+
+/**
+ * Sentinel-aware sibling of `getIngredientImage` — the opt-in entry point
+ * for the non-food icon rule (see `getNonFoodIcon` above). Returns either
+ * `{ photo: string }` or `{ icon: string }`, never a bare URL, so callers
+ * can't accidentally treat a sentinel as a src.
+ *
+ * WHY A SEPARATE FUNCTION rather than changing `getIngredientImage` itself:
+ * `getIngredientImage`'s plain-string return is depended on today by 8+
+ * call sites outside this task's file ownership (MealprepCarousel.jsx,
+ * MealPlannerPicker.jsx, MealQueueScreen.jsx, SlotSection.jsx,
+ * SchedulerView.jsx, recommendations.js, prefetch.js, adapter.js) — every
+ * one of them puts the return value straight into an `<img src>` or
+ * `Image().src`. Making `getIngredientImage` sometimes return `{icon:...}`
+ * would silently break all of them (a stringified object as an image src).
+ * This function is additive instead: `getIngredientImage`'s behavior is
+ * completely unchanged, and only callers that explicitly adopt this new
+ * function get sentinel-aware resolution. Today that's `FoodImageCard`'s
+ * `nonFoodIcon` prop and `RankedRow` (both call `getNonFoodIcon` directly,
+ * since they already have `group`/`fineGroup` in hand); wiring the screens
+ * above to call this function instead of `getIngredientImage` is a
+ * caller-side follow-up, not something this module can do unilaterally.
+ *
+ * @param {string} name
+ * @param {string} [group] - coarse food group code
+ * @param {string} [fineGroup] - fine food group code
+ * @param {string} [imageFile] - curation-overlay override (see
+ *   `getIngredientImage`) — a real curated image always wins over the icon
+ *   fallback, even for a non-food category.
+ * @returns {{ photo: string } | { icon: string }}
+ */
+export function getIngredientImageOrIcon(name, group, fineGroup, imageFile) {
+  if (!imageFile) {
+    const icon = getNonFoodIcon(group, fineGroup);
+    if (icon) return { icon };
+  }
+  return { photo: getIngredientImage(name, group, imageFile) };
 }

@@ -48,3 +48,57 @@ export default class ErrorBoundary extends Component {
     return this.props.children;
   }
 }
+
+// Route-level safety net. Mounted around just the <Outlet/> inside AppLayout
+// (App.jsx), keyed by the current pathname, so:
+//   - a render throw on one screen shows an inline panel in place of that
+//     screen only — TabBar/FAB (siblings in AppShell, outside this
+//     boundary) stay mounted and usable, unlike the root ErrorBoundary which
+//     blanks the entire app;
+//   - navigating away (the key changing) remounts the boundary fresh, so a
+//     broken screen doesn't stay broken forever — no need to reload the app;
+//   - a "Try again" button also resets it in place, for a broken screen
+//     whose underlying cause (e.g. a bad cached response) might clear on a
+//     re-render without a navigation at all.
+export class RouteErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    console.error("RouteErrorBoundary caught a render error", error, info);
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center px-6 py-16 text-center gap-3">
+          <p className="font-display text-base font-semibold text-blue-950 leading-snug">
+            This screen hit a snag
+          </p>
+          <p className="text-sm font-sans text-blue-950/60 leading-relaxed max-w-xs">
+            Something went wrong loading this. Try again, or come back to it later.
+          </p>
+          <button
+            type="button"
+            onClick={this.handleRetry}
+            className="mt-2 rounded-full bg-blue-950 text-white text-sm font-semibold font-sans px-5 py-2.5"
+          >
+            Try again
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}

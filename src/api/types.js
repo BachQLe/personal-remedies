@@ -160,10 +160,24 @@
  *   NOT computed or estimated by this app. Absent for recipes with no C1
  *   overlay match.
  * @property {string} mealType - Breakfast/Lunch/Dinner/Snack (best-effort keyword guess for real recipes)
- * @property {Food[]} [ingredients] - Real ingredient Food refs, hydrated
- *   from the C1 overlay's `ingredientFoodItemIds` — never fabricated. A
- *   recipe with no overlay match has no ingredients here, not guessed ones.
+ * @property {Array<{name: string, foodItemID?: number}>} [ingredients] -
+ *   Real ingredient facts from the C1 overlay's `rawIngredients` (paired
+ *   with `ingredientFoodItemIds` where a raw ingredient line was
+ *   successfully matched to a Nutridigm food) — never fabricated, never
+ *   invented quantities beyond what the source wrote. A recipe with no
+ *   overlay match has no ingredients here, not guessed ones. Surfaced to
+ *   FoodDetailCard as `realIngredients` (see recipeDetail.js) to keep it
+ *   unambiguous alongside `topFoodsForConditions`, a same-shaped but
+ *   unrelated "see also" rail.
  * @property {string[]} [matchedConditions] - Display names of conditions this recipe helps
+ * @property {Array<'breakfast'|'lunch'|'dinner'|'snack'|'beverage'>} [alsoFits] -
+ *   Additional meal types this recipe also fits, from the C1 overlay's
+ *   `alsoFits` (see RecipeOverlayRow below) — multi-category placement.
+ * @property {string[]} [dietaryTags] - e.g. "gluten-free", "vegetarian",
+ *   from the C1 overlay's `dietaryTags`.
+ * @property {number} [totalTimeMinutes] - Total prep + cook time, from the
+ *   C1 overlay. Absent for recipes with no C1 overlay match — never
+ *   estimated/guessed by this app.
  */
 
 /**
@@ -230,6 +244,11 @@
  * @property {'food'|'recipe'} kind
  * @property {string} [sourceName] - Attribution (e.g. "Food Network ·
  *   Giada De Laurentiis") — recipes only
+ * @property {string} [sourceUrl] - Link to the original recipe, from the C1
+ *   content overlay — recipes only, present only with a real overlay match.
+ * @property {string} [attribution] - Source attribution string from the C1
+ *   overlay, e.g. "MedlinePlus" — recipes only, present only with a real
+ *   overlay match. Distinct from `sourceName` (see Recipe typedef above).
  */
 
 /**

@@ -24,6 +24,8 @@ import BottomSheet from '../../components/shared/BottomSheet.jsx';
 import ConditionTag from '../../components/shared/ConditionTag.jsx';
 import Icon from '../../components/shared/Icon.jsx';
 import { getConditionMeta } from '../../utils/conditionMeta.js';
+import OtpCodeEntry from '../../components/auth/OtpCodeEntry.jsx';
+import { pullProfile } from '../../api/profileSync.js';
 
 // ── Demo profile fallback ────────────────────────────────────────────────────
 
@@ -399,18 +401,126 @@ function SubEditRow({ icon, label, onClick }) {
   );
 }
 
+/**
+ * BackupSheet — signed-out "Back up & sync" flow (email → 6-digit code),
+ * opened from the Account row in the main screen below. Mirrors this
+ * screen's other sub-edit sheets (EditList/EditCalorieTarget) for the
+ * email-collection stage, then hands off to the shared OtpCodeEntry (also
+ * used by the onboarding backup step and Login.jsx) for the code stage —
+ * see REMEDI_MASTER_PLAN.md §4.3-4.5.
+ */
+function BackupSheet({ onClose }) {
+  const { signInWithEmail, isSupabaseConfigured } = useAuth();
+  const [stage, setStage] = useState('email'); // 'email' | 'code' | 'done'
+  const [email, setEmail] = useState('');
+  const [sentAt, setSentAt] = useState(null);
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const submitEmail = async (e) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email');
+      return;
+    }
+    setSending(true);
+    setError('');
+    try {
+      await signInWithEmail(email);
+      setSentAt(Date.now());
+      setStage('code');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  // Same pull-then-continue pattern as Login.jsx / the onboarding backup
+  // step: reuse the existing profileSync reconciliation rather than
+  // duplicating merge logic here. The user is already signed OUT-turned-IN
+  // mid-session on an existing profile screen, so there's no first-time/
+  // returning routing decision to make — just settle sync, then close.
+  const handleVerified = async (session) => {
+    if (session?.user) {
+      try {
+        await pullProfile(session.user);
+      } catch {
+        /* best-effort — profileSync already logs/swallows its own errors */
+      }
+    }
+    setStage('done');
+    setTimeout(onClose, 1100);
+  };
+
+  return (
+    <BottomSheet open onClose={onClose} title="Back up & sync">
+      <div className="flex flex-col gap-4" style={{ minHeight: 220 }}>
+        {stage === 'done' ? (
+          <p className="text-sm font-semibold font-sans text-forest-700 text-center py-6">
+            You're synced — your profile and plan will follow you across devices.
+          </p>
+        ) : stage === 'code' ? (
+          <OtpCodeEntry
+            email={email}
+            sentAt={sentAt}
+            onVerified={handleVerified}
+            onCancel={() => {
+              setStage('email');
+              setError('');
+            }}
+          />
+        ) : (
+          <form onSubmit={submitEmail} className="flex flex-col gap-3">
+            <p className="text-xs text-char-400 font-sans -mt-1">
+              Add an email to back up your profile and plan, and pick up where you left off on
+              another device.
+            </p>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError('');
+              }}
+              placeholder="you@example.com"
+              autoComplete="email"
+              autoFocus
+              className="flex-1 bg-paper-100 border border-sand-200 rounded-lg px-4 py-3 text-sm font-sans outline-none focus:border-forest-700 transition-colors duration-base"
+            />
+            {error && <p className="text-sm text-signal-avoid font-sans">{error}</p>}
+            {!isSupabaseConfigured && (
+              <p className="text-xs text-char-400 font-sans italic">
+                Sync isn't configured for this build yet.
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={sending}
+              className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base bg-forest-700 hover:bg-forest-800 disabled:opacity-40 transition-colors duration-fast"
+            >
+              {sending ? 'Sending…' : 'Send code'}
+            </button>
+          </form>
+        )}
+      </div>
+    </BottomSheet>
+  );
+}
+
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function ProfileScreen() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   // Display names for profile.conditions (healthConditionID[]), resolved via
   // the cached conditions dictionary.
   const [conditionNames, setConditionNames] = useState([]);
-  // null | 'medications' | 'calorieTarget'
+  // null | 'medications' | 'calorieTarget' | 'backup'
   const [sheet, setSheet] = useState(null);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     getProfile().then((p) => {
@@ -433,6 +543,21 @@ export default function ProfileScreen() {
     setSaving(true);
     await saveProfile(next);
     setSaving(false);
+  };
+
+  const handleSignOut = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      await signOut();
+    } catch {
+      /* signOut() only throws on the unconfigured guard, which can't be
+         reached from here since a signed-in user implies Supabase is
+         configured — swallow defensively rather than surface a dead-end
+         error the user can't act on. */
+    } finally {
+      setSigningOut(false);
+    }
   };
 
   if (loading) {
@@ -523,6 +648,38 @@ export default function ProfileScreen() {
             <SubEditRow icon="scale" label="Daily calorie target" onClick={() => setSheet('calorieTarget')} />
             <SubEditRow icon="pill" label="Medications" onClick={() => setSheet('medications')} />
           </div>
+
+          {/* Section 3 — Account. Auth stays entirely optional (master plan
+              §4.3-4.5): signed-out shows a "Back up & sync" row that opens
+              the email + OTP flow; signed-in shows the account email + sign
+              out. Nothing here ever blocks using the app. */}
+          <div>
+            <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-1">
+              Account
+            </p>
+            {user ? (
+              <div className="flex items-center justify-between gap-3 py-4">
+                <span className="flex items-center gap-3 min-w-0">
+                  <span className="text-char-500">
+                    <Icon name="mail" size={20} />
+                  </span>
+                  <span className="flex-1 text-sm font-medium font-sans text-char-900 truncate">
+                    {user.email}
+                  </span>
+                </span>
+                <button
+                  onClick={handleSignOut}
+                  disabled={signingOut}
+                  className="text-xs font-semibold font-sans text-char-500 hover:text-avoid-600 disabled:opacity-40 transition-colors duration-fast flex-shrink-0"
+                  style={{ minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}
+                >
+                  {signingOut ? 'Signing out…' : 'Sign out'}
+                </button>
+              </div>
+            ) : (
+              <SubEditRow icon="shield" label="Back up & sync" onClick={() => setSheet('backup')} />
+            )}
+          </div>
         </div>
       </div>
 
@@ -543,6 +700,7 @@ export default function ProfileScreen() {
           onClose={() => setSheet(null)}
         />
       )}
+      {sheet === 'backup' && <BackupSheet onClose={() => setSheet(null)} />}
     </div>
   );
 }

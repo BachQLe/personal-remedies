@@ -10,6 +10,9 @@ import { getFoodFacts, assessFood, getFoodIdByName } from '../api/api.js';
 import { storage } from '../api/storage.js';
 import { DEFAULT_DEV_CONDITIONS } from '../api/config.js';
 import { getSaveBlockReason, SAVE_BLOCK_MESSAGES } from '../utils/saveGate.js';
+import { resolveIsRecipe, resolveRecipeLinkTarget } from '../utils/foodDetailCard.js';
+import { getNonFoodIcon } from '../api/ingredientImages.js';
+import { openUrl } from '../api/browser.js';
 import Snackbar from './shared/Snackbar.jsx';
 
 const DISMISS_THRESHOLD = 100;
@@ -116,7 +119,10 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
 
 /**
  * @param {Object} props
- * @param {Object} props.item - `{ foodId, name, image?, sourceName?, conditions?, ingredients?, isRecipe? }`
+ * @param {Object} props.item - `{ foodId, name, image?, sourceName?,
+ *   conditions?, topFoodsForConditions?, realIngredients?, sourceUrl?,
+ *   attribution?, isRecipe? }` — see recipeDetail.js's `buildRecipeDetail`
+ *   for the full recipe-detail payload shape.
  * @param {boolean} props.open
  * @param {() => void} props.onClose
  */
@@ -147,9 +153,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
     setSnackbar(null);
   }, []);
 
-  const isRecipe = item
-    ? (item.isRecipe ?? (item.ingredients?.length > 0 || !!item.sourceName))
-    : false;
+  const isRecipe = resolveIsRecipe(item);
   // Hoisted so both the save gate below AND handleSave's addToLibrary
   // payload use the exact same value — addToLibrary previously omitted
   // `kind` entirely, so items saved from this card recomputed as
@@ -299,7 +303,17 @@ export default function FoodDetailCard({ item, open, onClose }) {
     ? (item?.sourceName || null)
     : (facts?.longDescription && facts.longDescription.length >= 8 ? facts.longDescription : null);
 
-  const displayImage = item?.image || facts?.photo || null;
+  // Non-food rendering rule (master plan 1.10, decision j): coarse group
+  // 'k' (Key Nutrients & Herbal) or fine group 'x'/'j1' (lifestyle) items
+  // never get a stock food photo — a category icon renders instead. Group/
+  // fineGroup for the item currently open only become known once the
+  // self-loaded assessment resolves (assessFood's Food carries them; the
+  // seed `item` prop itself never does), so this only takes effect after
+  // load — before that, `nonFoodIcon` is null and the existing "no image"
+  // fallback (leaf icon) covers the loading window for any item that
+  // didn't arrive with a seeded photo.
+  const nonFoodIcon = getNonFoodIcon(assessment?.food?.group, assessment?.food?.fineGroup);
+  const displayImage = nonFoodIcon ? null : (item?.image || facts?.photo || null);
 
   // Condition chips: use the item's own conditions when given, else derive
   // from the assessment's helpful conditions (same logic as buildRecipeDetail).
@@ -314,11 +328,13 @@ export default function FoodDetailCard({ item, open, onClose }) {
   // so the longest name lands last, where it gets clipped at the panel edge.
   const sortedConditions = [...derivedConditions].sort((a, b) => a.length - b.length);
 
-  // No recipe URLs exist in the API — link out via a new-tab web search.
-  const handleGetRecipe = () => {
-    const query = `${item.name} ${item.sourceName || 'Food Network'} recipe`;
-    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank', 'noopener,noreferrer');
-  };
+  // Link-out target: a real C1 overlay `sourceUrl` always wins (public-
+  // domain attribution required, embedded in the label — see
+  // resolveRecipeLinkTarget); absent that, falls back to a new-tab web
+  // search exactly as before. Routed through browser.js's `openUrl` (the
+  // only file allowed to touch `window.open`) rather than calling it directly.
+  const linkTarget = resolveRecipeLinkTarget(item);
+  const handleGetRecipe = () => openUrl(linkTarget.url);
 
   return (
     <div className="fixed inset-0 z-30 flex items-center justify-center px-4">
@@ -371,7 +387,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-sand-100">
-                <Icon name="leaf" size={48} className="text-char-300" />
+                <Icon name={nonFoodIcon || 'leaf'} size={48} className="text-char-300" />
               </div>
             )}
 
@@ -568,23 +584,89 @@ export default function FoodDetailCard({ item, open, onClose }) {
                   )}
                 </div>
 
+                {/* Ingredients — real C1-overlay ingredient facts only
+                    (facts as given by the source, no invented quantities).
+                    Absent entirely (no placeholder row) when the recipe has
+                    no overlay match, per recipeDetail.js's never-fabricate
+                    rule. Directions are never republished — this list plus
+                    the link-out CTA below is the whole of what this app
+                    shows for a recipe's preparation. */}
+                {item?.realIngredients?.length > 0 && (
+                  <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
+                    <p className="text-[11px] font-label tracking-[0.14em] uppercase text-char-400 mb-3">
+                      Ingredients
+                    </p>
+                    <ul className="flex flex-col gap-1.5">
+                      {item.realIngredients.map((ing, i) => (
+                        <li key={ing.foodItemID ?? i} className="text-sm font-sans text-char-700 leading-snug">
+                          {ing.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Top foods for your conditions — a "see also" rail of
+                    OTHER foods that help the same conditions (from
+                    /topdoordonts), deliberately NOT presented as this
+                    item's ingredients (that was the old, misleading
+                    `ingredients` field name — see recipeDetail.js header).
+                    Only shown when there are real companions beyond the
+                    hero food itself. Thumbnails come pre-resolved from
+                    recipeDetail.js (outside this file's ownership this
+                    wave) and may not yet honor the non-food icon rule for
+                    a companion that happens to be a 'k'/lifestyle item —
+                    a known, documented gap, not attempted here. */}
+                {item?.topFoodsForConditions?.length > 1 && (
+                  <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
+                    {/* COPY-REVIEW: flagged for C2 health-claim audit */}
+                    <p className="text-[11px] font-label tracking-[0.14em] uppercase text-char-400 mb-3">
+                      Top foods for your conditions
+                    </p>
+                    <div className="flex gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
+                      {item.topFoodsForConditions.map((food, i) => (
+                        <div key={food.foodId ?? i} className="flex-shrink-0 w-16 flex flex-col items-center gap-1.5">
+                          {food.image ? (
+                            <img
+                              src={food.image}
+                              alt={food.name}
+                              className="w-16 h-16 rounded-full object-cover object-center"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 rounded-full bg-sand-100 flex items-center justify-center">
+                              <Icon name="leaf" size={22} className="text-char-300" />
+                            </div>
+                          )}
+                          <span className="text-[11px] font-sans text-char-600 text-center leading-tight line-clamp-2">
+                            {food.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
 
-            {/* Get the recipe — recipes only, pinned to the bottom */}
+            {/* Get the recipe — recipes only, pinned to the bottom.
+                `linkTarget.label` already embeds the attribution text when
+                sourceUrl wins (see resolveRecipeLinkTarget) — never shown
+                as a separate/equal element alongside the search fallback. */}
             {isRecipe && (
               <div className="flex-shrink-0 px-4 pb-4">
                 <button
                   onClick={handleGetRecipe}
-                  className="w-full py-3.5 rounded-xl bg-blue-950 text-white
+                  className="w-full py-3.5 px-4 rounded-xl bg-blue-950 text-white
                     font-display font-semibold text-base shadow-fab
                     flex items-center justify-center gap-2
                     transition-all duration-base ease-ds-out
                     hover:-translate-y-[1px] hover:shadow-lg
                     active:translate-y-[1px] active:scale-[0.99]"
                 >
-                  <ExternalLink size={17} />
-                  Get the recipe
+                  <ExternalLink size={17} className="flex-shrink-0" />
+                  <span className="truncate">{linkTarget.label}</span>
                 </button>
               </div>
             )}

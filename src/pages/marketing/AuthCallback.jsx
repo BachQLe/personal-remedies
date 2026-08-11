@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase, isSupabaseConfigured } from "../../lib/supabase";
 import { storage } from "../../api/storage.js";
+import { pullProfile } from "../../api/profileSync.js";
 
 const TIMEOUT_MS = 8000;
 
@@ -16,13 +17,30 @@ export default function AuthCallback() {
 
     let settled = false;
 
-    const finish = (session) => {
+    // First-time vs returning (REMEDI_MASTER_PLAN.md §4.5), keyed off
+    // profile presence + session only — same rule src/pages/marketing/
+    // Login.jsx's email+OTP path uses. `pullProfile` is the existing
+    // profileSync reconciliation (also triggered by AuthContext's own
+    // auth-listener on SIGNED_IN); awaiting it explicitly here — rather
+    // than relying on that listener's un-awaited background call racing
+    // against the `storage.get` read below — is what makes "onboarded"
+    // reflect a returning user's just-hydrated remote profile instead of
+    // whatever (possibly nothing) storage.js happened to hold before the
+    // pull settled.
+    const finish = async (session) => {
       if (settled) return;
       settled = true;
       clearTimeout(timeoutId);
       subscription.unsubscribe();
 
       if (session) {
+        if (session.user) {
+          try {
+            await pullProfile(session.user);
+          } catch {
+            /* best-effort — profileSync already logs/swallows its own errors */
+          }
+        }
         const onboarded = !!storage.get("profile", null);
         navigate(onboarded ? "/app/home" : "/onboarding", { replace: true });
       } else {

@@ -11,17 +11,28 @@
  *     no tier data, so this stays invisible there).
  *
  * Props:
- *   food          — { id, name, groupLabel?, notes?, isLifestyle?, tier? }
+ *   food          — { id, name, group?, fineGroup?, groupLabel?, notes?, isLifestyle?, tier? }
  *   studyCount    — number | null/undefined — rendered as "N studies" when a real number
  *   onSelect      — callback(food)
  *   onSaveBlocked — callback(message) — threaded through to SaveButton's onBlocked.
  *                   Both callers of RankedRow only ever fetch plain foods/lifestyle
  *                   items (recipes are structurally excluded from both endpoints),
  *                   so SaveButton's `item.kind` is hardcoded to 'food' here.
+ *
+ * Non-food icon rule (master plan 1.10, decision j): `food.group`/
+ * `food.fineGroup` are already present on both callers' Food objects
+ * (adapter.js's getTopDosAndDonts/getCategoryDetail), so this row resolves
+ * its own leading icon via `getNonFoodIcon` — no caller wiring needed. Coarse
+ * group 'k' (Key Nutrients & Herbal) or fine group 'x'/'j1' (lifestyle) get
+ * a small category-icon avatar; everything else keeps today's plain text
+ * row (RankedRow has never rendered a food photo, so ordinary foods are
+ * already rule-compliant — the icon is purely additive signal here).
  */
 import { ChevronRight } from 'lucide-react';
 import { cleanNotes } from '../../api/recommendations.js';
+import { getNonFoodIcon } from '../../api/ingredientImages.js';
 import SaveButton from './SaveButton.jsx';
+import Icon from './Icon.jsx';
 
 // ── Tier config (colors match the existing SignalChip benefit tokens) ───────
 
@@ -49,6 +60,7 @@ const TIER_CONFIG = {
 export default function RankedRow({ food, studyCount, onSelect, onSaveBlocked }) {
   const notes = food.isLifestyle ? cleanNotes(food.notes) : '';
   const tierCfg = food.tier ? TIER_CONFIG[food.tier] : null;
+  const nonFoodIcon = getNonFoodIcon(food.group, food.fineGroup);
 
   return (
     <button
@@ -56,6 +68,14 @@ export default function RankedRow({ food, studyCount, onSelect, onSaveBlocked })
       className="w-full flex items-start gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left
         transition-all duration-fast hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
     >
+      {/* Category icon avatar — non-food items only (never a photo here;
+          see the file header note). */}
+      {nonFoodIcon && (
+        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-sand-100 flex items-center justify-center self-center">
+          <Icon name={nonFoodIcon} size={16} className="text-char-500" />
+        </span>
+      )}
+
       {/* Name + lifestyle/tier chip + group + notes */}
       <span className="flex-1 min-w-0">
         <span className="flex items-center gap-2 flex-wrap">

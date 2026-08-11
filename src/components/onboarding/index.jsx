@@ -5,6 +5,9 @@ import RemediWelcome from './RemediWelcome';
 import ProfileBuilder from './ProfileBuilder';
 import { saveProfile } from '../../api/api.js';
 import { prefetchAppData } from '../../api/prefetch.js';
+import { useAuth } from '../../context/AuthContext.jsx';
+import OtpCodeEntry from '../auth/OtpCodeEntry.jsx';
+import { pullProfile } from '../../api/profileSync.js';
 
 const ONBOARDING_BG = '#BBCEFF';
 const DAILY_PICKS_BG = '#111E58';
@@ -106,6 +109,128 @@ const CLOUDS = [
 const cloudSpring = { type: 'spring', stiffness: 20, damping: 12 };
 // --- End cloud system ---
 
+/**
+ * BackupStep — final, SKIPPABLE onboarding step: "back up & sync" via the
+ * email + 6-digit OTP flow (REMEDI_MASTER_PLAN.md §4.3-4.5). Rendered as
+ * step 2, after ProfileBuilder's step 1 has already saved the local profile
+ * — this step can never block or gate reaching the app; "Skip for now" is
+ * always present, even mid code-entry, so a user who starts typing an email
+ * and changes their mind isn't trapped.
+ *
+ * Auth is entirely optional here: this step only exists to *offer* backup,
+ * never to require it. `onSkip` and the post-`onVerified` continuation both
+ * land on the same place (/app/home) — see OnboardingPage.finishOnboarding.
+ */
+function BackupStep({ onSkip, onVerified }) {
+  const { signInWithEmail, isSupabaseConfigured } = useAuth();
+  const [stage, setStage] = useState('email'); // 'email' | 'code'
+  const [email, setEmail] = useState('');
+  const [sentAt, setSentAt] = useState(null);
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
+
+  const submitEmail = async (e) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email');
+      return;
+    }
+    setSending(true);
+    setError('');
+    try {
+      await signInWithEmail(email);
+      setSentAt(Date.now());
+      setStage('code');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col flex-1 overflow-hidden relative">
+      {/* Top bar (tan) — matches ProfileBuilder's step chrome */}
+      <div className="flex-none px-6 pt-14 pb-4 relative z-10 bg-paper-200">
+        <h2
+          className="font-semibold tracking-tight text-[16px] text-char-900 leading-tight"
+          style={{ fontFamily: 'Quantico, sans-serif' }}
+        >
+          Back up your plan?
+        </h2>
+      </div>
+
+      {/* Body (blue) */}
+      <div className="flex-1 relative overflow-y-auto px-6 pt-8 pb-6" style={{ backgroundColor: '#BBCEFF' }}>
+        <div className="w-full max-w-[380px] mx-auto flex flex-col gap-5">
+          <p className="font-sans text-[15px] text-blue-950/80 text-center leading-relaxed">
+            Add an email to save your profile and plan, and pick them up on another device.
+            Totally optional — you can always do this later from your profile.
+          </p>
+
+          {stage === 'code' ? (
+            <div className="bg-white/90 rounded-2xl p-5 shadow-sm">
+              <OtpCodeEntry
+                email={email}
+                sentAt={sentAt}
+                onVerified={onVerified}
+                onCancel={() => {
+                  setStage('email');
+                  setError('');
+                }}
+              />
+            </div>
+          ) : (
+            <form onSubmit={submitEmail} className="flex flex-col gap-3">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError('');
+                }}
+                placeholder="you@example.com"
+                aria-label="Email address"
+                autoComplete="email"
+                autoFocus
+                className="w-full text-center px-5 py-3.5 rounded-pill border-[1.5px] border-blue-950/15 bg-white/70 text-blue-950 placeholder:text-blue-950/40 text-base font-sans shadow-sm outline-none transition-all duration-fast focus:border-blue-950/40 focus:bg-white"
+                style={{ minHeight: 44 }}
+              />
+              {error && (
+                <p className="font-sans text-[13px] text-signal-avoid text-center">{error}</p>
+              )}
+              {!isSupabaseConfigured && (
+                <p className="font-sans text-[12px] text-blue-950/50 text-center italic">
+                  Sync isn't configured for this build yet — you can still continue without it.
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={sending}
+                className="px-8 py-3.5 rounded-pill text-blue-950 font-semibold text-base bg-white hover:bg-white/90 transition-colors duration-fast font-sans shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ minHeight: 44 }}
+              >
+                {sending ? 'Sending…' : 'Send code'}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom bar (tan) — Skip is always reachable, in either stage */}
+      <div className="flex-none px-6 pt-3 pb-8 bg-paper-200 rounded-t-xl">
+        <button
+          type="button"
+          onClick={onSkip}
+          className="w-full text-sm font-semibold text-char-500 hover:text-char-700 transition-colors duration-fast font-sans bg-transparent border-none cursor-pointer py-4 min-h-[48px] flex items-center justify-center"
+        >
+          Skip for now
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function OnboardingPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -120,9 +245,12 @@ export default function OnboardingPage() {
     medications: [],
   });
 
-  // Final save, called directly from ProfileBuilder once conditions are set
+  // Called directly from ProfileBuilder once conditions are set
   // (ProfileBuilder's own Continue button is disabled until conditions.length
-  // > 0, so no separate gate is needed here).
+  // > 0, so no separate gate is needed here). Saves the profile and warms
+  // the cache immediately, THEN advances to the skippable backup step —
+  // profile save is deliberately NOT gated on auth: a user who abandons the
+  // backup step (or never even reaches it) still keeps their profile.
   const handleSubmit = async () => {
     if (saving) return;
     setSaving(true);
@@ -139,7 +267,29 @@ export default function OnboardingPage() {
 
     await saveProfile(payload);
     prefetchAppData(payload);
-    navigate('/app/home');
+    setSaving(false);
+    setStep(2);
+  };
+
+  // Both the "Skip for now" path and the post-verification continuation
+  // land here — auth is purely additive, never a gate to reaching the app.
+  const finishOnboarding = () => navigate('/app/home');
+
+  // On verified sign-in, trigger the existing profileSync pull/merge
+  // machinery (src/api/profileSync.js `pullProfile` — same function
+  // src/context/AuthContext.jsx's `initProfileSync` auth listener already
+  // calls on SIGNED_IN) before continuing, rather than reimplementing any
+  // merge logic here. Best-effort: profileSync already logs + swallows its
+  // own errors, so this never blocks the user from reaching the app.
+  const handleBackupVerified = async (session) => {
+    if (session?.user) {
+      try {
+        await pullProfile(session.user);
+      } catch {
+        /* best-effort reconciliation — never blocks onboarding completion */
+      }
+    }
+    finishOnboarding();
   };
 
   const slideVariants = {
@@ -189,6 +339,9 @@ export default function OnboardingPage() {
                   saving={saving}
                   onBack={() => setStep(0)}
                 />
+              )}
+              {step === 2 && (
+                <BackupStep onSkip={finishOnboarding} onVerified={handleBackupVerified} />
               )}
             </motion.div>
           </AnimatePresence>

@@ -61,7 +61,13 @@ function writeEntry(key, entry) {
 }
 
 /**
- * Fetch-through cache with TTL + stale-while-revalidate semantics.
+ * Fetch-through cache with TTL + stale-while-revalidate semantics, reporting
+ * cache provenance alongside the data.
+ *
+ * Used by src/hooks/useAsyncData.js (via a fetcher that returns this
+ * envelope directly) to drive the offline-cached state-matrix branch — the
+ * "Offline — showing saved data" banner needs a real signal for whether
+ * what's on screen came from the persisted cache, not a guess.
  *
  * @template T
  * @param {string} key - Cache key. Callers should fold any request params
@@ -69,16 +75,16 @@ function writeEntry(key, entry) {
  * @param {number} ttlMs - How long an entry is considered fresh.
  * @param {() => Promise<T>} fetcher - Produces a fresh value; only awaited
  *   when the cache is missing/stale/version-mismatched.
- * @returns {Promise<T>}
+ * @returns {Promise<{ data: T, fromCache: boolean, stale: boolean }>}
  */
-export async function cachedFetch(key, ttlMs, fetcher) {
+export async function cachedFetchWithMeta(key, ttlMs, fetcher) {
   const entry = readEntry(key);
   const now = Date.now();
 
   if (entry && entry.v === SCHEMA_VERSION) {
     const age = now - entry.ts;
     if (age < ttlMs) {
-      return entry.data;
+      return { data: entry.data, fromCache: true, stale: false };
     }
 
     // Stale: return immediately, revalidate in the background (de-duped).
@@ -95,12 +101,32 @@ export async function cachedFetch(key, ttlMs, fetcher) {
       })();
       _revalidating.set(key, revalidation);
     }
-    return entry.data;
+    return { data: entry.data, fromCache: true, stale: true };
   }
 
   // Missing or version-mismatched — await the network, then persist.
   const data = await fetcher();
   writeEntry(key, { v: SCHEMA_VERSION, ts: now, data });
+  return { data, fromCache: false, stale: false };
+}
+
+/**
+ * Fetch-through cache with TTL + stale-while-revalidate semantics.
+ *
+ * Thin wrapper over `cachedFetchWithMeta` that drops the provenance
+ * metadata — unchanged behavior/timing for the many existing call sites
+ * (src/api/adapter.js) that only ever wanted the data.
+ *
+ * @template T
+ * @param {string} key - Cache key. Callers should fold any request params
+ *   (e.g. conditionsCSV) into the key so distinct requests don't collide.
+ * @param {number} ttlMs - How long an entry is considered fresh.
+ * @param {() => Promise<T>} fetcher - Produces a fresh value; only awaited
+ *   when the cache is missing/stale/version-mismatched.
+ * @returns {Promise<T>}
+ */
+export async function cachedFetch(key, ttlMs, fetcher) {
+  const { data } = await cachedFetchWithMeta(key, ttlMs, fetcher);
   return data;
 }
 

@@ -7,11 +7,8 @@
  * shape:
  *   {
  *     foodId, name, image, sourceName, conditions[],
- *     topFoodsForConditions[],       // renamed from the old `ingredients` —
- *                                    // see below, this was NEVER a real
+ *     topFoodsForConditions[],       // see below — this was NEVER a real
  *                                    // ingredients list
- *     ingredients[],                 // LEGACY ALIAS, identical content to
- *                                    // topFoodsForConditions — see note below
  *     realIngredients?: [],          // present only when the recipe has a
  *                                    // C1 overlay match — real ingredient
  *                                    // facts, never fabricated
@@ -25,13 +22,12 @@
  * despite the field name, this was never an ingredients list for the card
  * being viewed, just other foods that happen to help the same conditions.
  * That's still useful content (a "top foods for your conditions" rail), so
- * it's kept, just honestly named `topFoodsForConditions`. The `ingredients`
- * key is DUAL-PUBLISHED for one wave with identical content purely so
- * FoodDetailCard.jsx (owned by the Wave-4 agent, not this one) keeps
- * working unmodified — see the LEGACY comment below. Real ingredients (from
- * the C1 overlay, when a recipe has one) are now available separately under
- * `realIngredients`, and are never mixed into `topFoodsForConditions`/
- * `ingredients`.
+ * it's kept, just honestly named `topFoodsForConditions`. The legacy
+ * `ingredients` alias (dual-published for one wave so FoodDetailCard.jsx
+ * kept working unmodified) is gone now that FoodDetailCard reads
+ * `topFoodsForConditions` directly (Task T4B). Real ingredients (from the
+ * C1 overlay, when a recipe has one) are available separately under
+ * `realIngredients`, and are never mixed into `topFoodsForConditions`.
  *
  * Still derives conditions from nutridigm via assessFood, and the
  * top-foods-for-conditions rail via /topdoordonts. No cook times, steps
@@ -130,8 +126,6 @@ export async function buildRecipeDetail(card, profile) {
     sourceName: card.sourceName ?? null,
     conditions: derivedConditions,
     topFoodsForConditions,
-    // LEGACY: FoodDetailCard still reads .ingredients; Wave-4 removes this alias
-    ingredients: topFoodsForConditions,
   };
 
   // Real fields from the C1 recipe overlay (src/data/recipeOverlay.json,

@@ -4,9 +4,10 @@
  *   - the old fabricated-name `ingredients` field (actually a "top foods
  *     for these conditions" rail from /topdoordonts, unrelated to the
  *     viewed recipe's real ingredients) is renamed `topFoodsForConditions`
- *   - the legacy `ingredients` key is DUAL-PUBLISHED for one wave with
- *     IDENTICAL content, so FoodDetailCard.jsx (Wave-4 owned, unmodified
- *     this wave) keeps working
+ *   - the legacy `ingredients` key (dual-published for one wave so
+ *     FoodDetailCard.jsx kept working unmodified) is GONE as of Task T4B —
+ *     FoodDetailCard now reads `topFoodsForConditions` directly, so the
+ *     payload must no longer carry an `ingredients` key at all
  *   - real overlay-derived fields (`realIngredients`, `sourceUrl`,
  *     `attribution`) appear ONLY when the caller's `card` actually carries
  *     them (i.e. only when a real C1 overlay match exists upstream, per
@@ -62,12 +63,12 @@ beforeEach(() => {
   fetchTopDoOrDonts.mockResolvedValue(TOPDOORDONTS_RESPONSE);
 });
 
-describe('buildRecipeDetail: dual-publish (topFoodsForConditions / legacy ingredients)', () => {
-  it('publishes topFoodsForConditions and a legacy ingredients alias with identical content', async () => {
+describe('buildRecipeDetail: topFoodsForConditions (legacy ingredients alias removed)', () => {
+  it('publishes topFoodsForConditions with no legacy ingredients key', async () => {
     const payload = await buildRecipeDetail(HERO_CARD, { conditions: [9001] });
     expect(payload.topFoodsForConditions).toBeDefined();
     expect(payload.topFoodsForConditions.length).toBeGreaterThan(0);
-    expect(payload.ingredients).toEqual(payload.topFoodsForConditions);
+    expect('ingredients' in payload).toBe(false);
     // hero food leads the rail
     expect(payload.topFoodsForConditions[0]).toEqual({
       name: HERO_CARD.name,
@@ -76,13 +77,13 @@ describe('buildRecipeDetail: dual-publish (topFoodsForConditions / legacy ingred
     });
   });
 
-  it('falls back to a hero-only rail (still dual-published identically) when topdoordonts is empty', async () => {
+  it('falls back to a hero-only rail (still no legacy alias) when topdoordonts is empty', async () => {
     fetchTopDoOrDonts.mockResolvedValue([]);
     const payload = await buildRecipeDetail(HERO_CARD, { conditions: [9001] });
     expect(payload.topFoodsForConditions).toEqual([
       { name: HERO_CARD.name, image: HERO_CARD.image, foodId: HERO_CARD.foodId },
     ]);
-    expect(payload.ingredients).toEqual(payload.topFoodsForConditions);
+    expect('ingredients' in payload).toBe(false);
   });
 
   it('falls back to a hero-only rail when topdoordonts rejects', async () => {
@@ -91,7 +92,7 @@ describe('buildRecipeDetail: dual-publish (topFoodsForConditions / legacy ingred
     expect(payload.topFoodsForConditions).toEqual([
       { name: HERO_CARD.name, image: HERO_CARD.image, foodId: HERO_CARD.foodId },
     ]);
-    expect(payload.ingredients).toEqual(payload.topFoodsForConditions);
+    expect('ingredients' in payload).toBe(false);
   });
 });
 

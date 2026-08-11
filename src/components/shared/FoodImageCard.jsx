@@ -33,6 +33,20 @@
  *                     SaveButton) is expected to be self-contained and handle
  *                     its own click/keyboard/stopPropagation.
  *   loading         — 'lazy' | 'eager', default 'lazy'
+ *   nonFoodIcon     — lucide icon name (see Icon.jsx's ICON_MAP), optional.
+ *                     When set, renders a category-icon tile INSTEAD of
+ *                     `image` — the non-food rendering rule (master plan
+ *                     1.10, decision j: coarse group 'k' / fine group
+ *                     'x'/'j1' items never get a stock food photo). Resolve
+ *                     it via `getNonFoodIcon(group, fineGroup)` from
+ *                     ../../api/ingredientImages.js and pass the result
+ *                     here; `undefined`/`null` (the default) renders `image`
+ *                     exactly as before, so every existing caller is
+ *                     unaffected until it opts in. No current caller passes
+ *                     this yet — wiring it into SlotSection/MealQueueScreen/
+ *                     etc. call sites is a follow-up (those files sit
+ *                     outside this task's ownership), same pattern as
+ *                     recipeDetail.js's `sourceUrl`/`realIngredients` gap.
  *
  * Styling:
  *   - Uses Tailwind with preset colors (char-900, forest-700, etc.)
@@ -43,6 +57,7 @@
 
 import FoodRating from './FoodRating.jsx';
 import MealTypeTag from './mealTypeMeta.jsx';
+import Icon from './Icon.jsx';
 
 /**
  * @param {Object} props
@@ -63,6 +78,7 @@ import MealTypeTag from './mealTypeMeta.jsx';
  * @param {() => void} [props.actionOnClick]
  * @param {React.ReactNode | (() => React.ReactNode)} [props.saveAction]
  * @param {'lazy' | 'eager'} [props.loading]
+ * @param {string} [props.nonFoodIcon] - lucide icon name; renders instead of `image` (see prop doc above)
  */
 export default function FoodImageCard({
   id,
@@ -82,6 +98,7 @@ export default function FoodImageCard({
   actionOnClick,
   saveAction,
   loading = 'lazy',
+  nonFoodIcon = null,
 }) {
   const badgeLabel = typeof badge === 'string' ? badge : badge?.label;
   const badgeVariant = badge && typeof badge === 'object' ? badge.variant : 'primary';
@@ -116,8 +133,14 @@ export default function FoodImageCard({
         ${className}`}
       style={{ aspectRatio: aspectRatio }}
     >
-      {/* Image background */}
-      {typeof image === 'string' ? (
+      {/* Image background — `nonFoodIcon` (non-food rendering rule, master
+          plan 1.10) always wins over `image`: a category icon tile instead
+          of a photo for coarse group 'k' / fine group 'x'/'j1' items. */}
+      {nonFoodIcon ? (
+        <div className="absolute inset-0 flex items-center justify-center bg-sand-100">
+          <Icon name={nonFoodIcon} size={40} className="text-char-400" />
+        </div>
+      ) : typeof image === 'string' ? (
         <img
           src={image}
           alt={imageAlt}

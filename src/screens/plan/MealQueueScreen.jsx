@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, BookmarkPlus, ArrowRight, RotateCw, RefreshCw, CalendarPlus } from 'lucide-react';
+import { Plus, BookmarkPlus, ArrowRight, RotateCw, RefreshCw, CalendarPlus, Printer, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import GlassPanel from '../../components/shared/GlassPanel.jsx';
@@ -29,6 +29,8 @@ import {
   generatePlanFromPicks,
 } from '../../api/api.js';
 import { estimatePlanDayCalories } from '../../api/calorieNeeds.js';
+import { formatWeekPlanText, buildPrintModel } from '../../api/planExport.js';
+import { printPage, share } from '../../api/browser.js';
 import { PLAN_SLOTS, DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import {
   getPlan,
@@ -341,6 +343,13 @@ export default function MealQueueScreen() {
   // below instead of 5 honest-empty slots.
   const firstRunEmpty = !building && !plan;
 
+  // Print view model (T4C) — built from the REAL plan only, never ghost data
+  // (`plan`, not `displayPlan`/GHOST_PLAN): `conditionNames` above is safe to
+  // reuse here too, since it equals `plan.conditionNames` exactly whenever
+  // `plan` is non-null (`displayPlan` only diverges from `plan` in ghost
+  // mode, which requires `!plan`). `null` when there's nothing to print yet.
+  const printModel = plan ? buildPrintModel(plan, { conditionNames }) : null;
+
   // Plan: shuffle one slot on the selected day
   const handleShuffle = useCallback(async (slotKey) => {
     if (shufflingSlot) return;
@@ -401,6 +410,27 @@ export default function MealQueueScreen() {
     showSnackbar('Removed from plan', true, () => insertIntoSlot(dateKey, slotKey, item, idx));
   }, [showSnackbar, activeDay]);
 
+  // Print & share the whole week (T4C, REMEDI_MASTER_PLAN.md §1.9) — plain,
+  // ink-friendly output; FOODS only, never a calorie tally (see
+  // planExport.js's header). `printPage()`/`share()` are the only
+  // window/navigator touchpoints allowed anywhere in the app (browser.js).
+  const handlePrint = useCallback(() => {
+    printPage();
+  }, []);
+
+  const handleShare = useCallback(async () => {
+    if (!plan) return;
+    const text = formatWeekPlanText(plan, { conditionNames });
+    const result = await share({ title: 'My Remedi meal plan', text });
+    if (!result.ok) {
+      showSnackbar('Could not share — try again');
+    } else if (result.method === 'clipboard') {
+      showSnackbar('Copied to clipboard');
+    }
+    // method === 'share' success: the native share sheet is its own
+    // confirmation — no snackbar needed.
+  }, [plan, conditionNames, showSnackbar]);
+
   // New meal plan picker: called right after `generatePlanFromPicks`
   // succeeds — lands the user on Day view, today, with a confirmation toast.
   const handlePlanGenerated = useCallback(() => {
@@ -455,13 +485,19 @@ export default function MealQueueScreen() {
   // exactly like SuggestionsScreen's BestRecipesTab.
   const handleSelect = useCallback((item) => {
     if (item.kind === 'recipe') {
+      // sourceUrl/attribution/ingredients thread through from the plan
+      // item/candidate onto the FoodDetailCard seed when present (they flow
+      // from PlanCandidate — see api/types.js) — `?? null`/`?? []` keeps this
+      // a no-op today, before those fields exist on a persisted PlanItem.
       const seed = {
         foodId: item.id,
         name: item.name,
         image: item.image,
         sourceName: item.sourceName ?? null,
+        sourceUrl: item.sourceUrl ?? null,
+        attribution: item.attribution ?? null,
         conditions: conditionNames,
-        ingredients: [],
+        ingredients: item.ingredients ?? [],
         isRecipe: true,
       };
       setSelectedDetail(seed);
@@ -477,16 +513,49 @@ export default function MealQueueScreen() {
   const plusIcon = <Plus size={16} className="text-forest-700" />;
 
   return (
-    <div className="bg-forest-300 flex flex-col min-h-screen -mb-28">
+    <div className="bg-forest-300 flex flex-col min-h-screen -mb-28 rm-plan-print-root">
 
-      {/* ── Header zone ──────────────────────────────────────────────────── */}
+      {/* ── Header zone ─────────────────────────────────────────────────────
+          `rm-print-hide` (index.css) hides this whole zone — chrome, tabs,
+          day strip, and the print/share controls below — under
+          `@media print`; only `.plan-print-view` (bottom of this file)
+          renders on a printed page. ─────────────────────────────────────── */}
       <PageHeader
         label="Plan"
         title="My Meal Plan"
-        className="bg-forest-300"
+        className="bg-forest-300 rm-print-hide"
       >
-        <div className="mt-4">
-          <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} />
+        <div className="mt-4 flex items-start gap-3">
+          <div className="flex-1">
+            <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} />
+          </div>
+
+          {/* Print & share (T4C) — plain, ink-friendly week summary; hidden
+              entirely with no plan yet (nothing honest to print/share). */}
+          {plan && (
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handlePrint}
+                aria-label="Print meal plan"
+                className="inline-flex items-center justify-center w-11 h-11 rounded-full
+                  bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
+                  transition-all duration-fast active:scale-95"
+              >
+                <Printer size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={handleShare}
+                aria-label="Share meal plan"
+                className="inline-flex items-center justify-center w-11 h-11 rounded-full
+                  bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
+                  transition-all duration-fast active:scale-95"
+              >
+                <Share2 size={18} />
+              </button>
+            </div>
+          )}
         </div>
 
         {view === 'queue' && !firstRunEmpty && (
@@ -497,7 +566,7 @@ export default function MealQueueScreen() {
       </PageHeader>
 
       {/* ── Glass panel ──────────────────────────────────────────────────── */}
-      <GlassPanel className="mt-4">
+      <GlassPanel className="mt-4 rm-print-hide">
         {view === 'queue' ? (
           firstRunEmpty ? (
             <EmptyState
@@ -706,9 +775,11 @@ export default function MealQueueScreen() {
 
       {/* ── New meal plan FAB — always visible on this screen, opens the
           recipe-picker overlay. Bottom offset mirrors the Snackbar's so it
-          clears the navbar. ─────────────────────────────────────────────── */}
+          clears the navbar. `data-print-hide`: a plain UI control, not
+          content — never belongs on a printed page. ────────────────────── */}
       <button
         onClick={() => setPickerOpen(true)}
+        data-print-hide
         className="fixed right-5 bottom-[88px] z-50 inline-flex items-center gap-2
           rounded-pill bg-blue-950 text-white px-4 py-3 shadow-lg
           font-sans text-sm font-semibold transition-all duration-fast
@@ -719,30 +790,79 @@ export default function MealQueueScreen() {
       </button>
 
       {/* ── Snackbar ─────────────────────────────────────────────────────── */}
-      <Snackbar snackbar={snackbar} onUndo={handleUndo} onDismiss={dismissSnackbar} />
+      <div data-print-hide>
+        <Snackbar snackbar={snackbar} onUndo={handleUndo} onDismiss={dismissSnackbar} />
+      </div>
 
       {/* ── Food/recipe detail ──────────────────────────────────────────── */}
-      <FoodDetailCard
-        item={selectedDetail}
-        open={!!selectedDetail}
-        onClose={() => setSelectedDetail(null)}
-      />
+      <div data-print-hide>
+        <FoodDetailCard
+          item={selectedDetail}
+          open={!!selectedDetail}
+          onClose={() => setSelectedDetail(null)}
+        />
+      </div>
 
       {/* ── Nutrition facts (from a Week view day) ────────────────────────── */}
-      <NutritionFactsSheet
-        open={!!factsTarget}
-        dayLabel={factsTarget?.day?.label}
-        items={factsTarget?.items ?? []}
-        onClose={() => setFactsTarget(null)}
-      />
+      <div data-print-hide>
+        <NutritionFactsSheet
+          open={!!factsTarget}
+          dayLabel={factsTarget?.day?.label}
+          items={factsTarget?.items ?? []}
+          onClose={() => setFactsTarget(null)}
+        />
+      </div>
 
       {/* ── New meal plan picker overlay ──────────────────────────────────── */}
-      <MealPlannerPicker
-        open={pickerOpen}
-        profile={profile}
-        onClose={() => setPickerOpen(false)}
-        onGenerated={handlePlanGenerated}
-      />
+      <div data-print-hide>
+        <MealPlannerPicker
+          open={pickerOpen}
+          profile={profile}
+          onClose={() => setPickerOpen(false)}
+          onGenerated={handlePlanGenerated}
+        />
+      </div>
+
+      {/* ── Print view (T4C, REMEDI_MASTER_PLAN.md §1.9) ───────────────────
+          Always in the DOM (so printed content can never lag a stale
+          render), invisible on screen (`.plan-print-view` in index.css),
+          shown ONLY under `@media print`. `aria-hidden` keeps it out of the
+          accessibility tree on screen, where it's genuinely inert — a
+          screen reader user gets the same live content via the on-screen
+          Day/Week views instead. Built straight from `buildPrintModel`
+          (planExport.js): foods only, no calories, no fabricated "—"
+          placeholders, no images/icons — plain black-on-white text. */}
+      <section className="plan-print-view" aria-hidden="true">
+        {printModel && (
+          <>
+            <h1 className="plan-print-title">Remedi Meal Plan</h1>
+            {printModel.rangeLabel && (
+              <p className="plan-print-range">{printModel.rangeLabel}</p>
+            )}
+            {printModel.conditionLine && (
+              <p className="plan-print-conditions">{printModel.conditionLine}</p>
+            )}
+
+            {printModel.days.map((day) => (
+              <div className="plan-print-day" key={`${day.label}-${day.dateLabel}`}>
+                <h2 className="plan-print-day-heading">{day.label} · {day.dateLabel}</h2>
+                {day.slots.length === 0 ? (
+                  <p className="plan-print-empty">Nothing planned</p>
+                ) : (
+                  day.slots.map((slot) => (
+                    <p className="plan-print-slot" key={slot.label}>
+                      <span className="plan-print-slot-label">{slot.label}:</span>{' '}
+                      {slot.items.join(', ')}
+                    </p>
+                  ))
+                )}
+              </div>
+            ))}
+
+            <p className="plan-print-footer">Generated by Remedi — not medical advice</p>
+          </>
+        )}
+      </section>
     </div>
   );
 }
