@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import logoMark from "../../assets/remedy-mark.svg";
+import { MARKETING_VISIBLE } from "./visibility";
 
-const cols = [
+const allCols = [
   {
     heading: "For patients",
     items: [
@@ -30,6 +31,21 @@ const cols = [
     ],
   },
 ];
+
+// With the marketing site hidden, the only destinations still worth linking are
+// the ones that outlive it: onboarding and the two legal pages.
+const hiddenSiteCols = [
+  {
+    heading: "Personal Remedies",
+    items: [
+      { label: "Get started", to: "/onboarding" },
+      { label: "Terms of use", to: "/terms" },
+      { label: "Privacy policy", to: "/privacy" },
+    ],
+  },
+];
+
+const cols = MARKETING_VISIBLE ? allCols : hiddenSiteCols;
 
 export default function Footer() {
   return (

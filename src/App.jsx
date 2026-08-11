@@ -3,15 +3,11 @@ import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigate, Navigat
 import { AuthProvider } from "./context/AuthContext";
 import { storage } from "./api/storage.js";
 import { prefetchAppData } from "./api/prefetch.js";
-import Home from "./pages/marketing/Home";
-import Survey from "./pages/marketing/Survey";
-import Providers from "./pages/marketing/Providers";
-import Developers from "./pages/marketing/Developers";
-import Science from "./pages/marketing/Science";
-import About from "./pages/marketing/About";
-import News from "./pages/marketing/News";
+// Marketing site is hidden — see the routes block below. The pages themselves
+// (Home, Survey, Providers, Developers, Science, About, News, Contact) are kept
+// in src/pages/marketing; only their routes are gone, so restoring the site is
+// a matter of re-adding the imports and <Route>s.
 import Login from "./pages/marketing/Login";
-import Contact from "./pages/marketing/Contact";
 import TermsOfUse from "./pages/marketing/TermsOfUse";
 import PrivacyPolicy from "./pages/marketing/PrivacyPolicy";
 import AuthCallback from "./pages/marketing/AuthCallback";
@@ -68,6 +64,16 @@ function RequireOnboarding({ children }) {
   const onboarded = !!storage.get("profile", null);
   if (!onboarded) return <Navigate to="/onboarding" replace />;
   return children;
+}
+
+// Entry point now that the marketing site is hidden: the root URL — and any
+// stale marketing link, via the catch-all route — drops straight into the
+// product. A first-time visitor lands on onboarding; a returning one goes to
+// their home screen rather than being made to re-run the flow (OnboardingPage
+// always starts from step 1 and would overwrite the saved profile).
+function EntryRedirect() {
+  const onboarded = !!storage.get("profile", null);
+  return <Navigate to={onboarded ? "/app/home" : "/onboarding"} replace />;
 }
 
 // Shell for the PWA app routes — always phone layout
@@ -160,20 +166,17 @@ function App() {
           <ScrollToTop />
           <SyncParentUrl />
           <Routes>
-            {/* Marketing site */}
-            <Route path="/" element={<Home />} />
+            {/* Entry — marketing site hidden, so "/" goes straight to the product */}
+            <Route path="/" element={<EntryRedirect />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            {/* Auth + legal: not marketing content, and still linked to.
+                /auth/callback is the Supabase magic-link return URL (see
+                AuthContext), /login its failure fallback, and /terms + /privacy
+                are linked from the login page. */}
             <Route path="/login" element={<Login />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/survey" element={<Survey />} />
-            <Route path="/providers" element={<Providers />} />
-            <Route path="/developers" element={<Developers />} />
-            <Route path="/science" element={<Science />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/news" element={<News />} />
-            <Route path="/contact" element={<Contact />} />
             <Route path="/terms" element={<TermsOfUse />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/onboarding" element={<OnboardingPage />} />
             {/* Dev */}
             <Route path="/kitchen-sink" element={<KitchenSink />} />
             {/* PWA App — gated behind onboarding */}
@@ -192,6 +195,9 @@ function App() {
               <Route path="/app/profile" element={<ProfileScreen />} />
               <Route path="/app/upgrade" element={<PaywallScreen />} />
             </Route>
+            {/* Retired marketing URLs (/about, /news, …) and any other unknown
+                path land in the product instead of a blank screen. */}
+            <Route path="*" element={<EntryRedirect />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

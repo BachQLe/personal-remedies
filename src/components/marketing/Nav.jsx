@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import logoMark from "../../assets/remedy-mark.svg";
 import Icon from "../shared/Icon";
+import { MARKETING_VISIBLE } from "./visibility";
 
-const menus = [
+const allMenus = [
   {
     label: "For providers",
     items: [
@@ -22,6 +23,10 @@ const menus = [
     ],
   },
 ];
+
+// Every entry points at a hidden marketing page, so with the site off the nav
+// keeps only the logo and the sign-up / log-in actions.
+const menus = MARKETING_VISIBLE ? allMenus : [];
 
 function Dropdown({ menu }) {
   const [open, setOpen] = useState(false);
@@ -99,9 +104,11 @@ function MobileMenu({ open, onClose, user, signOut }) {
             </button>
 
             <nav className="flex flex-col gap-1">
-              <Link to="/" onClick={onClose} className="text-[16px] font-medium font-sans text-char hover:text-forest-700 py-2 transition-colors duration-[120ms]">
-                For individuals
-              </Link>
+              {MARKETING_VISIBLE && (
+                <Link to="/" onClick={onClose} className="text-[16px] font-medium font-sans text-char hover:text-forest-700 py-2 transition-colors duration-[120ms]">
+                  For individuals
+                </Link>
+              )}
               {menus.map((m) => (
                 <div key={m.label} className="py-2">
                   <span className="text-[12px] font-label uppercase tracking-[0.14em] font-medium text-char-500">{m.label}</span>
@@ -182,9 +189,11 @@ export default function Nav({ offset = 0 }) {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8 ml-auto mr-8">
-            <Link to="/" className="text-[14px] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]">
-              For individuals
-            </Link>
+            {MARKETING_VISIBLE && (
+              <Link to="/" className="text-[14px] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]">
+                For individuals
+              </Link>
+            )}
             {menus.map((m) => (
               <Dropdown key={m.label} menu={m} />
             ))}
