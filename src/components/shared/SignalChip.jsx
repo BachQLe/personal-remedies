@@ -46,6 +46,13 @@ export default function SignalChip({
   const showLabel = label !== false;
   const labelText = typeof label === "string" ? label : c.text;
 
+  // The icon shape (check/triangle/x) already carries the beneficial/limit/
+  // avoid meaning independent of color (T6A: no color-only signals). But
+  // when the text label is hidden (`label={false}`), nothing in the DOM
+  // names that meaning for screen readers, since the icon itself is
+  // decorative markup — so keep a visually-hidden label as the chip's
+  // accessible name in that case, and mark the icon `aria-hidden` either
+  // way (it's redundant with the label text when visible).
   if (compact) {
     return (
       <span
@@ -54,9 +61,9 @@ export default function SignalChip({
         <span
           className={`inline-flex items-center justify-center w-[18px] h-[18px] rounded-full ${c.dot} text-white`}
         >
-          <Icon name={GLYPHS[signal]} size={12} />
+          <Icon name={GLYPHS[signal]} size={12} aria-hidden="true" />
         </span>
-        {showLabel && <span>{labelText}</span>}
+        {showLabel ? <span>{labelText}</span> : <span className="sr-only">{labelText}</span>}
       </span>
     );
   }
@@ -68,9 +75,9 @@ export default function SignalChip({
       <span
         className={`inline-flex items-center justify-center w-5 h-5 rounded-full ${c.dot} text-white flex-none`}
       >
-        <Icon name={GLYPHS[signal]} size={13} />
+        <Icon name={GLYPHS[signal]} size={13} aria-hidden="true" />
       </span>
-      {showLabel && <span>{labelText}</span>}
+      {showLabel ? <span>{labelText}</span> : <span className="sr-only">{labelText}</span>}
     </span>
   );
 }

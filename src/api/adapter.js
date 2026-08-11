@@ -1212,6 +1212,18 @@ export async function getMealPlanSuggestions(profile) {
  * would silently get empty slots with no "Demo data" chip.
  * APIDAILYLIMITREACHED and all other errors still degrade to [] per group,
  * since `withConditionFallback` deliberately doesn't retry quota errors.
+ *
+ * Total-vs-partial failure (binding project rule — an error must never be
+ * presented to the user as "no results"): some groups failing while others
+ * (or the recipes call) succeed is normal, expected degradation — the
+ * honest-empty design above — and keeps producing a (possibly partial)
+ * plan. But when EVERY /suggest group call AND the recipes call fail, there
+ * is nothing left to be "honestly empty" about — that's an outage (e.g. a
+ * total network failure), not a real zero-result plan, so this rethrows one
+ * of the underlying errors instead of returning all-empty candidates. A
+ * fulfilled settlement with an empty array (HTTP 220 — valid-but-empty) is
+ * NOT a failure for this check, so a real "nothing available" response from
+ * a healthy API still resolves normally.
  * @param {number[]} conditionIds
  * @returns {Promise<{
  *   candidates: Record<string, import('./types.js').PlanCandidate[]>,
@@ -1251,6 +1263,8 @@ async function getMealPlanSuggestionsRaw(conditionIds) {
   });
 
   let recipes;
+  let recipesFailed = false;
+  let recipesError = null;
   try {
     recipes = await getRecipesRaw(conditionIds);
   } catch (err) {
@@ -1260,6 +1274,19 @@ async function getMealPlanSuggestionsRaw(conditionIds) {
     }
     console.error('getMealPlanSuggestions: getRecipesRaw failed', err);
     recipes = [];
+    recipesFailed = true;
+    recipesError = err;
+  }
+
+  // Total outage: every /suggest group rejected AND the recipes call
+  // rejected — nothing succeeded anywhere. Rethrow instead of proceeding to
+  // build an all-empty candidates object, so callers see an honest error
+  // (with Retry) rather than "No recipes yet". `settlements` is never empty
+  // (PLAN_SLOTS always has fineGroups), so `.every(...)` here is a real
+  // "all failed" check, not a vacuous true.
+  const allGroupsFailed = settlements.every((s) => s.status === 'rejected');
+  if (allGroupsFailed && recipesFailed) {
+    throw recipesError ?? settlements[0].reason;
   }
 
   const itemsMap = await ensureFoodItems();

@@ -58,10 +58,10 @@ export default function GroupDetailScreen() {
         <div className="flex items-center gap-3 mt-3">
           <button
             onClick={() => navigate('/app/suggestions?tab=groups')}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-colors duration-fast hover:bg-sand-100 flex-shrink-0"
+            className="tap-target w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-colors duration-fast hover:bg-sand-100 flex-shrink-0"
             aria-label="Go back"
           >
-            <BackArrow />
+            <BackArrow aria-hidden="true" />
           </button>
           <h1 className="font-display text-[24px] font-semibold text-blue-950 leading-tight truncate">
             {groupLabel}

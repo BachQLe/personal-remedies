@@ -54,12 +54,14 @@ export default function StudyReferences({ references, loading }) {
     <div className="mt-2">
       <button
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
         className="flex items-center gap-1.5 text-xs font-semibold text-forest-700"
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
-        <Icon name="book-open" size={14} />
+        <Icon name="book-open" size={14} aria-hidden="true" />
         {open ? `Hide ${label}` : `See ${label}`}
         <span
+          aria-hidden="true"
           style={{
             transition: 'transform 200ms cubic-bezier(0.22, 0.61, 0.36, 1)',
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -85,7 +87,7 @@ export default function StudyReferences({ references, loading }) {
                   className="flex items-center gap-1 text-xs text-forest-700 underline underline-offset-2 leading-relaxed font-sans"
                 >
                   <span>{ref.source}{ref.year ? `, ${ref.year}` : ''}</span>
-                  <Icon name="external-link" size={11} className="opacity-60" />
+                  <Icon name="external-link" size={11} className="opacity-60" aria-hidden="true" />
                 </a>
               ) : (
                 <span className="text-xs text-char-500 leading-relaxed font-sans">

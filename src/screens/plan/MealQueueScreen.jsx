@@ -160,7 +160,7 @@ function CardGrid({ items, actionIcon, onAction, onBlocked, emptyMessage, emptyA
   if (items.length === 0) {
     return (
       <div className="flex items-start gap-3 px-4 py-4 rounded-xl border border-dashed border-blue-950/30">
-        <BookmarkPlus size={18} className="text-blue-950 shrink-0 mt-0.5" />
+        <BookmarkPlus size={18} className="text-blue-950 shrink-0 mt-0.5" aria-hidden="true" />
         <div className="flex flex-col items-start gap-2">
           <p className="text-sm text-blue-950 font-sans leading-snug">{emptyMessage}</p>
           {emptyAction && (
@@ -171,7 +171,7 @@ function CardGrid({ items, actionIcon, onAction, onBlocked, emptyMessage, emptyA
                 hover:bg-blue-900 active:scale-[0.99] transition-all duration-fast"
             >
               {emptyAction.label}
-              <ArrowRight size={14} />
+              <ArrowRight size={14} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -208,6 +208,7 @@ function CardGrid({ items, actionIcon, onAction, onBlocked, emptyMessage, emptyA
                 aspectRatio="4/5"
                 action={blocked ? undefined : actionIcon}
                 actionOnClick={blocked ? undefined : () => onAction(item)}
+                actionLabel={blocked ? undefined : `Add ${item.name} to plan`}
                 saveAction={<SaveButton item={item} onBlocked={onBlocked} />}
                 className="w-full"
               />
@@ -510,7 +511,7 @@ export default function MealQueueScreen() {
   }, [conditionNames]);
 
   const visibleCookbook = cookbookExpanded ? library : library.slice(0, PAGE_SIZE);
-  const plusIcon = <Plus size={16} className="text-forest-700" />;
+  const plusIcon = <Plus size={16} className="text-forest-700" aria-hidden="true" />;
 
   return (
     <div className="bg-forest-300 flex flex-col min-h-screen -mb-28 rm-plan-print-root">
@@ -542,7 +543,7 @@ export default function MealQueueScreen() {
                   bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
                   transition-all duration-fast active:scale-95"
               >
-                <Printer size={18} />
+                <Printer size={18} aria-hidden="true" />
               </button>
               <button
                 type="button"
@@ -552,7 +553,7 @@ export default function MealQueueScreen() {
                   bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
                   transition-all duration-fast active:scale-95"
               >
-                <Share2 size={18} />
+                <Share2 size={18} aria-hidden="true" />
               </button>
             </div>
           )}
@@ -581,7 +582,7 @@ export default function MealQueueScreen() {
                       text-sm font-semibold font-sans px-5 py-2.5
                       hover:bg-blue-900 active:scale-[0.99] transition-all duration-fast"
                   >
-                    <CalendarPlus size={16} />
+                    <CalendarPlus size={16} aria-hidden="true" />
                     Build your meal plan
                   </button>
 
@@ -625,7 +626,7 @@ export default function MealQueueScreen() {
                     px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
                     ${showGhost || regeneratingDay ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
                 >
-                  <RotateCw size={13} className={regeneratingDay ? 'animate-spin' : ''} />
+                  <RotateCw size={13} className={regeneratingDay ? 'animate-spin' : ''} aria-hidden="true" />
                   Regenerate day
                 </button>
               </div>
@@ -673,7 +674,7 @@ export default function MealQueueScreen() {
                     text-blue-950/50 hover:text-blue-950/70 transition-colors duration-fast
                     ${showGhost || regeneratingWeek ? 'opacity-40 pointer-events-none' : ''}`}
                 >
-                  <RefreshCw size={12} className={regeneratingWeek ? 'animate-spin' : ''} />
+                  <RefreshCw size={12} className={regeneratingWeek ? 'animate-spin' : ''} aria-hidden="true" />
                   Regenerate whole week
                 </button>
               </div>
@@ -785,7 +786,7 @@ export default function MealQueueScreen() {
           font-sans text-sm font-semibold transition-all duration-fast
           hover:bg-blue-900 active:scale-95"
       >
-        <CalendarPlus size={16} />
+        <CalendarPlus size={16} aria-hidden="true" />
         New meal plan
       </button>
 

@@ -99,7 +99,7 @@ export default function SaveButton({ item, size = 18, onBlocked, className = '' 
       onClick={handleActivate}
       onKeyDown={handleKeyDown}
       aria-label={ariaLabel}
-      className={`inline-flex items-center justify-center w-8 h-8 rounded-full
+      className={`tap-target inline-flex items-center justify-center w-8 h-8 rounded-full
         bg-white/90 backdrop-blur-sm shadow-sm cursor-pointer
         transition-all duration-fast hover:bg-white hover:shadow-md active:scale-95
         ${saved ? 'text-forest-700' : blockReason ? 'text-char-400' : 'text-char-700'}
@@ -107,7 +107,7 @@ export default function SaveButton({ item, size = 18, onBlocked, className = '' 
     >
       {blockReason && !saved ? (
         <span className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
-          <Bookmark size={size} />
+          <Bookmark size={size} aria-hidden="true" />
           <span
             aria-hidden="true"
             className="absolute left-0 top-1/2 h-[1.5px] w-[141%] bg-current"
@@ -115,7 +115,7 @@ export default function SaveButton({ item, size = 18, onBlocked, className = '' 
           />
         </span>
       ) : (
-        <Bookmark size={size} fill={saved ? 'currentColor' : 'none'} />
+        <Bookmark size={size} fill={saved ? 'currentColor' : 'none'} aria-hidden="true" />
       )}
     </span>
   );

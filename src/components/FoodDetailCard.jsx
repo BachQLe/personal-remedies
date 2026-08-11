@@ -387,7 +387,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-sand-100">
-                <Icon name={nonFoodIcon || 'leaf'} size={48} className="text-char-300" />
+                <Icon name={nonFoodIcon || 'leaf'} size={48} className="text-char-300" aria-hidden="true" />
               </div>
             )}
 
@@ -416,7 +416,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
             >
               {!saved && blockReason ? (
                 <span className="relative inline-flex items-center justify-center" style={{ width: 20, height: 20 }}>
-                  <Bookmark size={20} />
+                  <Bookmark size={20} aria-hidden="true" />
                   <span
                     aria-hidden="true"
                     className="absolute left-0 top-1/2 h-[1.5px] w-[141%] bg-current"
@@ -424,7 +424,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
                   />
                 </span>
               ) : (
-                <Bookmark size={20} fill={saved ? 'currentColor' : 'none'} />
+                <Bookmark size={20} fill={saved ? 'currentColor' : 'none'} aria-hidden="true" />
               )}
             </button>
 
@@ -437,7 +437,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
                 shadow-md transition-all duration-fast"
               aria-label="Close"
             >
-              <X size={20} />
+              <X size={20} aria-hidden="true" />
             </button>
 
             {/* Info panel — pinned to bottom, independent of image. Fixed
@@ -532,12 +532,12 @@ export default function FoodDetailCard({ item, open, onClose }) {
               </div>
               <button
                 onClick={() => setFlipped(false)}
-                className="flex-shrink-0 ml-3 h-9 px-3.5 rounded-full bg-white border border-neutral-200
+                className="tap-target flex-shrink-0 ml-3 h-9 px-3.5 rounded-full bg-white border border-neutral-200
                   flex items-center gap-1 text-char-600 text-sm font-sans
                   hover:bg-sand-100 transition-all duration-fast shadow-xs"
                 aria-label="Back to overview"
               >
-                <ChevronLeft size={15} />
+                <ChevronLeft size={15} aria-hidden="true" />
                 <span>To front</span>
               </button>
             </div>
@@ -635,7 +635,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
                             />
                           ) : (
                             <div className="w-16 h-16 rounded-full bg-sand-100 flex items-center justify-center">
-                              <Icon name="leaf" size={22} className="text-char-300" />
+                              <Icon name="leaf" size={22} className="text-char-300" aria-hidden="true" />
                             </div>
                           )}
                           <span className="text-[11px] font-sans text-char-600 text-center leading-tight line-clamp-2">
@@ -665,7 +665,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
                     hover:-translate-y-[1px] hover:shadow-lg
                     active:translate-y-[1px] active:scale-[0.99]"
                 >
-                  <ExternalLink size={17} className="flex-shrink-0" />
+                  <ExternalLink size={17} className="flex-shrink-0" aria-hidden="true" />
                   <span className="truncate">{linkTarget.label}</span>
                 </button>
               </div>

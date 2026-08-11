@@ -70,7 +70,7 @@ export default function CoverageNotice({ usedFallback, requestedConditionIds }) 
       role="status"
       className="flex items-start gap-2 px-4 py-2.5 rounded-lg bg-sand-100 border border-sand-200 text-char-600 text-xs font-sans font-medium"
     >
-      <Icon name="info" size={14} className="text-char-400 shrink-0 mt-0.5" />
+      <Icon name="info" size={14} className="text-char-400 shrink-0 mt-0.5" aria-hidden="true" />
       {/* COPY-REVIEW: flagged for C2 health-claim audit */}
       <span>{message}</span>
     </div>

@@ -68,8 +68,17 @@ export { ensurePlanForWeek, regenerateDay, regenerateWeek, shuffleSlot, inferSlo
  * dictionary filter); recipes come from the profile's condition-ranked
  * `getRecipes` list (already cached), filtered client-side by title substring
  * (case-insensitive — /suggest has no query param). Recipe entries are
- * appended after food entries; either side failing degrades to its empty
- * list rather than failing the whole search.
+ * appended after food entries.
+ *
+ * Partial-vs-total failure (binding project rule — an error must never be
+ * presented to the user as "no results"): the two sources are fanned out via
+ * `Promise.allSettled`. One side failing while the other succeeds is normal,
+ * expected degradation — that side contributes its empty list (logged), and
+ * the search still resolves with whatever the healthy side found. Only when
+ * BOTH sides fail (a genuine outage — network down, API down) does this
+ * throw, so callers (e.g. `useAsyncData`) can render an honest error state
+ * instead of an empty result indistinguishable from a real zero-result
+ * search.
  * @param {string} query
  * @param {import('./types.js').Profile} [profile]
  * @returns {Promise<Array<
@@ -81,15 +90,25 @@ export async function searchFoodsAndRecipes(query, profile) {
   const q = (query || '').trim();
   if (!q) return [];
 
-  const foods = await searchFoods(q, profile).catch((err) => {
-    console.error('searchFoodsAndRecipes: searchFoods failed', err);
-    return [];
-  });
+  const [foodsResult, recipesResult] = await Promise.allSettled([
+    searchFoods(q, profile),
+    getRecipes(profile),
+  ]);
 
-  const { recipes } = await getRecipes(profile).catch((err) => {
-    console.error('searchFoodsAndRecipes: getRecipes failed', err);
-    return { recipes: [] };
-  });
+  if (foodsResult.status === 'rejected' && recipesResult.status === 'rejected') {
+    console.error('searchFoodsAndRecipes: all sources failed', foodsResult.reason, recipesResult.reason);
+    throw recipesResult.reason;
+  }
+
+  if (foodsResult.status === 'rejected') {
+    console.error('searchFoodsAndRecipes: searchFoods failed', foodsResult.reason);
+  }
+  if (recipesResult.status === 'rejected') {
+    console.error('searchFoodsAndRecipes: getRecipes failed', recipesResult.reason);
+  }
+
+  const foods = foodsResult.status === 'fulfilled' ? foodsResult.value : [];
+  const recipes = recipesResult.status === 'fulfilled' ? recipesResult.value.recipes : [];
 
   const qLower = q.toLowerCase();
   const matchedRecipes = recipes.filter((r) => (r.title || '').toLowerCase().includes(qLower));
@@ -104,6 +123,12 @@ export async function searchFoodsAndRecipes(query, profile) {
  * Search Natural Sources (Key Nutrients & Herbal Medicines, coarse group 'k')
  * only. Same result-item contract as `searchFoodsAndRecipes`'s food entries —
  * foods only, no recipe branch, since recipes live in a different fine group.
+ *
+ * Single source, no fan-out — unlike `searchFoodsAndRecipes` there's nothing
+ * to partially degrade to, so any failure here IS a total failure and is
+ * left to propagate rather than being swallowed into an indistinguishable-
+ * from-real-empty `[]` (binding project rule: an error must never be
+ * presented to the user as "no results").
  * @param {string} query
  * @param {import('./types.js').Profile} [_profile] - Unused; kept for parity
  *   with `searchFoodsAndRecipes` in case scoping by profile is added later.
@@ -113,10 +138,7 @@ export async function searchNaturalSourceItems(query, _profile) {
   const q = (query || '').trim();
   if (!q) return [];
 
-  const foods = await searchNaturalSources(q).catch((err) => {
-    console.error('searchNaturalSourceItems: searchNaturalSources failed', err);
-    return [];
-  });
+  const foods = await searchNaturalSources(q);
 
   return foods.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f }));
 }

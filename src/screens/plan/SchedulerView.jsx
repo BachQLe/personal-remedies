@@ -55,6 +55,7 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
                 )}
                 <ChevronDown
                   size={16}
+                  aria-hidden="true"
                   className={`text-blue-950/60 transition-transform duration-fast ${expanded ? 'rotate-180' : ''}`}
                 />
               </div>
@@ -103,7 +104,8 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
                                   <div key={item.id} className="flex items-center gap-3">
                                     <button
                                       onClick={() => onSelectItem(item)}
-                                      className="w-8 h-8 rounded-lg overflow-hidden shrink-0"
+                                      aria-label={`View ${item.name}`}
+                                      className="tap-target w-8 h-8 rounded-lg overflow-hidden shrink-0"
                                     >
                                       <img
                                         src={cardImage(item)}
@@ -124,11 +126,11 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
                                           : markEaten(day.key, item.id)
                                       )}
                                       aria-label={eaten.includes(item.id) ? 'Mark as not eaten' : 'Mark as eaten'}
-                                      className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0
+                                      className={`tap-target w-7 h-7 rounded-full flex items-center justify-center shrink-0
                                         transition-all duration-fast active:scale-95
                                         ${eaten.includes(item.id) ? 'bg-forest-600 text-white' : 'bg-white/70 text-blue-950/40'}`}
                                     >
-                                      <Check size={14} />
+                                      <Check size={14} aria-hidden="true" />
                                     </button>
                                   </div>
                                 ))}

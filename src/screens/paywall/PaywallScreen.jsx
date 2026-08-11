@@ -45,10 +45,10 @@ export default function PaywallScreen() {
         <div className="flex items-center gap-3 mt-3">
           <button
             onClick={() => navigate('/app/profile')}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-colors duration-fast hover:bg-sand-100 flex-shrink-0"
+            className="tap-target w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-colors duration-fast hover:bg-sand-100 flex-shrink-0"
             aria-label="Go back"
           >
-            <BackArrow />
+            <BackArrow aria-hidden="true" />
           </button>
           <h1 className="font-display text-[24px] font-semibold text-blue-950 leading-tight">
             Remedi Plus
@@ -62,7 +62,7 @@ export default function PaywallScreen() {
             comment). Yellow, not the health-warning red ("avoid"/"signal")
             palette, so it never reads as a health caution. */}
         <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-yellow-100 border border-yellow-300">
-          <Icon name="alert-triangle" size={16} className="text-yellow-700 flex-shrink-0" />
+          <Icon name="alert-triangle" size={16} className="text-yellow-700 flex-shrink-0" aria-hidden="true" />
           <p className="text-xs font-semibold font-sans text-yellow-800">
             Draft — placeholder copy, not final pricing or feature claims
           </p>
@@ -94,7 +94,7 @@ export default function PaywallScreen() {
                 className="flex items-start gap-3 px-4 py-3 rounded-lg bg-white border border-sand-200"
               >
                 <span className="text-forest-700 mt-0.5 flex-shrink-0">
-                  <Icon name="check" size={16} />
+                  <Icon name="check" size={16} aria-hidden="true" />
                 </span>
                 <span className="flex-1 min-w-0">
                   <span className="block text-sm font-semibold font-sans text-char-900">

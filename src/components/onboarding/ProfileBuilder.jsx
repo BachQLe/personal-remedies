@@ -47,7 +47,7 @@ function truncate(text, max = 70) {
 // Brand back arrow (used everywhere instead of icon-font arrows)
 function BackArrow() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <line x1="7" y1="12" x2="17" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" />
       <path d="M11 8.5 Q10 12 7 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" fill="none" />
       <path d="M11 15.5 Q10 12 7 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" fill="none" />
@@ -142,7 +142,7 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
           {onBack && (
             <button
               onClick={onBack}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-colors duration-fast hover:bg-sand-100 flex-shrink-0"
+              className="tap-target w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-colors duration-fast hover:bg-sand-100 flex-shrink-0"
               aria-label="Go back"
             >
               <BackArrow />
@@ -201,6 +201,7 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
             transition={chipSpring}
             onClick={onSubmit}
             disabled={conditions.length === 0 || saving}
+            aria-label={saving ? 'Saving your profile' : 'Continue'}
             className="relative flex-[2] py-4 rounded-sm text-white font-semibold text-base bg-blue-900 hover:bg-blue-950 transition-all duration-fast disabled:opacity-40 disabled:cursor-not-allowed min-h-[52px] font-sans flex items-center justify-center gap-2 overflow-hidden shadow-lg hover:shadow-xl"
           >
             <span className="absolute top-1.5 right-1.5 w-3 h-3 border-t-2 border-r-2 border-white" />

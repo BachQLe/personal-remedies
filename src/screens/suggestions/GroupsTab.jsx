@@ -73,7 +73,7 @@ function CategoryGrid({ coarseLabels, fineLabelsByGroup, onOpen }) {
               transition-colors duration-fast hover:border-forest-300 active:scale-[0.99]"
           >
             <div className="w-11 h-11 rounded-lg bg-forest-50 flex items-center justify-center flex-shrink-0">
-              <Icon size={20} className="text-forest-700" />
+              <Icon size={20} className="text-forest-700" aria-hidden="true" />
             </div>
             <div className="min-w-0 w-full">
               <p className="font-sans text-sm font-semibold text-char-900 leading-snug line-clamp-2 min-h-[2.75em]">{label}</p>

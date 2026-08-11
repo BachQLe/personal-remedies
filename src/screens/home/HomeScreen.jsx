@@ -18,9 +18,14 @@
  *        2a "Dietary Guidance" — wide full-width lavender button → /app/suggestions.
  *        2b "Meal Planner" — wide full-width forest-tinted card → /app/plan.
  *        2c Food Lookup / Natural Sources — two half-width buttons, both live.
- *        2d Discovery + carousel — taller block, FLEXES to fill the leftover
+ *        2d News + carousel — taller block, FLEXES to fill the leftover
  *           viewport height. Stacks:
- *             • Discovery banner — first-join only, dismissable → best recipes.
+ *             • News banner — content-driven (src/api/messages.js
+ *               `getActiveMessages`), dismissable, persists dismissal via
+ *               `dismissMessage`. Renders nothing when there are no active,
+ *               non-dismissed messages. Navigation is fixed (→ best recipes)
+ *               regardless of which message is showing — messages.json
+ *               carries no per-message nav target.
  *             • Mealprep carousel — tallest element, fills remaining height.
  *           Dismiss/return behavior: when the banner is absent the carousel
  *           RISES to fill the freed space.
@@ -30,25 +35,47 @@
  *   → 2c half-width pair (compact rows) → navbar.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import Icon from '../../components/shared/Icon.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import MealprepCarousel from './MealprepCarousel.jsx';
 import { storage } from '../../api/storage.js';
+import { getActiveMessages, dismissMessage } from '../../api/messages.js';
 
 export default function HomeScreen() {
   const navigate = useNavigate();
-  const [showDiscovery, setShowDiscovery] = useState(true);
+
+  // Active, non-dismissed news messages (src/api/messages.js — master plan
+  // §4.7). Only the first is ever shown — this slot is a single banner
+  // surface, not a stack — so a second messages.json entry (e.g. the
+  // placeholder-plus-announcement seed row) simply waits its turn. Starts
+  // `null` (not `[]`) so the banner renders nothing during the initial fetch
+  // rather than flashing empty-then-populated.
+  const [messages, setMessages] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getActiveMessages().then((active) => {
+      if (!cancelled) setMessages(active);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const banner = messages?.[0] ?? null;
 
   // Read once — Home doesn't need to react to profile edits mid-session.
   const [profile] = useState(() => storage.get('profile', null));
 
   const firstName = typeof profile?.firstName === 'string' ? profile.firstName.trim() : '';
 
-  const dismissDiscovery = () => {
-    setShowDiscovery(false);
+  const dismissBanner = () => {
+    if (!banner) return;
+    dismissMessage(banner.id);
+    setMessages((prev) => (prev ?? []).filter((m) => m.id !== banner.id));
   };
 
   return (
@@ -79,7 +106,7 @@ export default function HomeScreen() {
               active:translate-y-[1px] active:scale-[0.99]"
           >
             <span className="w-12 h-12 shrink-0 rounded-lg bg-lavender-500/20 flex items-center justify-center text-lavender-700">
-              <Icon name="clipboard-list" size={22} />
+              <Icon name="clipboard-list" size={22} aria-hidden="true" />
             </span>
             <span className="flex-1 min-w-0">
               <span className="block font-display text-lg font-semibold text-blue-950 leading-tight">
@@ -101,7 +128,7 @@ export default function HomeScreen() {
               active:translate-y-[1px] active:scale-[0.99]"
           >
             <span className="w-10 h-10 shrink-0 rounded-lg bg-forest-500/20 flex items-center justify-center text-forest-700">
-              <Icon name="calendar" size={20} />
+              <Icon name="calendar" size={20} aria-hidden="true" />
             </span>
             <span className="flex-1 min-w-0">
               <span className="block font-display text-base font-semibold text-blue-950 leading-tight">
@@ -123,7 +150,7 @@ export default function HomeScreen() {
                 active:translate-y-[1px] active:scale-[0.99]"
             >
               <span className="w-9 h-9 shrink-0 rounded-lg bg-white/40 flex items-center justify-center text-yellow-950">
-                <Icon name="search" size={18} />
+                <Icon name="search" size={18} aria-hidden="true" />
               </span>
               <span className="flex-1 min-w-0">
                 <span className="block font-display text-[15px] font-semibold text-yellow-950 leading-tight">
@@ -140,7 +167,7 @@ export default function HomeScreen() {
                 active:translate-y-[1px] active:scale-[0.99]"
             >
               <span className="w-9 h-9 shrink-0 rounded-lg bg-white/40 flex items-center justify-center text-blue-900">
-                <Icon name="leaf" size={18} />
+                <Icon name="leaf" size={18} aria-hidden="true" />
               </span>
               <span className="flex-1 min-w-0">
                 <span className="block font-display text-[15px] font-semibold text-blue-900 leading-tight">
@@ -150,13 +177,16 @@ export default function HomeScreen() {
             </button>
           </div>
 
-          {/* 2d. Discovery + carousel — flexes to fill the leftover viewport
+          {/* 2d. News + carousel — flexes to fill the leftover viewport
               height; the carousel absorbs whatever height the banner leaves,
               and its 3:4 portrait cards size themselves to that height (width
               follows from the aspect), so the block never over/underflows. */}
           <div className="bg-neutral-00 rounded-xl border border-neutral-300/50 shadow-xs p-1 flex flex-col gap-1.5 flex-1 min-h-0">
-            {/* Discovery banner — first-join only, dismissable → best recipes */}
-            {showDiscovery && (
+            {/* News banner — content from messages.json via getActiveMessages
+                (master plan §4.7); renders nothing while loading or when
+                there's no active, non-dismissed message. Navigation is fixed
+                (→ best recipes), independent of which message is showing. */}
+            {banner && (
               <div className="relative shrink-0">
                 <button
                   onClick={() => navigate('/app/suggestions?tab=recipes')}
@@ -166,20 +196,20 @@ export default function HomeScreen() {
                     hover:bg-blue-900 hover:-translate-y-[1px] active:translate-y-[1px]"
                 >
                   <span className="block font-display text-base font-semibold leading-snug">
-                    Discover your Best Recipes
+                    {banner.title}
                   </span>
                   <span className="block text-xs text-white/70 font-sans leading-snug mt-0.5">
-                    Top recipes matched to your profile — tap to browse.
+                    {banner.body}
                   </span>
                 </button>
                 <button
-                  onClick={dismissDiscovery}
+                  onClick={dismissBanner}
                   aria-label="Dismiss"
-                  className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center
+                  className="tap-target absolute top-2 right-2 w-7 h-7 flex items-center justify-center
                     rounded-full text-white/70 hover:text-white hover:bg-white/10
                     transition-colors duration-fast"
                 >
-                  <X size={16} />
+                  <X size={16} aria-hidden="true" />
                 </button>
               </div>
             )}

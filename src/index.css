@@ -169,6 +169,50 @@
   .rm-ghost [data-ghost-shimmer] { animation: none !important; }
 }
 
+/* ── prefers-reduced-motion: CSS-driven animation (T6A) ──────────────────────
+   `<MotionConfig reducedMotion="user">` (src/main.jsx) handles every
+   framer-motion `motion.*` component app-wide. It does NOT reach plain-CSS
+   `@keyframes`/`transition` declarations — Tailwind's `animate-*` utilities
+   (`animate-sheet-up`, `animate-backdrop-in`, `animate-spin`, `animate-pulse`,
+   the `plan-blur-in`/`plan-jitter` keyframes above, etc.) and any
+   `transition-*` utility on hover/active states.
+
+   Scope is deliberately narrow:
+     - Kill TRANSFORM-based motion (slide/scale/jitter/spin) — this is the
+       category that can trigger vestibular discomfort, and freezing it never
+       breaks layout since the element just renders at its resting position.
+     - Kill non-essential decorative animation duration (shimmer, blur-in,
+       spin loaders) by collapsing it to nearly-instant.
+     - Do NOT touch opacity/color transitions — a fade still aids
+       comprehension (e.g. "this thing just appeared/disappeared") without
+       the motion-sickness risk, and killing every `transition-colors` etc.
+       would make hover/focus/active states feel broken rather than calmer.
+     - Do NOT blanket `animation: none` / `transition: none` on `*` — that
+       silently breaks things like the sliding PillSwitcher thumb (a
+       positional cue, not gratuitous motion) turning into a layout jump
+       with no explanation; instead we shrink duration to ~1ms so the end
+       state still applies immediately, just without the perceptible motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Transform-driven transitions (slide/scale/translate) collapse instantly;
+     non-transform transitions (color/opacity/shadow/background) keep their
+     duration so hover/focus/active feedback still reads as a state change. */
+  [class*="animate-"],
+  [class*="transition-transform"],
+  [class*="hover:scale"],
+  [class*="active:scale"],
+  [class*="active:translate"] {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 @layer components {
   .container-px {
     @apply px-5 sm:px-8 lg:px-12;
@@ -219,6 +263,44 @@
   }
   .material-symbols-rounded.fill {
     font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+  }
+
+  /**
+   * .tap-target — expands an interactive element's HIT AREA to the WCAG
+   * 2.5.5 (AA) minimum of 44x44px WITHOUT changing its visual size (T6A).
+   * Several icon buttons across the app are visually 28-32px
+   * (`w-7 h-7`/`w-8 h-8`) by design — shrinking the design to 44px would
+   * bloat dense rows/headers, and growing the tap target invisibly is the
+   * standard fix (same technique as Apple HIG's "hit area may exceed the
+   * visible control" and GOV.UK's expanded-hit-area pattern).
+   *
+   * TECHNIQUE: an invisible `::after` pseudo-element, absolutely positioned
+   * and centered over the element via `inset: 50%` + `translate(-50%,-50%)`,
+   * sized to `max(100%, 44px)` in both dimensions. On a 32px button this
+   * yields a 44x44 hit zone centered on it (extending ~6px past each visual
+   * edge); on anything already >=44px it's a no-op (max() picks 100%).
+   * Clicks/taps landing in that overflow area still register as clicks on
+   * the host element — pseudo-element content is part of the host's box for
+   * event dispatch — as long as no sibling sits on top of the overflow
+   * region, which holds for the isolated icon buttons this is applied to.
+   *
+   * USAGE: add the class alongside the element's existing size classes
+   * (e.g. `className="w-8 h-8 ... tap-target"`). Sets `position: relative`
+   * as its default anchor; if the element already carries a Tailwind
+   * position utility (`absolute`/`fixed`/`sticky`), that utility wins
+   * (utilities layer beats this components-layer rule) and still works fine
+   * as the anchor — no extra class needed either way.
+   */
+  .tap-target {
+    position: relative;
+  }
+  .tap-target::after {
+    content: "";
+    position: absolute;
+    inset: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
   }
 }
 

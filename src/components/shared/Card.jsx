@@ -38,14 +38,32 @@ export default function Card({
   const interactive = !!onClick;
   const hasHeader = title || eyebrow || action;
 
+  // A clickable Card is a `<div onClick>` — not natively keyboard-operable
+  // (no Tab stop, no Enter/Space activation) — so when `onClick` is passed,
+  // give it real button semantics/behavior rather than a mouse/touch-only
+  // affordance (T6A: no hover/click-only interactions).
+  const interactiveProps = interactive
+    ? {
+        role: "button",
+        tabIndex: 0,
+        onKeyDown: (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onClick(e);
+          }
+        },
+      }
+    : {};
+
   return (
     <div
       className={`rounded-[28px] overflow-hidden
         ${VARIANT_CLS[variant] || VARIANT_CLS.default}
         ${PAD_CLS[padding] || PAD_CLS.md}
-        ${interactive ? "cursor-pointer transition-all duration-base ease-ds-out hover:-translate-y-[2px] hover:shadow-lg active:translate-y-[1px] active:scale-[0.99]" : ""}
+        ${interactive ? "cursor-pointer transition-all duration-base ease-ds-out hover:-translate-y-[2px] hover:shadow-lg active:translate-y-[1px] active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest-600 focus-visible:outline-offset-2" : ""}
         ${className}`}
       onClick={onClick}
+      {...interactiveProps}
     >
       {hasHeader && (
         <div className="flex items-start justify-between gap-3 mb-3.5">

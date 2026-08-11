@@ -53,14 +53,14 @@ export default function SlotSection({
             px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
             ${shuffleDisabled ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
         >
-          <Shuffle size={14} className={shuffling ? 'animate-spin' : ''} />
+          <Shuffle size={14} className={shuffling ? 'animate-spin' : ''} aria-hidden="true" />
           Shuffle
         </button>
       </div>
 
       {items.length === 0 ? (
         <div className="flex items-start gap-3 px-4 py-4 rounded-xl border border-dashed border-blue-950/30">
-          <BookmarkPlus size={18} className="text-blue-950 shrink-0 mt-0.5" />
+          <BookmarkPlus size={18} className="text-blue-950 shrink-0 mt-0.5" aria-hidden="true" />
           <p className="text-sm text-blue-950 font-sans leading-snug">
             No scored suggestions for {slot.label} yet — add from your saved recipes.
           </p>
@@ -101,11 +101,11 @@ export default function SlotSection({
                           }
                         }}
                         aria-label="Remove from plan"
-                        className="w-8 h-8 rounded-full flex items-center justify-center shadow-sm
+                        className="tap-target w-8 h-8 rounded-full flex items-center justify-center shadow-sm
                           transition-all duration-fast active:scale-95 cursor-pointer
                           bg-white/90 hover:bg-white hover:shadow-md"
                       >
-                        <X size={16} className="text-char-500" />
+                        <X size={16} className="text-char-500" aria-hidden="true" />
                       </span>
                     )}
                     className="w-full"

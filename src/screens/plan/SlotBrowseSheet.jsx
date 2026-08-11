@@ -77,11 +77,11 @@ export default function SlotBrowseSheet({
                         }
                       }}
                       aria-label={isSelected ? 'Remove from picks' : 'Add to picks'}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm
+                      className={`tap-target w-8 h-8 rounded-full flex items-center justify-center shadow-sm
                         transition-all duration-fast active:scale-95 cursor-pointer
                         ${isSelected ? 'bg-forest-600 text-white' : 'bg-white/90 text-char-500 hover:bg-white hover:shadow-md'}`}
                     >
-                      {isSelected ? <Check size={16} /> : <Plus size={16} />}
+                      {isSelected ? <Check size={16} aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}
                     </span>
                   )}
                 />

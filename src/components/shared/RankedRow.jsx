@@ -72,7 +72,7 @@ export default function RankedRow({ food, studyCount, onSelect, onSaveBlocked })
           see the file header note). */}
       {nonFoodIcon && (
         <span className="flex-shrink-0 w-8 h-8 rounded-full bg-sand-100 flex items-center justify-center self-center">
-          <Icon name={nonFoodIcon} size={16} className="text-char-500" />
+          <Icon name={nonFoodIcon} size={16} className="text-char-500" aria-hidden="true" />
         </span>
       )}
 
@@ -122,7 +122,7 @@ export default function RankedRow({ food, studyCount, onSelect, onSaveBlocked })
         className="flex-shrink-0 self-center"
       />
 
-      <ChevronRight size={16} className="text-char-400 shrink-0 self-center" />
+      <ChevronRight size={16} className="text-char-400 shrink-0 self-center" aria-hidden="true" />
     </button>
   );
 }

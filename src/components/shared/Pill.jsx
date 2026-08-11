@@ -7,8 +7,10 @@
 export default function Pill({ children, selected, onClick }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-pill text-[11px] font-medium
+      aria-pressed={!!selected}
+      className={`tap-target inline-flex items-center gap-1 px-2.5 py-1 rounded-pill text-[11px] font-medium
         transition-all duration-fast ease-ds-out min-h-[26px]
         active:translate-y-[1px] active:scale-[0.99]
         ${

@@ -92,7 +92,7 @@ function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked }) 
         className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${isRecipe ? 'bg-lavender-100 text-lavender-600' : 'bg-forest-100 text-forest-700'
           }`}
       >
-        <Icon name={isRecipe ? 'utensils' : 'leaf'} size={18} />
+        <Icon name={isRecipe ? 'utensils' : 'leaf'} size={18} aria-hidden="true" />
       </span>
 
       <div className="flex-1 min-w-0">
@@ -342,7 +342,7 @@ export default function SearchScreen({ active, onClose }) {
               </div>
 
               <div className="relative mt-4 flex-none pointer-events-auto">
-                <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-char-400 pointer-events-none" />
+                <Search size={20} aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-char-400 pointer-events-none" />
                 <input
                   ref={inputRef}
                   type="search"
@@ -358,15 +358,15 @@ export default function SearchScreen({ active, onClose }) {
                     focus:outline-none ${accentFocusClass} focus:shadow-[0_4px_12px_rgba(45,36,24,0.10)]`}
                 />
                 {searching ? (
-                  <Loader2 size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 ${spinnerClass} animate-spin`} />
+                  <Loader2 size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 ${spinnerClass} animate-spin`} aria-hidden="true" />
                 ) : query ? (
                   <button
                     onClick={() => handleChange('')}
                     aria-label="Clear search"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center
+                    className="tap-target absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center
                       rounded-full text-char-400 hover:text-char-700 hover:bg-sand-100 transition-colors duration-fast"
                   >
-                    <X size={16} />
+                    <X size={16} aria-hidden="true" />
                   </button>
                 ) : null}
               </div>
@@ -456,7 +456,7 @@ export default function SearchScreen({ active, onClose }) {
                             no query at all, distinct from a completed search that
                             found zero results (the DataState branch above). */}
                         <div className="flex-1 flex flex-col items-center justify-center gap-2">
-                          <Search size={32} strokeWidth={1.5} className="text-blue-950/25" />
+                          <Search size={32} strokeWidth={1.5} className="text-blue-950/25" aria-hidden="true" />
                           <p className="text-sm font-sans text-blue-950/30">Searches appear here</p>
                         </div>
                       </motion.div>

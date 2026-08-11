@@ -25,7 +25,7 @@ export default function TabBar() {
               {({ isActive }) => (
                 <>
                   <span className={`transition-colors duration-fast ${isActive ? 'text-blue-950' : 'text-char-400'}`}>
-                    <Icon name={tab.icon} size={24} />
+                    <Icon name={tab.icon} size={24} aria-hidden="true" />
                   </span>
                   <span
                     className={`text-[10px] font-semibold font-sans transition-colors duration-fast ${

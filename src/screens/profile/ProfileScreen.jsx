@@ -64,6 +64,7 @@ function EditList({ title, value, placeholder, onChange, onClose }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && add()}
             placeholder={placeholder}
+            aria-label={title}
             className="flex-1 bg-paper-100 border border-sand-200 rounded-lg px-4 py-3 text-sm font-sans outline-none focus:border-forest-700 transition-colors duration-base"
           />
           <button
@@ -130,8 +131,9 @@ function EditCalorieTarget({ profile, onChange, onClose }) {
         </p>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold font-sans text-char-500">Calories per day</label>
+          <label htmlFor="calorie-target-input" className="text-xs font-semibold font-sans text-char-500">Calories per day</label>
           <input
+            id="calorie-target-input"
             type="number"
             inputMode="numeric"
             min="1"
@@ -206,7 +208,7 @@ function ConditionsEditor({ value, onChange }) {
             >
               {label}
               <span className="opacity-70">
-                <Icon name="x" size={14} />
+                <Icon name="x" size={14} aria-hidden="true" />
               </span>
             </button>
             {(cond?.longDescription || cond?.ICD10) && (
@@ -312,6 +314,7 @@ function ConditionDropdown({ value, onChange }) {
           {loading ? 'Loading conditions…' : 'Select your conditions'}
         </span>
         <span
+          aria-hidden="true"
           className={`material-symbols-rounded text-[18px] text-char-400 flex-shrink-0 transition-transform duration-fast ease-ds-out ${
             open ? 'rotate-180' : ''
           }`}
@@ -334,6 +337,7 @@ function ConditionDropdown({ value, onChange }) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search conditions…"
+                aria-label="Search conditions"
                 className="w-full pl-10 pr-3 py-2.5 rounded-full border-[1.5px] border-sand-200 bg-paper-100 text-[15px] text-char-900 placeholder:text-char-400 font-sans outline-none transition-colors duration-fast ease-ds-out focus:border-blue-900 focus:bg-white"
               />
             </div>
@@ -391,12 +395,12 @@ function SubEditRow({ icon, label, onClick }) {
     >
       <span className="flex items-center gap-3 flex-1 min-w-0">
         <span className="text-char-500">
-          <Icon name={icon} size={20} />
+          <Icon name={icon} size={20} aria-hidden="true" />
         </span>
         <span className="flex-1 text-sm font-medium font-sans text-char-900">{label}</span>
       </span>
       <span className="text-char-400">
-        <Icon name="chevron-right" size={18} />
+        <Icon name="chevron-right" size={18} aria-hidden="true" />
       </span>
     </button>
   );
@@ -485,6 +489,7 @@ function BackupSheet({ onClose }) {
                 setError('');
               }}
               placeholder="you@example.com"
+              aria-label="Email address"
               autoComplete="email"
               autoFocus
               className="flex-1 bg-paper-100 border border-sand-200 rounded-lg px-4 py-3 text-sm font-sans outline-none focus:border-forest-700 transition-colors duration-base"
@@ -610,7 +615,7 @@ export default function ProfileScreen() {
         {saving && (
           <span className="text-xs text-char-400 font-sans flex items-center gap-1.5 mt-2">
             <span className="animate-spin inline-flex">
-              <Icon name="refresh-cw" size={13} />
+              <Icon name="refresh-cw" size={13} aria-hidden="true" />
             </span>
             Saving
           </span>
@@ -674,7 +679,7 @@ export default function ProfileScreen() {
               <div className="flex items-center justify-between gap-3 py-4">
                 <span className="flex items-center gap-3 min-w-0">
                   <span className="text-char-500">
-                    <Icon name="mail" size={20} />
+                    <Icon name="mail" size={20} aria-hidden="true" />
                   </span>
                   <span className="flex-1 text-sm font-medium font-sans text-char-900 truncate">
                     {user.email}

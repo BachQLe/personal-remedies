@@ -62,7 +62,7 @@ function CarouselCard({ card, onClick, onSaveBlocked }) {
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
-          <Leaf size={72} className="text-white/30" strokeWidth={1.2} />
+          <Leaf size={72} className="text-white/30" strokeWidth={1.2} aria-hidden="true" />
         </div>
       )}
       {/* gradient for text legibility */}

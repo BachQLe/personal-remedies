@@ -139,7 +139,7 @@ function RecipeRow({ recipe, onView, onSaveBlocked }) {
           onBlocked={onSaveBlocked}
         />
         <span className="text-char-400">
-          <Icon name="chevron-right" size={16} />
+          <Icon name="chevron-right" size={16} aria-hidden="true" />
         </span>
       </span>
     </button>
@@ -281,7 +281,7 @@ export default function RecipesScreen() {
                 selected={mealFilter === label}
                 onClick={() => setMealFilter(label)}
               >
-                <Icon name="utensils" size={16} />
+                <Icon name="utensils" size={16} aria-hidden="true" />
                 {label}
               </Pill>
             ))}

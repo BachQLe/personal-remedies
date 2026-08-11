@@ -25,6 +25,11 @@
  *   gradient        — optional gradient direction, default 'from-char-900/85 via-char-900/20 to-transparent'
  *   action          — optional action element (renders in top-right overlay)
  *   actionOnClick   — callback for action button
+ *   actionLabel     — accessible name for the action button, used only when
+ *                     `action` is a plain node (not a function) — a
+ *                     function-valued `action` is expected to be a
+ *                     self-contained, already-labeled element (same
+ *                     convention as `saveAction`), so this is ignored then.
  *   saveAction      — optional save-button element (renders in bottom-right
  *                     overlay; independent of `action`/`badge`). Supports a
  *                     plain node or a function (same convention as `action`),
@@ -76,6 +81,7 @@ import Icon from './Icon.jsx';
  * @param {string} [props.gradient]
  * @param {React.ReactNode} [props.action]
  * @param {() => void} [props.actionOnClick]
+ * @param {string} [props.actionLabel]
  * @param {React.ReactNode | (() => React.ReactNode)} [props.saveAction]
  * @param {'lazy' | 'eager'} [props.loading]
  * @param {string} [props.nonFoodIcon] - lucide icon name; renders instead of `image` (see prop doc above)
@@ -96,6 +102,7 @@ export default function FoodImageCard({
   gradient = 'from-char-900/85 via-char-900/20 to-transparent',
   action,
   actionOnClick,
+  actionLabel,
   saveAction,
   loading = 'lazy',
   nonFoodIcon = null,
@@ -138,7 +145,7 @@ export default function FoodImageCard({
           of a photo for coarse group 'k' / fine group 'x'/'j1' items. */}
       {nonFoodIcon ? (
         <div className="absolute inset-0 flex items-center justify-center bg-sand-100">
-          <Icon name={nonFoodIcon} size={40} className="text-char-400" />
+          <Icon name={nonFoodIcon} size={40} className="text-char-400" aria-hidden="true" />
         </div>
       ) : typeof image === 'string' ? (
         <img
@@ -166,7 +173,7 @@ export default function FoodImageCard({
               handleBadgeClick(e);
             }
           }}
-          className={`absolute top-3 left-3 inline-flex items-center rounded-full
+          className={`tap-target absolute top-3 left-3 inline-flex items-center rounded-full
             px-2.5 py-1 text-[11px] font-semibold font-sans cursor-pointer
             transition-all duration-fast hover:scale-105 active:scale-95
             ${badgeVariantClasses[badgeVariant] || badgeVariantClasses.primary}`}
@@ -198,7 +205,8 @@ export default function FoodImageCard({
                   handleActionClick(e);
                 }
               }}
-              className="w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm
+              aria-label={actionLabel}
+              className="tap-target w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm
                 flex items-center justify-center shadow-sm cursor-pointer
                 transition-all duration-fast
                 hover:bg-white hover:shadow-md active:scale-95"

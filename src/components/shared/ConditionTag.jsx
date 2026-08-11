@@ -28,6 +28,7 @@ export default function ConditionTag({
         text-char-900 ${className}`}
     >
       <span
+        aria-hidden="true"
         className={`material-symbols-rounded flex-none ${compact ? "text-[13px]" : "text-[16px]"}`}
         style={{ color: meta.color }}
       >
@@ -37,10 +38,10 @@ export default function ConditionTag({
       {onRemove && (
         <button
           onClick={onRemove}
-          className="ml-0.5 opacity-60 hover:opacity-100 text-current"
+          className="tap-target ml-0.5 opacity-60 hover:opacity-100 text-current"
           aria-label={`Remove ${condition}`}
         >
-          <Icon name="x" size={14} />
+          <Icon name="x" size={14} aria-hidden="true" />
         </button>
       )}
     </span>

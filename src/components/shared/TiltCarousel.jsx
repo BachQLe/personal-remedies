@@ -262,7 +262,7 @@ export default function TiltCarousel({
           flex items-center justify-center
           transition-all duration-fast hover:bg-white active:scale-[0.94]"
       >
-        <ChevronLeft size={18} />
+        <ChevronLeft size={18} aria-hidden="true" />
       </button>
       <button
         type="button"
@@ -273,7 +273,7 @@ export default function TiltCarousel({
           flex items-center justify-center
           transition-all duration-fast hover:bg-white active:scale-[0.94]"
       >
-        <ChevronRight size={18} />
+        <ChevronRight size={18} aria-hidden="true" />
       </button>
 
       {/* Edge fade — fading vertical bars matching parent bg (see DESIGN_SYSTEM.md) */}

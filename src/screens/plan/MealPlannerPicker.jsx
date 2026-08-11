@@ -324,19 +324,19 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
             <button
               onClick={onClose}
               aria-label="Close"
-              className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-sm
+              className="tap-target w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-sm
                 transition-all duration-fast hover:shadow-md active:scale-95"
             >
-              <X size={18} className="text-char-700" />
+              <X size={18} className="text-char-700" aria-hidden="true" />
             </button>
-            <p className="font-display text-base font-semibold text-blue-950">New meal plan</p>
+            <h2 className="font-display text-base font-semibold text-blue-950">New meal plan</h2>
             <button
               onClick={() => console.log('MealPlannerPicker: search is not wired up yet')}
               aria-label="Search"
-              className="w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-sm
+              className="tap-target w-9 h-9 rounded-full bg-white flex items-center justify-center shadow-sm
                 transition-all duration-fast hover:shadow-md active:scale-95"
             >
-              <Search size={18} className="text-char-700" />
+              <Search size={18} className="text-char-700" aria-hidden="true" />
             </button>
           </div>
 
@@ -349,10 +349,10 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
               <button
                 onClick={handleRefresh}
                 aria-label="Refresh options"
-                className="w-9 h-9 shrink-0 rounded-full bg-white flex items-center justify-center shadow-sm
+                className="tap-target w-9 h-9 shrink-0 rounded-full bg-white flex items-center justify-center shadow-sm
                   transition-all duration-fast hover:shadow-md active:scale-95"
               >
-                <RefreshCw size={16} className="text-char-700" />
+                <RefreshCw size={16} className="text-char-700" aria-hidden="true" />
               </button>
             )}
           </div>
