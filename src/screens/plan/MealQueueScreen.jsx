@@ -554,25 +554,26 @@ export default function MealQueueScreen() {
             </div>
           ) : null
         }
-      >
-        <div className="mt-4">
-          <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} />
-        </div>
-
-        {view === 'queue' && !firstRunEmpty && (
-          <div className="mt-4 -mb-2">
-            <DayStrip days={days} selected={activeDay} onSelect={handleSelectDay} />
-          </div>
-        )}
-      </PageHeader>
+      />
 
       {/* ── Paper panel ──────────────────────────────────────────────────
           Same solid white container SuggestionsScreen (Best & Worst Choices)
           and Home use under their headers: full-bleed, rounded top corners
           only, own background + inner padding, soft upward shadow lifting it
           off the green page. Its pb-28 both clears the floating TabBar and
-          paints paper behind it (appshell-cream-fix). ─────────────────── */}
+          paints paper behind it (appshell-cream-fix). Now also encapsulates
+          the view switcher + day strip, so the whole Day/Week/Saved-recipes
+          control surface reads as one panel instead of straddling the green
+          header and the white body. ─────────────────────────────────────── */}
       <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-8 mt-4 rm-print-hide">
+        <div className="flex flex-col gap-4">
+          <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} />
+
+          {view === 'queue' && !firstRunEmpty && (
+            <DayStrip days={days} selected={activeDay} onSelect={handleSelectDay} bgClassName="bg-paper-100" />
+          )}
+        </div>
+
         {view === 'queue' ? (
           firstRunEmpty ? (
             <EmptyState
