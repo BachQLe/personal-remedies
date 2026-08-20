@@ -185,15 +185,25 @@ let _foodItemsCache = null;
  * once and memoized. Stays `async` (and callers keep `await`ing it)
  * purely to preserve the existing public call shape downstream; the actual
  * work is synchronous.
+ *
+ * Builds into a local `map` and only assigns it to the module-level
+ * `_foodItemsCache` once the loop finishes without throwing — assigning the
+ * (still-empty) Map to the cache BEFORE the loop, as this used to, left a
+ * corrupted "successfully empty" cache behind if `getItemTable()` ever threw
+ * (e.g. a corrupt bundle), which a second concurrent caller (searchFoods and
+ * searchNaturalSources now both hit this from the same
+ * `searchEverything` Promise.allSettled fan-out — see api.js) would then
+ * read as a real empty dictionary instead of hitting the same failure.
  * @returns {Promise<Map<number, Object>>}
  */
 async function ensureFoodItems() {
   if (_foodItemsCache) return _foodItemsCache;
 
-  _foodItemsCache = new Map();
+  const map = new Map();
   for (const item of getItemTable()) {
-    _foodItemsCache.set(item.foodItemID, item);
+    map.set(item.foodItemID, item);
   }
+  _foodItemsCache = map;
   return _foodItemsCache;
 }
 
@@ -586,7 +596,13 @@ export async function getFoodIdByName(name) {
 
 /**
  * Search the food dictionary (client-side filter on cached /fooditems).
- * Excludes non-food items (lifestyle, recipes) — see `isExcludedItem`.
+ * Excludes non-food items (lifestyle, recipes) — see `isExcludedItem` — AND
+ * excludes coarse group 'k' (Key Nutrients & Herbal Meds — vitamins,
+ * minerals, herbal supplements). Without that second guard, a food-oriented
+ * query like "vitamin" surfaced every nutrient/supplement row too (e.g.
+ * "Vitamin A Supplement"), which reads as a food but isn't one — group 'k'
+ * items are searched separately via `searchNaturalSources` and surfaced in
+ * their own nutrients/herbals sections by `searchEverything` (api.js).
  * @param {string} query
  * @param {import('./types.js').Profile} _profile
  * @returns {Promise<import('./types.js').Food[]>}
@@ -601,6 +617,7 @@ export async function searchFoods(query, _profile) {
 
   for (const [, item] of cache) {
     if (isExcludedItem(item)) continue;
+    if (effectiveCoarseGroup(item) === 'k') continue;
     const name = (item.displayAs || item.description || '').toLowerCase();
     if (name.includes(q)) {
       results.push(normalizeFood(item));
@@ -613,9 +630,16 @@ export async function searchFoods(query, _profile) {
 /**
  * Search Key Nutrients & Herbal Medicines (coarse group 'k', i.e. fine groups
  * k1/k2) in the food dictionary (client-side filter on cached /fooditems).
- * Mirrors `searchFoods` but scoped to the coarse group that powers the
- * Natural Sources screen, so its own search box doesn't surface unrelated
- * foods. Zero network beyond the already-cached dictionary.
+ * Mirrors `searchFoods` but scoped to the coarse group that used to power a
+ * separate "Natural Sources" screen; that screen has since been folded into
+ * the single Food & Nutrient Lookup screen (`searchEverything`, api.js),
+ * which splits this function's results into "Nutrients" (fine group 'k1' —
+ * Vitamins, Minerals & Other) and "Herbal Supplements" (fine group 'k2')
+ * sections. No separate helper/loop needed for that split: `normalizeFood`
+ * already stamps every result with a `fineGroup` field, so callers filter on
+ * `food.fineGroup === 'k1' | 'k2'` directly rather than this function
+ * duplicating the scan per subgroup. Zero network beyond the already-cached
+ * dictionary.
  * @param {string} query
  * @returns {Promise<import('./types.js').Food[]>}
  */
@@ -816,7 +840,7 @@ async function getSuggestionsRaw(conditionIds, consumeOrAvoid) {
  * powers the Top Dos & Don'ts screen.
  *
  * Shares the exact same cachedTopDoOrDonts call (limit 50) as
- * getSuggestions/getWorstFoods, so this screen, Dietary Guidance, and any
+ * getSuggestions/getWorstFoods, so this screen, Best & Worst Choices, and any
  * future prefetch cost ONE /topdoordonts request per direction between them.
  *
  * Unlike getSuggestions, lifestyle items (Exercise, Smoking, Sleep, …) are

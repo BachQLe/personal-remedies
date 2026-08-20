@@ -15,6 +15,12 @@
  *   - `searchNaturalSourceItems` has a single source (`searchNaturalSources`)
  *     — there's nothing to partially degrade to, so ANY failure there is a
  *     total failure and is left to propagate (no internal catch at all).
+ *   - `searchEverything` (Wave 2 — collapses Food Lookup + Natural Sources
+ *     into one sectioned "Food & Nutrient Lookup" screen) fans out THREE
+ *     sources — `searchFoods`, `searchNaturalSources`, `getRecipes` — via
+ *     `Promise.allSettled`. Total failure (ALL THREE reject) -> throws.
+ *     Partial failure (some reject) -> resolves, with each failed source's
+ *     section(s) degrading to empty while the others still populate.
  *   - Either way, a real "searched successfully, found nothing" result
  *     (including the API's HTTP 220 "valid but empty" shape, which
  *     nutridigm.js's `fetchSuggest`/`request` already coalesce to `[]`/`null`
@@ -175,5 +181,114 @@ describe('searchNaturalSourceItems: success but nothing matches (incl. 220-shape
     });
     const results = await searchNaturalSourceItems('ginseng');
     expect(results).toEqual([{ kind: 'food', key: 'food-200', food: expect.objectContaining({ id: 200 }) }]);
+  });
+});
+
+describe('searchFoods: coarse group k regression — nutrients/herbals never leak into food results', () => {
+  it('excludes every group-k row even when the name matches', async () => {
+    const { searchFoods } = await setupApi({
+      getItemTableImpl: () => [
+        { foodItemID: 300, displayAs: 'Vitamin A Supplement', coarseFoodGroup: 'k', fineFoodGroup: 'k1' },
+        { foodItemID: 301, displayAs: 'Vitamin B12 Supplement', coarseFoodGroup: 'k', fineFoodGroup: 'k1' },
+        { foodItemID: 302, displayAs: 'Vitamin-Rich Kale', coarseFoodGroup: 'e', fineFoodGroup: 'e1' },
+      ],
+    });
+    const results = await searchFoods('vitamin', { conditions: CONDITIONS });
+    expect(results.every((f) => f.group !== 'k')).toBe(true);
+    expect(results.some((f) => f.id === 302)).toBe(true);
+    expect(results.some((f) => f.id === 300 || f.id === 301)).toBe(false);
+  });
+});
+
+describe('searchEverything: total failure — searchFoods/searchNaturalSources (dictionary) and getRecipes both fail', () => {
+  it('throws instead of resolving with empty sections', async () => {
+    const { searchEverything } = await setupApi({
+      fetchSuggestImpl: async () => {
+        throw new Error('recipes network down');
+      },
+      getItemTableImpl: () => {
+        throw new Error('dictionary load failed');
+      },
+    });
+
+    await expect(
+      searchEverything('kale', { conditions: CONDITIONS })
+    ).rejects.toThrow();
+  });
+});
+
+describe('searchEverything: partial failure — dictionary fails, recipes succeed', () => {
+  it('resolves with only the recipes section populated', async () => {
+    const { searchEverything } = await setupApi({
+      fetchSuggestImpl: async (_csv, fineFoodGroup) => {
+        if (fineFoodGroup === 'l') {
+          return [{ foodItemID: 900, foodItemDisplayAs: 'Kale Salad', descriptionNumericID: 2 }];
+        }
+        return [];
+      },
+      getItemTableImpl: () => {
+        throw new Error('dictionary load failed');
+      },
+    });
+
+    const results = await searchEverything('kale', { conditions: CONDITIONS });
+    expect(results.foods).toEqual([]);
+    expect(results.nutrients).toEqual([]);
+    expect(results.herbals).toEqual([]);
+    expect(results.recipes.some((r) => r.kind === 'recipe' && r.recipe.id === 900)).toBe(true);
+  });
+});
+
+describe('searchEverything: partial failure — recipes fail, dictionary succeeds', () => {
+  it('resolves with foods/nutrients/herbals sections populated and recipes empty', async () => {
+    const { searchEverything } = await setupApi({
+      fetchSuggestImpl: async () => {
+        throw new Error('recipes network down');
+      },
+      getItemTableImpl: () => [
+        { foodItemID: 100, displayAs: 'Kale Chips', coarseFoodGroup: 'e', fineFoodGroup: 'e1' },
+        { foodItemID: 101, displayAs: 'Kale Root Extract', coarseFoodGroup: 'k', fineFoodGroup: 'k2' },
+      ],
+    });
+
+    const results = await searchEverything('kale', { conditions: CONDITIONS });
+    expect(results.recipes).toEqual([]);
+    expect(results.foods.some((r) => r.kind === 'food' && r.food.id === 100)).toBe(true);
+    expect(results.herbals.some((r) => r.kind === 'food' && r.food.id === 101)).toBe(true);
+    expect(results.nutrients).toEqual([]);
+  });
+});
+
+describe('searchEverything: success but nothing matches anywhere', () => {
+  it('resolves to all-empty sections WITHOUT throwing', async () => {
+    const { searchEverything } = await setupApi({
+      fetchSuggestImpl: async () => [],
+      getItemTableImpl: () => [],
+    });
+
+    const results = await searchEverything('nonexistent query', { conditions: CONDITIONS });
+    expect(results).toEqual({ foods: [], recipes: [], nutrients: [], herbals: [] });
+  });
+
+  it('no query -> empty sections without calling any source', async () => {
+    const { searchEverything } = await setupApi();
+    const results = await searchEverything('   ', { conditions: CONDITIONS });
+    expect(results).toEqual({ foods: [], recipes: [], nutrients: [], herbals: [] });
+  });
+});
+
+describe('searchEverything: nutrients vs herbals split', () => {
+  it('buckets fine group k1 as nutrients and k2 as herbals', async () => {
+    const { searchEverything } = await setupApi({
+      fetchSuggestImpl: async () => [],
+      getItemTableImpl: () => [
+        { foodItemID: 400, displayAs: 'Ginseng Vitamin Blend', coarseFoodGroup: 'k', fineFoodGroup: 'k1' },
+        { foodItemID: 401, displayAs: 'Ginseng Root', coarseFoodGroup: 'k', fineFoodGroup: 'k2' },
+      ],
+    });
+
+    const results = await searchEverything('ginseng', { conditions: CONDITIONS });
+    expect(results.nutrients).toEqual([{ kind: 'food', key: 'food-400', food: expect.objectContaining({ id: 400 }) }]);
+    expect(results.herbals).toEqual([{ kind: 'food', key: 'food-401', food: expect.objectContaining({ id: 401 }) }]);
   });
 });

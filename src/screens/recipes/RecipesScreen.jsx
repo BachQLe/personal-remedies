@@ -246,24 +246,32 @@ export default function RecipesScreen() {
   const clearFilters = () => { setMealFilter('All'); setConditionFilter('All'); setSearchQuery(''); };
 
   return (
+    // Green page + white paper shell — the same two-layer background every
+    // other screen uses (see HomeScreen/SuggestionsScreen). `-mb-28` cancels
+    // the AppShell main's pb-28 navbar reserve so the shell's own pb-28
+    // becomes the navbar clearance and paints paper behind the floating
+    // TabBar (appshell-cream-fix pattern).
     <div
-      className={`flex flex-col gap-5 px-5 pt-6 pb-8 bg-paper-200 min-h-full${ghost ? ' rm-ghost' : ''}`}
+      className={`bg-forest-300 flex flex-col min-h-screen -mb-28${ghost ? ' rm-ghost' : ''}`}
       aria-busy={ghost}
     >
-      {/* Header */}
-      <div>
-        <p className="text-[12px] text-char-500 font-label tracking-[0.14em] uppercase">Personal Remedies</p>
+      {/* Header zone — on the green page background, above the shell */}
+      <div className="px-5 pt-6 pb-6">
+        <p className="text-[12px] text-blue-950/60 font-label tracking-[0.14em] uppercase">Personal Remedies</p>
         <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">Recipes</h1>
-        <p className="text-sm text-char-500 mt-0.5 font-sans">Condition-approved for your profile</p>
+        <p className="text-sm text-blue-950/60 mt-0.5 font-sans">Condition-approved for your profile</p>
       </div>
 
-      {/* Search */}
-      <div className="py-1">
-        <SearchInput
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder="Search recipes"
-        />
+      {/* Content shell — full-bleed white container with rounded top corners */}
+      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-5">
+
+        {/* Search */}
+        <div className="py-1">
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search recipes"
+          />
       </div>
 
       {/* Section header */}
@@ -373,6 +381,8 @@ export default function RecipesScreen() {
           )}
         </DataState>
       )}
+
+      </div>
 
       {/* Recipe detail card */}
       <FoodDetailCard

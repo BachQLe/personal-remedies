@@ -61,7 +61,7 @@ export default function CalorieGapSheet({
     <BottomSheet open={open} onClose={onBack} zClass="z-[70]">
       <div className="flex flex-col gap-1 mb-4">
         <h2 className="font-display text-lg font-semibold text-blue-950 tracking-tightish leading-snug">
-          Your meal plan does not reach sufficient calories!
+          My meal plan doesn't reach enough calories
         </h2>
         <p className="font-sans text-sm text-char-500">Consider adding these!</p>
       </div>

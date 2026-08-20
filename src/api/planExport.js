@@ -94,7 +94,7 @@ function cleanConditionNames(conditionNames) {
  * @returns {string}
  */
 function headerLine(rangeLabel, cleanNames) {
-  const parts = ['Remedi meal plan'];
+  const parts = ['My Remedi meal plan'];
   if (rangeLabel) parts.push(rangeLabel);
   if (cleanNames.length > 0) parts.push(`for: ${cleanNames.join(', ')}`);
   return parts.join(' · ');

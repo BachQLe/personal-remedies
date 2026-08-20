@@ -107,7 +107,7 @@ describe('ensurePlanForWeek: conditions-change contract (storage-map.md §6, gap
     // freshly rebuilt (pool-filled) day. Gap 3's fix means a conditions
     // change no longer rebuilds anything — it discards the plan outright and
     // hands back the same no-plan contract `MealQueueScreen` already renders
-    // its "Build your meal plan" empty-state CTA for.
+    // its "Build my meal plan" empty-state CTA for.
     expect(result).toEqual({ plan: null, usedFallback: false });
 
     // The stale plan must actually be cleared from storage too — not just

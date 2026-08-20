@@ -125,7 +125,7 @@ export async function getRecommendations(slot, offset, limit = 3) {
 /**
  * Home carousel feed — same underlying list as the Top Dos & Don'ts "Do"
  * tab (getTopDosAndDonts(profile, 'consume')), so the home carousel and
- * Dietary Guidance stay consistent: both keep lifestyle/non-food items
+ * Best & Worst Choices stay consistent: both keep lifestyle/non-food items
  * (flagged via `isLifestyle`), unlike getRecommendations above which is
  * food-only. Returns raw Food-shaped items ({ id, name, group, fineGroup,
  * notes, isLifestyle, rank, groupLabel, ... }) — no `tier` field, and no

@@ -2,8 +2,9 @@
  * PillSwitcher — full-width segmented pill tab switcher with a sliding thumb.
  *
  * Shared across Do/Don't and Eat/Avoid style toggles (e.g. TopDosTab,
- * CategoryDetailPanel, naturalSources) so the segmented-control look stays
- * consistent instead of each screen hand-rolling its own. The selected state
+ * CategoryDetailPanel, MealQueueScreen, MealPlannerPicker, SuggestionsScreen)
+ * so the segmented-control look stays consistent instead of each screen
+ * hand-rolling its own. The selected state
  * is drawn as a single absolutely-positioned thumb that slides + recolors
  * behind the buttons, rather than each button toggling its own background.
  *

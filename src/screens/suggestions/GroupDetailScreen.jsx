@@ -20,9 +20,6 @@ import { BackArrow } from '../../components/shared/Icon.jsx';
 import CategoryDetailPanel from './CategoryDetailPanel.jsx';
 import { CATEGORY_GRID_GROUPS } from './GroupsTab.jsx';
 
-// Same lavender-200 page background SuggestionsScreen's three tabs share.
-const LAVENDER_BG_COLOR = '#DCC8F0';
-
 export default function GroupDetailScreen() {
   const { groupId } = useParams();
   const navigate = useNavigate();
@@ -53,8 +50,8 @@ export default function GroupDetailScreen() {
     // -mb-28 cancels the AppShell main's pb-28 navbar reserve so the
     // background reaches behind the floating TabBar (appshell-cream-fix
     // pattern); GlassPanel's own pb-28 keeps the last row clear of the bar.
-    <div className="flex flex-col -mb-28" style={{ backgroundColor: LAVENDER_BG_COLOR, minHeight: '100dvh' }}>
-      <PageHeader label="Guidance" className="pb-3">
+    <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
+      <PageHeader label="Best & Worst Choices" className="pb-3">
         <div className="flex items-center gap-3 mt-3">
           <button
             onClick={() => navigate('/app/suggestions?tab=groups')}

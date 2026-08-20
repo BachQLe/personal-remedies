@@ -40,7 +40,7 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
           <div key={day.key}>
             <button
               onClick={() => setExpandedKey(expanded ? null : day.key)}
-              className={`w-full bg-white/40 rounded-xl px-4 py-3 flex items-center justify-between
+              className={`w-full bg-sand-100 rounded-xl px-4 py-3 flex items-center justify-between
                 ${expanded ? 'rounded-b-none' : ''}`}
             >
               <div className="flex items-baseline gap-2">
@@ -49,7 +49,7 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
               </div>
               <div className="flex items-center gap-2">
                 {allItems.length > 0 && (
-                  <span className="text-[11px] bg-white/40 rounded-full px-2 py-0.5 text-blue-950/60">
+                  <span className="text-[11px] bg-sand-200 rounded-full px-2 py-0.5 text-blue-950/60">
                     {allItems.length} item{allItems.length === 1 ? '' : 's'}
                   </span>
                 )}
@@ -71,7 +71,7 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
                   transition={calmSpring}
                   className="overflow-hidden"
                 >
-                  <div className="bg-white/40 rounded-xl rounded-t-none p-4">
+                  <div className="bg-sand-100 rounded-xl rounded-t-none p-4">
                     {allItems.length === 0 ? (
                       <div className="border border-dashed border-blue-950/30 rounded-xl px-4 py-4 text-sm text-blue-950/60">
                         Nothing planned for this day yet.
@@ -128,7 +128,7 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
                                       aria-label={eaten.includes(item.id) ? 'Mark as not eaten' : 'Mark as eaten'}
                                       className={`tap-target w-7 h-7 rounded-full flex items-center justify-center shrink-0
                                         transition-all duration-fast active:scale-95
-                                        ${eaten.includes(item.id) ? 'bg-forest-600 text-white' : 'bg-white/70 text-blue-950/40'}`}
+                                        ${eaten.includes(item.id) ? 'bg-forest-600 text-white' : 'bg-sand-200 text-blue-950/40'}`}
                                     >
                                       <Check size={14} aria-hidden="true" />
                                     </button>

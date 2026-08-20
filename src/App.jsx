@@ -79,7 +79,7 @@ function EntryRedirect() {
 // Shell for the PWA app routes — always phone layout
 function AppShell({ children }) {
   return (
-    <div className="min-h-screen bg-paper-200">
+    <div className="min-h-screen bg-forest-300">
       {/* bottom inset ≥ floating navbar height + margin so content clears it */}
       <main className="pb-28">
         <div className="max-w-[430px] mx-auto w-full">
@@ -127,12 +127,14 @@ function AppLayout() {
 // src/screens/search/SearchScreen.jsx), plus a small buffer before navigating.
 const SEARCH_CLOSE_MS = 260;
 
-// Route wrapper for /app/search — owns the open/close lifecycle only. Which
-// mode is showing (Food Lookup vs Natural Sources) is read by SearchScreen
-// itself from the `?mode=` query param via useSearchParams, and the pill
-// toggle syncs that param back as a side effect — never a navigation, so
-// toggling modes never remounts this wrapper or retriggers the open/close
-// animation. /app/natural redirects here with `?mode=natural` (see routes).
+// Route wrapper for /app/search — owns the open/close lifecycle only.
+// SearchScreen itself is now a single "Food & Nutrient Lookup" surface with
+// no mode switcher (foods/recipes/nutrients/herbals are all sectioned
+// results from one search), so there's no query param to read or sync here
+// anymore. /app/natural — the old Natural Sources screen's URL — now
+// redirects straight here with no `?mode=` param (see routes); any stale
+// `?mode=natural` still floating around in a bookmark/history entry is
+// simply ignored, never crashes.
 function SearchRouteScreen() {
   const navigate = useNavigate();
   const [active, setActive] = useState(true);
@@ -181,7 +183,7 @@ function App() {
             <Route path="/kitchen-sink" element={<KitchenSink />} />
             {/* PWA App — gated behind onboarding */}
             <Route path="/app" element={<Navigate to="/app/home" replace />} />
-            <Route path="/app/natural" element={<Navigate to="/app/search?mode=natural" replace />} />
+            <Route path="/app/natural" element={<Navigate to="/app/search" replace />} />
             {/* Stale links to the retired glance / Top Dos & Don'ts screens */}
             <Route path="/app/glance" element={<Navigate to="/app/suggestions" replace />} />
             <Route path="/app/top" element={<Navigate to="/app/suggestions" replace />} />

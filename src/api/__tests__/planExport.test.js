@@ -97,7 +97,7 @@ describe('formatWeekPlanText', () => {
     const d0 = expectedDayMeta(D0);
     const d2 = expectedDayMeta(D2);
     expect(text.split('\n')[0]).toBe(
-      `Remedi meal plan · ${d0.dateLabel} – ${d2.dateLabel} · for: Diabetes, High Blood Pressure`
+      `My Remedi meal plan · ${d0.dateLabel} – ${d2.dateLabel} · for: Diabetes, High Blood Pressure`
     );
   });
 

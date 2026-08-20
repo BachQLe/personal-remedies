@@ -48,7 +48,7 @@ function SkeletonGrid() {
       {CATEGORY_GRID_GROUPS.map((group) => (
         <div
           key={group}
-          className="flex flex-col items-start gap-2 px-3 py-4 rounded-sm bg-white border border-sand-200"
+          className="flex flex-col items-start gap-2 px-3 py-4 rounded-sm bg-white border border-sand-200 shadow-xs"
         >
           <div className="w-11 h-11 rounded-lg bg-sand-200 animate-pulse" />
           <div className="h-3.5 w-3/4 rounded bg-sand-200 animate-pulse" />
@@ -69,8 +69,8 @@ function CategoryGrid({ coarseLabels, fineLabelsByGroup, onOpen }) {
           <button
             key={group}
             onClick={() => onOpen(group)}
-            className="flex flex-col items-start gap-2 px-3 py-4 rounded-sm bg-white border border-sand-200 text-left
-              transition-colors duration-fast hover:border-forest-300 active:scale-[0.99]"
+            className="flex flex-col items-start gap-2 px-3 py-4 rounded-sm bg-white border border-sand-200 shadow-xs text-left
+              transition-all duration-fast hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
           >
             <div className="w-11 h-11 rounded-lg bg-forest-50 flex items-center justify-center flex-shrink-0">
               <Icon size={20} className="text-forest-700" aria-hidden="true" />

@@ -1,6 +1,6 @@
 # Remedi — What Each Page Is For
 
-*Last updated: August 2, 2026. Written against the code as it stands on `main`.*
+*Last updated: August 19, 2026. Written against the code as it stands on `main`.*
 
 ## The idea in one paragraph
 
@@ -19,7 +19,7 @@ The product is a mobile-first web app. On desktop it renders inside a phone fram
 
 **Public site** → `/` and its sub-pages: the pitch.
 **Onboarding** → `/onboarding`: two steps, name and conditions.
-**The app** → `/app/*`: five tabs across the bottom — Plan, Search, Home, Guidance, Profile.
+**The app** → `/app/*`: five tabs across the bottom — Plan, Search, Home, Choices, Profile. ("Choices" is the tab-bar label for the Best & Worst Choices / Guidance screen at `/app/suggestions` — the full name doesn't fit a five-up tab bar at 10px, so the tab is short and the on-screen title spells it out.)
 
 You can't reach `/app/*` without a saved profile; the app bounces you to onboarding.
 
@@ -67,22 +67,26 @@ On submit the profile is saved locally, the app pre-warms its data caches in the
 
 **Purpose:** The hub. Greet the user by name and give one tap to everything else.
 
-Four entry points laid out as colored blocks — **Dietary Guidance**, **Meal Planner**, **Food Lookup**, **Natural Sources Lookup** — followed by *"Top recommendations for you"*, an auto-advancing 3D-tilted carousel of the highest-ranked items for the user's conditions. Tapping a card opens the detail view.
+Three entry points, stacked full-width and sized by importance — **Best & Worst Choices** (tallest, the primary destination), **Meal Planner**, and **Food & Nutrient Lookup** — followed by *"Top recommendations for you"*, an auto-advancing, 3D-tilted carousel that fills whatever vertical space is left. Tapping a card opens the detail view; "See all" next to the carousel's label goes to the full recipe browser at `/app/recipes`.
 
-That carousel draws from the same ranked list as the "Do" side of Top Dos & Don'ts, which means it includes **lifestyle factors, not just foods** — exercise, sleep, smoking. Those render with a leaf icon instead of a food photo, because pairing a stock photo with "Exercise" would be nonsense.
+There used to be a fourth block (a dismissible "Discover your best recipes" news banner) and a two-button Food Lookup / Natural Sources Lookup pair. Both are gone: the banner was deleted outright, and the two lookup buttons merged into the single "Food & Nutrient Lookup" block. See "Consequences" further down for what the banner's removal left dangling.
+
+That carousel draws from the same ranked list as the "Do" side of Top Dos & Don'ts, which means it includes **lifestyle factors, not just foods** — exercise, sleep, smoking. Those render with a leaf icon instead of a food photo, because pairing a stock photo with "Exercise" would be nonsense. It fetches once on mount (50 rows, to render 8 cards — a known, unfixed over-fetch), and that call is already warmed at app boot and cached for 8 hours, so in practice it's rarely a cold fetch and never blocks the three buttons above it from being tappable.
 
 ## Search — `/app/search`
 
-**Purpose:** Look up one specific thing.
+**Purpose:** Look up one specific thing — food, recipe, nutrient, or herbal supplement — from a single box.
 
-Two modes behind a pill switcher, each with its own color:
+The old two-mode pill switcher (Food Lookup vs. Natural Sources) is gone. One query now fans out to every source at once and results render as up to four labelled sections, each shown only when it has rows:
 
-- **Food Lookup** (yellow) — search foods and recipes by name.
-- **Natural Sources** (blue) — search key nutrients and herbal medicines.
+- **Foods** — the plain food dictionary, filtered locally by name.
+- **Recipes** — the profile's condition-ranked recipe list, filtered locally by title.
+- **Nutrients** — key vitamins/minerals (what "Natural Sources" used to mean, half of it).
+- **Herbal Supplements** — herbal medicines (the other half of "Natural Sources").
 
-Type-ahead with a short debounce, recent searches as tappable chips, results as rows with an icon, title, category, and a save button. Tapping a row opens the detail view.
+Type-ahead with a 300ms debounce, recent searches as tappable chips, results as rows with an icon, title, a real food-group subtitle, and a save button. Tapping a row opens the detail view.
 
-Both modes filter locally over a bundled dictionary rather than hitting the network, so results are instant.
+All of it filters locally over bundled/already-cached dictionaries rather than hitting the network fresh, so results are instant. If every source fails at once it's an honest error state; if only one source is down, the working sections still render.
 
 ## Recipes — `/app/recipes`
 
@@ -94,9 +98,11 @@ The recipes are real Food Network recipes ranked against the user's conditions, 
 
 Reached from Home's "See all", not from the tab bar.
 
-## Guidance — `/app/suggestions`
+**Open item:** this is one of two recipe entry points one level below Home — the other is Best & Worst Choices' "Best Recipes" tab (below), which shows top-ranked rails from the same pool rather than the full browsable list. Home itself only has one recipe button now, but the two deeper surfaces still exist side by side and haven't been reconciled.
 
-**Purpose:** The reference section — everything the app knows about your conditions, organized three ways.
+## Best & Worst Choices — `/app/suggestions`
+
+**Purpose:** The reference section — everything the app knows about your conditions, organized three ways. (Renamed from "Dietary Guidance" — see the boss-review doc for why; the tab bar shows the short form "Choices".)
 
 ### Tab 1 — Dos & Don'ts
 
@@ -157,7 +163,7 @@ Signing in is optional. Everything works signed out against local storage; when 
 
 ### Food & recipe detail
 
-Opens as a flip card from anywhere — Home, Search, Recipes, Guidance, Plan. Drag down to dismiss.
+Opens as a flip card from anywhere — Home, Search, Recipes, Best & Worst Choices, Plan. Drag down to dismiss.
 
 **Front:** photo, star rating, name, "Best for" condition chips, description.
 **Back:** one row per condition in your profile with a match verdict (Top / Strong / Good / Poor match / Neutral), plus study counts and expandable citations for foods.
@@ -175,3 +181,30 @@ A Neutral verdict is not a mild endorsement — it means **the data makes no cla
 ### Where the data comes from
 
 The Nutridigm API, across endpoints for ranked do/don't lists, per-group detail, condition-scoped suggestions, per-condition verdicts, and study references. Dictionaries (foods, conditions, food groups) ship bundled with the app so they cost nothing at runtime; live recommendation calls are cached for 8 hours with stale-while-revalidate. Recipes come through as Food Network recipes carrying real condition rankings and chef attribution.
+
+---
+
+## What every button does
+
+This is the answer to "where does that explanation show up" — read from the current `HomeScreen.jsx`, `MealprepCarousel.jsx`, `TabBar.jsx`, and `App.jsx` route table.
+
+### Home
+
+| Label | Goes to | What happens on tap |
+|---|---|---|
+| **Best & Worst Choices** (tall lavender button) | `/app/suggestions` | Navigates to the Best & Worst Choices screen — Top Dos & Don'ts, Food Groups, and Best Recipes tabs. This is the tallest of the three buttons; it's the app's primary destination. |
+| **Meal Planner** (forest-green card) | `/app/plan` | Navigates to the meal planner (Day view / Week view / Saved recipes). |
+| **Food & Nutrient Lookup** (yellow card) | `/app/search` | Navigates to the single search screen covering foods, recipes, nutrients, and herbal supplements. |
+| **"See all"** (top-right of the carousel label) | `/app/recipes` | Navigates to the full, browsable recipe list. |
+| **A carousel card** (tap anywhere on the card) | No navigation — opens an overlay | Opens the flip-card food/detail view for that item on top of Home. The card seeds instantly with what the carousel already has (name, image), then enriches in the background via `buildRecipeDetail`; every carousel card is a plain food or lifestyle item, never a recipe. Drag down or tap outside to dismiss and return to Home underneath. |
+| **Save icon** (top-right corner of a carousel card) | No navigation | Toggles the item's saved state. Since carousel items are foods/lifestyle entries, not recipes, tapping this always shows the "not available for save because it is an ingredient" toast rather than saving — see Saving, above. |
+
+### Bottom tab bar
+
+| Label | Route | What that screen is for |
+|---|---|---|
+| **Plan** | `/app/plan` | The meal planner: a 7-day strip, four recipe slots per day, regenerate/shuffle controls, and a saved-recipes tab. |
+| **Search** | `/app/search` | Food & Nutrient Lookup — one query box, results sectioned into Foods / Recipes / Nutrients / Herbal Supplements. |
+| **Home** | `/app/home` | The hub — one tap to the three sections above, plus the recommendation carousel. |
+| **Choices** | `/app/suggestions` | Best & Worst Choices — the reference section: ranked Dos & Don'ts, food-group detail pages, and top-ranked recipe rails, organized by the user's conditions. |
+| **Profile** | `/app/profile` | Conditions, calorie target, medications, allergies, and dietary preferences — the inputs that drive every recommendation elsewhere in the app. |

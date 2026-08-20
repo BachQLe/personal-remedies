@@ -143,6 +143,96 @@ export async function searchNaturalSourceItems(query, _profile) {
   return foods.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f }));
 }
 
+/**
+ * Unified search across ALL of foods, recipes, nutrients, and herbal
+ * supplements — powers the single "Food & Nutrient Lookup" screen (no mode
+ * switcher; results are sectioned by kind instead of picking a source
+ * up-front). Supersedes the food-vs-natural-sources split that
+ * `searchFoodsAndRecipes` / `searchNaturalSourceItems` (above) used to back
+ * as two separate screens; those two functions stay exported/working since
+ * existing tests still cover them, but this is what SearchScreen calls now.
+ *
+ * Sources:
+ *  - `foods`: `searchFoods` (dictionary; already excludes coarse group 'k' —
+ *    see its doc comment in adapter.js)
+ *  - `recipes`: `getRecipes`, filtered client-side by title substring
+ *    (case-insensitive — /suggest has no query param), same as
+ *    `searchFoodsAndRecipes` above
+ *  - `nutrients` / `herbals`: both come from ONE `searchNaturalSources` call
+ *    (coarse group 'k'), split client-side on the `fineGroup` field
+ *    `normalizeFood` already stamps on every result — 'k1' (Vitamins,
+ *    Minerals & Other) -> nutrients, 'k2' (Herbal Supplements) -> herbals.
+ *    See adapter.js's `searchNaturalSources` doc comment for why no second
+ *    dictionary scan is needed for the split.
+ *
+ * Honesty contract (same binding project rule as `searchFoodsAndRecipes` /
+ * `searchNaturalSourceItems`: an error must never be presented as "no
+ * results"): the three underlying calls (`searchFoods`, `searchNaturalSources`,
+ * `getRecipes`) are fanned out via `Promise.allSettled`. Only when ALL THREE
+ * reject (a genuine outage) does this throw; if only some reject, those
+ * sources degrade to an empty contribution to their section(s) (console
+ * .error'd) while the sections backed by the sources that succeeded still
+ * render normally.
+ * @param {string} query
+ * @param {import('./types.js').Profile} [profile]
+ * @returns {Promise<{
+ *   foods: Array<{ kind: 'food', key: string, food: object }>,
+ *   recipes: Array<{ kind: 'recipe', key: string, recipe: object }>,
+ *   nutrients: Array<{ kind: 'food', key: string, food: object }>,
+ *   herbals: Array<{ kind: 'food', key: string, food: object }>,
+ * }>}
+ */
+export async function searchEverything(query, profile) {
+  const q = (query || '').trim();
+  if (!q) return { foods: [], recipes: [], nutrients: [], herbals: [] };
+
+  const [foodsResult, naturalResult, recipesResult] = await Promise.allSettled([
+    searchFoods(q, profile),
+    searchNaturalSources(q),
+    getRecipes(profile),
+  ]);
+
+  if (
+    foodsResult.status === 'rejected' &&
+    naturalResult.status === 'rejected' &&
+    recipesResult.status === 'rejected'
+  ) {
+    console.error(
+      'searchEverything: all sources failed',
+      foodsResult.reason,
+      naturalResult.reason,
+      recipesResult.reason,
+    );
+    throw foodsResult.reason;
+  }
+
+  if (foodsResult.status === 'rejected') {
+    console.error('searchEverything: searchFoods failed', foodsResult.reason);
+  }
+  if (naturalResult.status === 'rejected') {
+    console.error('searchEverything: searchNaturalSources failed', naturalResult.reason);
+  }
+  if (recipesResult.status === 'rejected') {
+    console.error('searchEverything: getRecipes failed', recipesResult.reason);
+  }
+
+  const foods = foodsResult.status === 'fulfilled' ? foodsResult.value : [];
+  const naturalItems = naturalResult.status === 'fulfilled' ? naturalResult.value : [];
+  const recipes = recipesResult.status === 'fulfilled' ? recipesResult.value.recipes : [];
+
+  const qLower = q.toLowerCase();
+  const matchedRecipes = recipes.filter((r) => (r.title || '').toLowerCase().includes(qLower));
+  const nutrients = naturalItems.filter((f) => f.fineGroup === 'k1');
+  const herbals = naturalItems.filter((f) => f.fineGroup === 'k2');
+
+  return {
+    foods: foods.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f })),
+    recipes: matchedRecipes.map((r) => ({ kind: 'recipe', key: `recipe-${r.id}`, recipe: r })),
+    nutrients: nutrients.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f })),
+    herbals: herbals.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f })),
+  };
+}
+
 // ── Profile / storage helpers ────────────────────────────────────────────────
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));

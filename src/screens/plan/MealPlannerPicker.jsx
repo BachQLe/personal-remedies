@@ -1,7 +1,10 @@
 /**
  * MealPlannerPicker.jsx — full-screen "New meal plan" recipe-picker overlay.
  *
- * Opened by the Plan screen's "New meal plan" FAB. Two tabs (`PillSwitcher`):
+ * Opened by the Plan screen's "New meal plan" FAB (hidden during the
+ * first-run empty state, where the empty-state's own "Build my meal plan"
+ * button is the only CTA — see MealQueueScreen.jsx's `firstRunEmpty`). Two
+ * tabs (`PillSwitcher`):
  * "Best recipes" (ranked candidate pools from `getMealPlanSuggestions`,
  * refreshable via a windowed re-slice — zero extra network) and "Saved
  * recipes" (the user's library, grouped by meal type). Both render through

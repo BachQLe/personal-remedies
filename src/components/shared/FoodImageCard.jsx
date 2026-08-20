@@ -30,6 +30,16 @@
  *                     function-valued `action` is expected to be a
  *                     self-contained, already-labeled element (same
  *                     convention as `saveAction`), so this is ignored then.
+ *   saveActionPosition — 'bottom' (default) or 'top': which corner the
+ *                     `saveAction` overlay sits in. 'top' puts it top-right,
+ *                     the MealprepCarousel/home-screen placement, which keeps
+ *                     the bottom of the card clear for the title block.
+ *                     Callers that also pass `action` (its own top-right
+ *                     overlay) should leave this at 'bottom'.
+ *   dimImage        — darken the photo (brightness 0.75, same as the home
+ *                     screen's carousel cards) so overlaid white text stays
+ *                     legible against bright food photography. Off by
+ *                     default; the gradient alone is enough on small cards.
  *   saveAction      — optional save-button element (renders in bottom-right
  *                     overlay; independent of `action`/`badge`). Supports a
  *                     plain node or a function (same convention as `action`),
@@ -83,6 +93,8 @@ import Icon from './Icon.jsx';
  * @param {() => void} [props.actionOnClick]
  * @param {string} [props.actionLabel]
  * @param {React.ReactNode | (() => React.ReactNode)} [props.saveAction]
+ * @param {'top' | 'bottom'} [props.saveActionPosition]
+ * @param {boolean} [props.dimImage]
  * @param {'lazy' | 'eager'} [props.loading]
  * @param {string} [props.nonFoodIcon] - lucide icon name; renders instead of `image` (see prop doc above)
  */
@@ -104,6 +116,8 @@ export default function FoodImageCard({
   actionOnClick,
   actionLabel,
   saveAction,
+  saveActionPosition = 'bottom',
+  dimImage = false,
   loading = 'lazy',
   nonFoodIcon = null,
 }) {
@@ -151,7 +165,7 @@ export default function FoodImageCard({
         <img
           src={image}
           alt={imageAlt}
-          className="absolute inset-0 w-full h-full object-cover"
+          className={`absolute inset-0 w-full h-full object-cover ${dimImage ? 'brightness-[0.75]' : ''}`}
           loading={loading}
         />
       ) : (
@@ -222,7 +236,7 @@ export default function FoodImageCard({
           be self-contained (e.g. SaveButton), handling its own
           click/keyboard/stopPropagation. */}
       {saveAction && (
-        <div className="absolute bottom-3 right-3 z-10">
+        <div className={`absolute right-3 z-10 ${saveActionPosition === 'top' ? 'top-3' : 'bottom-3'}`}>
           {typeof saveAction === 'function' ? saveAction() : saveAction}
         </div>
       )}

@@ -1,8 +1,7 @@
 /**
  * ProfileScreen — layout (top → bottom):
  *   1. Header zone   — page label + identity block (avatar, name, active conditions)
- *   2. Lower shell   — "Dietary Guidance" button (→ /app/suggestions), then
- *                      an inline editor below it: condition editor (saves on
+ *   2. Lower shell   — an inline editor: condition editor (saves on
  *                      change), macro-goals stub (flagged), and sub-edit rows
  *                      for the other profile fields. Scroll down to reach the
  *                      editor.
@@ -127,7 +126,7 @@ function EditCalorieTarget({ profile, onChange, onClose }) {
     <BottomSheet open onClose={onClose} title="Daily calorie target">
       <div className="flex flex-col gap-4">
         <p className="text-xs text-char-400 font-sans -mt-1">
-          Used to gauge whether your plan has enough — you can change this any time.
+          Used to gauge whether my plan has enough — change it any time.
         </p>
 
         <div className="flex flex-col gap-1.5">

@@ -2,7 +2,7 @@
  * prefetch.js — boot-time / post-onboarding cache warming.
  *
  * Front-loads the same calls the first screens a user lands on (Home,
- * Suggestions/Dietary Guidance, Glance, Natural Sources) would make
+ * Suggestions/Best & Worst Choices, Food & Nutrient Lookup) would make
  * anyway, using the EXISTING adapter/api functions so cache keys and the
  * in-flight de-dupe in nutridigm.js line up exactly with what the screens
  * request. This must never add net-new API spend — it only moves the

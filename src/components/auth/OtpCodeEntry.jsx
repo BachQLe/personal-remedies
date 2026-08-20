@@ -146,7 +146,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
           aria-invalid={!!error}
           aria-describedby={error ? 'otp-code-error' : undefined}
           autoFocus
-          className="w-full text-center tracking-[0.5em] text-[22px] font-sans px-4 py-3 bg-white border border-sand-200 rounded-md text-char-900 placeholder:text-char-300 focus:outline-none focus:border-forest-600 focus:shadow-[0_0_0_3px_rgba(30,71,54,0.22)] transition-[border-color,box-shadow] duration-[120ms] disabled:opacity-60"
+          className="w-full text-center tracking-[0.5em] text-[22px] font-sans px-4 py-3 bg-white border border-sand-200 rounded-md text-char-900 placeholder:text-char-300 focus:outline-none focus:border-char-700 focus:shadow-[0_0_0_3px_rgba(66,61,54,0.22)] transition-[border-color,box-shadow] duration-[120ms] disabled:opacity-60"
           style={{ minHeight: 44 }}
         />
 
@@ -165,7 +165,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
         <button
           type="submit"
           disabled={!isValidCode(code) || verifying}
-          className="w-full bg-forest-700 text-[#F3EFE6] font-sans font-semibold text-[16px] py-3 rounded-[6px] hover:bg-forest-800 disabled:opacity-50 disabled:cursor-not-allowed active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
+          className="w-full bg-char-900 text-[#F3EFE6] font-sans font-semibold text-[16px] py-3 rounded-[6px] hover:bg-char-700 disabled:opacity-50 disabled:cursor-not-allowed active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
           style={{ minHeight: 44 }}
         >
           {verifying ? 'Verifying…' : 'Verify code'}
@@ -178,7 +178,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
           onClick={handleResend}
           disabled={!resendReady || resending}
           aria-label={resendReady ? 'Resend code' : `Resend code available in ${secondsLeft} seconds`}
-          className="font-sans text-[14px] font-semibold text-forest-700 hover:text-forest-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-[120ms]"
+          className="font-sans text-[14px] font-semibold text-char-900 hover:text-char-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-[120ms]"
           style={{ minHeight: 44 }}
         >
           {resending ? 'Sending…' : resendReady ? 'Resend code' : `Resend in ${secondsLeft}s`}
@@ -197,7 +197,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
       </div>
 
       {resendNote && !error && (
-        <p role="status" className="font-sans text-[13px] text-forest-700">
+        <p role="status" className="font-sans text-[13px] text-char-700">
           {resendNote}
         </p>
       )}

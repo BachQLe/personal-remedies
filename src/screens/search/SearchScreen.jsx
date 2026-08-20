@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, X } from 'lucide-react';
-import { searchFoodsAndRecipes, searchNaturalSourceItems, buildRecipeDetail } from '../../api/api.js';
+import { searchEverything, buildRecipeDetail, getGroupLabel } from '../../api/api.js';
 import { storage } from '../../api/storage.js';
 import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { getRecentSearches, addRecentSearch } from '../../state/recentSearches.js';
 import Icon from '../../components/shared/Icon.jsx';
-import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
 import DataState from '../../components/shared/DataState.jsx';
@@ -15,39 +13,73 @@ import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import { recipeToSaveItem } from '../../utils/saveGate.js';
 
-// Mode configs — Food Lookup vs Natural Sources. Backdrop colors are the
-// exact hex values behind the `yellow-200`/`blue-200` Tailwind tokens
-// (see tailwind.config.js) so framer-motion can animate between them as
-// real color values instead of instant class swaps. `accentFocusClass` /
-// `spinnerClass` key the input's focus ring and loading spinner to the same
-// hue as the backdrop.
-const MODES = {
-  food: {
-    label: 'Food Lookup',
-    heading: 'Ingredients and Recipes',
-    searchFn: searchFoodsAndRecipes,
-    recentsScope: 'default',
-    backdropColor: '#FFEC88',
-    accentFocusClass: 'focus:border-yellow-500',
-    spinnerClass: 'text-yellow-600',
-    placeholder: 'Enter foods and recipes.',
-  },
-  natural: {
-    label: 'Natural Sources',
-    heading: 'Look up natural sources and supplements',
-    searchFn: searchNaturalSourceItems,
-    recentsScope: 'natural',
-    backdropColor: '#BBCEFF',
-    accentFocusClass: 'focus:border-blue-500',
-    spinnerClass: 'text-blue-600',
-    placeholder: 'Enter natural sources and supplements.',
-  },
-};
+// Single "Food & Nutrient Lookup" search surface — no mode switcher. One
+// query fans out to `searchEverything` (foods, recipes, and the nutrients/
+// herbal-supplements split of the old "Natural Sources" screen, which has
+// been folded in here), and the results render as up to four labelled
+// sections (Foods / Recipes / Nutrients / Herbal Supplements), each omitted
+// entirely when it has no rows. `BACKDROP_COLOR` is the shared green page
+// background every screen uses (tailwind.config.js's `forest-300`);
+// `ACCENT_FOCUS_CLASS`/`SPINNER_CLASS` keep the old "Food Lookup" yellow
+// accents (`yellow-500`/`yellow-600`) on the white input — kept as module
+// constants (not a MODES table) since there's only one mode now.
+const HEADING = 'Food & Nutrient Lookup';
+const PLACEHOLDER = 'Search foods, recipes, nutrients…';
+const BACKDROP_COLOR = '#C8E87A';
+const ACCENT_FOCUS_CLASS = 'focus:border-yellow-500';
+const SPINNER_CLASS = 'text-yellow-600';
 
-const MODE_OPTIONS = [
-  { key: 'food', label: MODES.food.label },
-  { key: 'natural', label: MODES.natural.label },
+// Section order + labels for `searchEverything`'s sectioned result shape
+// (`{ foods, recipes, nutrients, herbals }`). Rendered in this order, each
+// section skipped entirely when its array is empty.
+const SECTIONS = [
+  { key: 'foods', label: 'Foods' },
+  { key: 'recipes', label: 'Recipes' },
+  { key: 'nutrients', label: 'Nutrients' },
+  { key: 'herbals', label: 'Herbal Supplements' },
 ];
+
+const EMPTY_SECTIONS = { foods: [], recipes: [], nutrients: [], herbals: [] };
+
+/**
+ * `useAsyncData`'s default emptiness check (loadState.js#defaultIsEmpty)
+ * treats any non-array object with own keys as non-empty — but the sectioned
+ * shape here ALWAYS has all four keys, even when every array inside is
+ * empty. Without this override, a genuine zero-result search would render
+ * as 'success' with nothing to show instead of the 'empty' DataState branch.
+ * @param {typeof EMPTY_SECTIONS} data
+ * @returns {boolean}
+ */
+function isSectionsEmpty(data) {
+  if (!data) return true;
+  return SECTIONS.every(({ key }) => !data[key] || data[key].length === 0);
+}
+
+/**
+ * Resolve each food-kind result's real food-group label (e.g. "Vegetables",
+ * "Herbal Supplements") and stamp it on as `groupLabel`, mutating the
+ * sections in place. `normalizeFood` (adapter.js) never sets a `category`
+ * field, so without this every food row would render the FoodDetailCard-era
+ * placeholder subtitle "Ingredient" regardless of what the food actually is.
+ * `getGroupLabel` reads the bundled, already-cached /foodgroups dictionary
+ * (localTables.js#getGroupTable via adapter.js) — zero network — so this is
+ * cheap; codes are deduped first so a results page with many foods from the
+ * same group only resolves that group's label once.
+ * @param {typeof EMPTY_SECTIONS} sections
+ * @returns {Promise<typeof EMPTY_SECTIONS>}
+ */
+async function attachFoodGroupLabels(sections) {
+  const foodItems = [...sections.foods, ...sections.nutrients, ...sections.herbals].map(
+    (r) => r.food,
+  );
+  const codes = [...new Set(foodItems.map((f) => f.fineGroup || f.group))];
+  const labelEntries = await Promise.all(codes.map(async (code) => [code, await getGroupLabel(code)]));
+  const labelByCode = new Map(labelEntries);
+  for (const food of foodItems) {
+    food.groupLabel = labelByCode.get(food.fineGroup || food.group);
+  }
+  return sections;
+}
 
 function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked }) {
   const isRecipe = kind === 'recipe';
@@ -91,9 +123,6 @@ function getProfile() {
 }
 
 export default function SearchScreen({ active, onClose }) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const urlMode = searchParams.get('mode') === 'natural' ? 'natural' : 'food';
-  const [mode, setMode] = useState(urlMode);
   const [query, setQuery] = useState('');
   // The query a fetch actually runs against — updated 300ms after the last
   // keystroke (handleChange's debounce), or immediately on Enter/a
@@ -115,33 +144,26 @@ export default function SearchScreen({ active, onClose }) {
   const profile = useRef(getProfile());
   const { show } = useSnackbar();
 
-  const {
-    heading,
-    searchFn,
-    recentsScope,
-    backdropColor,
-    accentFocusClass,
-    spinnerClass,
-    placeholder,
-  } = MODES[mode];
-
   const hasQuery = query.trim().length > 0;
   const trimmedCommitted = committedQuery.trim();
 
-  const fetcher = useCallback(() => {
-    if (!trimmedCommitted) return Promise.resolve([]);
-    return searchFn(trimmedCommitted, profile.current);
-  }, [trimmedCommitted, searchFn]);
+  const fetcher = useCallback(async () => {
+    if (!trimmedCommitted) return EMPTY_SECTIONS;
+    const sections = await searchEverything(trimmedCommitted, profile.current);
+    return attachFoodGroupLabels(sections);
+  }, [trimmedCommitted]);
 
-  const { status, data, retry } = useAsyncData(fetcher, [trimmedCommitted, mode], {});
-  const results = data ?? [];
+  const { status, data, retry } = useAsyncData(fetcher, [trimmedCommitted], {
+    isEmpty: isSectionsEmpty,
+  });
+  const results = data ?? EMPTY_SECTIONS;
 
   // Derived straight from storage on every render rather than mirrored into
   // state — addRecentSearch() writes synchronously, so by the time any
   // re-render happens (triggered by the same handler's other setState calls)
   // this already reflects the latest list. Avoids a setState-in-effect just
   // to keep a copy in sync.
-  const recents = active ? getRecentSearches(recentsScope) : [];
+  const recents = active ? getRecentSearches() : [];
 
   useEffect(() => {
     if (!active) return undefined;
@@ -177,47 +199,9 @@ export default function SearchScreen({ active, onClose }) {
     }, 300);
   };
 
-  // Switching modes changes searchFn/recentsScope, so any in-flight query and
-  // its results (scoped to the previous mode) are stale — clear them rather
-  // than showing e.g. recipe results under the Natural Sources searchFn.
-  const resetForModeChange = (nextMode) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    setMode(nextMode);
-    setQuery('');
-    setCommittedQuery('');
-    setDebouncePending(false);
-    setSelectedItem(null);
-  };
-
-  // Pill toggle: local state drives the mode instantly, then the URL is
-  // synced as a side effect (replace, not push) — never a navigation, so it
-  // never remounts this screen or retriggers the open/close animation.
-  const handleModeChange = (nextMode) => {
-    resetForModeChange(nextMode);
-    setSearchParams(nextMode === 'natural' ? { mode: 'natural' } : {}, { replace: true });
-  };
-
-  // Reverse direction: the URL's `mode` param changed out from under us
-  // (e.g. browser back/forward) without the pill being clicked — sync local
-  // mode state to match. Adjusting state during render (guarded by the
-  // equality check, same pattern React recommends for "adjusting state when
-  // a prop changes") rather than in an effect — `mode` catches up to
-  // `urlMode` within the same render pass instead of committing a stale
-  // frame first. Only plain setState here (no ref access, which render-phase
-  // code isn't allowed) — the debounce timer isn't touched here since this
-  // URL-driven path never has one in flight from itself (only the
-  // handler-driven paths above set one).
-  if (urlMode !== mode) {
-    setMode(urlMode);
-    setQuery('');
-    setCommittedQuery('');
-    setDebouncePending(false);
-    setSelectedItem(null);
-  }
-
   const runChip = (term) => {
     setQuery(term);
-    addRecentSearch(term, recentsScope);
+    addRecentSearch(term);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setDebouncePending(false);
     setCommittedQuery(term);
@@ -226,8 +210,8 @@ export default function SearchScreen({ active, onClose }) {
   const commitRecent = useCallback((term) => {
     const t = (term || '').trim();
     if (!t) return;
-    addRecentSearch(t, recentsScope);
-  }, [recentsScope]);
+    addRecentSearch(t);
+  }, []);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -287,8 +271,8 @@ export default function SearchScreen({ active, onClose }) {
             <motion.div
               key="backdrop"
               className="absolute inset-0"
-              initial={{ opacity: 0, backgroundColor: backdropColor }}
-              animate={{ opacity: 1, backgroundColor: backdropColor }}
+              initial={{ opacity: 0, backgroundColor: BACKDROP_COLOR }}
+              animate={{ opacity: 1, backgroundColor: BACKDROP_COLOR }}
               exit={{ opacity: 0 }}
               transition={{ opacity: { duration: 0.25, ease: 'easeOut' }, backgroundColor: { duration: 0.35, ease: 'easeOut' } }}
               onClick={onClose}
@@ -305,12 +289,8 @@ export default function SearchScreen({ active, onClose }) {
                 Search
               </p>
               <h1 className="font-display text-[32px] font-semibold text-blue-950 leading-tight mt-2 flex-none">
-                {heading}
+                {HEADING}
               </h1>
-
-              <div className="mt-4 flex-none pointer-events-auto">
-                <PillSwitcher options={MODE_OPTIONS} value={mode} onChange={handleModeChange} />
-              </div>
 
               <div className="relative mt-4 flex-none pointer-events-auto">
                 <Search size={20} aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-char-400 pointer-events-none" />
@@ -321,15 +301,15 @@ export default function SearchScreen({ active, onClose }) {
                   onChange={(e) => handleChange(e.target.value)}
                   onKeyDown={handleKeyDown}
                   autoFocus
-                  placeholder={placeholder}
+                  placeholder={PLACEHOLDER}
                   className={`w-full pl-12 pr-12 py-4 rounded-xl bg-white border-[1.5px] border-sand-200
                     text-base text-char-900 placeholder:text-char-400 font-sans
                     shadow-[0_2px_8px_rgba(45,36,24,0.06)]
                     transition-all duration-fast ease-ds-out
-                    focus:outline-none ${accentFocusClass} focus:shadow-[0_4px_12px_rgba(45,36,24,0.10)]`}
+                    focus:outline-none ${ACCENT_FOCUS_CLASS} focus:shadow-[0_4px_12px_rgba(45,36,24,0.10)]`}
                 />
                 {searching ? (
-                  <Loader2 size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 ${spinnerClass} animate-spin`} aria-hidden="true" />
+                  <Loader2 size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 ${SPINNER_CLASS} animate-spin`} aria-hidden="true" />
                 ) : query ? (
                   <button
                     onClick={() => handleChange('')}
@@ -352,7 +332,7 @@ export default function SearchScreen({ active, onClose }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.18, ease: 'easeOut' }}
-                        className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-2.5"
+                        className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
                       >
                         {/* Idle-vs-no-results distinction (must survive): this
                             DataState only ever mounts once `hasQuery` is true —
@@ -365,29 +345,42 @@ export default function SearchScreen({ active, onClose }) {
                           emptyBody={`No matches for "${query.trim()}" — try a different term.`}
                           screenName="search results"
                         >
-                          {results.map((item) =>
-                            item.kind === 'food' ? (
-                              <ResultRow
-                                key={item.key}
-                                kind="food"
-                                title={item.food.name}
-                                subtitle={item.food.category || 'Ingredient'}
-                                onClick={() => openFood(item.food)}
-                                saveItem={{ ...item.food, kind: 'food' }}
-                                onSaveBlocked={show}
-                              />
-                            ) : (
-                              <ResultRow
-                                key={item.key}
-                                kind="recipe"
-                                title={item.recipe.title}
-                                subtitle={item.recipe.sourceName}
-                                onClick={() => openRecipe(item.recipe)}
-                                saveItem={recipeToSaveItem(item.recipe)}
-                                onSaveBlocked={show}
-                              />
-                            ),
-                          )}
+                          {SECTIONS.map(({ key, label }) => {
+                            const rows = results[key];
+                            if (!rows || !rows.length) return null;
+                            return (
+                              <div key={key}>
+                                <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
+                                  {label}
+                                </p>
+                                <div className="flex flex-col gap-2.5">
+                                  {rows.map((item) =>
+                                    item.kind === 'food' ? (
+                                      <ResultRow
+                                        key={item.key}
+                                        kind="food"
+                                        title={item.food.name}
+                                        subtitle={item.food.groupLabel || 'Ingredient'}
+                                        onClick={() => openFood(item.food)}
+                                        saveItem={{ ...item.food, kind: 'food' }}
+                                        onSaveBlocked={show}
+                                      />
+                                    ) : (
+                                      <ResultRow
+                                        key={item.key}
+                                        kind="recipe"
+                                        title={item.recipe.title}
+                                        subtitle={item.recipe.sourceName}
+                                        onClick={() => openRecipe(item.recipe)}
+                                        saveItem={recipeToSaveItem(item.recipe)}
+                                        onSaveBlocked={show}
+                                      />
+                                    ),
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </DataState>
                       </motion.div>
                     ) : (

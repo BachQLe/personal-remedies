@@ -49,7 +49,7 @@ export default function SlotSection({
           onClick={() => onShuffle(slot.key)}
           disabled={shuffleDisabled}
           title={allPinned ? 'Everything here is pinned' : undefined}
-          className={`inline-flex items-center gap-1.5 rounded-pill bg-white/40 hover:bg-white/60
+          className={`inline-flex items-center gap-1.5 rounded-pill bg-sand-100 hover:bg-sand-200
             px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
             ${shuffleDisabled ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
         >

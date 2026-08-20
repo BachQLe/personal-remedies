@@ -1,6 +1,6 @@
 /**
  * TopDosTab — ranked Top Dos & Don'ts list, rendered via RankedRow as its
- * own tab within Dietary Guidance. Both directions share adapter.js's cached
+ * own tab within Best & Worst Choices. Both directions share adapter.js's cached
  * /topdoordonts@50 call, so fetching them together here costs at most one
  * API request per direction across the whole app.
  *
@@ -41,7 +41,7 @@ function SkeletonRows() {
   return (
     <div className="flex flex-col gap-2">
       {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-        <div key={i} className="flex items-center gap-3 py-3.5 px-4 rounded-xl bg-white border border-sand-200">
+        <div key={i} className="flex items-center gap-3 py-3.5 px-4 rounded-xl bg-white border border-sand-200 shadow-xs">
           <div className="h-3.5 flex-1 rounded animate-pulse bg-sand-200" />
           <div className="h-3 w-12 rounded animate-pulse bg-sand-200 flex-shrink-0" />
         </div>

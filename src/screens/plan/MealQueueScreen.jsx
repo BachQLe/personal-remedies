@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, BookmarkPlus, ArrowRight, RotateCw, RefreshCw, CalendarPlus, Printer, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/shared/PageHeader.jsx';
-import GlassPanel from '../../components/shared/GlassPanel.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import Snackbar from '../../components/shared/Snackbar.jsx';
@@ -525,16 +524,13 @@ export default function MealQueueScreen() {
         label="Plan"
         title="My Meal Plan"
         className="bg-forest-300 rm-print-hide"
-      >
-        <div className="mt-4 flex items-start gap-3">
-          <div className="flex-1">
-            <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} />
-          </div>
-
-          {/* Print & share (T4C) — plain, ink-friendly week summary; hidden
-              entirely with no plan yet (nothing honest to print/share). */}
-          {plan && (
-            <div className="flex items-center gap-2 shrink-0">
+        right={
+          /* Print & share (T4C) — plain, ink-friendly week summary; lives in
+             the header's top-right corner so it never shares a row with the
+             view switcher or day strip below (both horizontally scrollable).
+             Hidden entirely with no plan yet (nothing honest to print/share). */
+          plan ? (
+            <div className="flex items-center gap-2 shrink-0 -mt-3 -mr-1">
               <button
                 type="button"
                 onClick={handlePrint}
@@ -556,7 +552,11 @@ export default function MealQueueScreen() {
                 <Share2 size={18} aria-hidden="true" />
               </button>
             </div>
-          )}
+          ) : null
+        }
+      >
+        <div className="mt-4">
+          <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} />
         </div>
 
         {view === 'queue' && !firstRunEmpty && (
@@ -566,14 +566,18 @@ export default function MealQueueScreen() {
         )}
       </PageHeader>
 
-      {/* ── Glass panel ──────────────────────────────────────────────────── */}
-      <GlassPanel className="mt-4 rm-print-hide">
+      {/* ── Paper panel ──────────────────────────────────────────────────
+          Same solid white container SuggestionsScreen (Best & Worst Choices)
+          and Home use under their headers: full-bleed, rounded top corners
+          only, own background + inner padding, soft upward shadow lifting it
+          off the green page. Its pb-28 both clears the floating TabBar and
+          paints paper behind it (appshell-cream-fix). ─────────────────── */}
+      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-8 mt-4 rm-print-hide">
         {view === 'queue' ? (
           firstRunEmpty ? (
             <EmptyState
               icon="calendar"
               title="No meal plan yet"
-              body="Pick recipes you like and we'll build your week around them — nothing gets added automatically."
               action={
                 <div className="flex flex-col items-center gap-3">
                   <button
@@ -583,8 +587,12 @@ export default function MealQueueScreen() {
                       hover:bg-blue-900 active:scale-[0.99] transition-all duration-fast"
                   >
                     <CalendarPlus size={16} aria-hidden="true" />
-                    Build your meal plan
+                    Build my meal plan
                   </button>
+
+                  <p className="text-xs text-char-500 font-sans max-w-[260px] text-center leading-snug">
+                    Pick recipes you like and we'll build your week around them — nothing gets added automatically.
+                  </p>
 
                   {library.length > 0 ? (
                     <button
@@ -598,7 +606,7 @@ export default function MealQueueScreen() {
                   ) : (
                     <div className="flex flex-col items-center gap-1.5">
                       <p className="text-xs text-char-500 font-sans max-w-[260px] text-center leading-snug">
-                        Save recipes you like, then build a plan from them.
+                        Save recipes you like and we'll build a plan around them.
                       </p>
                       <button
                         onClick={() => navigate('/app/recipes')}
@@ -622,7 +630,7 @@ export default function MealQueueScreen() {
                 <button
                   onClick={handleRegenerateDay}
                   disabled={showGhost || regeneratingDay}
-                  className={`shrink-0 inline-flex items-center gap-1.5 rounded-pill bg-white/40 hover:bg-white/60
+                  className={`shrink-0 inline-flex items-center gap-1.5 rounded-pill bg-sand-100 hover:bg-sand-200
                     px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
                     ${showGhost || regeneratingDay ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
                 >
@@ -736,8 +744,8 @@ export default function MealQueueScreen() {
                   actionIcon={plusIcon}
                   onAction={handleAddToPlan}
                   onBlocked={(msg) => showSnackbar(msg)}
-                  emptyMessage="Your saved recipes list is empty — save foods and recipes from Food Lookup."
-                  emptyAction={{ label: 'Food Lookup', onClick: () => navigate('/app/search') }}
+                  emptyMessage="No saved recipes yet — save recipes as you browse."
+                  emptyAction={{ label: 'Browse recipes', onClick: () => navigate('/app/recipes') }}
                 />
 
                 {/* See more / see less */}
@@ -772,23 +780,30 @@ export default function MealQueueScreen() {
             )}
           </section>
         )}
-      </GlassPanel>
+      </div>
 
-      {/* ── New meal plan FAB — always visible on this screen, opens the
-          recipe-picker overlay. Bottom offset mirrors the Snackbar's so it
-          clears the navbar. `data-print-hide`: a plain UI control, not
-          content — never belongs on a printed page. ────────────────────── */}
-      <button
-        onClick={() => setPickerOpen(true)}
-        data-print-hide
-        className="fixed right-5 bottom-[88px] z-50 inline-flex items-center gap-2
-          rounded-pill bg-blue-950 text-white px-4 py-3 shadow-lg
-          font-sans text-sm font-semibold transition-all duration-fast
-          hover:bg-blue-900 active:scale-95"
-      >
-        <CalendarPlus size={16} aria-hidden="true" />
-        New meal plan
-      </button>
+      {/* ── New meal plan FAB — opens the recipe-picker overlay. Hidden during
+          the first-run empty state (`firstRunEmpty`), where the empty-state's
+          own "Build my meal plan" button is the only CTA — a first-time user
+          would otherwise see two buttons doing the identical
+          `setPickerOpen(true)`. Visible everywhere else a plan already
+          exists, where "New meal plan" correctly means "replace the current
+          one". Bottom offset mirrors the Snackbar's so it clears the navbar.
+          `data-print-hide`: a plain UI control, not content — never belongs
+          on a printed page. ─────────────────────────────────────────────── */}
+      {!firstRunEmpty && (
+        <button
+          onClick={() => setPickerOpen(true)}
+          data-print-hide
+          className="fixed right-5 bottom-[88px] z-50 inline-flex items-center gap-2
+            rounded-pill bg-blue-950 text-white px-4 py-3 shadow-lg
+            font-sans text-sm font-semibold transition-all duration-fast
+            hover:bg-blue-900 active:scale-95"
+        >
+          <CalendarPlus size={16} aria-hidden="true" />
+          New meal plan
+        </button>
+      )}
 
       {/* ── Snackbar ─────────────────────────────────────────────────────── */}
       <div data-print-hide>
@@ -836,7 +851,7 @@ export default function MealQueueScreen() {
       <section className="plan-print-view" aria-hidden="true">
         {printModel && (
           <>
-            <h1 className="plan-print-title">Remedi Meal Plan</h1>
+            <h1 className="plan-print-title">My Remedi Meal Plan</h1>
             {printModel.rangeLabel && (
               <p className="plan-print-range">{printModel.rangeLabel}</p>
             )}

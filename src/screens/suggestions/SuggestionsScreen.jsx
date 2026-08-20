@@ -7,7 +7,6 @@ import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
-import GlassPanel from '../../components/shared/GlassPanel.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import BestRecipesRails from '../../components/shared/BestRecipesRails.jsx';
 import DataState from '../../components/shared/DataState.jsx';
@@ -18,11 +17,6 @@ import TopDosTab from './TopDosTab.jsx';
 import GroupsTab from './GroupsTab.jsx';
 
 // ── Constants ────────────────────────────────────────────────────────────────
-
-// All three tabs (Top Dos & Don'ts, Food Groups, Best Recipes) share this
-// lavender-200 page background — one shade more saturated than the
-// lavender-100 tone used on the Home screen's Dietary Guidance tile.
-const LAVENDER_BG_COLOR = '#DCC8F0';
 
 // Screen-level title + description per tab, crossfaded in the shared
 // PageHeader (replaces the per-tab <h1> each tab used to render itself).
@@ -63,7 +57,7 @@ function SkeletonRails() {
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="w-[150px] shrink-0 rounded-xl bg-sand-200 animate-pulse"
+                className="w-[225px] shrink-0 rounded-xl bg-sand-200 animate-pulse"
                 style={{ aspectRatio: '4/5' }}
               />
             ))}
@@ -157,8 +151,15 @@ function BestRecipesTab() {
             <BestRecipesRails
               candidatesBySlot={candidates}
               onSelectCard={openRecipe}
-              edgeFadeClass="bg-lavender-200"
               onSaveBlocked={show}
+              // Browse surface, not a picker: cards run 50% wider than the
+              // planner's, carry no source/tier subline, keep the bookmark
+              // top-right and the title alone at the bottom, and dim the
+              // photo so that white title reads (home-screen card layout).
+              cardWidthClass="w-[225px]"
+              showSubtitle={false}
+              saveAtTop
+              dimImages
             />
           </div>
         </DataState>
@@ -211,10 +212,10 @@ export default function SuggestionsScreen() {
   return (
     // -mb-28 cancels the AppShell main's pb-28 navbar reserve so the
     // background reaches behind the floating TabBar (appshell-cream-fix
-    // pattern); GlassPanel's own pb-28 keeps the last row clear of the bar.
-    <div className="flex flex-col -mb-28" style={{ backgroundColor: LAVENDER_BG_COLOR, minHeight: '100dvh' }}>
+    // pattern); the shell's own pb-28 keeps the last row clear of the bar.
+    <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
 
-      <PageHeader label="Guidance" className="pb-3">
+      <PageHeader label="Best & Worst Choices" className="pb-6">
         {/* Title crossfade between tabs — min-height keeps the slider from
             jumping while the title swaps. */}
         <div className="min-h-[44px]">
@@ -231,15 +232,23 @@ export default function SuggestionsScreen() {
             </motion.div>
           </AnimatePresence>
         </div>
-
-        {/* Tab switcher — shared PillSwitcher slider (same as Search). */}
-        <div className="mt-3">
-          <PillSwitcher options={TAB_OPTIONS} value={activeTab} onChange={setActiveTab} />
-        </div>
       </PageHeader>
 
-      {/* Tab content — glass panel bleeds behind the navbar (appshell-cream-fix) */}
-      <GlassPanel>
+      {/* Tab content — solid paper shell, the same container HomeScreen uses
+          under its header: full-bleed (no side inset), rounded top corners
+          only, own background + inner padding, and a soft upward shadow that
+          lifts it off the green page. Its pb-28 both clears the floating
+          TabBar and paints paper behind it (appshell-cream-fix). Shared by all
+          three tabs so the panel doesn't change shape when you switch. */}
+      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col">
+        {/* Tab switcher — shared PillSwitcher slider (same as Search). Lives
+            inside the shell rather than the header so the paper container
+            wraps the tab strip too, and the strip stays put while only the
+            tab body below it crossfades. */}
+        <div className="mb-4">
+          <PillSwitcher options={TAB_OPTIONS} value={activeTab} onChange={setActiveTab} />
+        </div>
+
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -256,7 +265,7 @@ export default function SuggestionsScreen() {
             )}
           </motion.div>
         </AnimatePresence>
-      </GlassPanel>
+      </div>
 
       {/* Food detail card (self-loads facts + assessment from the id/name) */}
       {selectedFood && (

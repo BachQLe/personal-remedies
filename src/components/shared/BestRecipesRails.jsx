@@ -40,6 +40,17 @@ import { PLAN_SLOTS } from '../../api/config.js';
  * @param {(message: string) => void} [props.onSaveBlocked] - forwarded to
  *   every card's `SaveButton`; the consuming screen routes this into its own
  *   snackbar.
+ * @param {string} [props.cardWidthClass] - Tailwind width for each card in
+ *   the rail (default `w-[150px]`). The Best Recipes tab runs wider cards
+ *   since it's a browse surface, not a compact picker.
+ * @param {boolean} [props.showSubtitle] - render the card's secondary line
+ *   (source name / tier) under its title. On by default.
+ * @param {boolean} [props.saveAtTop] - put the save bookmark in the card's
+ *   top-right instead of bottom-right, leaving the bottom to the title (the
+ *   home screen's card layout). Ignore when `showAdd` is on — the "+" toggle
+ *   already owns that corner.
+ * @param {boolean} [props.dimImages] - darken card photos so overlaid white
+ *   text stays legible (home-screen brightness).
  */
 export default function BestRecipesRails({
   candidatesBySlot,
@@ -51,6 +62,10 @@ export default function BestRecipesRails({
   showScrollbar = false,
   onSeeMore,
   onSaveBlocked,
+  cardWidthClass = 'w-[150px]',
+  showSubtitle = true,
+  saveAtTop = false,
+  dimImages = false,
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -94,17 +109,19 @@ export default function BestRecipesRails({
                     const isSelected = showAdd && selectedIds?.has(item.id);
 
                     return (
-                      <div key={item.id} className="snap-start shrink-0 w-[150px]" style={{ aspectRatio: '4/5' }}>
+                      <div key={item.id} className={`snap-start shrink-0 ${cardWidthClass}`} style={{ aspectRatio: '4/5' }}>
                         <FoodImageCard
                           id={item.id}
                           mealTag={displayTagForItem(item, slot.key)}
                           image={item.image}
                           title={item.name}
-                          subtitle={item.sourceName || item.tier || undefined}
+                          subtitle={showSubtitle ? (item.sourceName || item.tier || undefined) : undefined}
                           numericId={item.numericId}
                           onClick={() => onSelectCard?.(item)}
                           className="w-full h-full"
                           saveAction={() => <SaveButton item={item} onBlocked={onSaveBlocked} />}
+                          saveActionPosition={saveAtTop && !showAdd ? 'top' : 'bottom'}
+                          dimImage={dimImages}
                           action={
                             showAdd
                               ? () => (
