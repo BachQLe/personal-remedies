@@ -28,11 +28,9 @@ import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import TiltCarousel from '../../components/shared/TiltCarousel.jsx';
-import SaveButton from '../../components/shared/SaveButton.jsx';
 import DataState from '../../components/shared/DataState.jsx';
 import Skeleton from '../../components/shared/Skeleton.jsx';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
-import { useSnackbar } from '../../context/SnackbarContext.jsx';
 
 function getProfile() {
   const saved = storage.get('profile', null);
@@ -40,7 +38,7 @@ function getProfile() {
   return { conditions: DEFAULT_DEV_CONDITIONS };
 }
 
-function CarouselCard({ card, onClick, onSaveBlocked }) {
+function CarouselCard({ card, onClick }) {
   const [imgError, setImgError] = useState(false);
   return (
     <button
@@ -49,9 +47,6 @@ function CarouselCard({ card, onClick, onSaveBlocked }) {
         transition-all duration-base ease-ds-out
         hover:-translate-y-[2px] active:translate-y-[1px] active:scale-[0.99]"
     >
-      <div className="absolute top-3 right-3 z-10">
-        <SaveButton item={card} onBlocked={onSaveBlocked} />
-      </div>
       {!imgError && card.image && !card.isLifestyle ? (
         <img
           src={card.image}
@@ -96,7 +91,6 @@ export default function MealprepCarousel() {
   const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState(null);
   const profile = useRef(getProfile());
-  const { show } = useSnackbar();
 
   const fetcher = useCallback(
     () =>
@@ -156,7 +150,6 @@ export default function MealprepCarousel() {
                   <CarouselCard
                     key={i}
                     card={card}
-                    onSaveBlocked={show}
                     onClick={() => {
                       // Open immediately with minimal data; enrich async
                       setSelectedItem({

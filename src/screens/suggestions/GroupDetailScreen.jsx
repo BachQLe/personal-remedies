@@ -16,7 +16,7 @@ import { COARSE_GROUP_LABELS } from '../../api/config.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import GlassPanel from '../../components/shared/GlassPanel.jsx';
-import { BackArrow } from '../../components/shared/Icon.jsx';
+import BackButton from '../../components/shared/BackButton.jsx';
 import CategoryDetailPanel from './CategoryDetailPanel.jsx';
 import { CATEGORY_GRID_GROUPS } from './GroupsTab.jsx';
 
@@ -53,13 +53,7 @@ export default function GroupDetailScreen() {
     <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
       <PageHeader label="Best & Worst Choices" className="pb-3">
         <div className="flex items-center gap-3 mt-3">
-          <button
-            onClick={() => navigate('/app/suggestions?tab=groups')}
-            className="tap-target w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-colors duration-fast hover:bg-sand-100 flex-shrink-0"
-            aria-label="Go back"
-          >
-            <BackArrow aria-hidden="true" />
-          </button>
+          <BackButton onClick={() => navigate('/app/suggestions?tab=groups')} />
           <h1 className="font-display text-[24px] font-semibold text-blue-950 leading-tight truncate">
             {groupLabel}
           </h1>

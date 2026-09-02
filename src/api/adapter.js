@@ -258,8 +258,12 @@ let _fineGroupLabelsByCoarseCache = null;
  *
  * Bucketing is a plain `foodGroupID[0]` prefix match — the excluded fine
  * codes ('x', 'j1', 'l', see `EXCLUDED_FINE_GROUPS`) never prefix-match the
- * 9 UI grid letters (b,c,d,e,f,g,h,i,k), so no exclusion filtering is needed
- * here.
+ * 9 UI grid letters (b,c,d,e,f,g,h,i,k), so no exclusion filtering for those
+ * is needed here. Separately, a fine-group record whose `foodGroupID` is
+ * IDENTICAL to its own coarse letter (d, e, f as of this writing — flagged
+ * both `isCoarseFoodGroup` and `isFineFoodGroup` with no real subdivisions
+ * underneath) is excluded from its own bucket — see inline comment below —
+ * so those groups resolve to an empty (not self-referential) list.
  * @returns {Promise<Map<string, string[]>>}
  */
 export async function getFineGroupLabelsByCoarse() {
@@ -270,6 +274,14 @@ export async function getFineGroupLabelsByCoarse() {
   for (const g of groups) {
     if (!g.isFineFoodGroup) continue;
     const coarseLetter = g.foodGroupID[0];
+    // A handful of coarse groups (d, e, f as of this writing) are flagged
+    // BOTH isCoarseFoodGroup and isFineFoodGroup on the very same record,
+    // with no real b1/b2-style subdivisions underneath — that record means
+    // "this coarse group has no fine subdivisions," not an actual fine-group
+    // label. Skip it so a group's own coarse record never gets bucketed as
+    // its own fine-group entry (which previously made the tile's title and
+    // its fine-group preview line render the exact same string).
+    if (g.foodGroupID === coarseLetter) continue;
     if (!byCoarse.has(coarseLetter)) byCoarse.set(coarseLetter, []);
     byCoarse.get(coarseLetter).push(g);
   }
@@ -405,7 +417,10 @@ function normalizeTopFood(raw) {
  * fields at all, so `group` is injected from the request (the coarseGroup
  * the caller asked for) rather than read off the raw item. No `tier` is set:
  * list membership (helpful/neutral/harmful) IS the verdict for this
- * endpoint, and the raw `value` must never be exposed.
+ * endpoint, and the raw `value` must never be exposed. `referenceTotal` is
+ * NOT set here either — this function stays synchronous; the caller
+ * (`getCategoryDetailRaw`) attaches it afterward via `fetchReferenceTotal`,
+ * the same async per-condition /references lookup `assessFoodRaw` uses.
  * @param {Object} raw
  * @param {string} coarseGroup - The coarse group requested (injected, not on raw)
  * @returns {import('./types.js').Food}
@@ -664,6 +679,34 @@ export async function searchNaturalSources(query) {
 }
 
 /**
+ * Fetch /references citations for a food across multiple conditions and
+ * reduce them to the honest "study total" both `assessFoodRaw` and
+ * `getCategoryDetailRaw` need: `null` (unknown) if ANY per-condition fetch
+ * errored, otherwise the summed citation count — never a fabricated 0 when
+ * we simply couldn't check. Runs the fetches through Promise.allSettled
+ * (rather than Promise.all + try/catch per item) so one condition's
+ * /references failure can't be silently swallowed into an
+ * indistinguishable-from-"no studies" empty array. Also returns the raw
+ * `refSettlements` so callers that need per-condition citations/
+ * referenceStatus (assessFoodRaw) don't have to re-fetch.
+ * @param {number} foodId
+ * @param {number[]} conditionIds
+ * @returns {Promise<{ refSettlements: PromiseSettledResult<string[]>[], referenceTotal: number|null }>}
+ */
+async function fetchReferenceTotal(foodId, conditionIds) {
+  const refSettlements = await Promise.allSettled(
+    conditionIds.map((conditionId) => cachedReferences(conditionId, foodId))
+  );
+
+  const anyErrored = refSettlements.some((s) => s.status === 'rejected');
+  const referenceTotal = anyErrored
+    ? null
+    : refSettlements.reduce((sum, s) => sum + (s.value || []).length, 0);
+
+  return { refSettlements, referenceTotal };
+}
+
+/**
  * Assess a single food against the user's profile.
  * Calls /goodfor for the reconciled verdict, then /references for each condition.
  * @param {number} foodId
@@ -704,13 +747,10 @@ async function assessFoodRaw(foodId, conditionIds) {
 
   const tier = numericIdToTier(raw.descriptionNumericID);
 
-  // Per-condition reference fetches run through Promise.allSettled (rather
-  // than Promise.all + try/catch per item) so one condition's /references
-  // failure can't be silently swallowed into an indistinguishable-from-
-  // "no studies" empty array — each row gets an honest referenceStatus.
-  const refSettlements = await Promise.allSettled(
-    conditionIds.map((conditionId) => cachedReferences(conditionId, foodId))
-  );
+  // Per-condition reference fetches — see `fetchReferenceTotal` for why this
+  // goes through Promise.allSettled — each row below gets an honest
+  // referenceStatus from the same settlements.
+  const { refSettlements, referenceTotal } = await fetchReferenceTotal(foodId, conditionIds);
 
   const perCondition = await Promise.all(
     conditionIds.map(async (conditionId, index) => {
@@ -741,11 +781,10 @@ async function assessFoodRaw(foodId, conditionIds) {
   food.tier = tier;
   // Null (unknown), not 0, when ANY per-condition reference fetch failed —
   // a failed fetch is indistinguishable from "no studies" otherwise, and we
-  // never want to imply zero support when we simply couldn't check.
-  const anyErrored = perCondition.some((c) => c.referenceStatus === 'error');
-  food.referenceTotal = anyErrored
-    ? null
-    : perCondition.reduce((sum, c) => sum + c.referenceCount, 0);
+  // never want to imply zero support when we simply couldn't check. Computed
+  // by `fetchReferenceTotal` from the same `refSettlements` `perCondition`
+  // above derives its citations/referenceStatus from.
+  food.referenceTotal = referenceTotal;
 
   return {
     food,
@@ -936,6 +975,14 @@ export async function getCategoryDetail(profile, coarseGroup, listType) {
 
 /**
  * Unwrapped getCategoryDetail body.
+ *
+ * Each item's `referenceTotal` is attached here (not in
+ * `normalizeDetailedFood`, which is synchronous) via `fetchReferenceTotal` —
+ * the same per-condition /references fan-out + honest-total reduction
+ * `assessFoodRaw` uses — keyed on the SAME `conditionIds` this raw list was
+ * fetched with. `fetchReferenceTotal` never rejects (its internal
+ * Promise.allSettled absorbs per-condition failures into `null`), so mapping
+ * it directly inside this `Promise.all` is safe.
  * @param {number[]} conditionIds
  * @param {string} coarseGroup
  * @param {'helpful'|'neutral'|'harmful'} listType
@@ -950,7 +997,12 @@ async function getCategoryDetailRaw(conditionIds, coarseGroup, listType) {
   if (!raw || !raw.length) return [];
 
   return Promise.all(
-    raw.map((item) => attachGroupLabel(normalizeDetailedFood(item, coarseGroup)))
+    raw.map(async (item) => {
+      const food = await attachGroupLabel(normalizeDetailedFood(item, coarseGroup));
+      const { referenceTotal } = await fetchReferenceTotal(item.foodItemID, conditionIds);
+      food.referenceTotal = referenceTotal;
+      return food;
+    })
   );
 }
 
@@ -1106,10 +1158,30 @@ function normalizePlanGroup(raw, fineGroup) {
  * orchestrator) and never touches the safety fields below (`tier`/
  * `numericId`), which stay derived from the API's `descriptionNumericID`
  * only, exactly as before.
+ *
+ * `substituteFineGroup` (added for the Substitutions feature): the REAL fine
+ * food group to scope substitute suggestions by — unlike `fineGroup` above
+ * (always the hardcoded recipe group 'l', useless for scoping substitutes),
+ * this is resolved from the recipe's `ingredients` array (built in
+ * `getRecipesRaw` from the C1 overlay's `rawIngredients`/
+ * `ingredientFoodItemIds`, BEFORE this function strips it away): the first
+ * ingredient entry that carries a `foodItemID` is looked up in `itemsMap`
+ * (the same `ensureFoodItems()` item-table Map `flaggedPoolAcrossGroups`
+ * uses) for its real `fineFoodGroup`. `null` when the recipe has no overlay
+ * ingredient data, or that first resolvable ingredient isn't in the
+ * dictionary — an honest degradation (recipes outside the ~150-recipe C1
+ * overlay dataset), never a fabricated fallback. Purely additive: never
+ * read from/written to `tier`/`numericId`.
  * @param {import('./types.js').Recipe} recipe
+ * @param {Map<number, Object>} itemsMap - foodItemID -> merged item row (from `ensureFoodItems`)
  * @returns {import('./types.js').PlanCandidate}
  */
-function recipeToPlanCandidate(recipe) {
+function recipeToPlanCandidate(recipe, itemsMap) {
+  const firstResolvableIngredient = recipe.ingredients?.find((ing) => ing.foodItemID != null);
+  const substituteFineGroup = firstResolvableIngredient
+    ? itemsMap.get(firstResolvableIngredient.foodItemID)?.fineFoodGroup || null
+    : null;
+
   return {
     id: recipe.id,
     name: recipe.title,
@@ -1122,6 +1194,7 @@ function recipeToPlanCandidate(recipe) {
     sourceName: recipe.sourceName,
     sourceUrl: recipe.sourceUrl,
     attribution: recipe.attribution,
+    substituteFineGroup,
   };
 }
 
@@ -1338,7 +1411,7 @@ async function getMealPlanSuggestionsRaw(conditionIds) {
     const slotRecipes = slot.recipeMealType
       ? recipes
           .filter((r) => r.mealType === slot.recipeMealType && TIER_TO_NUMERIC_ID[r.tier] != null)
-          .map(recipeToPlanCandidate)
+          .map((r) => recipeToPlanCandidate(r, itemsMap))
       : [];
 
     if (slot.key === 'beverages') {
@@ -1353,6 +1426,149 @@ async function getMealPlanSuggestionsRaw(conditionIds) {
   const conditionNames = await getConditionNames(conditionIds).catch(() => []);
 
   return { candidates, conditionIds, conditionNames };
+}
+
+// ── Slot substitutions ───────────────────────────────────────────────────────
+
+/**
+ * The fine food group(s) that scope acceptable substitutes for a single Plan
+ * slot item. Returns an ARRAY (not a single group) — even though today it is
+ * always 0 or 1 entries — so a later cross-category fast-follow (a curated
+ * config of alternate groups per item, e.g. "also suggest from group X") is a
+ * change to this one function, not a rewrite of `getSlotSubstitutesRaw`'s
+ * fan-out/grouping below.
+ *
+ * A food-kind item scopes by its own `fineGroup`. A recipe-kind item's own
+ * `fineGroup` is always the hardcoded recipe group 'l' (see
+ * `recipeToPlanCandidate`) — useless for scoping real-food substitutes — so
+ * recipes instead use `substituteFineGroup` (resolved from the recipe's
+ * primary overlay ingredient). Either way, a missing/falsy group yields an
+ * empty array: that item simply gets no substitutes fetched for it (honest
+ * degradation, never fabricated).
+ * @param {import('../state/dailyPlan.js').PlanItem} item
+ * @returns {string[]}
+ */
+function scopingGroupsForItem(item) {
+  const group = item.kind === 'recipe' ? item.substituteFineGroup : item.fineGroup;
+  return group ? [group] : [];
+}
+
+/**
+ * Unwrapped getSlotSubstitutes body — used by withConditionFallback for the
+ * retry. Mirrors `getMealPlanSuggestionsRaw`'s fan-out/failure shape (see
+ * adapter.mealPlanOutage.test.js) but scoped to one slot's current items
+ * instead of all of PLAN_SLOTS.
+ * @param {number[]} conditionIds
+ * @param {import('../state/dailyPlan.js').PlanItem[]} slotItems
+ * @returns {Promise<{ bySourceItem: Array<{ sourceItem: import('../state/dailyPlan.js').PlanItem, substitutes: import('./types.js').PlanCandidate[] }> }>}
+ */
+async function getSlotSubstitutesRaw(conditionIds, slotItems) {
+  const csv = conditionIds.join(',');
+  const existingIds = new Set(slotItems.map((item) => item.id));
+
+  const groupsByItemId = new Map(slotItems.map((item) => [item.id, scopingGroupsForItem(item)]));
+  const uniqueGroups = [...new Set([...groupsByItemId.values()].flat())];
+
+  const settlements = await Promise.allSettled(
+    uniqueGroups.map((group) => cachedSuggest(csv, group))
+  );
+
+  const authFailure = settlements.find((settlement) => {
+    if (settlement.status !== 'rejected') return false;
+    const err = settlement.reason;
+    const isAuthError = err instanceof NutridigmAuthError || err?.name === 'NutridigmAuthError';
+    return isAuthError && err.code === 'NOTAUTHORIZEDHEALTHID';
+  });
+  if (authFailure) {
+    throw authFailure.reason;
+  }
+
+  // Total outage: every group actually fetched rejected — nothing left to be
+  // honestly-empty about (mirrors getMealPlanSuggestionsRaw's allGroupsFailed
+  // handling), so this rethrows rather than resolving to an all-empty
+  // substitutes list ("no results" must never be presented as a real
+  // answer). `uniqueGroups.length > 0` guards the vacuous-true case: a slot
+  // whose every item resolved to no scoping group (e.g. all recipes outside
+  // the C1 overlay) makes zero /suggest calls at all — that's a real,
+  // honestly-empty state, not an outage.
+  const allGroupsFailed = uniqueGroups.length > 0 && settlements.every((s) => s.status === 'rejected');
+  if (allGroupsFailed) {
+    throw settlements[0].reason;
+  }
+
+  /** @type {Map<string, import('./types.js').PlanCandidate[]>} */
+  const substitutesByGroup = new Map();
+  settlements.forEach((settlement, i) => {
+    const group = uniqueGroups[i];
+    if (settlement.status === 'fulfilled') {
+      const candidates = normalizePlanGroup(settlement.value || [], group).filter(
+        (c) => !existingIds.has(c.id)
+      );
+      substitutesByGroup.set(group, candidates);
+    } else {
+      console.error(`getSlotSubstitutes: /suggest failed for fine group "${group}"`, settlement.reason);
+      substitutesByGroup.set(group, []);
+    }
+  });
+
+  const bySourceItem = slotItems.map((item) => {
+    const groups = groupsByItemId.get(item.id) || [];
+    const seen = new Set();
+    const substitutes = [];
+    for (const group of groups) {
+      for (const candidate of substitutesByGroup.get(group) || []) {
+        if (seen.has(candidate.id)) continue;
+        seen.add(candidate.id);
+        substitutes.push(candidate);
+      }
+    }
+    return { sourceItem: item, substitutes };
+  });
+
+  return { bySourceItem };
+}
+
+/**
+ * Get acceptable substitute items/recipes for everything currently in ONE
+ * Plan slot, via /suggest scoped by fine food group — powers the Plan
+ * screen's per-slot "Substitutions" sheet (SubstitutionsSheet.jsx). Grouped
+ * by which source item each substitute stands in for, so a slot holding
+ * multiple recipes (e.g. 3 lunch options) needs only ONE call/sheet covering
+ * all of them, rather than a per-card picker (see SubstitutionsSheet.jsx's
+ * doc for why this is structurally distinct from the deleted SwapSheet).
+ *
+ * Every candidate is pre-filtered through the same safety gate as the Plan
+ * screen itself (`normalizePlanGroup`/`isExcludedItem`, numericId 1-4 only)
+ * before ever reaching the UI, and never suggests an id already present in
+ * `slotItems` (nothing recommends what's already shown).
+ *
+ * Only wired to same-group scoping for now (see `scopingGroupsForItem`) — a
+ * curated cross-category alternate-groups config is a documented fast-follow,
+ * not part of this pass.
+ * @param {import('./types.js').Profile} profile
+ * @param {import('../state/dailyPlan.js').PlanItem[]} slotItems - the slot's
+ *   current items (e.g. `day.slots[slotKey]`)
+ * @returns {Promise<{
+ *   bySourceItem: Array<{ sourceItem: import('../state/dailyPlan.js').PlanItem, substitutes: import('./types.js').PlanCandidate[] }>,
+ *   usedFallback: boolean
+ * }>}
+ */
+export async function getSlotSubstitutes(profile, slotItems) {
+  const items = slotItems || [];
+  const conditionIds = profile?.conditions || [];
+
+  if (!conditionIds.length || !items.length) {
+    return {
+      bySourceItem: items.map((item) => ({ sourceItem: item, substitutes: [] })),
+      usedFallback: false,
+    };
+  }
+
+  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
+    getSlotSubstitutesRaw(ids, items)
+  );
+
+  return { ...result, usedFallback };
 }
 
 /**

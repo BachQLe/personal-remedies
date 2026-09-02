@@ -28,7 +28,7 @@ const TAB_META = {
     title: 'Food Groups',
   },
   recipes: {
-    title: 'Best Recipes',
+    title: 'Recommendations',
   },
 };
 
@@ -141,7 +141,7 @@ function BestRecipesTab() {
         <DataState
           status={status}
           onRetry={retry}
-          screenName="Best Recipes"
+          screenName="Recommendations"
           emptyTitle="No recipes yet"
           emptyBody="We don't have recipes ranked for your conditions right now."
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}

@@ -104,10 +104,22 @@ export function inferSlotKey(item) {
  * PlanItem fields before it goes into a slot — keeps the Supabase
  * `daily_plan` row small and matches dailyPlan.js's `PlanItem` typedef
  * exactly. Drops anything else (e.g. stray fields from older shapes).
+ *
+ * `substituteFineGroup` (additive, Substitutions feature): carried through
+ * unchanged when present on a recipe candidate (see `recipeToPlanCandidate`
+ * in adapter.js) so `getSlotSubstitutes` can scope a persisted recipe's
+ * substitutes correctly later — `undefined` on food candidates and on any
+ * candidate built before this field existed, same as every other optional
+ * field here.
+ *
+ * Exported (unlike the rest of this module's internals) so MealQueueScreen's
+ * "swap a substitute into the plan" handler converts a PlanCandidate the
+ * exact same way every other slot-fill path here does, instead of
+ * duplicating a second, potentially-divergent conversion.
  * @param {Object} candidate
  * @returns {import('../state/dailyPlan.js').PlanItem}
  */
-function toPlanItem(candidate) {
+export function toPlanItem(candidate) {
   return {
     id: candidate.id,
     name: candidate.name,
@@ -118,6 +130,7 @@ function toPlanItem(candidate) {
     numericId: candidate.numericId,
     kind: candidate.kind,
     sourceName: candidate.sourceName,
+    substituteFineGroup: candidate.substituteFineGroup,
   };
 }
 

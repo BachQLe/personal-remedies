@@ -4,7 +4,7 @@
  * Stacked sections (Breakfast → Beverages, `PLAN_SLOTS` order), each a
  * `<MealTypeTag>` + label header over a horizontal snap rail of
  * `FoodImageCard`s. Reused by `MealPlannerPicker.jsx` (the "New meal plan"
- * recipe picker, selectable) and `SuggestionsScreen.jsx`'s Best Recipes tab
+ * recipe picker, selectable) and `SuggestionsScreen.jsx`'s Recommendations tab
  * (read-only) — one carousel implementation, not two hand-rolled ones.
  *
  * Honesty rule: a slot with an empty pool renders a small muted "No options
@@ -41,7 +41,7 @@ import { PLAN_SLOTS } from '../../api/config.js';
  *   every card's `SaveButton`; the consuming screen routes this into its own
  *   snackbar.
  * @param {string} [props.cardWidthClass] - Tailwind width for each card in
- *   the rail (default `w-[150px]`). The Best Recipes tab runs wider cards
+ *   the rail (default `w-[150px]`). The Recommendations tab runs wider cards
  *   since it's a browse surface, not a compact picker.
  * @param {boolean} [props.showSubtitle] - render the card's secondary line
  *   (source name / tier) under its title. On by default.

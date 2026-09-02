@@ -46,6 +46,11 @@ import { storage } from '../api/storage.js';
  * @property {number|null} [numericId] - Raw /goodfor descriptionNumericID (1-7), null if unknown
  * @property {'food'|'recipe'} kind
  * @property {string} [sourceName] - Attribution for recipes, e.g. "Food Network · ..."
+ * @property {string|null} [substituteFineGroup] - Recipe-kind items only: the
+ *   REAL fine food group of the recipe's primary ingredient (resolved from
+ *   the C1 overlay), used to scope `getSlotSubstitutes` — a recipe's own
+ *   `fineGroup` is always the hardcoded recipe group 'l', useless for that.
+ *   `null`/absent when unresolvable (recipe outside the overlay dataset).
  */
 
 /**

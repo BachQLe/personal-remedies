@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shuffle, X, BookmarkPlus } from 'lucide-react';
+import { Shuffle, Repeat, X, BookmarkPlus } from 'lucide-react';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
 import { getIngredientImage } from '../../api/ingredientImages.js';
@@ -13,12 +13,18 @@ function cardImage(item) {
 
 /**
  * SlotSection — one meal-plan slot (Breakfast/Lunch/Dinner/Snacks/Beverages)
- * for a SINGLE day: header (label + Shuffle) and a 2-col FoodImageCard grid,
- * or a dashed-border empty state when the slot has no items.
+ * for a SINGLE day: header (label + Shuffle + Substitutions) and a 2-col
+ * FoodImageCard grid, or a dashed-border empty state when the slot has no
+ * items.
  *
  * Each card carries a meal-type corner tag (the slot IS its meal type) and
  * two circular actions: Remove (drop from the plan, with Undo upstream, top
  * corner) and Save (bookmark to the user's library, bottom corner).
+ *
+ * The Substitutions pill is a per-SLOT affordance (one trigger covering
+ * every item in the slot), not a per-card one — see SubstitutionsSheet.jsx's
+ * doc for why that distinction matters (it's what keeps this feature
+ * structurally distinct from the deleted SwapSheet).
  */
 export default function SlotSection({
   slot,
@@ -31,12 +37,14 @@ export default function SlotSection({
   onShuffle,
   onSelect,
   onRemove,
+  onOpenSubstitutions,
   ghost,
   shuffling,
   onSaveBlocked,
 }) {
   const allPinned = items.length > 0 && items.every((item) => pinnedIds?.includes(item.id));
   const shuffleDisabled = ghost || items.length === 0 || shuffling || allPinned;
+  const substitutionsDisabled = ghost || items.length === 0;
 
   return (
     <section className={ghost ? 'rm-ghost' : ''}>
@@ -45,17 +53,30 @@ export default function SlotSection({
           {slot.label}
         </p>
 
-        <button
-          onClick={() => onShuffle(slot.key)}
-          disabled={shuffleDisabled}
-          title={allPinned ? 'Everything here is pinned' : undefined}
-          className={`inline-flex items-center gap-1.5 rounded-pill bg-sand-100 hover:bg-sand-200
-            px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
-            ${shuffleDisabled ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
-        >
-          <Shuffle size={14} className={shuffling ? 'animate-spin' : ''} aria-hidden="true" />
-          Shuffle
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onOpenSubstitutions(slot.key)}
+            disabled={substitutionsDisabled}
+            className={`inline-flex items-center gap-1.5 rounded-pill bg-sand-100 hover:bg-sand-200
+              px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
+              ${substitutionsDisabled ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
+          >
+            <Repeat size={14} aria-hidden="true" />
+            Substitutions
+          </button>
+
+          <button
+            onClick={() => onShuffle(slot.key)}
+            disabled={shuffleDisabled}
+            title={allPinned ? 'Everything here is pinned' : undefined}
+            className={`inline-flex items-center gap-1.5 rounded-pill bg-sand-100 hover:bg-sand-200
+              px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
+              ${shuffleDisabled ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
+          >
+            <Shuffle size={14} className={shuffling ? 'animate-spin' : ''} aria-hidden="true" />
+            Shuffle
+          </button>
+        </div>
       </div>
 
       {items.length === 0 ? (

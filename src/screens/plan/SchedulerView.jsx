@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check } from 'lucide-react';
 import { nextSevenDays } from './planDates.js';
-import { estimateDayTotals } from '../../data/nutritionEstimates.js';
+import { resolveDayTotals } from '../../api/nutrition.js';
 import { markEaten, unmarkEaten } from '../../state/dailyPlan.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import { PLAN_SLOTS } from '../../api/config.js';
@@ -34,7 +34,7 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
         const eaten = dayState?.eaten ?? [];
         const allItems = PLAN_SLOTS.flatMap((slot) => slots[slot.key] ?? []);
         const expanded = expandedKey === day.key;
-        const totals = estimateDayTotals(allItems);
+        const totals = resolveDayTotals(allItems);
 
         return (
           <div key={day.key}>

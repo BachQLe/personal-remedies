@@ -82,6 +82,9 @@ async function attachFoodGroupLabels(sections) {
 }
 
 function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked }) {
+  // `saveItem` is opt-in — only recipe rows carry one (they're the only
+  // saveable kind here; a plain food/nutrient/herbal result has nothing to
+  // save, so passing a SaveButton for it would always render as blocked).
   const isRecipe = kind === 'recipe';
   return (
     <motion.button
@@ -103,7 +106,9 @@ function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked }) 
         {subtitle && <p className="text-xs text-char-500 mt-0.5 truncate">{subtitle}</p>}
       </div>
 
-      <SaveButton item={saveItem} onBlocked={onSaveBlocked} className="flex-shrink-0" />
+      {saveItem && (
+        <SaveButton item={saveItem} onBlocked={onSaveBlocked} className="flex-shrink-0" />
+      )}
     </motion.button>
   );
 }
@@ -362,8 +367,6 @@ export default function SearchScreen({ active, onClose }) {
                                         title={item.food.name}
                                         subtitle={item.food.groupLabel || 'Ingredient'}
                                         onClick={() => openFood(item.food)}
-                                        saveItem={{ ...item.food, kind: 'food' }}
-                                        onSaveBlocked={show}
                                       />
                                     ) : (
                                       <ResultRow

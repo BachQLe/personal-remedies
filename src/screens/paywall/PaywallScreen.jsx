@@ -23,8 +23,9 @@
 import { useNavigate } from 'react-router-dom';
 import { listFeatures } from '../../api/entitlements.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
-import Icon, { BackArrow } from '../../components/shared/Icon.jsx';
+import Icon from '../../components/shared/Icon.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
+import BackButton from '../../components/shared/BackButton.jsx';
 
 export default function PaywallScreen() {
   const navigate = useNavigate();
@@ -43,13 +44,7 @@ export default function PaywallScreen() {
     <div className="min-h-screen -mb-28 bg-forest-300 flex flex-col">
       <PageHeader label="Remedi Plus" className="pb-4">
         <div className="flex items-center gap-3 mt-3">
-          <button
-            onClick={() => navigate('/app/profile')}
-            className="tap-target w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-colors duration-fast hover:bg-sand-100 flex-shrink-0"
-            aria-label="Go back"
-          >
-            <BackArrow aria-hidden="true" />
-          </button>
+          <BackButton onClick={() => navigate('/app/profile')} />
           <h1 className="font-display text-[24px] font-semibold text-blue-950 leading-tight">
             Remedi Plus
           </h1>

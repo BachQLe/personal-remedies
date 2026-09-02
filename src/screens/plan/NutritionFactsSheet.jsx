@@ -10,9 +10,11 @@ import { resolveNutrition } from '../../api/nutrition.js';
  * (Task T3D) resolve through `resolveNutrition` (src/api/nutrition.js)
  * instead, so a real recipe-panel or USDA figure is labeled honestly: no
  * tilde for real per-serving data, an explicit "per 100 g" note when USDA
- * only had a 100 g figure (not a serving), and the existing "~N (estimated)"
- * tilde treatment preserved for stand-in group estimates. An item with no
- * data anywhere still renders "No estimate" — never a fabricated number.
+ * only had a 100 g figure (not a serving), and a "~N kcal · estimated"
+ * tilde-plus-label treatment for stand-in group estimates (the tilde alone
+ * isn't a strong enough cue once real per-item rows exist alongside it). An
+ * item with no data anywhere still renders "No estimate" — never a
+ * fabricated number.
  */
 export default function NutritionFactsSheet({ open, onClose, dayLabel, items }) {
   const list = items ?? [];
@@ -70,7 +72,7 @@ export default function NutritionFactsSheet({ open, onClose, dayLabel, items }) 
                   {resolved ? (
                     <span className="text-char-500 shrink-0">
                       {resolved.estimated
-                        ? `~${resolved.calories} kcal`
+                        ? `~${resolved.calories} kcal · estimated`
                         : resolved.basis === 'per100g'
                           ? `${resolved.calories} kcal per 100 g`
                           : `${resolved.calories} kcal`}

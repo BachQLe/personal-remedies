@@ -39,10 +39,12 @@
  * @property {Tier} [tier] - Assessment tier when assessed (optional)
  * @property {number|null} [referenceTotal] - Total reference count across
  *   conditions. `null` means unknown (at least one condition's /references
- *   fetch failed) — render nothing / a neutral state, NOT "0 studies". Only
- *   set on Foods produced by `assessFood` (via `assessFoodRaw`); absent
- *   elsewhere. See `getCachedRefCount` in adapter.js for the cache-only way
- *   to opportunistically populate this outside of a full assessFood call
+ *   fetch failed) — render nothing / a neutral state, NOT "0 studies". Set
+ *   on Foods produced by `assessFood` (via `assessFoodRaw`) and by
+ *   `getCategoryDetail` (via the shared `fetchReferenceTotal` helper);
+ *   absent on Foods from other paths (e.g. searchFoods' normalizeFood).
+ *   See `getCachedRefCount` in adapter.js for the cache-only way to
+ *   opportunistically populate this outside of a full assessFood call
  *   (e.g. list-view trust signals).
  * @property {string} [notes] - Any advisory notes from the engine
  * @property {number} [rank] - 1-based position in a ranked list. Only set by
@@ -249,6 +251,12 @@
  * @property {string} [attribution] - Source attribution string from the C1
  *   overlay, e.g. "MedlinePlus" — recipes only, present only with a real
  *   overlay match. Distinct from `sourceName` (see Recipe typedef above).
+ * @property {string|null} [substituteFineGroup] - Recipe-kind candidates
+ *   only: the real fine food group of the recipe's primary ingredient
+ *   (resolved via the C1 overlay), used by `getSlotSubstitutes` to scope
+ *   substitutes — recipes' own `fineGroup` above is always the hardcoded 'l'
+ *   recipe group, which can't scope real-food substitutes. `null` when
+ *   unresolvable.
  */
 
 /**

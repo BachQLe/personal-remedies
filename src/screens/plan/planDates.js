@@ -12,7 +12,7 @@ const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 
  * @typedef {Object} PlanDay
  * @property {string} key - LOCAL 'YYYY-MM-DD'
  * @property {string} label - 'Today' | 'Tomorrow' | weekday name
- * @property {string} sublabel - e.g. 'Jul 16'
+ * @property {string} sublabel - e.g. 'Day 1' (relative to today, 1-indexed)
  */
 
 /**
@@ -26,7 +26,7 @@ export function nextSevenDays() {
     date.setDate(date.getDate() + i);
     const key = date.toLocaleDateString('en-CA');
     const label = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : WEEKDAY_LABELS[date.getDay()];
-    const sublabel = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const sublabel = `Day ${i + 1}`;
     days.push({ key, label, sublabel });
   }
   return days;

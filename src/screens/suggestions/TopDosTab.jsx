@@ -23,7 +23,6 @@
 import { useState } from 'react';
 import { getTopDosAndDonts, getCachedRefCount } from '../../api/api.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
-import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
 import DataState from '../../components/shared/DataState.jsx';
@@ -72,7 +71,6 @@ function isBothDirectionsEmpty(data) {
 
 export default function TopDosTab({ onSelectFood }) {
   const [direction, setDirection] = useState('consume');
-  const { show } = useSnackbar();
 
   const { status, data, retry } = useAsyncData(fetchBothDirections, [], {
     isEmpty: isBothDirectionsEmpty,
@@ -128,7 +126,6 @@ export default function TopDosTab({ onSelectFood }) {
                       : null
                   }
                   onSelect={onSelectFood}
-                  onSaveBlocked={show}
                 />
               ))
             )}

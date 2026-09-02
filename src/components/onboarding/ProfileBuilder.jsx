@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { conditionSynonyms } from '../../data/conditionSynonyms';
 import { getConditions } from '../../api/api.js';
 import { getConditionMeta } from '../../utils/conditionMeta.js';
+import { BackArrow } from '../shared/Icon.jsx';
+import BackButton from '../shared/BackButton.jsx';
 
 const chipSpring = { type: 'spring', stiffness: 500, damping: 30, mass: 0.8 };
 // Snappy spring for the card height "opening up".
@@ -43,18 +45,6 @@ function truncate(text, max = 70) {
   const trimmed = text.trim();
   return trimmed.length > max ? trimmed.slice(0, max - 1).trimEnd() + '…' : trimmed;
 }
-
-// Brand back arrow (used everywhere instead of icon-font arrows)
-function BackArrow() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <line x1="7" y1="12" x2="17" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" />
-      <path d="M11 8.5 Q10 12 7 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" fill="none" />
-      <path d="M11 15.5 Q10 12 7 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" fill="none" />
-    </svg>
-  );
-}
-
 
 export default function ProfileBuilder({ profile, onChange, onSubmit, saving, onBack }) {
   const [conditionQuery, setConditionQuery] = useState('');
@@ -139,15 +129,7 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
         className="flex-none px-6 pt-14 pb-4 relative z-10 bg-paper-200 overflow-visible"
       >
         <div className="flex items-center gap-3">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="tap-target w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-colors duration-fast hover:bg-sand-100 flex-shrink-0"
-              aria-label="Go back"
-            >
-              <BackArrow />
-            </button>
-          )}
+          {onBack && <BackButton onClick={onBack} />}
           <h2 className="font-semibold tracking-tight text-[16px] text-char-900 leading-tight" style={{ fontFamily: 'Quantico, sans-serif' }}>
             Build your health profile
           </h2>
@@ -193,7 +175,7 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
             onClick={onBack}
             className="flex-1 text-sm font-medium text-char-500 hover:text-char-700 transition-colors duration-fast font-sans bg-transparent border-none cursor-pointer py-4 min-h-[48px] flex items-center justify-center gap-1"
           >
-            <BackArrow />
+            <BackArrow aria-hidden="true" />
             Back
           </button>
           <motion.button

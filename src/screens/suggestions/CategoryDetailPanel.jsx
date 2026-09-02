@@ -36,7 +36,6 @@
 import { useState, useEffect } from 'react';
 import { getCategoryDetail, getGroupLabel } from '../../api/api.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
-import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
 import DataState from '../../components/shared/DataState.jsx';
@@ -62,7 +61,6 @@ function isItemsEmpty(data) {
 export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp, hideTitle = false, onSelectFood }) {
   const [listType, setListType] = useState('helpful');
   const [groupLabel, setGroupLabel] = useState(groupLabelProp || '');
-  const { show } = useSnackbar();
 
   // Reset per-group UI state when the panel is pointed at a (possibly new)
   // group. Adjusted during render (React's documented escape hatch for
@@ -132,7 +130,6 @@ export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp,
                 food={food}
                 studyCount={food.referenceTotal}
                 onSelect={onSelectFood}
-                onSaveBlocked={show}
               />
             ))}
           </div>

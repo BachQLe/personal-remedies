@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, BookmarkPlus, ArrowRight, RotateCw, RefreshCw, CalendarPlus, Printer, Share2 } from 'lucide-react';
+import { Plus, BookmarkPlus, ArrowRight, RotateCw, RefreshCw, CalendarPlus, Printer, Share2, HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
@@ -14,7 +14,9 @@ import SlotSection from './SlotSection.jsx';
 import DayStrip from './DayStrip.jsx';
 import SchedulerView from './SchedulerView.jsx';
 import NutritionFactsSheet from './NutritionFactsSheet.jsx';
+import HowToUseSheet from './HowToUseSheet.jsx';
 import MealPlannerPicker from './MealPlannerPicker.jsx';
+import SubstitutionsSheet from './SubstitutionsSheet.jsx';
 import { nextSevenDays, todayKey } from './planDates.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import {
@@ -26,6 +28,7 @@ import {
   inferSlotKey,
   buildRecipeDetail,
   generatePlanFromPicks,
+  toPlanItem,
 } from '../../api/api.js';
 import { estimatePlanDayCalories } from '../../api/calorieNeeds.js';
 import { formatWeekPlanText, buildPrintModel } from '../../api/planExport.js';
@@ -155,7 +158,7 @@ function CalorieLine({ slots, need }) {
 
 // ── Cookbook card grid ───────────────────────────────────────────────────────
 
-function CardGrid({ items, actionIcon, onAction, onBlocked, emptyMessage, emptyAction }) {
+function CardGrid({ items, actionIcon, onAction, onSelect, onBlocked, emptyMessage, emptyAction }) {
   if (items.length === 0) {
     return (
       <div className="flex items-start gap-3 px-4 py-4 rounded-xl border border-dashed border-blue-950/30">
@@ -205,6 +208,7 @@ function CardGrid({ items, actionIcon, onAction, onBlocked, emptyMessage, emptyA
                 subtitle={cardSubtitle(item)}
                 mealTag={mealTypeForItem(item)}
                 aspectRatio="4/5"
+                onClick={() => onSelect(item)}
                 action={blocked ? undefined : actionIcon}
                 actionOnClick={blocked ? undefined : () => onAction(item)}
                 actionLabel={blocked ? undefined : `Add ${item.name} to plan`}
@@ -240,6 +244,8 @@ export default function MealQueueScreen() {
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [factsTarget, setFactsTarget] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [howToUseOpen, setHowToUseOpen] = useState(false);
+  const [substitutionsSlot, setSubstitutionsSlot] = useState(null);
   const [buildingFromSaved, setBuildingFromSaved] = useState(false);
   const [snackbar, setSnackbar] = useState(null);
   const snackbarRef = useRef(null);
@@ -410,6 +416,29 @@ export default function MealQueueScreen() {
     showSnackbar('Removed from plan', true, () => insertIntoSlot(dateKey, slotKey, item, idx));
   }, [showSnackbar, activeDay]);
 
+  // Substitutions: swap an acceptable substitute into the currently-open
+  // slot in place of the original item. Composed entirely from the same
+  // removeFromSlot/insertIntoSlot primitives handleRemove already uses above
+  // — never a new mutation path (see SubstitutionsSheet.jsx's doc on why
+  // this must stay distinct from the deleted SwapSheet). `toPlanItem`
+  // (planBuilder.js) is the same PlanCandidate -> PlanItem conversion every
+  // other slot-fill path uses. Undo mirrors handleRemove's Undo pattern
+  // exactly: swap the original back into the same index.
+  const handleSwapSubstitute = useCallback((originalItem, substitute) => {
+    const dateKey = activeDay;
+    const slotKey = substitutionsSlot;
+    if (!slotKey) return;
+
+    const index = removeFromSlot(dateKey, slotKey, originalItem.id);
+    const convertedItem = toPlanItem(substitute);
+    insertIntoSlot(dateKey, slotKey, convertedItem, index);
+
+    showSnackbar(`Swapped in — ${substitute.name}`, true, () => {
+      removeFromSlot(dateKey, slotKey, convertedItem.id);
+      insertIntoSlot(dateKey, slotKey, originalItem, index);
+    });
+  }, [showSnackbar, activeDay, substitutionsSlot]);
+
   // Print & share the whole week (T4C, REMEDI_MASTER_PLAN.md §1.9) — plain,
   // ink-friendly output; FOODS only, never a calorie tally (see
   // planExport.js's header). `printPage()`/`share()` are the only
@@ -525,34 +554,49 @@ export default function MealQueueScreen() {
         title="My Meal Plan"
         className="bg-forest-300 rm-print-hide"
         right={
-          /* Print & share (T4C) — plain, ink-friendly week summary; lives in
-             the header's top-right corner so it never shares a row with the
-             view switcher or day strip below (both horizontally scrollable).
-             Hidden entirely with no plan yet (nothing honest to print/share). */
-          plan ? (
-            <div className="flex items-center gap-2 shrink-0 -mt-3 -mr-1">
-              <button
-                type="button"
-                onClick={handlePrint}
-                aria-label="Print meal plan"
-                className="inline-flex items-center justify-center w-11 h-11 rounded-full
-                  bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
-                  transition-all duration-fast active:scale-95"
-              >
-                <Printer size={18} aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                onClick={handleShare}
-                aria-label="Share meal plan"
-                className="inline-flex items-center justify-center w-11 h-11 rounded-full
-                  bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
-                  transition-all duration-fast active:scale-95"
-              >
-                <Share2 size={18} aria-hidden="true" />
-              </button>
-            </div>
-          ) : null
+          /* Help (always available) + print/share (T4C, plan-gated) — all
+             three live in the header's top-right corner so they never share
+             a row with the view switcher or day strip below (both
+             horizontally scrollable). Print/share stay hidden with no plan
+             yet (nothing honest to print/share); the help icon has no such
+             dependency, since it also documents Cookbook-only controls
+             (Add/Save) that are usable before a plan exists. */
+          <div className="flex items-center gap-2 shrink-0 -mt-3 -mr-1">
+            <button
+              type="button"
+              onClick={() => setHowToUseOpen(true)}
+              aria-label="How to use this screen"
+              className="inline-flex items-center justify-center w-11 h-11 rounded-full
+                bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
+                transition-all duration-fast active:scale-95"
+            >
+              <HelpCircle size={18} aria-hidden="true" />
+            </button>
+            {plan && (
+              <>
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  aria-label="Print meal plan"
+                  className="inline-flex items-center justify-center w-11 h-11 rounded-full
+                    bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
+                    transition-all duration-fast active:scale-95"
+                >
+                  <Printer size={18} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  aria-label="Share meal plan"
+                  className="inline-flex items-center justify-center w-11 h-11 rounded-full
+                    bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
+                    transition-all duration-fast active:scale-95"
+                >
+                  <Share2 size={18} aria-hidden="true" />
+                </button>
+              </>
+            )}
+          </div>
         }
       />
 
@@ -666,6 +710,7 @@ export default function MealQueueScreen() {
                       onSelect={handleSelect}
                       onRemove={handleRemove}
                       onTogglePin={handleTogglePin}
+                      onOpenSubstitutions={setSubstitutionsSlot}
                       ghost={showGhost}
                       shuffling={shufflingSlot === slot.key}
                       onSaveBlocked={showSnackbar}
@@ -674,8 +719,14 @@ export default function MealQueueScreen() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Week-level regenerate — discoverable but not dominant */}
-              <div className="flex justify-center pt-2">
+              {/* Week-level regenerate — discoverable but not dominant.
+                  `pb-16` (on top of the panel's own `pb-28`) lifts this clear
+                  of the fixed "New meal plan" FAB, which floats
+                  bottom-[88px]..~132px above the viewport bottom — without
+                  it, this button's own line lands inside that band and the
+                  FAB (rendered later, z-50) visually sits on top of and
+                  intercepts taps meant for it. */}
+              <div className="flex justify-center pt-2 pb-16">
                 <button
                   onClick={handleRegenerateWeek}
                   disabled={showGhost || regeneratingWeek}
@@ -731,6 +782,7 @@ export default function MealQueueScreen() {
                         items={slotItems}
                         actionIcon={plusIcon}
                         onAction={handleAddToPlan}
+                        onSelect={handleSelect}
                         onBlocked={(msg) => showSnackbar(msg)}
                         emptyMessage=""
                       />
@@ -744,6 +796,7 @@ export default function MealQueueScreen() {
                   items={visibleCookbook}
                   actionIcon={plusIcon}
                   onAction={handleAddToPlan}
+                  onSelect={handleSelect}
                   onBlocked={(msg) => showSnackbar(msg)}
                   emptyMessage="No saved recipes yet — save recipes as you browse."
                   emptyAction={{ label: 'Browse recipes', onClick: () => navigate('/app/recipes') }}
@@ -830,6 +883,14 @@ export default function MealQueueScreen() {
         />
       </div>
 
+      {/* ── How to Use (help) ──────────────────────────────────────────────── */}
+      <div data-print-hide>
+        <HowToUseSheet
+          open={howToUseOpen}
+          onClose={() => setHowToUseOpen(false)}
+        />
+      </div>
+
       {/* ── New meal plan picker overlay ──────────────────────────────────── */}
       <div data-print-hide>
         <MealPlannerPicker
@@ -837,6 +898,19 @@ export default function MealQueueScreen() {
           profile={profile}
           onClose={() => setPickerOpen(false)}
           onGenerated={handlePlanGenerated}
+        />
+      </div>
+
+      {/* ── Substitutions (per-slot, see SlotSection's pill) ──────────────── */}
+      <div data-print-hide>
+        <SubstitutionsSheet
+          open={!!substitutionsSlot}
+          onClose={() => setSubstitutionsSlot(null)}
+          slotLabel={PLAN_SLOTS.find((s) => s.key === substitutionsSlot)?.label ?? ''}
+          sourceItems={daySlots[substitutionsSlot] ?? []}
+          profile={profile}
+          onSelect={handleSelect}
+          onSwap={handleSwapSubstitute}
         />
       </div>
 
