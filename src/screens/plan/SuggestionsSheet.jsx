@@ -1,23 +1,14 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeftRight, ChevronLeft } from 'lucide-react';
-import { Fish, Egg, Apple, Carrot, Wheat, Milk, Cookie, Soup, Sparkles, Pill } from 'lucide-react';
+import { ArrowLeftRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import { getSlotSubstitutes, getGroupLabel } from '../../api/api.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
+import { FINE_GROUP_IMAGES } from '../../assets/food-groups/index.js';
 
 function cardImage(item) {
   return item.image || getIngredientImage(item.name, item.group);
 }
-
-// Coarse-letter icon lookup, keyed the same way GroupsTab.jsx's
-// CATEGORY_GRID_ICONS is (that map isn't exported — src/screens/suggestions/
-// is owned by another agent, so this is a small, deliberate local duplicate
-// rather than reaching into that file). A fine group code's first character
-// is always its coarse group letter (e.g. 'b1' -> 'b', 'c2' -> 'c').
-const GROUP_TILE_ICONS = {
-  b: Fish, c: Egg, d: Apple, e: Carrot, f: Wheat, g: Milk, h: Cookie, i: Soup, j: Sparkles, k: Pill,
-};
 
 /**
  * The fine food group a Plan item's substitutes are scoped by — mirrors
@@ -46,13 +37,15 @@ function scopingGroupFor(item) {
  *
  * What changed (Task 11, per explicit product direction): the picker's
  * SHAPE now matches the website's Suggest screen (`src/screens/suggestions/
- * GroupsTab.jsx`'s `CategoryGrid` tile-grid pattern) instead of a flat
+ * GroupsTab.jsx`'s `CategoryGrid` row-list pattern) instead of a flat
  * "Instead of {name}" card list. Concretely, this is a two-level view:
- *   - Level 1 (default): a grid of tiles, one per fine food group relevant
- *     to this slot (`PLAN_SLOTS[slotKey].fineGroups`, config.js) — same
- *     visual/interaction pattern as GroupsTab's CategoryGrid (tap a tile to
- *     drill in), scoped down from GroupsTab's full 10-coarse-group grid to
- *     just this slot's few fine groups.
+ *   - Level 1 (default): a single-column list of rows, one per fine food
+ *     group relevant to this slot (`PLAN_SLOTS[slotKey].fineGroups`,
+ *     config.js), each fronted by its own true photo (FINE_GROUP_IMAGES,
+ *     src/assets/food-groups) — same visual/interaction pattern as
+ *     GroupsTab's CategoryGrid (tap a row to drill in), scoped down from
+ *     GroupsTab's full 10-coarse-group list to just this slot's few fine
+ *     groups.
  *   - Level 2 (a tile tapped): the substitute cards for that ONE group,
  *     still grouped "Instead of {name}" per current slot item scoped to it.
  * `GroupsTab.jsx`/`GroupDetailScreen.jsx` themselves are NOT reused directly
@@ -193,27 +186,29 @@ export default function SuggestionsSheet({
           <p className="text-xs text-char-500">
             Browse a food group to find acceptable swaps for {slot?.label}, scored against your conditions.
           </p>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="flex flex-col gap-2.5">
             {(slot?.fineGroups ?? []).map((code) => {
-              const Icon = GROUP_TILE_ICONS[code.charAt(0)] ?? Sparkles;
               const label = groupLabels[code] ?? code;
               const count = bucketed.get(code)?.reduce((n, e) => n + e.substitutes.length, 0) ?? 0;
               return (
                 <button
                   key={code}
                   onClick={() => setActiveGroup(code)}
-                  className="flex flex-col items-start gap-2 px-3 py-4 rounded-sm bg-white border border-sand-200 shadow-xs text-left
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left
                     transition-all duration-fast hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
                 >
-                  <div className="w-11 h-11 rounded-lg bg-forest-50 flex items-center justify-center flex-shrink-0">
-                    <Icon size={20} className="text-forest-700" aria-hidden="true" />
-                  </div>
-                  <div className="min-w-0 w-full">
-                    <p className="font-sans text-sm font-semibold text-char-900 leading-snug line-clamp-2">{label}</p>
-                    <p className="text-[11px] text-char-400 font-sans mt-0.5">
+                  <img
+                    src={FINE_GROUP_IMAGES[code]}
+                    alt=""
+                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-sans text-base font-semibold text-char-900 leading-snug">{label}</p>
+                    <p className="text-xs text-char-400 font-sans mt-0.5">
                       {count > 0 ? `${count} suggestion${count === 1 ? '' : 's'}` : 'No suggestions yet'}
                     </p>
                   </div>
+                  <ChevronRight size={16} className="text-char-400 shrink-0" aria-hidden="true" />
                 </button>
               );
             })}

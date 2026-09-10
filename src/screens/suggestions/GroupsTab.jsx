@@ -1,7 +1,12 @@
 /**
- * GroupsTab — food-group picker grid (all 9 coarse food groups). Moved out
+ * GroupsTab — food-group picker list (all 10 coarse food groups). Moved out
  * of SuggestionsScreen.jsx so it can live as its own tab alongside Top Dos &
  * Don'ts and Best Recipes.
+ *
+ * Rendered as a single-column list of full-width rows, one per line rather
+ * than a 2-column grid — per product direction (older-adult users), each row
+ * leads with a real stock photo (COARSE_GROUP_IMAGES, src/assets/food-groups)
+ * instead of a lucide icon, sized for a bigger, easier tap target.
  *
  * Tiles carry no per-profile data — labels come from adapter.js's
  * getGroupLabels/getFineGroupLabelsByCoarse (coarse group name plus a
@@ -10,48 +15,45 @@
  * guidance") notice — labels aren't condition-scored, so
  * withConditionFallback never applies here.
  *
- * On failure the grid still renders using COARSE_GROUP_LABELS with no
+ * On failure the list still renders using COARSE_GROUP_LABELS with no
  * fine-group preview line — a deliberate graceful degrade (T5B: KEPT as-is,
- * not routed through the shared error/Retry state-matrix, since the tile
- * grid stays fully usable without the preview line and forcing a Retry
- * panel here would be a strictly worse experience for a cosmetic-only
- * failure).
+ * not routed through the shared error/Retry state-matrix, since the list
+ * stays fully usable without the preview line and forcing a Retry panel here
+ * would be a strictly worse experience for a cosmetic-only failure).
  *
- * Tapping a tile navigates to that group's own detail route
+ * Tapping a row navigates to that group's own detail route
  * (GroupDetailScreen) rather than expanding a panel inline.
  */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Fish, Egg, Apple, Carrot, Wheat, Milk, Cookie, Soup, Sparkles, Pill,
-} from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { getGroupLabels, getFineGroupLabelsByCoarse } from '../../api/api.js';
 import { COARSE_GROUP_LABELS } from '../../api/config.js';
+import { COARSE_GROUP_IMAGES } from '../../assets/food-groups/index.js';
 
 // ── CategoryGrid ─────────────────────────────────────────────────────────────
-// All 10 coarse food groups as a 2-column grid of tiles — tapping a tile
+// All 10 coarse food groups as a single-column list of rows — tapping a row
 // navigates to /app/suggestions/group/:groupId.
 
 // Shared with GroupDetailScreen for its route-param validation.
 // eslint-disable-next-line react-refresh/only-export-components
 export const CATEGORY_GRID_GROUPS = ['b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'];
 
-const CATEGORY_GRID_ICONS = {
-  b: Fish, c: Egg, d: Apple, e: Carrot, f: Wheat, g: Milk, h: Cookie, i: Soup, j: Sparkles, k: Pill,
-};
-
-// Bespoke skeleton grid — same 2-col tile shape as CategoryGrid, so the
+// Bespoke skeleton list — same row shape as CategoryGrid, so the
 // loading→loaded swap doesn't jump.
 function SkeletonGrid() {
   return (
-    <div className="grid grid-cols-2 gap-2.5">
+    <div className="flex flex-col gap-2.5">
       {CATEGORY_GRID_GROUPS.map((group) => (
         <div
           key={group}
-          className="flex flex-col items-start gap-2 px-3 py-4 rounded-sm bg-white border border-sand-200 shadow-xs"
+          className="flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs"
         >
-          <div className="w-11 h-11 rounded-lg bg-sand-200 animate-pulse" />
-          <div className="h-3.5 w-3/4 rounded bg-sand-200 animate-pulse" />
+          <div className="w-16 h-16 rounded-lg bg-sand-200 animate-pulse flex-shrink-0" />
+          <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+            <div className="h-4 w-1/2 rounded bg-sand-200 animate-pulse" />
+            <div className="h-3 w-3/4 rounded bg-sand-200 animate-pulse" />
+          </div>
         </div>
       ))}
     </div>
@@ -60,27 +62,29 @@ function SkeletonGrid() {
 
 function CategoryGrid({ coarseLabels, fineLabelsByGroup, onOpen }) {
   return (
-    <div className="grid grid-cols-2 gap-2.5">
+    <div className="flex flex-col gap-2.5">
       {CATEGORY_GRID_GROUPS.map((group) => {
-        const Icon = CATEGORY_GRID_ICONS[group];
         const label = coarseLabels[group] ?? COARSE_GROUP_LABELS[group] ?? group;
         const fineLine = (fineLabelsByGroup[group] ?? []).join(' · ');
         return (
           <button
             key={group}
             onClick={() => onOpen(group)}
-            className="flex flex-col items-start gap-2 px-3 py-4 rounded-sm bg-white border border-sand-200 shadow-xs text-left
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left
               transition-all duration-fast hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
           >
-            <div className="w-11 h-11 rounded-lg bg-forest-50 flex items-center justify-center flex-shrink-0">
-              <Icon size={20} className="text-forest-700" aria-hidden="true" />
-            </div>
-            <div className="min-w-0 w-full">
-              <p className="font-sans text-sm font-semibold text-char-900 leading-snug line-clamp-2 min-h-[2.75em]">{label}</p>
+            <img
+              src={COARSE_GROUP_IMAGES[group]}
+              alt=""
+              className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="font-sans text-base font-semibold text-char-900 leading-snug">{label}</p>
               {fineLine && (
-                <p className="text-[11px] text-char-400 font-sans mt-0.5 line-clamp-2">{fineLine}</p>
+                <p className="text-xs text-char-400 font-sans mt-0.5 line-clamp-2">{fineLine}</p>
               )}
             </div>
+            <ChevronRight size={16} className="text-char-400 shrink-0" aria-hidden="true" />
           </button>
         );
       })}
