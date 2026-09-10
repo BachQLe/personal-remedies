@@ -68,6 +68,14 @@ if (!IS_CONFIGURED) {
 export const DEFAULT_DEV_CONDITIONS = [203, 244];
 
 /**
+ * Max items shown per category/direction list on the Suggestions screens —
+ * Top Dos & Don'ts (per direction) and Food Groups' category detail (per
+ * Eat/Avoid list). A single named constant so every list-capping call site
+ * stays in sync rather than hand-rolling its own magic number.
+ */
+export const MAX_RECOMMENDATIONS_PER_CATEGORY = 20;
+
+/**
  * Fine food groups to exclude from food lists (non-food / lifestyle items).
  *
  * Filtering by FINE group (not coarse) matters: real foods like Taro leaves
@@ -100,6 +108,7 @@ export const COARSE_GROUP_LABELS = {
   g: 'Dairy, Fats & Oils',
   h: 'Desserts, Snacks & Beverages',
   i: 'Herbs, Spices & Prepared Foods',
+  j: 'Alternative Therapies & Misc.',
   k: 'Key Nutrients & Herbal',
 };
 
@@ -147,3 +156,11 @@ export const PLAN_SLOTS = [
 
 /** Slot keys in render order — `PLAN_SLOTS.map((s) => s.key)`. */
 export const PLAN_SLOT_KEYS = PLAN_SLOTS.map((s) => s.key);
+
+/**
+ * Max number of named plan snapshots a user can keep under storage.js's
+ * 'savedPlans' key (see `saveCurrentPlan`/`getSavedPlans` in planBuilder.js).
+ * Enforced by BLOCKING a new save at the cap with a clear message — never
+ * silently evicting the oldest save, never fabricating extra capacity.
+ */
+export const MAX_SAVED_PLANS = 4;

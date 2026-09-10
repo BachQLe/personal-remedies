@@ -26,6 +26,8 @@ import Icon from '../../components/shared/Icon.jsx';
 import { getConditionMeta } from '../../utils/conditionMeta.js';
 import OtpCodeEntry from '../../components/auth/OtpCodeEntry.jsx';
 import { pullProfile } from '../../api/profileSync.js';
+import { getActiveMessages } from '../../api/messages.js';
+import WhatsNewSheet from './WhatsNewSheet.jsx';
 
 // ── Demo profile fallback ────────────────────────────────────────────────────
 
@@ -386,17 +388,26 @@ function ConditionDropdown({ value, onChange }) {
   );
 }
 
-function SubEditRow({ icon, label, onClick }) {
+function SubEditRow({ icon, label, onClick, dot = false }) {
   return (
     <button
       onClick={onClick}
       className="w-full flex items-center gap-3 py-4 text-left border-b border-sand-200 last:border-b-0 transition-opacity duration-fast hover:opacity-80"
     >
       <span className="flex items-center gap-3 flex-1 min-w-0">
-        <span className="text-char-500">
+        <span className="relative text-char-500">
           <Icon name={icon} size={20} aria-hidden="true" />
+          {dot && (
+            <span
+              className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-avoid-700"
+              aria-hidden="true"
+            />
+          )}
         </span>
-        <span className="flex-1 text-sm font-medium font-sans text-char-900">{label}</span>
+        <span className="flex-1 text-sm font-medium font-sans text-char-900">
+          {label}
+          {dot && <span className="sr-only"> (new)</span>}
+        </span>
       </span>
       <span className="text-char-400">
         <Icon name="chevron-right" size={18} aria-hidden="true" />
@@ -524,15 +535,28 @@ export default function ProfileScreen() {
   // Display names for profile.conditions (healthConditionID[]), resolved via
   // the cached conditions dictionary.
   const [conditionNames, setConditionNames] = useState([]);
-  // null | 'medications' | 'calorieTarget' | 'backup'
+  // null | 'medications' | 'calorieTarget' | 'backup' | 'whatsNew'
   const [sheet, setSheet] = useState(null);
   const [signingOut, setSigningOut] = useState(false);
+  // News/alerts channel (src/api/messages.js, REMEDI_MASTER_PLAN.md §4.7).
+  // Fetched once on mount — messages.js's own cache.js layer already TTLs
+  // this at 15 min, so no extra caching is added here. Drives both the
+  // "What's new" sheet's contents and its unread dot.
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     getProfile().then((p) => {
       setProfile(p ?? DEMO_PROFILE);
       setLoading(false);
     });
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    getActiveMessages().then((active) => {
+      if (alive) setMessages(active);
+    });
+    return () => { alive = false; };
   }, []);
 
   useEffect(() => {
@@ -571,7 +595,7 @@ export default function ProfileScreen() {
       <div className="h-dvh flex items-center justify-center bg-paper-100">
         <div
           className="w-8 h-8 rounded-full border-2 border-sand-200 animate-spin"
-          style={{ borderTopColor: '#628C22' }}
+          style={{ borderTopColor: '#4F7118' }}
         />
       </div>
     );
@@ -653,6 +677,12 @@ export default function ProfileScreen() {
             </p>
             <SubEditRow icon="scale" label="Daily calorie target" onClick={() => setSheet('calorieTarget')} />
             <SubEditRow icon="pill" label="Medications" onClick={() => setSheet('medications')} />
+            <SubEditRow
+              icon="bell"
+              label="What's new"
+              onClick={() => setSheet('whatsNew')}
+              dot={messages.length > 0}
+            />
           </div>
 
           {/* Section 2.5 — Remedi Plus. Scaffolding-only entry point (Task
@@ -718,6 +748,13 @@ export default function ProfileScreen() {
         />
       )}
       {sheet === 'backup' && <BackupSheet onClose={() => setSheet(null)} />}
+      {sheet === 'whatsNew' && (
+        <WhatsNewSheet
+          messages={messages}
+          onDismiss={(id) => setMessages((prev) => prev.filter((m) => m.id !== id))}
+          onClose={() => setSheet(null)}
+        />
+      )}
     </div>
   );
 }

@@ -35,6 +35,7 @@
  */
 import { useState, useEffect } from 'react';
 import { getCategoryDetail, getGroupLabel } from '../../api/api.js';
+import { MAX_RECOMMENDATIONS_PER_CATEGORY } from '../../api/config.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
@@ -96,7 +97,7 @@ export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp,
     requiresProfile: true,
   });
 
-  const items = data?.items ?? [];
+  const items = (data?.items ?? []).slice(0, MAX_RECOMMENDATIONS_PER_CATEGORY);
 
   return (
     <div className="flex flex-col gap-3">

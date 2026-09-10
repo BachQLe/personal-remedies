@@ -422,14 +422,14 @@ localStorage remains the synchronous source of truth; the app works fully signed
 
 | Group | Key Stops |
 |-------|-----------|
-| Forest (primary action) | 50 → 950; base #B4D85C, action #628C22 |
+| Forest (primary action) | 50 → 950; base #B4D85C, action #4F7118 |
 | Blue (ink/navy) | 50 → 950; base #5878E0, deepest #080E30 |
 | Lavender (panel surface) | 50 → 950; panel #C8A8E8 |
 | Charcoal (text) | 900 #211E1B, 700, 500, 400, 300 |
 | Sand (borders/dividers) | 200 #E6E6E0, 100 #EEEEE9 |
 | Paper (backgrounds) | 200 #F5F5F0, 100 #FAFAF8 |
 | Benefit | 700 #1F6B43, 600 #2F8C5A, 100 #DCEDE2 |
-| Caution | 700 #9C6A18, 600 #C98A2E, 100 #F6E8CB |
+| Caution | 700 #8A5D15, 600 #C98A2E, 100 #F6E8CB |
 | Avoid | 700 #9E3A22, 600 #C04A2F, 100 #F6DED5 |
 | Info | 600 #3F6E86, 100 #DDE8ED |
 

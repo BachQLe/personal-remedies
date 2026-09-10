@@ -1,24 +1,900 @@
 {
   "_meta": {
-    "generatedAt": "2026-08-10T19:52:58.548Z",
-    "fdcDataVersion": "FDC API v1 (accessed 2026-08-10); USDA does not expose a single unified dataset version via the API — each matched item's fdcId links to its own FDC record for provenance.",
+    "generatedAt": "2026-09-06T23:16:59.482Z",
+    "fdcDataVersion": "FDC API v1 (accessed 2026-09-06); USDA does not expose a single unified dataset version via the API — each matched item's fdcId links to its own FDC record for provenance.",
     "subsetSize": 632,
-    "matchedCount": 0,
-    "unmatchedCount": 632,
+    "matchedCount": 125,
+    "unmatchedCount": 507,
     "matchThreshold": 0.75,
     "dataTypePriority": [
       "Foundation",
       "SR Legacy"
     ],
     "lastRun": {
-      "keyTier": "demo",
-      "limit": 40,
-      "attempted": 1,
-      "matchedThisRun": 0,
-      "unmatchedThisRun": 0,
+      "keyTier": "configured",
+      "limit": null,
+      "attempted": 109,
+      "matchedThisRun": 90,
+      "unmatchedThisRun": 18,
       "stoppedEarly": true,
-      "stopReason": "429 rate limited by FDC API during search phase"
+      "stopReason": "search failed for #252 \"Sugar/snap peas non-org\": [usda] searchFoods(\"Sugar/snap peas non-org\"): HTTP 400 Bad Request"
     }
   },
-  "items": {}
+  "items": {
+    "1": {
+      "fdcId": 174212,
+      "matchedName": "Mollusks, abalone, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "2": {
+      "fdcId": 174182,
+      "matchedName": "Fish, anchovy, european, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "4": {
+      "fdcId": 171989,
+      "matchedName": "Fish, bass, freshwater, mixed species, cooked, dry heat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "6": {
+      "fdcId": 171948,
+      "matchedName": "Fish, bass, striped, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "30": {
+      "fdcId": 171949,
+      "matchedName": "Fish, bluefish, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "33": {
+      "fdcId": 171950,
+      "matchedName": "Fish, burbot, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "34": {
+      "fdcId": 171951,
+      "matchedName": "Fish, butterfish, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "35": {
+      "fdcId": 174223,
+      "matchedName": "Mollusks, squid, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "37": {
+      "fdcId": 171952,
+      "matchedName": "Fish, carp, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "38": {
+      "fdcId": 2684445,
+      "matchedName": "Fish, catfish, farm raised, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "39": {
+      "fdcId": 174188,
+      "matchedName": "Fish, caviar, black and red, granular",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "41": {
+      "fdcId": 171474,
+      "matchedName": "Chicken, broilers or fryers, breast, meat and skin, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "42": {
+      "fdcId": 172404,
+      "matchedName": "Chicken, stewing, dark meat, meat only, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "43": {
+      "fdcId": 174465,
+      "matchedName": "Chicken, capons, giblets, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "44": {
+      "fdcId": 171458,
+      "matchedName": "Chicken, heart, all classes, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "45": {
+      "fdcId": 172928,
+      "matchedName": "Pate, chicken liver, canned",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "46": {
+      "fdcId": 2727568,
+      "matchedName": "Chicken, wing, meat and skin, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "49": {
+      "fdcId": 171953,
+      "matchedName": "Fish, cisco, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "50": {
+      "fdcId": 171953,
+      "matchedName": "Fish, cisco, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "52": {
+      "fdcId": 2684444,
+      "matchedName": "Fish, cod, Atlantic, wild caught, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "55": {
+      "fdcId": 2684446,
+      "matchedName": "Crustaceans, crab, blue swimming, lump, pasteurized, refrigerated",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "56": {
+      "fdcId": 171968,
+      "matchedName": "Crustaceans, crab, dungeness, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "57": {
+      "fdcId": 174206,
+      "matchedName": "Crustaceans, crayfish, mixed species, wild, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "58": {
+      "fdcId": 174192,
+      "matchedName": "Fish, croaker, Atlantic, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "60": {
+      "fdcId": 171958,
+      "matchedName": "Fish, cusk, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "61": {
+      "fdcId": 174215,
+      "matchedName": "Mollusks, cuttlefish, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "63": {
+      "fdcId": 172835,
+      "matchedName": "Emu, inside drum, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "64": {
+      "fdcId": 171823,
+      "matchedName": "Sauce, duck, ready-to-serve",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "65": {
+      "fdcId": 174193,
+      "matchedName": "Fish, eel, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "67": {
+      "fdcId": 175132,
+      "matchedName": "Fish, roe, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "68": {
+      "fdcId": 174196,
+      "matchedName": "Fish, flatfish (flounder and sole species), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "73": {
+      "fdcId": 173572,
+      "matchedName": "Fat, goose",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "74": {
+      "fdcId": 171962,
+      "matchedName": "Fish, grouper, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "75": {
+      "fdcId": 174471,
+      "matchedName": "Guinea hen, meat only, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "76": {
+      "fdcId": 333374,
+      "matchedName": "Fish, haddock, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "77": {
+      "fdcId": 171965,
+      "matchedName": "Fish, halibut, Greenland, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "78": {
+      "fdcId": 172340,
+      "matchedName": "Fish oil, herring",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "91": {
+      "fdcId": 173670,
+      "matchedName": "Fish, ling, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "92": {
+      "fdcId": 173671,
+      "matchedName": "Fish, lingcod, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "94": {
+      "fdcId": 174208,
+      "matchedName": "Crustaceans, lobster, northern, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "95": {
+      "fdcId": 174211,
+      "matchedName": "Crustaceans, spiny lobster, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "99": {
+      "fdcId": 168149,
+      "matchedName": "Fish, mackerel, salted",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "100": {
+      "fdcId": 175122,
+      "matchedName": "Fish, mackerel, king, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "103": {
+      "fdcId": 173675,
+      "matchedName": "Fish, milkfish, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "104": {
+      "fdcId": 173676,
+      "matchedName": "Fish, monkfish, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "105": {
+      "fdcId": 175123,
+      "matchedName": "Fish, mullet, striped, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "107": {
+      "fdcId": 173680,
+      "matchedName": "Fish, pike, northern, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "108": {
+      "fdcId": 168019,
+      "matchedName": "Octopus (Alaska Native)",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "109": {
+      "fdcId": 175133,
+      "matchedName": "Fish, roughy, orange, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "116": {
+      "fdcId": 173678,
+      "matchedName": "Fish, perch, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "117": {
+      "fdcId": 174473,
+      "matchedName": "Pheasant, raw, meat only",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "118": {
+      "fdcId": 174474,
+      "matchedName": "Pheasant, breast, meat only, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "119": {
+      "fdcId": 2768188,
+      "matchedName": "Alaska Pollock, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "120": {
+      "fdcId": 173682,
+      "matchedName": "Fish, pompano, florida, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "139": {
+      "fdcId": 173677,
+      "matchedName": "Fish, pout, ocean, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "141": {
+      "fdcId": 172191,
+      "matchedName": "Egg, quail, whole, fresh, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "142": {
+      "fdcId": 172829,
+      "matchedName": "Quail, breast, meat only, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "144": {
+      "fdcId": 173684,
+      "matchedName": "Fish, rockfish, Pacific, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "145": {
+      "fdcId": 175134,
+      "matchedName": "Fish, sablefish, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "147": {
+      "fdcId": 172343,
+      "matchedName": "Fish oil, salmon",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "148": {
+      "fdcId": 175138,
+      "matchedName": "Fish, salmon, pink, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "154": {
+      "fdcId": 2747667,
+      "matchedName": "Scallops, sea, frozen, wild caught",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "155": {
+      "fdcId": 175141,
+      "matchedName": "Fish, scup, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "157": {
+      "fdcId": 173695,
+      "matchedName": "Fish, seatrout, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "158": {
+      "fdcId": 173696,
+      "matchedName": "Fish, shad, american, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "159": {
+      "fdcId": 173697,
+      "matchedName": "Fish, shark, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "160": {
+      "fdcId": 175144,
+      "matchedName": "Fish, sheepshead, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "163": {
+      "fdcId": 175146,
+      "matchedName": "Fish, smelt, rainbow, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "164": {
+      "fdcId": 167744,
+      "matchedName": "Mollusks, snail, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "165": {
+      "fdcId": 173698,
+      "matchedName": "Fish, snapper, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "166": {
+      "fdcId": 173700,
+      "matchedName": "Fish, spot, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "167": {
+      "fdcId": 171079,
+      "matchedName": "Squab, (pigeon), meat only, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "168": {
+      "fdcId": 173701,
+      "matchedName": "Fish, sturgeon, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "169": {
+      "fdcId": 175150,
+      "matchedName": "Fish, sucker, white, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "170": {
+      "fdcId": 173702,
+      "matchedName": "Fish, surimi",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "171": {
+      "fdcId": 173703,
+      "matchedName": "Fish, swordfish, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "172": {
+      "fdcId": 2684442,
+      "matchedName": "Fish, tilapia, farm raised, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "173": {
+      "fdcId": 173705,
+      "matchedName": "Fish, tilefish, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "174": {
+      "fdcId": 175153,
+      "matchedName": "Fish, trout, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "176": {
+      "fdcId": 334194,
+      "matchedName": "Fish, tuna, light, canned in water, drained solids",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "177": {
+      "fdcId": 2747673,
+      "matchedName": "Tuna, ahi or yellowfin, frozen, wild caught",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "178": {
+      "fdcId": 173710,
+      "matchedName": "Fish, turbot, european, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "180": {
+      "fdcId": 171098,
+      "matchedName": "Turkey, whole, breast, meat only, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "181": {
+      "fdcId": 171090,
+      "matchedName": "Turkey, whole, dark meat, meat only, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "182": {
+      "fdcId": 171083,
+      "matchedName": "Turkey, whole, giblets, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "183": {
+      "fdcId": 171484,
+      "matchedName": "Turkey, all classes, heart, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "184": {
+      "fdcId": 171486,
+      "matchedName": "Turkey, all classes, liver, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "198": {
+      "fdcId": 175128,
+      "matchedName": "Fish, pike, walleye, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "199": {
+      "fdcId": 171983,
+      "matchedName": "Mollusks, whelk, unspecified, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "200": {
+      "fdcId": 175150,
+      "matchedName": "Fish, sucker, white, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "201": {
+      "fdcId": 175150,
+      "matchedName": "Fish, sucker, white, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "203": {
+      "fdcId": 175162,
+      "matchedName": "Fish, wolffish, Atlantic, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "204": {
+      "fdcId": 175163,
+      "matchedName": "Fish, yellowtail, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "205": {
+      "fdcId": 170157,
+      "matchedName": "Nuts, acorns, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "207": {
+      "fdcId": 2346393,
+      "matchedName": "Nuts, almonds, whole, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "208": {
+      "fdcId": 173727,
+      "matchedName": "Beans, adzuki, mature seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "209": {
+      "fdcId": 2758983,
+      "matchedName": "Beans, baked, canned, vegetarian",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "210": {
+      "fdcId": 747444,
+      "matchedName": "Beans, Dry, Black (0% moisture)",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "212": {
+      "fdcId": 168574,
+      "matchedName": "Beans, fava, in pod, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "213": {
+      "fdcId": 175210,
+      "matchedName": "Hyacinth beans, mature seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "214": {
+      "fdcId": 747440,
+      "matchedName": "Beans, Dry, Dark Red Kidney (0% moisture)",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "215": {
+      "fdcId": 168396,
+      "matchedName": "Lima beans, immature seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "217": {
+      "fdcId": 170079,
+      "matchedName": "Beans, mung, mature seeds, sprouted, canned, drained solids",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "218": {
+      "fdcId": 747441,
+      "matchedName": "Beans, Dry, Navy (0% moisture)",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "219": {
+      "fdcId": 747445,
+      "matchedName": "Beans, Dry, Pinto (0% moisture)",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "220": {
+      "fdcId": 174283,
+      "matchedName": "Winged beans, mature seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "221": {
+      "fdcId": 174281,
+      "matchedName": "Yardlong beans, mature seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "222": {
+      "fdcId": 169320,
+      "matchedName": "Beans, snap, yellow, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "224": {
+      "fdcId": 170161,
+      "matchedName": "Nuts, beechnuts, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "226": {
+      "fdcId": 170144,
+      "matchedName": "Seeds, breadfruit seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "227": {
+      "fdcId": 170570,
+      "matchedName": "Nuts, butternuts, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "228": {
+      "fdcId": 2515374,
+      "matchedName": "Nuts, cashew nuts, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "229": {
+      "fdcId": 170164,
+      "matchedName": "Nuts, chestnuts, chinese, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "230": {
+      "fdcId": 2644282,
+      "matchedName": "Chickpeas, (garbanzo beans, bengal gram), dry",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "231": {
+      "fdcId": 170169,
+      "matchedName": "Nuts, coconut meat, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "232": {
+      "fdcId": 170169,
+      "matchedName": "Nuts, coconut meat, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "233": {
+      "fdcId": 168781,
+      "matchedName": "Puddings, coconut cream, dry mix, instant, prepared with 2% milk",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "234": {
+      "fdcId": 167950,
+      "matchedName": "Snacks, KRAFT, CORNNUTS, plain",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "242": {
+      "fdcId": 170584,
+      "matchedName": "Nuts, ginkgo nuts, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "243": {
+      "fdcId": 2515375,
+      "matchedName": "Nuts, hazelnuts or filberts, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "245": {
+      "fdcId": 2644283,
+      "matchedName": "Lentils, dry",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "247": {
+      "fdcId": 2515378,
+      "matchedName": "Nuts, macadamia nuts, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "249": {
+      "fdcId": 171575,
+      "matchedName": "Sauce, peanut, made from coconut, water, sugar, peanuts",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "250": {
+      "fdcId": 170419,
+      "matchedName": "Peas, green, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "251": {
+      "fdcId": 172428,
+      "matchedName": "Peas, green, split, mature seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    }
+  }
 }

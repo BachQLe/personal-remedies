@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shuffle, Repeat, X, BookmarkPlus } from 'lucide-react';
+import { Shuffle, X, BookmarkPlus } from 'lucide-react';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
 import { getIngredientImage } from '../../api/ingredientImages.js';
@@ -13,7 +13,7 @@ function cardImage(item) {
 
 /**
  * SlotSection — one meal-plan slot (Breakfast/Lunch/Dinner/Snacks/Beverages)
- * for a SINGLE day: header (label + Shuffle + Substitutions) and a 2-col
+ * for a SINGLE day: header (label + Shuffle + Suggestions) and a 2-col
  * FoodImageCard grid, or a dashed-border empty state when the slot has no
  * items.
  *
@@ -21,10 +21,13 @@ function cardImage(item) {
  * two circular actions: Remove (drop from the plan, with Undo upstream, top
  * corner) and Save (bookmark to the user's library, bottom corner).
  *
- * The Substitutions pill is a per-SLOT affordance (one trigger covering
- * every item in the slot), not a per-card one — see SubstitutionsSheet.jsx's
- * doc for why that distinction matters (it's what keeps this feature
- * structurally distinct from the deleted SwapSheet).
+ * The "Suggestions" trigger (Task 11 — renamed + re-skinned from
+ * "Substitutions") is a plain text LINK, not an icon button, and is still a
+ * per-SLOT affordance (one trigger covering every item in the slot), not a
+ * per-card one — see SuggestionsSheet.jsx's doc for why that distinction
+ * matters (it's what keeps this feature structurally distinct from the
+ * deleted SwapSheet) and for what opens when it's tapped (a group-tile grid
+ * matching the website's Suggest screen, not a flat card list).
  */
 export default function SlotSection({
   slot,
@@ -37,14 +40,14 @@ export default function SlotSection({
   onShuffle,
   onSelect,
   onRemove,
-  onOpenSubstitutions,
+  onOpenSuggestions,
   ghost,
   shuffling,
   onSaveBlocked,
 }) {
   const allPinned = items.length > 0 && items.every((item) => pinnedIds?.includes(item.id));
   const shuffleDisabled = ghost || items.length === 0 || shuffling || allPinned;
-  const substitutionsDisabled = ghost || items.length === 0;
+  const suggestionsDisabled = ghost || items.length === 0;
 
   return (
     <section className={ghost ? 'rm-ghost' : ''}>
@@ -53,16 +56,18 @@ export default function SlotSection({
           {slot.label}
         </p>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Task 11: plain text link, not an icon button — tapping it opens
+              SuggestionsSheet's group-tile picker (GroupsTab's visual
+              pattern), not a flat substitute-card list. */}
           <button
-            onClick={() => onOpenSubstitutions(slot.key)}
-            disabled={substitutionsDisabled}
-            className={`inline-flex items-center gap-1.5 rounded-pill bg-sand-100 hover:bg-sand-200
-              px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
-              ${substitutionsDisabled ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
+            onClick={() => onOpenSuggestions(slot.key)}
+            disabled={suggestionsDisabled}
+            className={`text-xs font-semibold text-blue-950/70 underline decoration-blue-950/30
+              underline-offset-2 transition-colors duration-fast hover:text-blue-950
+              ${suggestionsDisabled ? 'opacity-40 pointer-events-none' : ''}`}
           >
-            <Repeat size={14} aria-hidden="true" />
-            Substitutions
+            Suggestions
           </button>
 
           <button

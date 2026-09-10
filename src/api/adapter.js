@@ -517,7 +517,27 @@ function parseSourceName(notes) {
   return chef ? `${network} · ${chef}` : network;
 }
 
-/** [keyword, mealType] — checked in order, first substring match wins. */
+/**
+ * [keyword, mealType] — checked in order, first substring match wins.
+ *
+ * BUG FIX (Task 4, "no choices appear for Lunch"): `guessMealType`'s
+ * fallback is 'dinner' for anything that matches no keyword at all, and the
+ * pre-fix lunch bucket held only 'salad'/'sandwich'/'wrap' — against the
+ * real recipe dictionary (fine group 'l', src/data/cache/items.json) that
+ * classified just 2 of 54 recipe titles as lunch (e.g. "Vietnamese Noodle
+ * Soup", "Lentil Soup", "Garden Vegetable Soup" all fell through to the
+ * 'dinner' default instead), while 42/54 landed on 'dinner'. Combined with
+ * `getMealPlanSuggestionsRaw`'s lunch slot being recipes-only (see its doc)
+ * and the further `TIER_TO_NUMERIC_ID` tier filter, a 2-recipe pool
+ * frequently resolved to an empty lunch slot. 'soup' moves here (soup is at
+ * least as often a lunch dish as a dinner one, and lunch's PLAN_SLOTS
+ * fineGroups — beans/vegetables/fish — already skew toward the lighter fare
+ * soups represent) and 'taco'/'bowl' are added — both rescue real titles
+ * from the dictionary ("Slow-Cooker Pork Tacos", "Fish Tacos") into a slot
+ * that otherwise starves. This is a genuine classification-accuracy fix, not
+ * a fallback: it changes which honest bucket a recipe lands in, never
+ * fabricates one.
+ */
 const RECIPE_MEAL_TYPE_KEYWORDS = [
   ['oatmeal', 'breakfast'],
   ['pancake', 'breakfast'],
@@ -526,7 +546,6 @@ const RECIPE_MEAL_TYPE_KEYWORDS = [
   ['granola', 'breakfast'],
   ['parfait', 'breakfast'],
   ['smoothie', 'breakfast'],
-  ['soup', 'dinner'],
   ['chili', 'dinner'],
   ['stew', 'dinner'],
   ['roast', 'dinner'],
@@ -534,6 +553,9 @@ const RECIPE_MEAL_TYPE_KEYWORDS = [
   ['salad', 'lunch'],
   ['sandwich', 'lunch'],
   ['wrap', 'lunch'],
+  ['soup', 'lunch'],
+  ['taco', 'lunch'],
+  ['bowl', 'lunch'],
   ['guacamole', 'snack'],
   ['dip', 'snack'],
   ['bar', 'snack'],
@@ -1531,10 +1553,12 @@ async function getSlotSubstitutesRaw(conditionIds, slotItems) {
 /**
  * Get acceptable substitute items/recipes for everything currently in ONE
  * Plan slot, via /suggest scoped by fine food group — powers the Plan
- * screen's per-slot "Substitutions" sheet (SubstitutionsSheet.jsx). Grouped
+ * screen's per-slot "Suggestions" sheet (SuggestionsSheet.jsx, formerly
+ * "Substitutions"/SubstitutionsSheet.jsx — renamed/re-skinned in Task 11;
+ * this function's own name and data flow are unchanged). Grouped
  * by which source item each substitute stands in for, so a slot holding
  * multiple recipes (e.g. 3 lunch options) needs only ONE call/sheet covering
- * all of them, rather than a per-card picker (see SubstitutionsSheet.jsx's
+ * all of them, rather than a per-card picker (see SuggestionsSheet.jsx's
  * doc for why this is structurally distinct from the deleted SwapSheet).
  *
  * Every candidate is pre-filtered through the same safety gate as the Plan

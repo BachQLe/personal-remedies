@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, BookmarkPlus, ArrowRight, RotateCw, RefreshCw, CalendarPlus, Printer, Share2, HelpCircle } from 'lucide-react';
+import { Plus, BookmarkPlus, Bookmark, ArrowRight, RotateCw, RefreshCw, CalendarPlus, Printer, Share2, HelpCircle, CalendarRange } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
@@ -16,8 +16,9 @@ import SchedulerView from './SchedulerView.jsx';
 import NutritionFactsSheet from './NutritionFactsSheet.jsx';
 import HowToUseSheet from './HowToUseSheet.jsx';
 import MealPlannerPicker from './MealPlannerPicker.jsx';
-import SubstitutionsSheet from './SubstitutionsSheet.jsx';
-import { nextSevenDays, todayKey } from './planDates.js';
+import SuggestionsSheet from './SuggestionsSheet.jsx';
+import SavedPlansSheet from './SavedPlansSheet.jsx';
+import { nextSevenDays, todayKey, getDayLabelMode, setDayLabelMode } from './planDates.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import {
   getProfile,
@@ -29,11 +30,15 @@ import {
   buildRecipeDetail,
   generatePlanFromPicks,
   toPlanItem,
+  getSavedPlans,
+  saveCurrentPlan,
+  loadSavedPlan,
+  deleteSavedPlan,
 } from '../../api/api.js';
 import { estimatePlanDayCalories } from '../../api/calorieNeeds.js';
 import { formatWeekPlanText, buildPrintModel } from '../../api/planExport.js';
 import { printPage, share } from '../../api/browser.js';
-import { PLAN_SLOTS, DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
+import { PLAN_SLOTS, DEFAULT_DEV_CONDITIONS, MAX_SAVED_PLANS } from '../../api/config.js';
 import {
   getPlan,
   subscribePlan,
@@ -245,8 +250,11 @@ export default function MealQueueScreen() {
   const [factsTarget, setFactsTarget] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [howToUseOpen, setHowToUseOpen] = useState(false);
-  const [substitutionsSlot, setSubstitutionsSlot] = useState(null);
+  const [suggestionsSlot, setSuggestionsSlot] = useState(null);
   const [buildingFromSaved, setBuildingFromSaved] = useState(false);
+  const [savedPlansOpen, setSavedPlansOpen] = useState(false);
+  const [savedPlans, setSavedPlans] = useState(getSavedPlans);
+  const [dayLabelMode, setDayLabelModeState] = useState(getDayLabelMode);
   const [snackbar, setSnackbar] = useState(null);
   const snackbarRef = useRef(null);
   const snackbarIdRef = useRef(0);
@@ -416,17 +424,18 @@ export default function MealQueueScreen() {
     showSnackbar('Removed from plan', true, () => insertIntoSlot(dateKey, slotKey, item, idx));
   }, [showSnackbar, activeDay]);
 
-  // Substitutions: swap an acceptable substitute into the currently-open
-  // slot in place of the original item. Composed entirely from the same
-  // removeFromSlot/insertIntoSlot primitives handleRemove already uses above
-  // — never a new mutation path (see SubstitutionsSheet.jsx's doc on why
-  // this must stay distinct from the deleted SwapSheet). `toPlanItem`
-  // (planBuilder.js) is the same PlanCandidate -> PlanItem conversion every
-  // other slot-fill path uses. Undo mirrors handleRemove's Undo pattern
-  // exactly: swap the original back into the same index.
+  // Suggestions (Task 11, formerly "Substitutions"): swap an acceptable
+  // substitute into the currently-open slot in place of the original item.
+  // Composed entirely from the same removeFromSlot/insertIntoSlot primitives
+  // handleRemove already uses above — never a new mutation path (see
+  // SuggestionsSheet.jsx's doc on why this must stay distinct from the
+  // deleted SwapSheet). `toPlanItem` (planBuilder.js) is the same
+  // PlanCandidate -> PlanItem conversion every other slot-fill path uses.
+  // Undo mirrors handleRemove's Undo pattern exactly: swap the original back
+  // into the same index.
   const handleSwapSubstitute = useCallback((originalItem, substitute) => {
     const dateKey = activeDay;
-    const slotKey = substitutionsSlot;
+    const slotKey = suggestionsSlot;
     if (!slotKey) return;
 
     const index = removeFromSlot(dateKey, slotKey, originalItem.id);
@@ -437,7 +446,50 @@ export default function MealQueueScreen() {
       removeFromSlot(dateKey, slotKey, convertedItem.id);
       insertIntoSlot(dateKey, slotKey, originalItem, index);
     });
-  }, [showSnackbar, activeDay, substitutionsSlot]);
+  }, [showSnackbar, activeDay, suggestionsSlot]);
+
+  // Task 10: display-only Day-label mode toggle (see planDates.js's NOTE) —
+  // swaps whether each day chip's PRIMARY label is the weekday name or a
+  // relative "Day N"; `nextSevenDays()` (called fresh in this render body,
+  // below, and again inside SchedulerView's own render) picks up the new
+  // stored mode as soon as this state change triggers a re-render. Never
+  // touches which real calendar date backs any `plan.days[key]` entry.
+  const handleToggleDayLabelMode = useCallback(() => {
+    const next = dayLabelMode === 'dayNumber' ? 'calendar' : 'dayNumber';
+    setDayLabelMode(next);
+    setDayLabelModeState(next);
+  }, [dayLabelMode]);
+
+  // Task 8: save/load/delete named plan snapshots, capped at
+  // MAX_SAVED_PLANS (config.js) — separate from saving an individual recipe
+  // (SaveButton/library.js). All persistence lives in planBuilder.js's
+  // saveCurrentPlan/getSavedPlans/loadSavedPlan/deleteSavedPlan (storage.js's
+  // namespaced persistence wrapper); this screen just re-reads the list
+  // after each mutation and surfaces a snackbar.
+  const refreshSavedPlans = useCallback(() => setSavedPlans(getSavedPlans()), []);
+
+  const handleSavePlan = useCallback((name) => {
+    const result = saveCurrentPlan(name);
+    if (result.ok) {
+      refreshSavedPlans();
+      showSnackbar(`Saved as "${result.entry.name}"`);
+    } else if (result.reason === 'at-cap') {
+      showSnackbar(`You can save up to ${MAX_SAVED_PLANS} plans — delete one first`);
+    } else {
+      showSnackbar('Nothing to save yet — build a plan first');
+    }
+  }, [refreshSavedPlans, showSnackbar]);
+
+  const handleLoadSavedPlan = useCallback((id) => {
+    const ok = loadSavedPlan(id);
+    setSavedPlansOpen(false);
+    showSnackbar(ok ? 'Plan loaded' : 'Could not load that plan');
+  }, [showSnackbar]);
+
+  const handleDeleteSavedPlan = useCallback((id) => {
+    deleteSavedPlan(id);
+    refreshSavedPlans();
+  }, [refreshSavedPlans]);
 
   // Print & share the whole week (T4C, REMEDI_MASTER_PLAN.md §1.9) — plain,
   // ink-friendly output; FOODS only, never a calorie tally (see
@@ -554,13 +606,14 @@ export default function MealQueueScreen() {
         title="My Meal Plan"
         className="bg-forest-300 rm-print-hide"
         right={
-          /* Help (always available) + print/share (T4C, plan-gated) — all
-             three live in the header's top-right corner so they never share
-             a row with the view switcher or day strip below (both
-             horizontally scrollable). Print/share stay hidden with no plan
-             yet (nothing honest to print/share); the help icon has no such
-             dependency, since it also documents Cookbook-only controls
-             (Add/Save) that are usable before a plan exists. */
+          /* Help + Saved plans (always available) + print/share (T4C,
+             plan-gated) — all live in the header's top-right corner so they
+             never share a row with the view switcher or day strip below
+             (both horizontally scrollable). Print/share stay hidden with no
+             plan yet (nothing honest to print/share); Help/Saved plans have
+             no such dependency — Saved plans is a way to LOAD a previous
+             week even during the first-run empty state, and Help documents
+             Cookbook-only controls usable before a plan exists too. */
           <div className="flex items-center gap-2 shrink-0 -mt-3 -mr-1">
             <button
               type="button"
@@ -571,6 +624,16 @@ export default function MealQueueScreen() {
                 transition-all duration-fast active:scale-95"
             >
               <HelpCircle size={18} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setSavedPlansOpen(true)}
+              aria-label="Saved plans"
+              className="inline-flex items-center justify-center w-11 h-11 rounded-full
+                bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
+                transition-all duration-fast active:scale-95"
+            >
+              <Bookmark size={18} aria-hidden="true" />
             </button>
             {plan && (
               <>
@@ -614,7 +677,20 @@ export default function MealQueueScreen() {
           <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} />
 
           {view === 'queue' && !firstRunEmpty && (
-            <DayStrip days={days} selected={activeDay} onSelect={handleSelectDay} bgClassName="bg-paper-100" />
+            <>
+              <DayStrip days={days} selected={activeDay} onSelect={handleSelectDay} bgClassName="bg-paper-100" />
+              {/* Task 10: display-only Day 1-7 <-> calendar-day toggle — see
+                  planDates.js's NOTE for why this is a display swap, not a
+                  change to which real date each day chip represents. */}
+              <button
+                onClick={handleToggleDayLabelMode}
+                className="inline-flex items-center gap-1.5 self-end text-xs font-semibold font-sans
+                  text-blue-950/50 hover:text-blue-950/70 transition-colors duration-fast"
+              >
+                <CalendarRange size={12} aria-hidden="true" />
+                {dayLabelMode === 'dayNumber' ? 'Show calendar days' : 'Show Day 1–7'}
+              </button>
+            </>
           )}
         </div>
 
@@ -710,7 +786,7 @@ export default function MealQueueScreen() {
                       onSelect={handleSelect}
                       onRemove={handleRemove}
                       onTogglePin={handleTogglePin}
-                      onOpenSubstitutions={setSubstitutionsSlot}
+                      onOpenSuggestions={setSuggestionsSlot}
                       ghost={showGhost}
                       shuffling={shufflingSlot === slot.key}
                       onSaveBlocked={showSnackbar}
@@ -901,16 +977,30 @@ export default function MealQueueScreen() {
         />
       </div>
 
-      {/* ── Substitutions (per-slot, see SlotSection's pill) ──────────────── */}
+      {/* ── Suggestions (Task 11, formerly "Substitutions" — per-slot, see
+          SlotSection's text link) ─────────────────────────────────────── */}
       <div data-print-hide>
-        <SubstitutionsSheet
-          open={!!substitutionsSlot}
-          onClose={() => setSubstitutionsSlot(null)}
-          slotLabel={PLAN_SLOTS.find((s) => s.key === substitutionsSlot)?.label ?? ''}
-          sourceItems={daySlots[substitutionsSlot] ?? []}
+        <SuggestionsSheet
+          open={!!suggestionsSlot}
+          onClose={() => setSuggestionsSlot(null)}
+          slot={PLAN_SLOTS.find((s) => s.key === suggestionsSlot) ?? null}
+          sourceItems={daySlots[suggestionsSlot] ?? []}
           profile={profile}
           onSelect={handleSelect}
           onSwap={handleSwapSubstitute}
+        />
+      </div>
+
+      {/* ── Saved plans (Task 8) ────────────────────────────────────────── */}
+      <div data-print-hide>
+        <SavedPlansSheet
+          open={savedPlansOpen}
+          onClose={() => setSavedPlansOpen(false)}
+          hasActivePlan={!!plan}
+          savedPlans={savedPlans}
+          onSave={handleSavePlan}
+          onLoad={handleLoadSavedPlan}
+          onDelete={handleDeleteSavedPlan}
         />
       </div>
 

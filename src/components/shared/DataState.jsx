@@ -94,7 +94,7 @@ export default function DataState({
             role="status"
             className="flex items-center gap-2 px-4 py-2 mb-3 rounded-lg bg-sand-100 text-char-500 text-xs font-sans font-medium"
           >
-            <Icon name="cloud" size={14} className="text-char-400 shrink-0" aria-hidden="true" />
+            <Icon name="cloud" size={14} className="text-char-500 shrink-0" aria-hidden="true" />
             Offline — showing saved data
           </div>
         )}

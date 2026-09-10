@@ -1,6 +1,6 @@
 # Remedi — What Each Page Is For
 
-*Last updated: August 19, 2026. Written against the code as it stands on `main`.*
+*Last updated: September 8, 2026. Written against the code as it stands on `main`.*
 
 ## The idea in one paragraph
 
@@ -152,6 +152,7 @@ Header shows the name and current condition chips. Below:
 - **Medications** — free-text list.
 - **Allergies & intolerances** — free-text list.
 - **Dietary preferences** — Vegetarian, Vegan, Pescatarian, Avoid Pork, Gluten-Free, Dairy-Free, Low Sodium.
+- **What's new** — opens the news/alerts channel (`src/api/messages.js`, content in `public/messages.json`; `REMEDI_MASTER_PLAN.md` §4.7). A dot on the row signals unread messages; each is dismissible per device and the dismissal persists locally, so a cleared message doesn't come back.
 
 The calorie target is a flat, user-set number by design. An earlier version estimated it from height, weight, age, sex, and activity level via the Mifflin–St Jeor equation; that whole path — formula and biometrics UI — was removed. Asking for body measurements to produce an estimate the user could have typed themselves was friction without payoff, and it pushed the product toward feeling like a calorie tracker, which it isn't.
 

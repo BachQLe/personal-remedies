@@ -33,7 +33,7 @@ const PALETTES = {
     ['plum-50', '#F4ECF0'],
   ],
   Honey: [
-    ['honey-700', '#9C6F1E'], ['honey-600', '#C2902F'], ['honey-500', '#D6A642'],
+    ['honey-700', '#94691C'], ['honey-600', '#C2902F'], ['honey-500', '#D6A642'],
     ['honey-100', '#F3E6C7'], ['honey-50', '#FAF3E2'],
   ],
   Neutrals: [

@@ -27,7 +27,7 @@ export default function SearchInput({
         aria-label={placeholder}
         autoFocus={autoFocus}
         className="w-full pl-10 pr-4 py-5 rounded-lg border border-sand-200 bg-white
-          text-char-900 placeholder:text-char-300 font-sans text-sm
+          text-char-900 placeholder:text-char-500 font-sans text-sm
           shadow-inset
           transition-all duration-fast ease-ds-out
           hover:border-forest-300

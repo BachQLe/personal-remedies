@@ -1,14 +1,576 @@
 {
   "_meta": {
-    "generatedAt": "2026-08-10T19:52:58.548Z",
-    "fdcDataVersion": "FDC API v1 (accessed 2026-08-10); USDA does not expose a single unified dataset version via the API — each matched item's fdcId links to its own FDC record for provenance.",
-    "fdcIdCount": 0,
+    "generatedAt": "2026-09-06T23:16:59.482Z",
+    "fdcDataVersion": "FDC API v1 (accessed 2026-09-06); USDA does not expose a single unified dataset version via the API — each matched item's fdcId links to its own FDC record for provenance.",
+    "fdcIdCount": 33,
     "lastRun": {
-      "keyTier": "demo",
+      "keyTier": "configured",
       "fetchedThisRun": 0,
       "stoppedEarly": true,
-      "stopReason": "429 rate limited by FDC API during search phase"
+      "stopReason": "search failed for #252 \"Sugar/snap peas non-org\": [usda] searchFoods(\"Sugar/snap peas non-org\"): HTTP 400 Bad Request"
     }
   },
-  "nutrients": {}
+  "nutrients": {
+    "171458": {
+      "per100g": {
+        "calories": 153,
+        "protein": 15.55,
+        "carbs": 0.71,
+        "fat": 9.33
+      },
+      "portionSource": "1 heart",
+      "perServing": {
+        "amount": 6.1,
+        "unit": "g",
+        "calories": 9.33,
+        "protein": 0.95,
+        "carbs": 0.04,
+        "fat": 0.57
+      }
+    },
+    "171474": {
+      "per100g": {
+        "calories": 172,
+        "protein": 20.85,
+        "carbs": 0,
+        "fat": 9.25
+      },
+      "portionSource": "0.5 breast, bone removed (yield from 1 lb ready-to-cook chicken)",
+      "perServing": {
+        "amount": 87,
+        "unit": "g",
+        "calories": 149.64,
+        "protein": 18.14,
+        "carbs": 0,
+        "fat": 8.05
+      }
+    },
+    "171823": {
+      "per100g": {
+        "calories": 245,
+        "protein": 0.36,
+        "carbs": 60.66,
+        "fat": 0.13
+      },
+      "portionSource": "2 Tbsp",
+      "perServing": {
+        "amount": 33,
+        "unit": "g",
+        "calories": 80.85,
+        "protein": 0.12,
+        "carbs": 20.02,
+        "fat": 0.04
+      }
+    },
+    "171948": {
+      "per100g": {
+        "calories": 97,
+        "protein": 17.73,
+        "carbs": 0,
+        "fat": 2.33
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 82.45,
+        "protein": 15.07,
+        "carbs": 0,
+        "fat": 1.98
+      }
+    },
+    "171949": {
+      "per100g": {
+        "calories": 124,
+        "protein": 20.04,
+        "carbs": 0,
+        "fat": 4.24
+      },
+      "portionSource": "1 fillet",
+      "perServing": {
+        "amount": 150,
+        "unit": "g",
+        "calories": 186,
+        "protein": 30.06,
+        "carbs": 0,
+        "fat": 6.36
+      }
+    },
+    "171950": {
+      "per100g": {
+        "calories": 90,
+        "protein": 19.31,
+        "carbs": 0,
+        "fat": 0.81
+      },
+      "portionSource": "1 fillet",
+      "perServing": {
+        "amount": 116,
+        "unit": "g",
+        "calories": 104.4,
+        "protein": 22.4,
+        "carbs": 0,
+        "fat": 0.94
+      }
+    },
+    "171951": {
+      "per100g": {
+        "calories": 146,
+        "protein": 17.28,
+        "carbs": 0,
+        "fat": 8.02
+      },
+      "portionSource": "1 fillet",
+      "perServing": {
+        "amount": 32,
+        "unit": "g",
+        "calories": 46.72,
+        "protein": 5.53,
+        "carbs": 0,
+        "fat": 2.57
+      }
+    },
+    "171952": {
+      "per100g": {
+        "calories": 127,
+        "protein": 17.83,
+        "carbs": 0,
+        "fat": 5.6
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 107.95,
+        "protein": 15.16,
+        "carbs": 0,
+        "fat": 4.76
+      }
+    },
+    "171953": {
+      "per100g": {
+        "calories": 98,
+        "protein": 18.99,
+        "carbs": 0,
+        "fat": 1.91
+      },
+      "portionSource": "1 fillet",
+      "perServing": {
+        "amount": 79,
+        "unit": "g",
+        "calories": 77.42,
+        "protein": 15,
+        "carbs": 0,
+        "fat": 1.51
+      }
+    },
+    "171958": {
+      "per100g": {
+        "calories": 87,
+        "protein": 18.99,
+        "carbs": 0,
+        "fat": 0.69
+      },
+      "portionSource": "1 fillet",
+      "perServing": {
+        "amount": 122,
+        "unit": "g",
+        "calories": 106.14,
+        "protein": 23.17,
+        "carbs": 0,
+        "fat": 0.84
+      }
+    },
+    "171962": {
+      "per100g": {
+        "calories": 92,
+        "protein": 19.38,
+        "carbs": 0,
+        "fat": 1.02
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 78.2,
+        "protein": 16.47,
+        "carbs": 0,
+        "fat": 0.87
+      }
+    },
+    "171968": {
+      "per100g": {
+        "calories": 86,
+        "protein": 17.41,
+        "carbs": 0.74,
+        "fat": 0.97
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 73.1,
+        "protein": 14.8,
+        "carbs": 0.63,
+        "fat": 0.82
+      }
+    },
+    "171989": {
+      "per100g": {
+        "calories": 146,
+        "protein": 24.18,
+        "carbs": 0,
+        "fat": 4.73
+      },
+      "portionSource": "1 fillet",
+      "perServing": {
+        "amount": 62,
+        "unit": "g",
+        "calories": 90.52,
+        "protein": 14.99,
+        "carbs": 0,
+        "fat": 2.93
+      }
+    },
+    "172404": {
+      "per100g": {
+        "calories": 157,
+        "protein": 19.7,
+        "carbs": 0,
+        "fat": 8.12
+      },
+      "portionSource": "1 unit (yield from 1 lb ready-to-cook chicken)",
+      "perServing": {
+        "amount": 105,
+        "unit": "g",
+        "calories": 164.85,
+        "protein": 20.69,
+        "carbs": 0,
+        "fat": 8.53
+      }
+    },
+    "172835": {
+      "per100g": {
+        "calories": 108,
+        "protein": 22.22,
+        "carbs": 0,
+        "fat": 1.49
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 91.8,
+        "protein": 18.89,
+        "carbs": 0,
+        "fat": 1.27
+      }
+    },
+    "172928": {
+      "per100g": {
+        "calories": 201,
+        "protein": 13.45,
+        "carbs": 6.55,
+        "fat": 13.1
+      },
+      "portionSource": "1 tbsp",
+      "perServing": {
+        "amount": 13,
+        "unit": "g",
+        "calories": 26.13,
+        "protein": 1.75,
+        "carbs": 0.85,
+        "fat": 1.7
+      }
+    },
+    "173572": {
+      "per100g": {
+        "calories": 900,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 99.8
+      },
+      "portionSource": "1 tbsp",
+      "perServing": {
+        "amount": 12.8,
+        "unit": "g",
+        "calories": 115.2,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 12.77
+      }
+    },
+    "174182": {
+      "per100g": {
+        "calories": 131,
+        "protein": 20.35,
+        "carbs": 0,
+        "fat": 4.84
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 111.35,
+        "protein": 17.3,
+        "carbs": 0,
+        "fat": 4.11
+      }
+    },
+    "174188": {
+      "per100g": {
+        "calories": 264,
+        "protein": 24.6,
+        "carbs": 4,
+        "fat": 17.9
+      },
+      "portionSource": "1 tbsp",
+      "perServing": {
+        "amount": 16,
+        "unit": "g",
+        "calories": 42.24,
+        "protein": 3.94,
+        "carbs": 0.64,
+        "fat": 2.86
+      }
+    },
+    "174192": {
+      "per100g": {
+        "calories": 104,
+        "protein": 17.78,
+        "carbs": 0,
+        "fat": 3.17
+      },
+      "portionSource": "1 fillet",
+      "perServing": {
+        "amount": 79,
+        "unit": "g",
+        "calories": 82.16,
+        "protein": 14.05,
+        "carbs": 0,
+        "fat": 2.5
+      }
+    },
+    "174193": {
+      "per100g": {
+        "calories": 184,
+        "protein": 18.44,
+        "carbs": 0,
+        "fat": 11.66
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 156.4,
+        "protein": 15.67,
+        "carbs": 0,
+        "fat": 9.91
+      }
+    },
+    "174196": {
+      "per100g": {
+        "calories": 70,
+        "protein": 12.41,
+        "carbs": 0,
+        "fat": 1.93
+      },
+      "portionSource": "1 oz, boneless",
+      "perServing": {
+        "amount": 28.35,
+        "unit": "g",
+        "calories": 19.85,
+        "protein": 3.52,
+        "carbs": 0,
+        "fat": 0.55
+      }
+    },
+    "174206": {
+      "per100g": {
+        "calories": 77,
+        "protein": 15.97,
+        "carbs": 0,
+        "fat": 0.95
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 65.45,
+        "protein": 13.57,
+        "carbs": 0,
+        "fat": 0.81
+      }
+    },
+    "174212": {
+      "per100g": {
+        "calories": 105,
+        "protein": 17.1,
+        "carbs": 6.01,
+        "fat": 0.76
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 89.25,
+        "protein": 14.54,
+        "carbs": 5.11,
+        "fat": 0.65
+      }
+    },
+    "174215": {
+      "per100g": {
+        "calories": 79,
+        "protein": 16.24,
+        "carbs": 0.82,
+        "fat": 0.7
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 67.15,
+        "protein": 13.8,
+        "carbs": 0.7,
+        "fat": 0.6
+      }
+    },
+    "174223": {
+      "per100g": {
+        "calories": 92,
+        "protein": 15.58,
+        "carbs": 3.08,
+        "fat": 1.38
+      },
+      "portionSource": "1 oz, boneless",
+      "perServing": {
+        "amount": 28.35,
+        "unit": "g",
+        "calories": 26.08,
+        "protein": 4.42,
+        "carbs": 0.87,
+        "fat": 0.39
+      }
+    },
+    "174465": {
+      "per100g": {
+        "calories": 130,
+        "protein": 18.28,
+        "carbs": 1.42,
+        "fat": 5.18
+      },
+      "portionSource": "1 giblets",
+      "perServing": {
+        "amount": 115,
+        "unit": "g",
+        "calories": 149.5,
+        "protein": 21.02,
+        "carbs": 1.63,
+        "fat": 5.96
+      }
+    },
+    "174471": {
+      "per100g": {
+        "calories": 110,
+        "protein": 20.64,
+        "carbs": 0,
+        "fat": 2.47
+      },
+      "portionSource": "3 oz",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 93.5,
+        "protein": 17.54,
+        "carbs": 0,
+        "fat": 2.1
+      }
+    },
+    "175132": {
+      "per100g": {
+        "calories": 143,
+        "protein": 22.32,
+        "carbs": 1.5,
+        "fat": 6.42
+      },
+      "portionSource": "1 tbsp",
+      "perServing": {
+        "amount": 14,
+        "unit": "g",
+        "calories": 20.02,
+        "protein": 3.12,
+        "carbs": 0.21,
+        "fat": 0.9
+      }
+    },
+    "2684444": {
+      "per100g": {
+        "calories": 65.9855,
+        "protein": 16.06875,
+        "carbs": 0,
+        "fat": 0.6675
+      },
+      "portionSource": "1 RACC",
+      "perServing": {
+        "amount": 115,
+        "unit": "g",
+        "calories": 75.88,
+        "protein": 18.48,
+        "carbs": 0,
+        "fat": 0.77
+      }
+    },
+    "2684445": {
+      "per100g": {
+        "calories": 129.1124,
+        "protein": 16.46875,
+        "carbs": 0,
+        "fat": 7.308
+      },
+      "portionSource": "1 RACC",
+      "perServing": {
+        "amount": 115,
+        "unit": "g",
+        "calories": 148.48,
+        "protein": 18.94,
+        "carbs": 0,
+        "fat": 8.4
+      }
+    },
+    "2684446": {
+      "per100g": {
+        "calories": 80.9935,
+        "protein": 18.65,
+        "carbs": 0,
+        "fat": 0.8075
+      },
+      "portionSource": "1 RACC",
+      "perServing": {
+        "amount": 85,
+        "unit": "g",
+        "calories": 68.84,
+        "protein": 15.85,
+        "carbs": 0,
+        "fat": 0.69
+      }
+    },
+    "2727568": {
+      "per100g": {
+        "calories": 167.55,
+        "protein": 18.40625,
+        "carbs": -0.45875,
+        "fat": 10.64
+      },
+      "portionSource": "1 RACC",
+      "perServing": {
+        "amount": 114,
+        "unit": "g",
+        "calories": 191.01,
+        "protein": 20.98,
+        "carbs": -0.52,
+        "fat": 12.13
+      }
+    }
+  }
 }

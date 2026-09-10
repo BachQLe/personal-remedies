@@ -118,7 +118,7 @@ What was genuinely wrong: the **Saved Recipes empty state** on the Meal Plan pag
 
 ## Consequences & open items
 
-- **The news/alerts channel lost its only mount point.** Deleting the "Discover your best recipes" banner (#5) removed the sole place `src/api/messages.js`'s `getActiveMessages`/`dismissMessage` and `public/messages.json` were ever rendered. Both files are still in the tree, fully functional, wired to nothing. `REMEDI_MASTER_PLAN.md` §4.7 ("News / alerts channel. In-app message surface now; push once native.") is reopened — there is currently no in-app surface for it at all.
+- **The news/alerts channel lost its only mount point — since resolved.** Deleting the "Discover your best recipes" banner (#5) removed the sole place `src/api/messages.js`'s `getActiveMessages`/`dismissMessage` and `public/messages.json` were ever rendered. It now mounts from a new "What's new" row on Profile (`src/screens/profile/ProfileScreen.jsx`, `WhatsNewSheet.jsx`), with an unread dot driven off the same active-messages fetch. `REMEDI_MASTER_PLAN.md` §4.7 ("News / alerts channel. In-app message surface now; push once native.") is closed again.
 - **`Remedi_Build_Checklist_v3.docx`** — this wave did not touch the binary; the deltas described in this document (renames, the merged Search screen, the FAB fix, the Saved Recipes copy fix, etc.) still need to be folded into it by whoever owns that file.
 - **The carousel's 50-rows-for-8 over-fetch** (#6) is unaddressed, by choice — it's flagged, not fixed.
 - **The two-recipe-surfaces follow-up from #2** — Home is down to one recipe entry point, but `/app/recipes` (browse) and Best & Worst Choices' Best Recipes tab (top-ranked rails) still overlap one level down and haven't been reconciled.

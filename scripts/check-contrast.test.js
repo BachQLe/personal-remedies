@@ -2,26 +2,16 @@
  * check-contrast.test.js — regression guard for scripts/check-contrast.mjs
  * (T6A, REMEDI_MASTER_PLAN.md Phase 5 "Accessibility").
  *
- * This does NOT assert every pairing passes WCAG AA — as of this writing 15
- * of the app's 34 real color pairings fail (see KNOWN_FAILURES below), most
- * notably the primary CTA button (PrimaryButton.jsx, 3.46:1 vs the 4.5:1
- * required) and the entire SignalChip "beneficial/limit/avoid" tinted-text
- * system (2.42–3.83:1). Those are BRAND PALETTE decisions (which shade of
- * forest-700/benefit-600/etc. to use), not something this task is
- * authorized to silently change — REMEDI_MASTER_PLAN.md T6A brief: "if
- * existing pairings fail AA, do NOT silently change the brand palette —
- * report the failures clearly... Bach decides palette changes, not you."
+ * As of the W2 palette pass (Sep 2026) all 34 of the app's real color
+ * pairings pass WCAG AA — see docs/a11y-checklist.md §3 for the summary of
+ * which tokens changed and why. KNOWN_FAILURES below is the documented
+ * baseline of pairings allowlisted as pre-existing brand-palette failures;
+ * it is intentionally empty now that the baseline is clean.
  *
- * So instead this test locks in the CURRENT set of failing pairing ids as a
- * documented baseline:
- *   - A NEW failure (a pairing not in KNOWN_FAILURES that now fails) means
- *     someone introduced a regression — e.g. picked a lower-contrast token
- *     for existing UI — and the test fails loudly.
- *   - A pairing in KNOWN_FAILURES that starts PASSING (e.g. Bach approves a
- *     palette tweak) is reported as a friendly note, not a failure, so
- *     fixing one doesn't require touching this test file first — but it DOES
- *     mean KNOWN_FAILURES has gone stale and should be trimmed by whoever
- *     made that change.
+ * This test still does its job with an empty baseline:
+ *   - A NEW failure (any pairing that now fails, since KNOWN_FAILURES is
+ *     empty) means someone introduced a regression — e.g. picked a
+ *     lower-contrast token for existing UI — and the test fails loudly.
  *   - Adding a brand-new PAIRINGS entry that fails AA requires a conscious
  *     choice: either fix the token pairing, or add its id to
  *     KNOWN_FAILURES with a reason — silently leaving it out isn't possible
@@ -31,30 +21,14 @@ import { describe, expect, it } from 'vitest';
 import { evaluatePairings } from './check-contrast.mjs';
 
 /**
- * Pre-existing AA failures as of T6A (Aug 2026), each with the reason it's
- * allowlisted rather than fixed here. TODO(bach): review whether to bump
- * these tokens a shade or two for AA compliance; see check-contrast.mjs's
- * PAIRINGS list (and re-run `node scripts/check-contrast.mjs`) for exact
- * ratios and the offending hex pairs.
+ * Documented AA-failure baseline. Empty as of the W2 palette pass (Sep
+ * 2026) — the full 34-pairing set passes AA. Add an entry here only for a
+ * newly-introduced pairing that's a deliberate, reported brand-palette
+ * decision to leave failing (with the reason), not as a way to silence a
+ * regression.
  * @type {Record<string, string>}
  */
-const KNOWN_FAILURES = {
-  'muted-text-on-white': 'char-400 (#8A8377) on white is 3.75:1, used for de-emphasized icon/label text app-wide — bumping to char-500 everywhere is a broader sweep than this task scope.',
-  'primary-btn-text': "the app's primary CTA (PrimaryButton.jsx): text-on-dark (#F3EFE6) on forest-700 (#628C22) is 3.46:1 — the single highest-impact finding in this audit.",
-  'pill-forest-text': 'same token pair as primary-btn-text, via .pill-forest in src/index.css.',
-  'pill-honey-text': 'white on honey-600 (#C2902F) is 2.87:1 — legacy token, .pill-honey in src/index.css.',
-  'retry-btn-text': 'DataState.jsx retry button reuses forest-700 background; white text is 3.97:1, just under 4.5:1.',
-  'signalchip-beneficial-text': 'SignalChip.jsx "beneficial" tinted text (benefit-600 on benefit-100) is 3.44:1 — part of the brand-defining food-guidance signal system.',
-  'signalchip-limit-text': 'SignalChip.jsx "limit" tinted text (caution-600 on caution-100) is 2.42:1 — the worst ratio in the audit.',
-  'signalchip-limit-dot': 'SignalChip.jsx "limit" dot-icon fill (white on caution-600) is 2.93:1, just under the 3:1 UI-component threshold.',
-  'signalchip-avoid-text': 'SignalChip.jsx "avoid" tinted text (avoid-600 on avoid-100) is 3.83:1.',
-  'studyreferences-link': 'StudyReferences.jsx citation link (forest-700 on white) is 3.97:1 — also reused by pill-selected/primary-btn-text\'s forest-700.',
-  'pillswitcher-selected-positive': 'PillSwitcher.jsx tone="positive" selected thumb (white on forest-600) is 2.80:1.',
-  'pillswitcher-selected-negative': 'PillSwitcher.jsx tone="negative" selected thumb (white on red-500) is 4.05:1.',
-  'pill-selected': 'Pill.jsx selected state reuses forest-700; white text is 3.97:1.',
-  'searchinput-placeholder': 'SearchInput.jsx placeholder text (char-300 on white) is 2.18:1 — placeholder text is exempt from some interpretations of AA but fails outright here regardless.',
-  'emptystate-icon': 'EmptyState.jsx icon-in-circle (forest-600 on forest-50) is 2.62:1, under the 3:1 UI-component threshold.',
-};
+const KNOWN_FAILURES = {};
 
 describe('contrast check (T6A): AA regressions vs. documented baseline', () => {
   it('no pairing fails AA unless it is in the documented KNOWN_FAILURES baseline', async () => {

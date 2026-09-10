@@ -12,9 +12,11 @@
  *      item with only a coarse group resolves via the 'h' fallback, and a
  *      recipe resolves via RECIPE_SLOT_ESTIMATES.beverages.
  *
- * Runs against the real (empty) USDA tables — same "production today" shape
- * as nutrition.test.js — so every item here resolves via the tier-3 estimate
- * table, same numbers `estimateNutrition` would have produced pre-T3D.
+ * Runs against the real committed USDA tables (src/data/usda/fdcMap.json /
+ * nutrients.json), which are now populated — fixture ids here are chosen
+ * outside that map's id range (900000+) so every item still resolves via
+ * the tier-3 estimate table, same numbers `estimateNutrition` would have
+ * produced pre-T3D. See nutrition.test.js for the same convention.
  */
 import { describe, expect, it } from 'vitest';
 import { estimatePlanDayCalories } from '../calorieNeeds.js';
@@ -28,15 +30,15 @@ describe('estimatePlanDayCalories', () => {
 
   it('sums calories across slots and counts resolvable vs unresolvable items', () => {
     const slots = {
-      breakfast: [{ id: 1, fineGroup: 'b1' }], // 180 kcal
-      lunch: [{ id: 2, group: 'zz' }], // unresolvable
+      breakfast: [{ id: 900001, fineGroup: 'b1' }], // 180 kcal
+      lunch: [{ id: 900002, group: 'zz' }], // unresolvable
     };
     const result = estimatePlanDayCalories(slots);
     expect(result).toEqual({ total: 180, counted: 1, uncounted: 1 });
   });
 
   it('ignores non-array slot values and null items without throwing', () => {
-    const slots = { breakfast: null, lunch: [null, { id: 1, fineGroup: 'b1' }] };
+    const slots = { breakfast: null, lunch: [null, { id: 900001, fineGroup: 'b1' }] };
     const result = estimatePlanDayCalories(slots);
     expect(result).toEqual({ total: 180, counted: 1, uncounted: 0 });
   });

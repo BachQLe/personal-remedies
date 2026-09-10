@@ -26,12 +26,12 @@ import { numericIdToRating } from '../../utils/rating.js';
  *     "Neutral" pill, because on a detail view silence would read as a
  *     loading/error state rather than an honest "neither helps nor hurts."
  *
- * DARK SURFACES ONLY: every color here (`text-white`, `text-white/25`,
- * `text-red-400`, `bg-white/15`, ...) is hardcoded for the dark
- * photo-gradient overlays this component lives on (FoodImageCard,
- * FoodDetailCard). If a light-surface use case ever comes up, add an
- * explicit `tone` prop rather than trying to tweak these opacities in
- * place — they are not designed to survive on a light background.
+ * Surfaces: defaults to `tone="dark"` — colors (`text-white`,
+ * `text-white/25`, `text-red-400`, `bg-white/15`, ...) tuned for the dark
+ * photo-gradient overlays this component was built for (FoodImageCard,
+ * FoodDetailCard's front face). Pass `tone="light"` for a white/paper card
+ * surface (e.g. FoodDetailCard's back-face "Conditions in your profile"
+ * rows) — uses the app's benefit/avoid signal tokens instead.
  *
  * Two deliberate removals versus the old StarRating:
  *   - No `showValue`/`X/5` text — there's no natural denominator on a
@@ -51,16 +51,20 @@ import { numericIdToRating } from '../../utils/rating.js';
  * @param {boolean} [props.showNeutralLabel] - Show a "Neutral" pill for
  *   numericId 4 instead of rendering nothing. Default false (compact card
  *   contexts); pass true on detail views. See the three-case doc above.
+ * @param {'dark'|'light'} [props.tone] - Surface the row sits on. Default
+ *   'dark' (photo overlays). Use 'light' on a white/paper card.
  * @param {string} [props.className] - Appended to the root element.
  */
 export default function FoodRating({
-  numericId, size = 15, loading = false, showNeutralLabel = false, className = '',
+  numericId, size = 15, loading = false, showNeutralLabel = false, tone = 'dark', className = '',
 }) {
+  const isLight = tone === 'light';
+
   if (loading) {
     // shape="block" (not "pill") on purpose — Skeleton's pill variant hardcodes
     // h-7, and className order in the attribute does not beat it (Tailwind
     // stylesheet source order decides).
-    return <Skeleton shape="block" className={`h-4 w-16 rounded-pill ${className}`} tint="bg-white/15" />;
+    return <Skeleton shape="block" className={`h-4 w-16 rounded-pill ${className}`} tint={isLight ? 'bg-sand-200' : 'bg-white/15'} />;
   }
 
   const rating = numericIdToRating(numericId);
@@ -69,15 +73,15 @@ export default function FoodRating({
   if (rating.kind === 'neutral') {
     if (!showNeutralLabel) return null;
     return (
-      <span className={`inline-flex items-center rounded-pill bg-white/15 px-2 py-[3px] font-label text-[10px] uppercase tracking-eyebrow text-white/80 ${className}`}>
+      <span className={`inline-flex items-center rounded-pill px-2 py-[3px] font-label text-[10px] uppercase tracking-eyebrow ${isLight ? 'bg-sand-100 text-char-500' : 'bg-white/15 text-white/80'} ${className}`}>
         Neutral
       </span>
     );
   }
 
   const isSkull = rating.kind === 'skull';
-  const on  = isSkull ? 'text-red-400'    : 'text-white';
-  const off = isSkull ? 'text-red-400/25' : 'text-white/25';
+  const on  = isLight ? (isSkull ? 'text-avoid-600' : 'text-benefit-600') : (isSkull ? 'text-red-400'    : 'text-white');
+  const off = isLight ? 'text-char-300' : (isSkull ? 'text-red-400/25' : 'text-white/25');
   const label = isSkull
     ? `${rating.count} of 3 skulls — harmful for your conditions`
     : `${rating.count} of 3 stars`;

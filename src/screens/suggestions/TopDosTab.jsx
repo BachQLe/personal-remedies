@@ -22,6 +22,7 @@
  */
 import { useState } from 'react';
 import { getTopDosAndDonts, getCachedRefCount } from '../../api/api.js';
+import { MAX_RECOMMENDATIONS_PER_CATEGORY } from '../../api/config.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
@@ -29,9 +30,6 @@ import DataState from '../../components/shared/DataState.jsx';
 import CoverageNotice from './CoverageNotice.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
-
-/** Max rows shown per direction. */
-const MAX_ROWS = 20;
 
 // ── Skeleton (card-shaped rows to match the button-card list; bespoke —
 // kept for 'loading' per DataState's docblock rather than its generic one) ──
@@ -79,7 +77,7 @@ export default function TopDosTab({ onSelectFood }) {
 
   const activeResult = data?.[direction];
   const items = activeResult?.items ?? [];
-  const visibleItems = items.slice(0, MAX_ROWS);
+  const visibleItems = items.slice(0, MAX_RECOMMENDATIONS_PER_CATEGORY);
   const usedFallback = !!(data?.consume?.usedFallback || data?.avoid?.usedFallback);
   const firstConditionId = data?.requestedConditionIds?.[0] ?? null;
 

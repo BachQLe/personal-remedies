@@ -14,10 +14,11 @@
  */
 
 import { getMealPlanSuggestions } from './adapter.js';
-import { PLAN_SLOTS, PLAN_SLOT_KEYS, MEAL_SLOT_MAP } from './config.js';
+import { PLAN_SLOTS, PLAN_SLOT_KEYS, MEAL_SLOT_MAP, MAX_SAVED_PLANS } from './config.js';
 import { getPlan, setPlan, consumeLegacyQueue } from '../state/dailyPlan.js';
 import { nextSevenDays } from '../screens/plan/planDates.js';
 import { mealTypeForItem } from '../components/shared/mealTypeMeta.jsx';
+import { storage } from './storage.js';
 
 /**
  * Session memo of the last-loaded candidate pools, keyed by conditions CSV —
@@ -807,4 +808,90 @@ export async function shuffleSlot(profile, dateKey, slotKey) {
   const plan = { ...existing, days: { ...existing.days, [dateKey]: newDay } };
   setPlan(plan);
   return plan;
+}
+
+// ── Saved plans (Task 8) ─────────────────────────────────────────────────────
+//
+// A user-named snapshot of the CURRENTLY ACTIVE WeeklyPlan, separate from
+// saving an individual recipe (SaveButton/library.js). Persisted via
+// storage.js's namespaced persistence wrapper (never a second storage
+// mechanism) under its own key, as an array capped at MAX_SAVED_PLANS
+// (config.js). Capping policy: BLOCK a new save at the cap with a clear
+// `{ ok: false, reason: 'at-cap' }` result for the caller to surface as a
+// message — never silently evict the oldest save (that would delete a named
+// snapshot the user asked to keep without telling them) and never fabricate
+// extra capacity.
+
+/** storage.js key for the saved-plans array — see module doc above. */
+const SAVED_PLANS_KEY = 'savedPlans';
+
+/**
+ * @typedef {Object} SavedPlanEntry
+ * @property {string} id
+ * @property {string} name
+ * @property {string} savedAt - ISO timestamp
+ * @property {import('../state/dailyPlan.js').WeeklyPlan} plan - a snapshot,
+ *   independent from this point on: loading it back (`loadSavedPlan`) copies
+ *   it into the live `dailyPlan` store, and subsequent edits to either the
+ *   live plan or this saved copy never affect the other.
+ */
+
+/**
+ * List saved plans, oldest-saved first (insertion order). Never trims —
+ * trimming to the cap only ever happens in `saveCurrentPlan`.
+ * @returns {SavedPlanEntry[]}
+ */
+export function getSavedPlans() {
+  const saved = storage.get(SAVED_PLANS_KEY, []);
+  return Array.isArray(saved) ? saved : [];
+}
+
+/**
+ * Save a snapshot of the currently active plan (`getPlan()`) under a name.
+ * @param {string} [name] - trimmed; falls back to `Plan N` when blank.
+ * @returns {{ ok: true, entry: SavedPlanEntry } | { ok: false, reason: 'no-plan'|'at-cap' }}
+ */
+export function saveCurrentPlan(name) {
+  const plan = getPlan();
+  if (!plan) return { ok: false, reason: 'no-plan' };
+
+  const saved = getSavedPlans();
+  if (saved.length >= MAX_SAVED_PLANS) return { ok: false, reason: 'at-cap' };
+
+  const entry = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    name: (name || '').trim() || `Plan ${saved.length + 1}`,
+    savedAt: new Date().toISOString(),
+    plan,
+  };
+  storage.set(SAVED_PLANS_KEY, [...saved, entry]);
+  return { ok: true, entry };
+}
+
+/**
+ * Load a saved plan back into the live `dailyPlan` store, REPLACING whatever
+ * plan is currently active — same whole-plan-overwrite contract every other
+ * export here uses via `setPlan`. The saved entry is left in place; loading
+ * is non-destructive to the saved list.
+ * @param {string} id
+ * @returns {boolean} true if a matching saved plan was found and loaded.
+ */
+export function loadSavedPlan(id) {
+  const entry = getSavedPlans().find((p) => p.id === id);
+  if (!entry) return false;
+  setPlan(entry.plan);
+  return true;
+}
+
+/**
+ * Delete a saved plan by id. No-op (returns false) if not found.
+ * @param {string} id
+ * @returns {boolean}
+ */
+export function deleteSavedPlan(id) {
+  const saved = getSavedPlans();
+  const next = saved.filter((p) => p.id !== id);
+  if (next.length === saved.length) return false;
+  storage.set(SAVED_PLANS_KEY, next);
+  return true;
 }

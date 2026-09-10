@@ -37,6 +37,16 @@
  * (src/api/recipeIngestion.js, wired into `getRecipesRaw` in adapter.js);
  * absent (not guessed/empty-array-as-placeholder) when there's no overlay
  * match.
+ *
+ * NOTE: despite the name, this function is also called for plain (non-
+ * recipe) foods — MealprepCarousel's "Top Dos & Don'ts" home rail seeds
+ * FoodDetailCard via this same function with `isRecipe: false`, since
+ * `topFoodsForConditions` is legitimate "similar items" content for a plain
+ * food. `card` carries no reliable recipe/food signal at this layer, so
+ * `topFoodsForConditions` is always computed here; FoodDetailCard.jsx is
+ * what gates it out of the rendered recipe view (`!isRecipe &&` on the rail,
+ * mirroring its other recipe-gated blocks), since only it reliably knows
+ * which case it's in.
  */
 
 import { assessFood, isExcludedItem } from './adapter.js';

@@ -494,9 +494,15 @@ async function main() {
     attempted++;
     const rawName = item.displayAs || item.description || '';
     const normalizedTarget = normalizeFoodName(rawName);
+    // FDC's POST /foods/search returns a hard 400 for any query containing
+    // a "/" (observed on e.g. "Sugar/snap peas non-org") — strip it to a
+    // space for the HTTP query only. rawName (with the slash) is still what
+    // gets displayed/stored; normalizedTarget (used for scoring) already
+    // strips punctuation independently, so match quality is unaffected.
+    const searchQuery = rawName.replace(/\//g, ' ').replace(/\s+/g, ' ').trim();
 
     try {
-      const searchRes = await searchFoods(rawName, { apiKey, dataType: DATA_TYPE_PRIORITY, pageSize: 10 });
+      const searchRes = await searchFoods(searchQuery, { apiKey, dataType: DATA_TYPE_PRIORITY, pageSize: 10 });
       const candidates = searchRes.foods || [];
       const best = pickBestMatch(normalizedTarget, candidates, { threshold: DEFAULT_MATCH_THRESHOLD });
 

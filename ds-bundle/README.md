@@ -19,7 +19,7 @@ Personal Remedies is a personalized nutrition app that recommends foods based on
 ### Color Philosophy
 The palette is nature-forward and clinical at the same time — forest greens for growth/benefit, navy for authority/trust, lavender for calm/wellness, and a strong signal system (green/yellow/red/blue) that tells users exactly how each food affects their body.
 
-- **Forest / Lime** (`--forest-700` = `#628C22`) — primary CTAs, active states, success
+- **Forest / Lime** (`--forest-700` = `#4F7118`) — primary CTAs, active states, success
 - **Navy** (`--blue-950` = `#080E30`) — headings, hero backgrounds, data ink
 - **Lavender** (`--lavender-300` = `#C8A8E8`) — onboarding panels, form surfaces
 - **Yellow** (`--yellow-400` = `#F5CC30`) — accent, caution, breakfast badge

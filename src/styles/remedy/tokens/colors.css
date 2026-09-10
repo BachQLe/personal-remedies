@@ -12,8 +12,8 @@
   --forest-400: #B4D85C;   /* base */
   --forest-500: #98C040;
   --forest-600: #7CA830;
-  --forest-700: #628C22;   /* primary action */
-  --forest-800: #4A6E18;
+  --forest-700: #4F7118;   /* primary action */
+  --forest-800: #3D5812;
   --forest-900: #345010;
   --forest-950: #1E3208;
 
@@ -86,7 +86,7 @@
   --benefit-700: #1F6B43;
   --benefit-600: #2F8C5A;  /* beneficial / eat freely */
   --benefit-100: #DCEDE2;
-  --caution-700: #9C6A18;
+  --caution-700: #8A5D15;
   --caution-600: #C98A2E;  /* limit / moderate */
   --caution-100: #F6E8CB;
   --avoid-700: #9E3A22;
@@ -106,7 +106,8 @@
   --plum-400: #A86C8E;
   --plum-100: #EBDDE6;
   --plum-50:  #F4ECF0;
-  --honey-700: #9C6F1E;
+  --honey-800: #6F4E14;
+  --honey-700: #94691C;
   --honey-600: #C2902F;
   --honey-500: #D6A642;
   --honey-100: #F3E6C7;

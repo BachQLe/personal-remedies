@@ -23,9 +23,9 @@ export default function PillSwitcher({ options, value, onChange, className = '',
 
   const thumbClasses =
     selectedTone === 'positive'
-      ? 'bg-forest-600'
+      ? 'bg-forest-700'
       : selectedTone === 'negative'
-      ? 'bg-red-500'
+      ? 'bg-red-600'
       : 'bg-white shadow-xs';
 
   return (

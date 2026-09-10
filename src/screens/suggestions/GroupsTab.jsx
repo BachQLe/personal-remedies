@@ -23,21 +23,21 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Fish, Egg, Apple, Carrot, Wheat, Milk, Cookie, Soup, Pill,
+  Fish, Egg, Apple, Carrot, Wheat, Milk, Cookie, Soup, Sparkles, Pill,
 } from 'lucide-react';
 import { getGroupLabels, getFineGroupLabelsByCoarse } from '../../api/api.js';
 import { COARSE_GROUP_LABELS } from '../../api/config.js';
 
 // ── CategoryGrid ─────────────────────────────────────────────────────────────
-// All 9 coarse food groups as a 2-column grid of tiles — tapping a tile
+// All 10 coarse food groups as a 2-column grid of tiles — tapping a tile
 // navigates to /app/suggestions/group/:groupId.
 
 // Shared with GroupDetailScreen for its route-param validation.
 // eslint-disable-next-line react-refresh/only-export-components
-export const CATEGORY_GRID_GROUPS = ['b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k'];
+export const CATEGORY_GRID_GROUPS = ['b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'];
 
 const CATEGORY_GRID_ICONS = {
-  b: Fish, c: Egg, d: Apple, e: Carrot, f: Wheat, g: Milk, h: Cookie, i: Soup, k: Pill,
+  b: Fish, c: Egg, d: Apple, e: Carrot, f: Wheat, g: Milk, h: Cookie, i: Soup, j: Sparkles, k: Pill,
 };
 
 // Bespoke skeleton grid — same 2-col tile shape as CategoryGrid, so the

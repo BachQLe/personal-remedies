@@ -13,20 +13,20 @@ const CONFIG = {
   beneficial: {
     text: "Beneficial",
     bg: "bg-benefit-100",
-    fg: "text-benefit-600",
-    dot: "bg-benefit-600",
+    fg: "text-benefit-700",
+    dot: "bg-benefit-700",
   },
   limit: {
     text: "Limit",
     bg: "bg-caution-100",
-    fg: "text-caution-600",
-    dot: "bg-caution-600",
+    fg: "text-caution-700",
+    dot: "bg-caution-700",
   },
   avoid: {
     text: "Avoid",
     bg: "bg-avoid-100",
-    fg: "text-avoid-600",
-    dot: "bg-avoid-600",
+    fg: "text-avoid-700",
+    dot: "bg-avoid-700",
   },
 };
 

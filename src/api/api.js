@@ -61,7 +61,7 @@ export {
   getFoodIdByName,
 };
 export { buildRecipeDetail } from './recipeDetail.js';
-export { ensurePlanForWeek, regenerateDay, regenerateWeek, shuffleSlot, inferSlotKey, generatePlanFromPicks, toPlanItem } from './planBuilder.js';
+export { ensurePlanForWeek, regenerateDay, regenerateWeek, shuffleSlot, inferSlotKey, generatePlanFromPicks, toPlanItem, getSavedPlans, saveCurrentPlan, loadSavedPlan, deleteSavedPlan } from './planBuilder.js';
 
 // ── Unified search (foods + recipes) ─────────────────────────────────────────
 

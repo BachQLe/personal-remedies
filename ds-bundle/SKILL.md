@@ -9,7 +9,7 @@ Read the README.md file within this skill, and explore the other available files
 If creating visual artifacts (slides, mocks, throwaway prototypes, etc), copy assets out and create static HTML files for the user to view. If working on production code, you can copy assets and read the rules here to become an expert in designing with this brand.
 
 Key design rules to remember:
-- Primary CTA: `--forest-700` (#628C22) background, `--text-on-dark` (#F3EFE6) text, 6px border-radius
+- Primary CTA: `--forest-700` (#4F7118) background, `--text-on-dark` (#F3EFE6) text, 6px border-radius
 - Headings: Chillax font, `--blue-950` (#080E30) color
 - Labels / eyebrows: Quantico font, ALL CAPS, letter-spacing .12–.18em
 - Body: Switzer font, `--char-900` color

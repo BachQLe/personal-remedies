@@ -3,10 +3,10 @@
  * (src/api/nutrition.js, Task T3D).
  *
  * Runs against the REAL committed USDA tables (src/data/usda/fdcMap.json /
- * nutrients.json), which ship empty (`items: {}` / `nutrients: {}`) — that
- * IS production today, so these tests double as the "empty tables"
- * equivalence proof: with tier 1 (panel) and tier 2 (USDA) both unable to
- * hit, `resolveNutrition` must fall through to tier 3 and match
+ * nutrients.json), which are now populated with real foodItemID -> fdcId
+ * matches. Fixture ids in the tier-3/tier-4 sections below are deliberately
+ * chosen outside that map's id range (900000+) so tier 2 (USDA) still can't
+ * hit and `resolveNutrition` falls through to tier 3, matching
  * `estimateNutrition` byte-for-byte (plus the added `source` field).
  *
  * Tier-2 (USDA) matching WITH data present is covered separately in
@@ -51,7 +51,7 @@ describe('resolveNutrition — tier 1: recipe panel', () => {
 
 // ── Tier 2 absent (empty tables) → falls through to tier 3 ─────────────────
 
-describe('resolveNutrition — tier 2 (USDA) absent with empty committed tables', () => {
+describe('resolveNutrition — tier 2 (USDA) absent for an id with no map entry', () => {
   it('a plain food item with no panel and no USDA match falls through to the estimate tier', () => {
     const item = { id: 999999, fineGroup: 'b1', kind: 'food' };
     const result = resolveNutrition(item);
@@ -64,25 +64,25 @@ describe('resolveNutrition — tier 2 (USDA) absent with empty committed tables'
 
 describe('resolveNutrition — tier 3: estimate fallback', () => {
   it('resolves via fine food group', () => {
-    const item = { id: 1, fineGroup: 'b1' };
+    const item = { id: 900001, fineGroup: 'b1' };
     const result = resolveNutrition(item);
     expect(result).toEqual({ calories: 180, protein: 25, carbs: 0, fat: 8, estimated: true, source: 'estimate' });
   });
 
   it('resolves via coarse food group when fine group is absent/unlisted', () => {
-    const item = { id: 2, group: 'e9' };
+    const item = { id: 900002, group: 'e9' };
     const result = resolveNutrition(item);
     expect(result).toEqual({ calories: 50, protein: 2, carbs: 10, fat: 0, estimated: true, source: 'estimate' });
   });
 
   it('resolves a recipe via the per-slot table when it has no food group and no panel', () => {
-    const item = { id: 3, kind: 'recipe' };
+    const item = { id: 900003, kind: 'recipe' };
     const result = resolveNutrition(item, 'lunch');
     expect(result).toEqual({ calories: 450, protein: 25, carbs: 45, fat: 18, estimated: true, source: 'estimate' });
   });
 
   it('resolves a recipe in the beverages slot via RECIPE_SLOT_ESTIMATES.beverages', () => {
-    const item = { id: 4, kind: 'recipe' };
+    const item = { id: 900004, kind: 'recipe' };
     const result = resolveNutrition(item, 'beverages');
     expect(result).toEqual({ calories: 120, protein: 2, carbs: 24, fat: 1, estimated: true, source: 'estimate' });
   });
@@ -97,17 +97,17 @@ describe('resolveNutrition — tier 4: null (never guess)', () => {
   });
 
   it('returns null for a food item with no fine/coarse group match', () => {
-    const item = { id: 5, group: 'zz' };
+    const item = { id: 900005, group: 'zz' };
     expect(resolveNutrition(item)).toBeNull();
   });
 
   it('returns null for a recipe with no panel, no group, and no slotKey', () => {
-    const item = { id: 6, kind: 'recipe' };
+    const item = { id: 900006, kind: 'recipe' };
     expect(resolveNutrition(item)).toBeNull();
   });
 
   it('returns null for a recipe with no panel and a slotKey not in RECIPE_SLOT_ESTIMATES', () => {
-    const item = { id: 7, kind: 'recipe' };
+    const item = { id: 900007, kind: 'recipe' };
     expect(resolveNutrition(item, 'not-a-real-slot')).toBeNull();
   });
 });

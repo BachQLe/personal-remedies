@@ -5,6 +5,7 @@ import Icon from './shared/Icon.jsx';
 import Skeleton from './shared/Skeleton.jsx';
 import FoodRating from './shared/FoodRating.jsx';
 import StudyReferences from './shared/StudyReferences.jsx';
+import EmptyState from './shared/EmptyState.jsx';
 import { getLibrary, addToLibrary, removeFromLibrary } from '../state/library.js';
 import { getFoodFacts, assessFood, getFoodIdByName } from '../api/api.js';
 import { storage } from '../api/storage.js';
@@ -16,42 +17,6 @@ import { openUrl } from '../api/browser.js';
 import Snackbar from './shared/Snackbar.jsx';
 
 const DISMISS_THRESHOLD = 100;
-
-// ── Tier config for per-condition rows. Self-contained (not imported from
-// elsewhere) so this card can render its tier chips independently. ──────────
-
-const TIER_CONFIG = {
-  Top: {
-    label: 'Top',
-    bg: 'bg-benefit-100',
-    fg: 'text-benefit-600',
-    dot: 'bg-benefit-600',
-  },
-  Strong: {
-    label: 'Strong',
-    bg: 'bg-forest-50',
-    fg: 'text-forest-700',
-    dot: 'bg-forest-600',
-  },
-  Good: {
-    label: 'Good',
-    bg: 'bg-paper-200',
-    fg: 'text-char-700',
-    dot: 'bg-char-500',
-  },
-  poor: {
-    label: 'Poor match',
-    bg: 'bg-avoid-100',
-    fg: 'text-avoid-600',
-    dot: 'bg-avoid-600',
-  },
-  Neutral: {
-    label: 'Neutral',
-    bg: 'bg-sand-100',
-    fg: 'text-char-500',
-    dot: 'bg-char-400',
-  },
-};
 
 // The Nutridigm API exposes no nutrition-fact fields anywhere (fooditems/
 // goodfor/detailed all probed, July 2026) — no nutrition UI is shown.
@@ -67,17 +32,21 @@ function getProfile() {
 
 /**
  * Single per-condition row in the back face's "Conditions in your profile"
- * section — tier pill, study count, and "couldn't load studies" honesty
- * state, backed by the shared StudyReferences component for the expandable
- * citations list. `showReferences` (default true) hides all study-related UI
- * for recipes, which show verdicts but never studies.
+ * section — verdict rating, study count, and "couldn't load studies"
+ * honesty state, backed by the shared StudyReferences component for the
+ * expandable citations list. `showReferences` (default true) hides all
+ * study-related UI for recipes, which show verdicts but never studies.
+ *
+ * Renders the verdict via the shared FoodRating (green star/red skull)
+ * component rather than a hand-rolled tier pill — this row already has a
+ * real per-condition `numericId` (raw.conditions[i].descriptionNumericID),
+ * so it uses the app's canonical numericId-driven rating system instead of
+ * the text-only tier pill (src/utils/tierConfig.js) that surfaces without a
+ * numericId fall back to. `tone="light"` since this row sits on a white
+ * card, unlike FoodRating's usual dark photo-overlay context.
  */
 function ConditionRow({ conditionAssessment, showReferences = true }) {
-  const { conditionName, tier, numericId, referenceCount, citations, referenceStatus } = conditionAssessment;
-  // Prefer a real tier match; numericId 4 ("Neutral / OK") maps to a null
-  // tier upstream (indistinguishable from "no data" otherwise), so fall back
-  // to the Neutral pill specifically for that case rather than any null tier.
-  const cfg = tier ? TIER_CONFIG[tier] : (numericId === 4 ? TIER_CONFIG.Neutral : null);
+  const { conditionName, numericId, referenceCount, citations, referenceStatus } = conditionAssessment;
   const refsErrored = referenceStatus === 'error';
 
   const formattedRefs = (citations || []).map((c) => (typeof c === 'string' ? { source: c } : c));
@@ -89,12 +58,7 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
           {conditionName}
         </span>
         <div className="flex items-center gap-2">
-          {cfg && (
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-pill text-[11px] font-semibold ${cfg.bg} ${cfg.fg}`}>
-              <span className={`w-[6px] h-[6px] rounded-full ${cfg.dot}`} />
-              {cfg.label}
-            </span>
-          )}
+          <FoodRating numericId={numericId} size={14} tone="light" showNeutralLabel />
           {showReferences && !refsErrored && referenceCount > 0 && (
             <span className="text-[11px] text-char-400 font-sans whitespace-nowrap">
               {referenceCount} {referenceCount === 1 ? 'study' : 'studies'}
@@ -578,9 +542,15 @@ export default function FoodDetailCard({ item, open, onClose }) {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-char-400 font-sans italic">
-                      No condition data available.
-                    </p>
+                    // Honest "nothing to show" state — fires when /goodfor
+                    // genuinely returned nothing for this item/condition
+                    // pairing (e.g. some lifestyle items like Smoking have no
+                    // per-condition scoring data), not a blank/broken card.
+                    <EmptyState
+                      icon="info"
+                      title="No data for this item"
+                      body="We don't have condition or study data for this pairing yet."
+                    />
                   )}
                 </div>
 
@@ -616,8 +586,18 @@ export default function FoodDetailCard({ item, open, onClose }) {
                     recipeDetail.js (outside this file's ownership this
                     wave) and may not yet honor the non-food icon rule for
                     a companion that happens to be a 'k'/lifestyle item —
-                    a known, documented gap, not attempted here. */}
-                {item?.topFoodsForConditions?.length > 1 && (
+                    a known, documented gap, not attempted here.
+                    Recipe-gated: buildRecipeDetail is shared by both recipe
+                    screens and MealprepCarousel's plain "Top Dos & Don'ts"
+                    foods (isRecipe: false), and for the latter this rail is
+                    genuinely the item's own "similar items" content. For a
+                    recipe, though, these are unrelated individual foods that
+                    merely target the same conditions — showing them under a
+                    recipe's health details reads as if they were part of the
+                    recipe, which they're not. A recipe's own content is
+                    `realIngredients` (above) when a C1 overlay match exists,
+                    or nothing. */}
+                {!isRecipe && item?.topFoodsForConditions?.length > 1 && (
                   <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
                     {/* COPY-REVIEW: flagged for C2 health-claim audit */}
                     <p className="text-[11px] font-label tracking-[0.14em] uppercase text-char-400 mb-3">

@@ -146,7 +146,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
           aria-invalid={!!error}
           aria-describedby={error ? 'otp-code-error' : undefined}
           autoFocus
-          className="w-full text-center tracking-[0.5em] text-[22px] font-sans px-4 py-3 bg-white border border-sand-200 rounded-md text-char-900 placeholder:text-char-300 focus:outline-none focus:border-char-700 focus:shadow-[0_0_0_3px_rgba(66,61,54,0.22)] transition-[border-color,box-shadow] duration-[120ms] disabled:opacity-60"
+          className="w-full text-center tracking-[0.5em] text-[22px] font-sans px-4 py-3 bg-white border border-sand-200 rounded-md text-char-900 placeholder:text-char-500 focus:outline-none focus:border-char-700 focus:shadow-[0_0_0_3px_rgba(66,61,54,0.22)] transition-[border-color,box-shadow] duration-[120ms] disabled:opacity-60"
           style={{ minHeight: 44 }}
         />
 

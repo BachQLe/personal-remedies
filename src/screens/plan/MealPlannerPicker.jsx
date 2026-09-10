@@ -17,6 +17,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, RefreshCw } from 'lucide-react';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
@@ -49,9 +50,6 @@ const TAB_OPTIONS = [
 // as too thin to hand over without comment. Deliberately not 100% — these are
 // coarse estimates on both sides, so only a clear shortfall is worth a prompt.
 const CALORIE_GAP_RATIO = 0.8;
-
-/** Cap on quick-add cards in the gap sheet — it's a nudge, not a second picker. */
-const GAP_SUGGESTION_LIMIT = 24;
 
 function emptySlotMap() {
   return Object.fromEntries(PLAN_SLOT_KEYS.map((key) => [key, []]));
@@ -95,6 +93,7 @@ function SkeletonRails() {
  *   successfully generated, before `onClose`.
  */
 export default function MealPlannerPicker({ open, profile, onClose, onGenerated }) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('best');
   const [pools, setPools] = useState(emptySlotMap);
   const [loading, setLoading] = useState(true);
@@ -105,7 +104,6 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
   const [generating, setGenerating] = useState(false);
   /** @type {[{need: number, total: number}|null, Function]} */
   const [gap, setGap] = useState(null);
-  const gapOpen = gap !== null;
   const [browseSlot, setBrowseSlot] = useState(null);
   const [snackbar, setSnackbar] = useState(null);
   const snackbarRef = useRef(null);
@@ -267,49 +265,15 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
     }
   }, [profile, selected, finish]);
 
-  // While the gap sheet is open, quick-adds mutate `selected` — rebuild the
-  // plan so the running total reflects the real planner output rather than a
-  // parallel estimate that could drift from it. Free: `generatePlanFromPicks`
-  // makes no network call once the candidate pools are memoized.
-  useEffect(() => {
-    if (!gapOpen || !profile) return;
-    let cancelled = false;
-    generatePlanFromPicks(profile, [...selected.values()])
-      .then(({ plan }) => {
-        if (cancelled) return;
-        const { total } = estimatePlanDayCalories(plan.days[todayKey()]?.slots);
-        setGap((prev) => (prev ? { ...prev, total } : prev));
-      })
-      .catch((err) => console.error('MealPlannerPicker: quick-add recompute failed', err));
-    return () => {
-      cancelled = true;
-    };
-  }, [gapOpen, profile, selected]);
-
-  // Quick-add candidates: the user's saved recipes first (their own food beats
-  // our ranking when the ask is "add something you'd actually eat"), then the
-  // ranked pools already in memory. Already-selected items stay in the list,
-  // rendered checked, so the sheet doesn't reshuffle under the user's finger.
-  const gapSuggestions = useMemo(() => {
-    if (!gapOpen) return [];
-    const out = [];
-    const seen = new Set();
-    for (const key of PLAN_SLOT_KEYS) {
-      for (const item of savedBySlot[key] || []) {
-        if (seen.has(item.id)) continue;
-        seen.add(item.id);
-        out.push(item);
-      }
-    }
-    for (const key of PLAN_SLOT_KEYS) {
-      for (const item of pools[key] || []) {
-        if (seen.has(item.id)) continue;
-        seen.add(item.id);
-        out.push({ ...item, fromSlot: key });
-      }
-    }
-    return out.slice(0, GAP_SUGGESTION_LIMIT);
-  }, [gapOpen, savedBySlot, pools]);
+  // Task 9: the gap sheet's "Choose more recipes" action closes both the gap
+  // sheet and this whole picker overlay, then routes to the full Recipes
+  // catalog (/app/recipes, RecipesScreen) — replaces the old inline quick-add
+  // grid built from `gapSuggestions` (removed; see CalorieGapSheet.jsx's doc).
+  const handleChooseMore = useCallback(() => {
+    setGap(null);
+    onClose?.();
+    navigate('/app/recipes');
+  }, [onClose, navigate]);
 
   return (
     <AnimatePresence>
@@ -431,12 +395,9 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
               open
               need={gap.need}
               total={gap.total}
-              suggestions={gapSuggestions}
-              selectedIds={selectedIds}
-              onToggleSelect={handleToggleSelect}
-              onBack={() => setGap(null)}
+              onClose={() => setGap(null)}
               onContinue={finish}
-              onSaveBlocked={showSnackbar}
+              onChooseMore={handleChooseMore}
             />
           )}
 

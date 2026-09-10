@@ -42,30 +42,8 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Info } from 'lucide-react';
 import { cleanNotes } from '../../api/recommendations.js';
 import { getNonFoodIcon } from '../../api/ingredientImages.js';
+import { TIER_CONFIG } from '../../utils/tierConfig.js';
 import Icon from './Icon.jsx';
-
-// ── Tier config (colors match the existing SignalChip benefit tokens) ───────
-
-const TIER_CONFIG = {
-  Top: {
-    label: 'Top',
-    bg: 'bg-benefit-100',
-    fg: 'text-benefit-600',
-    dot: 'bg-benefit-600',
-  },
-  Strong: {
-    label: 'Strong',
-    bg: 'bg-forest-50',
-    fg: 'text-forest-700',
-    dot: 'bg-forest-600',
-  },
-  Good: {
-    label: 'Good',
-    bg: 'bg-paper-200',
-    fg: 'text-char-700',
-    dot: 'bg-char-500',
-  },
-};
 
 // ── Study count + info tooltip ──────────────────────────────────────────────
 

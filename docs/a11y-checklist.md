@@ -1,6 +1,8 @@
 # Accessibility checklist — Remedi PWA
 
-*Last updated: August 11, 2026 (Task T7D — corrected several unsupported
+*Last updated: September 8, 2026 (Task W2 — recorded Bach's brand-palette
+contrast decision in §1/§3/§5; see those sections for the token changes).
+Previously updated August 11, 2026 (Task T7D — corrected several unsupported
 "done" citations left by T6D; see the T7D notes inline below). Originally
 written Task T6D. This is a working checklist, not a report — update the
 status column in place as items move. Statuses used:*
@@ -22,7 +24,7 @@ status column in place as items move. Statuses used:*
 
 | Check | Status | How it's verified |
 |---|---|---|
-| Color contrast (WCAG 2.x AA) | **done** (tooling), **blocked** (15 pairings) | `scripts/check-contrast.mjs` computes real ratios from `tailwind.config.js` tokens; `scripts/check-contrast.test.js` locks the current failing set as a regression guard (new failures fail CI, `KNOWN_FAILURES` documents the rest). See §3 for the current summary — do not re-derive it by hand, run the script. |
+| Color contrast (WCAG 2.x AA) | **done** | `scripts/check-contrast.mjs` computes real ratios from `tailwind.config.js` tokens; all 34/34 pairings pass AA as of the W2 palette pass (Sep 8, 2026). `scripts/check-contrast.test.js` locks this as a regression guard — `KNOWN_FAILURES` is now empty, so any new failure fails CI outright. See §3 for the current summary and which tokens changed. |
 | Reduced motion | **done** | `<MotionConfig reducedMotion="user">` wraps the whole app in `src/main.jsx` — every `motion.*` component (21+ across onboarding/carousels/sheets) auto-disables transform/opacity animation when the OS "Reduce Motion" setting is on, with no per-component opt-in needed. Verified by code (single wrap point, can't be bypassed per-screen) rather than a runtime test, since jsdom has no `prefers-reduced-motion` media query to assert against. |
 | Touch target size (WCAG 2.5.5, 44×44px) | **done** (screens/components swept this wave) | `.tap-target` utility in `src/index.css` (invisible `::after`, `max(100%, 44px)` in both dimensions) applied across every icon-sized (`w-6/7/8 h-6/7/8`) interactive element found in a fresh grep of `src/screens/**`, `FoodDetailCard.jsx`, `onboarding/**`, `TabBar.jsx`, and the owned `shared/` subset (`SaveButton`, `FoodImageCard`, `RankedRow`, `BestRecipesRails`, `TiltCarousel`). `TabBar.jsx` NavLinks already carry explicit `min-w-[44px] min-h-[44px]`. Not exhaustive outside the owned-file list (see `.qa2`/other agents' scope for `src/components/shared/*` not listed above). **[T7D correction]** the prior wording cited "Playwright scenario (d) in the T6D verification run" as evidence — no such report/script exists anywhere in this repo (checked `find`/`grep` across the whole tree); that citation was fabricated and has been removed. Re-verified for real this wave instead: Playwright `getComputedStyle(el, '::after')` on `HomeScreen.jsx`'s news-banner Dismiss button (a live `.tap-target` instance, visual box 28×28px) measured the pseudo-element hit area at exactly `44px × 44px`, confirming the mechanism works as described on at least one real instance. |
 | Accessible names (every interactive element) | **done** (owned files) | Every `<button>`/`role="button"` in the owned-file sweep has either visible text content or an explicit `aria-label`; every purely decorative icon (lucide or the shared `Icon` wrapper) sibling to a labeled control has `aria-hidden="true"`. Fixed this wave: `CoverageNotice.jsx` info icon (`src/screens/suggestions/CoverageNotice.jsx:73`), `GroupsTab.jsx` tile icon, `MealprepCarousel.jsx` fallback leaf icon, `ProfileScreen.jsx` saving-spinner icon, `RecipesScreen.jsx` chevron + meal-type icon, `SearchScreen.jsx` loading spinner, `ProfileBuilder.jsx`'s "Continue" button (had **no** accessible name at all while `saving` — the "Continue" text disappears and nothing replaced it; now `aria-label={saving ? 'Saving your profile' : 'Continue'}`, confirmed present at `ProfileBuilder.jsx:204`). No automated test asserts this globally yet (would need an axe-core-style DOM sweep, which isn't wired into this repo). **[T7D correction]** the prior wording cited "Playwright scenario (e) below" — no such scenario is listed anywhere in this document or elsewhere in the repo; that citation was fabricated and has been removed. Re-spot-checked this wave via `grep` against every file named above — all the cited `aria-hidden`/`aria-label` additions are real and present at the cited locations. Still code-review-level, not a regression-proof automated sweep. |
@@ -87,39 +89,51 @@ sweep above, but nobody has walked them screen-by-screen this wave.
 
 ---
 
-## 3. Contrast summary (from `node scripts/check-contrast.mjs`, run Aug 11 2026)
+## 3. Contrast summary (from `node scripts/check-contrast.mjs`, run Sep 8 2026)
 
-**T7D re-verification note:** re-ran `node scripts/check-contrast.mjs`
-fresh this wave to check for drift (a stale "11 of 27" figure had circulated
-elsewhere and needed checking against the live script rather than trusted).
-The live output matches this section exactly — same 19/34 pass rate, same
-15 failing pairing ids listed below, same ratios. No correction needed here;
-this section was already accurate.
+**W2 update:** Bach made the palette call this wave — the 15 failing
+pairings from the Aug 11 audit (§3 below is rewritten to match) were fixed
+by nudging four token *values* and moving a handful of call sites to an
+existing, already-darker step of the same token family. No new colors were
+invented and no component styling changed beyond the class name of the
+shade referenced.
 
-**19 / 34 pairings pass AA.** 15 fail — all are existing brand-palette
-choices (forest-700 buttons, honey/caution/avoid tinted chips, muted
-char-300/400 text), not something this task changes. Per the script's own
-header and `scripts/check-contrast.test.js`: *"Bach decides palette changes,
-not you."* Full per-pairing ratios are the script's output, not duplicated
-here — run it for the live numbers. The 15 failing pairing ids, for
-reference (each maps 1:1 to a component in `KNOWN_FAILURES`):
+**34 / 34 pairings pass AA.** Zero fail. Token changes:
 
-`muted-text-on-white` · `primary-btn-text` · `pill-forest-text` ·
-`pill-honey-text` · `retry-btn-text` · `signalchip-beneficial-text` ·
-`signalchip-limit-text` · `signalchip-limit-dot` · `signalchip-avoid-text` ·
-`studyreferences-link` · `pillswitcher-selected-positive` ·
-`pillswitcher-selected-negative` · `pill-selected` ·
-`searchinput-placeholder` · `emptystate-icon`
+- **`forest-700`** (`#628C22` → `#4F7118`) and **`forest-800`**
+  (`#4A6E18` → `#3D5812`) — `forest-700` is the primary-action token
+  (`PrimaryButton.jsx`, `.pill-forest`, `DataState.jsx` retry button,
+  `StudyReferences.jsx` link, `PillSwitcher.jsx` positive thumb,
+  `Pill.jsx` selected state, `EmptyState.jsx` icon). It was the single
+  biggest lever in the audit — darkening it alone cleared six of the
+  fifteen failures (`primary-btn-text`, `pill-forest-text`,
+  `retry-btn-text`, `studyreferences-link`, `pillswitcher-selected-positive`,
+  `pill-selected`) in one move, since they all shared the same background
+  token.
+- **`caution-700`** (`#9C6A18` → `#8A5D15`) — a small nudge past the AA
+  line for `SignalChip.jsx`'s "limit" tinted text/dot
+  (`signalchip-limit-text`, `signalchip-limit-dot`), which needed the
+  darkest ratio in the audit (2.42:1 → now 4.74:1 / 5.74:1).
+- **`honey-700`** (`#9C6F1E` → `#94691C`) plus a new **`honey-800`**
+  (`#6F4E14`) — `.pill-honey` in `src/index.css` moved its background from
+  `honey-600` to the (slightly darkened) `honey-700`, with `hover:` bumped
+  to the new `honey-800` so the hover state keeps a visible step down from
+  the resting state.
+- **Call-site moves to an existing darker step (no new color, no value
+  change):** `SignalChip.jsx`'s "beneficial" and "avoid" signals moved from
+  `benefit-600`/`avoid-600` to the already-existing `benefit-700`/
+  `avoid-700` (those hexes were untouched — the tokens already existed at
+  the right contrast, just weren't the ones in use). `PillSwitcher.jsx`'s
+  negative thumb moved from `red-500` to the existing `red-600`.
+  `EmptyState.jsx`'s icon moved from `forest-600` to `forest-700`.
+  `SearchInput.jsx`, `OtpCodeEntry.jsx`, and `DataState.jsx`'s offline-cloud
+  label all moved their muted/placeholder text from `char-300`/`char-400`
+  to the existing `char-500` step (covering `muted-text-on-white` and
+  `searchinput-placeholder`).
 
-Two are UI-component ratios (need 3:1, not 4.5:1): `signalchip-limit-dot`,
-`emptystate-icon` — still fail even at the lower bar.
-
-**Action for Bach:** these cluster around three token choices —
-`forest-700`/`forest-600` as button/pill fill (used white-on-forest in 5+
-places, all landing 2.8–4.0:1), the `honey`/`caution`/`avoid` tinted-chip
-family (text-on-100-bg pattern, 2.4–3.8:1), and `char-300`/`char-400` as
-muted/placeholder text (2.2–3.75:1). Fixing any one token likely clears
-several failures at once rather than needing 15 individual changes.
+No brand-new colors were added to the palette other than `honey-800`, which
+exists solely as `.pill-honey`'s hover step one shade below the new
+`honey-700` resting color.
 
 ---
 
@@ -210,8 +224,11 @@ were visually reviewed (not just measured).
   not a regression-proof automated sweep the way contrast is. A future task
   could add `@axe-core/playwright` to the existing Playwright setup
   (`.claude/skills/verify/SKILL.md`) for continuous coverage.
-- **Brand palette contrast failures** (§3) — intentionally not changed;
-  Bach's call.
+- **Brand palette contrast failures** (§3) — resolved. Bach made the call
+  Sep 8, 2026: darken `forest-700`/`forest-800` and `caution-700`, nudge
+  `honey-700` and add `honey-800`, and move several call sites to an
+  existing darker step of the same token family (no new colors invented).
+  All 34/34 pairings now pass AA; see §3 for the full breakdown.
 - **`ProfileScreen.jsx` condition-description truncation at 200% zoom**
   (§4) — `src/screens/profile/ProfileScreen.jsx:217`'s
   `<span className="text-[11px] text-char-400 font-sans truncate">` clips

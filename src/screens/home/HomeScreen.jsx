@@ -36,9 +36,9 @@
  *   other, same height as 2a but half its width) → navbar.
  *
  * Note: the news/alerts banner (content-driven via src/api/messages.js
- * `getActiveMessages`/`dismissMessage`) was removed from this screen. Those
- * APIs and public/messages.json are left in place but currently have no
- * mount point anywhere in the app.
+ * `getActiveMessages`/`dismissMessage`) was removed from this screen. That
+ * channel now mounts from Profile instead — see the "What's new" row and
+ * WhatsNewSheet in src/screens/profile/ProfileScreen.jsx.
  */
 
 import { useState } from 'react';
