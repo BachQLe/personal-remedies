@@ -154,13 +154,25 @@
  *   (facts) is the whole of what the app shows for a recipe's preparation.
  * @property {string} [attribution] - Source attribution string from the C1
  *   overlay, e.g. "MedlinePlus". Distinct from `sourceName`, which is parsed
- *   from the live API's `notes` field independently of the overlay.
- * @property {number} [servings] - Recipe yield, from the C1 overlay.
- * @property {{calories:number, protein:number, carbs:number, fat:number}} [nutritionPerServing] -
- *   Per-serving macros from the C1 overlay, transcribed from the original
- *   recipe's FDA Nutrition Facts panel (REMEDI_MASTER_PLAN.md Phase 2.3) —
- *   NOT computed or estimated by this app. Absent for recipes with no C1
- *   overlay match.
+ *   from the live API's `notes` field independently of the overlay. Optional:
+ *   absent when the source row hasn't been given one yet.
+ * @property {number} [servings] - Recipe yield, from the C1 overlay. Optional.
+ * @property {{calories?:number, protein?:number, carbs?:number, fat?:number}} [nutritionPerServing] -
+ *   Per-serving macros from the C1 overlay, when the overlay row carries
+ *   any. Every sub-field, including `calories`, is transcribed by a human
+ *   directly off the source recipe's own FDA Nutrition Facts panel — NEVER
+ *   computed or estimated by this app. `calories` used to be the one
+ *   guaranteed sub-field, but Mory's real 119-recipe source spreadsheet has
+ *   NO calorie column at all (relaxed Sept 2026, user-approved — see
+ *   RecipeOverlayRow's `nutritionPerServing` below), so `calories` is now
+ *   independently optional same as `protein`/`carbs`/`fat`: a row can carry
+ *   macros with no calorie figure, or no nutrition data whatsoever.
+ *   CALORIE PROVENANCE (frozen): summing a recipe's calories from its
+ *   ingredients is permanently impossible, not deferred — no table or API
+ *   in this system maps a recipe to its own per-ingredient nutrition
+ *   breakdown; `calories` here is the transcribed source number or it's
+ *   absent — never a fabricated default. Whole object absent entirely for
+ *   recipes with no C1 overlay match, or whose match has no nutrition data.
  * @property {string} mealType - Breakfast/Lunch/Dinner/Snack (best-effort keyword guess for real recipes)
  * @property {Array<{name: string, foodItemID?: number}>} [ingredients] -
  *   Real ingredient facts from the C1 overlay's `rawIngredients` (paired
@@ -172,9 +184,11 @@
  *   unambiguous alongside `topFoodsForConditions`, a same-shaped but
  *   unrelated "see also" rail.
  * @property {string[]} [matchedConditions] - Display names of conditions this recipe helps
- * @property {Array<'breakfast'|'lunch'|'dinner'|'snack'|'beverage'>} [alsoFits] -
+ * @property {Array<'breakfast'|'lunch'|'dinner'|'snack'|'beverage'|'dessert'>} [alsoFits] -
  *   Additional meal types this recipe also fits, from the C1 overlay's
  *   `alsoFits` (see RecipeOverlayRow below) — multi-category placement.
+ *   'dessert' (added Sept 2026, user decision) is a first-class meal type,
+ *   not an alias of 'snack' — see `MEAL_TYPES` in recipeIngestion.js.
  * @property {string[]} [dietaryTags] - e.g. "gluten-free", "vegetarian",
  *   from the C1 overlay's `dietaryTags`.
  * @property {number} [totalTimeMinutes] - Total prep + cook time, from the
@@ -197,26 +211,60 @@
  * never gain one — recipe directions are the source's copyrighted
  * expression. Ingredients (a list of facts) plus `sourceUrl` (link out) is
  * the frozen shape (REMEDI_MASTER_PLAN.md, "Recipe directions text").
+ *
+ * REQUIRED vs OPTIONAL (relaxed to match Mory's actual source data):
+ * required are `name`, `sourceUrl`, `mealType`, and `fineFoodGroup` ('l').
+ * Everything else on this typedef is optional: valid when absent ("we
+ * don't have this yet"), but still strictly type-checked by
+ * `validateOverlayRow` when present. The one deliberate exception is
+ * `rawIngredients`: an explicit `[]` is still invalid (only "absent" means
+ * unknown; an empty array would mean the content pipeline broke).
+ * `nutritionPerServing` (see below) follows this same "absent fine,
+ * explicit-empty invalid" shape as of Sept 2026 — see CALORIE PROVENANCE.
  * @property {string} name - Editorial recipe title, as given by the source
  * @property {string} sourceUrl - https:// link to the original recipe
- * @property {string} attribution - e.g. "MedlinePlus"
- * @property {'breakfast'|'lunch'|'dinner'|'snack'|'beverage'} mealType -
+ * @property {string} [attribution] - e.g. "MedlinePlus". Optional.
+ * @property {'breakfast'|'lunch'|'dinner'|'snack'|'beverage'|'dessert'} mealType -
  *   Editorial meal-type categorization (ground truth) — distinct from
  *   `guessMealType`'s keyword heuristic in adapter.js, which is only a
- *   fallback for recipes the overlay hasn't reached
- * @property {Array<'breakfast'|'lunch'|'dinner'|'snack'|'beverage'>} [alsoFits] -
+ *   fallback for recipes the overlay hasn't reached. 'dessert' (added Sept
+ *   2026, user decision, verbatim: "Snacks and deserts are going to be
+ *   shown at once. But theyre going to have different tags. So yeah add as
+ *   another meal type.") is a first-class meal type, NOT an alias of
+ *   'snack' — see `MEAL_TYPES` in recipeIngestion.js.
+ * @property {Array<'breakfast'|'lunch'|'dinner'|'snack'|'beverage'|'dessert'>} [alsoFits] -
  *   Additional meal types this recipe also fits (multi-category placement)
- * @property {string[]} rawIngredients - Ingredient lines as written by the
+ * @property {string[]} [rawIngredients] - Ingredient lines as written by the
  *   source (facts, not the source's copyrighted expression — safe to
- *   republish; directions are not)
- * @property {number[]} ingredientFoodItemIds - `rawIngredients` mapped to
- *   Nutridigm foodItemIDs
- * @property {number} servings - Recipe yield
- * @property {{calories:number, protein:number, carbs:number, fat:number}} nutritionPerServing -
- *   Per-serving macros transcribed from the source's FDA Nutrition Facts
- *   panel — never computed by this app
+ *   republish; directions are not). Optional, but if present must be a
+ *   NON-EMPTY string array — an explicit `[]` is rejected as invalid (a
+ *   broken pipeline), whereas an absent key just means this row hasn't been
+ *   enriched with ingredients yet.
+ * @property {number[]} [ingredientFoodItemIds] - `rawIngredients` mapped to
+ *   Nutridigm foodItemIDs. Optional.
+ * @property {number} [servings] - Recipe yield. Optional.
+ * @property {{calories?:number, protein?:number, carbs?:number, fat?:number}} [nutritionPerServing] -
+ *   Per-serving macros, transcribed by a human directly off the source
+ *   recipe's own FDA Nutrition Facts panel — NEVER computed/estimated by
+ *   this app. OPTIONAL AS A WHOLE (relaxed Sept 2026, user-approved):
+ *   Mory's real 119-recipe source spreadsheet has NO calorie column at
+ *   all, so a row with no nutrition data whatsoever is valid — this is now
+ *   the common case, not the exception the schema was originally frozen
+ *   against. Every sub-field, including `calories`, is independently
+ *   optional and, when present, transcribed the same way (never derived).
+ *   An explicit empty object (`nutritionPerServing: {}`) is REJECTED by
+ *   `validateOverlayRow`, same convention as `rawIngredients` above — omit
+ *   the key entirely to mean "unknown", don't ship an empty placeholder
+ *   object. CALORIE PROVENANCE (frozen): summing a recipe's calories from
+ *   its ingredients is permanently impossible, not deferred — no table or
+ *   API in this system maps a recipe to its own per-ingredient nutrition
+ *   breakdown. `calories` is the transcribed source number or it (and
+ *   possibly the whole object) is absent — never a fabricated default. The
+ *   UI already degrades honestly on absence: RecipeLinkSheet renders no
+ *   calorie line when `preview.calories` is null (see
+ *   `resolveRecipePreview` in src/utils/foodDetailCard.js).
  * @property {string[]} [dietaryTags] - e.g. "gluten-free", "vegetarian"
- * @property {number} totalTimeMinutes - Total prep + cook time
+ * @property {number} [totalTimeMinutes] - Total prep + cook time. Optional.
  * @property {'l'} fineFoodGroup - Always 'l' (recipes are Nutridigm food
  *   items in fine group 'l')
  * @property {number} [foodItemID] - Nutridigm foodItemID, assigned by

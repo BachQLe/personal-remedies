@@ -18,8 +18,18 @@ const HELP_ITEMS = [
   },
   {
     icon: Bookmark,
-    title: 'Save',
+    title: 'Save recipe',
     body: 'Bookmarks a recipe to your Saved recipes tab so you can add it to a plan later.',
+  },
+  {
+    icon: Bookmark,
+    title: 'Saved plans',
+    body: 'The bookmark icon in the top-right opens your saved plans — save your current week under a name, then load or delete it later. A dot on the icon means the loaded plan has unsaved changes.',
+  },
+  {
+    icon: Bookmark,
+    title: 'Save meal plan',
+    body: 'The button next to "New meal plan" saves your current week. If you loaded a saved plan, it updates that save in place; otherwise it opens the naming flow to save a new one.',
   },
   {
     icon: Shuffle,
@@ -48,7 +58,7 @@ export default function HowToUseSheet({ open, onClose }) {
       <div className="flex flex-col gap-4">
         {HELP_ITEMS.map(({ icon: Icon, title, body }) => (
           <div key={title} className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-sand-100 flex items-center justify-center shrink-0 text-blue-950/70">
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 text-blue-950/70">
               <Icon size={16} aria-hidden="true" />
             </div>
             <div className="flex flex-col gap-0.5">

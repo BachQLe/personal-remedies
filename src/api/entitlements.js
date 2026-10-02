@@ -54,7 +54,7 @@
 
 /**
  * @typedef {Object} FeatureDescriptor
- * @property {string} key - Stable identifier, e.g. 'advanced_filters'.
+ * @property {string} key - Stable identifier, e.g. 'top_dos_donts'.
  * @property {string} label - Short human-readable name for the paywall list.
  * @property {string} [description] - Neutral, non-persuasive one-line
  *   description of what the feature is. NOT marketing copy — see
@@ -85,23 +85,38 @@
 export const ENTITLEMENT_CONFIG = {
   defaultUnlocked: true,
   features: {
-    // Placeholder feature roster for the paywall's "what's included" list.
-    // Descriptions are neutral/factual per the no-health-claims guardrail —
-    // final copy is a Track C (C10) + C2 audit deliverable, not this file's.
-    advanced_filters: {
-      key: 'advanced_filters',
-      label: 'Advanced filters',
-      description: 'More ways to narrow food and recipe results.',
+    // Real premium-side surfaces (REMEDI_MASTER_PLAN.md §6.7's boundary
+    // table): everything here is condition-scored against the user's own
+    // health profile, which is the line Pricing.jsx's copy draws between
+    // Free and Premium. None carries a `tier` yet — see the module
+    // docblock's swap path — so `defaultUnlocked: true` means every one of
+    // these still resolves unlocked today. Descriptions are neutral/factual
+    // per the no-health-claims guardrail — final copy is a Track C (C10) +
+    // C2 audit deliverable, not this file's.
+    top_dos_donts: {
+      key: 'top_dos_donts',
+      label: "Top Do's & Don'ts",
+      description: 'Condition-ranked list of what to favor and what to limit.',
     },
-    extended_history: {
-      key: 'extended_history',
-      label: 'Extended history',
-      description: 'Look back further than the default window.',
+    food_group_detail: {
+      key: 'food_group_detail',
+      label: 'Food Groups Eat/Avoid detail',
+      description: 'Per-item eat/avoid verdicts within a food group, scored against your conditions.',
     },
-    priority_support: {
-      key: 'priority_support',
-      label: 'Priority support',
-      description: 'Faster response times from the support team.',
+    suggest: {
+      key: 'suggest',
+      label: 'Suggestions for you',
+      description: 'Condition-ranked suggestions within a specific food group.',
+    },
+    plan: {
+      key: 'plan',
+      label: 'Meal planner',
+      description: 'Build a plan from condition-filtered candidate pools.',
+    },
+    saved_plans: {
+      key: 'saved_plans',
+      label: 'Saved plans',
+      description: 'Keep copies of plans you have built.',
     },
   },
 };

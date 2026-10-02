@@ -123,10 +123,6 @@ export default function GroupsTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-blue-950/70 font-sans">
-        Click to see best and worst items from food groups.
-      </p>
-
       {loading ? (
         <SkeletonGrid />
       ) : (

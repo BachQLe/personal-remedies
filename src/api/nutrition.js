@@ -83,12 +83,33 @@ function resolveUsda(foodItemID) {
 
   if (nutrientEntry.perServing) {
     const { calories, protein, carbs, fat } = nutrientEntry.perServing;
-    return { calories, protein, carbs, fat, estimated: false, source: 'usda', basis: 'perServing' };
+    // `?? null` on every field: FDC doesn't always report all four macros
+    // for a given food, and the module contract (see header) is that an
+    // absent value is always `null`, never `undefined` — a bare destructure
+    // would silently let `undefined` through for whichever field FDC
+    // omitted.
+    return {
+      calories: calories ?? null,
+      protein: protein ?? null,
+      carbs: carbs ?? null,
+      fat: fat ?? null,
+      estimated: false,
+      source: 'usda',
+      basis: 'perServing',
+    };
   }
 
   if (nutrientEntry.per100g) {
     const { calories, protein, carbs, fat } = nutrientEntry.per100g;
-    return { calories, protein, carbs, fat, estimated: false, source: 'usda', basis: 'per100g' };
+    return {
+      calories: calories ?? null,
+      protein: protein ?? null,
+      carbs: carbs ?? null,
+      fat: fat ?? null,
+      estimated: false,
+      source: 'usda',
+      basis: 'per100g',
+    };
   }
 
   return null;
@@ -112,7 +133,24 @@ export function resolveNutrition(item, slotKey) {
   const panel = item.nutritionPerServing;
   if (panel && typeof panel === 'object') {
     const { calories, protein, carbs, fat } = panel;
-    return { calories, protein, carbs, fat, estimated: false, source: 'panel' };
+    // `?? null` on every field, not a bare destructure: recipeIngestion.js's
+    // validator now allows `nutritionPerServing` to be present with
+    // `calories` (or any other macro) absent — Mory's real recipe source
+    // has no calorie column at all (see recipeIngestion.js's "NUTRITION
+    // RELAXATION" note) — and this module's own contract (see header) is
+    // that a missing value is always `null`, NEVER `undefined`. A bare
+    // destructure would let `undefined` leak through here, and a caller
+    // like NutritionFactsSheet templating `${resolved.calories} kcal`
+    // without a dedicated null-check would render the literal string
+    // "undefined kcal" instead of the app's honest "no data" treatment.
+    return {
+      calories: calories ?? null,
+      protein: protein ?? null,
+      carbs: carbs ?? null,
+      fat: fat ?? null,
+      estimated: false,
+      source: 'panel',
+    };
   }
 
   // Tier 2 — USDA FDC table, matched by foodItemID.

@@ -56,3 +56,109 @@ describe('getMealPlanSuggestions: lunch mealType classification (Task 4 fix)', (
     expect(result.candidates.dinner.some((c) => c.id === 901)).toBe(false);
   });
 });
+
+describe('getMealPlanSuggestions: lunch rail blank fix (#8/#13) keyword corrections', () => {
+  it('the dictionary typo "American Macaroni Salald" lands in lunch, not dinner', async () => {
+    fetchSuggest.mockImplementation(async (_csv, fineFoodGroup) => {
+      if (fineFoodGroup === 'l') {
+        return [
+          { foodItemID: 5003, foodItemDisplayAs: 'American Macaroni Salald', descriptionNumericID: 2 },
+        ];
+      }
+      return [];
+    });
+
+    // Distinct condition id per test in this file — `recipes:{csv}:l` is
+    // cached by adapter.js's `cachedFetch` for the whole module lifetime
+    // (which spans this entire test file), so reusing condition 9001 here
+    // would silently serve an EARLIER test's cached /suggest('l') response
+    // instead of this test's mock.
+    const result = await getMealPlanSuggestions({ conditions: [9101] });
+
+    expect(result.candidates.lunch.some((c) => c.id === 5003)).toBe(true);
+    expect(result.candidates.dinner.some((c) => c.id === 5003)).toBe(false);
+  });
+
+  it('"Chicken Pot Pie (no crust)" lands in dinner, not snacks (pot pie is a dish, not a dessert)', async () => {
+    fetchSuggest.mockImplementation(async (_csv, fineFoodGroup) => {
+      if (fineFoodGroup === 'l') {
+        return [
+          { foodItemID: 5039, foodItemDisplayAs: 'Chicken Pot Pie (no crust)', descriptionNumericID: 1 },
+        ];
+      }
+      return [];
+    });
+
+    const result = await getMealPlanSuggestions({ conditions: [9102] });
+
+    expect(result.candidates.dinner.some((c) => c.id === 5039)).toBe(true);
+    expect(result.candidates.snacks.some((c) => c.id === 5039)).toBe(false);
+  });
+
+  it('a plain "pie" title (no "pot pie") still lands as a snack — the pot-pie fix does not swallow real desserts', async () => {
+    fetchSuggest.mockImplementation(async (_csv, fineFoodGroup) => {
+      if (fineFoodGroup === 'l') {
+        return [{ foodItemID: 5099, foodItemDisplayAs: 'Apple Pie', descriptionNumericID: 1 }];
+      }
+      return [];
+    });
+
+    const result = await getMealPlanSuggestions({ conditions: [9103] });
+
+    expect(result.candidates.snacks.some((c) => c.id === 5099)).toBe(true);
+    expect(result.candidates.dinner.some((c) => c.id === 5099)).toBe(false);
+  });
+});
+
+describe('getMealPlanSuggestions: lunch top-up from defaulted-dinner recipes (Task 1c)', () => {
+  it('fills lunch up to its slot size from dinner recipes that only defaulted to dinner (no keyword match), without removing them from dinner', async () => {
+    fetchSuggest.mockImplementation(async (_csv, fineFoodGroup) => {
+      if (fineFoodGroup === 'l') {
+        return [
+          // No keyword-lunch recipes at all.
+          { foodItemID: 700, foodItemDisplayAs: 'Pasta e Fagioli', descriptionNumericID: 1 }, // defaults to dinner
+          { foodItemID: 701, foodItemDisplayAs: 'Hash Brown Casserole', descriptionNumericID: 2 }, // defaults to dinner
+          { foodItemID: 702, foodItemDisplayAs: 'Zucchini Parmesan Crisps', descriptionNumericID: 3 }, // defaults to dinner
+          { foodItemID: 703, foodItemDisplayAs: 'Sauteed Kale', descriptionNumericID: 2 }, // defaults to dinner (4th default -- should NOT be needed, lunch size is 3)
+          { foodItemID: 704, foodItemDisplayAs: 'Slow-Cooker Beef Roast', descriptionNumericID: 1 }, // real 'roast' keyword -> dinner, NOT defaulted
+        ];
+      }
+      return [];
+    });
+
+    const result = await getMealPlanSuggestions({ conditions: [9104] });
+
+    // Lunch slot size is 3 (PLAN_SLOTS) — zero real lunch matches, so it's
+    // topped up from the defaulted-dinner pool, in dinner's existing order,
+    // up to size 3.
+    expect(result.candidates.lunch.length).toBe(3);
+    expect(result.candidates.lunch.map((c) => c.id)).toEqual([700, 701, 702]);
+
+    // The real 'roast' keyword match (never defaulted) must NOT be used to
+    // top up lunch.
+    expect(result.candidates.lunch.some((c) => c.id === 704)).toBe(false);
+
+    // Dinner keeps every one of its own candidates — the top-up is additive,
+    // never a move.
+    expect(result.candidates.dinner.map((c) => c.id)).toEqual([700, 701, 702, 703, 704]);
+  });
+
+  it('does not top up lunch when it already meets the slot size from real keyword matches', async () => {
+    fetchSuggest.mockImplementation(async (_csv, fineFoodGroup) => {
+      if (fineFoodGroup === 'l') {
+        return [
+          { foodItemID: 800, foodItemDisplayAs: 'Chicken Caesar Salad', descriptionNumericID: 1 },
+          { foodItemID: 801, foodItemDisplayAs: 'Turkey Sandwich', descriptionNumericID: 1 },
+          { foodItemID: 802, foodItemDisplayAs: 'Veggie Wrap', descriptionNumericID: 1 },
+          { foodItemID: 803, foodItemDisplayAs: 'Mystery Casserole', descriptionNumericID: 1 }, // defaults to dinner
+        ];
+      }
+      return [];
+    });
+
+    const result = await getMealPlanSuggestions({ conditions: [9105] });
+
+    expect(result.candidates.lunch.map((c) => c.id).sort()).toEqual([800, 801, 802]);
+    expect(result.candidates.lunch.some((c) => c.id === 803)).toBe(false);
+  });
+});

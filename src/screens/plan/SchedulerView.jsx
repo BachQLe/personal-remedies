@@ -5,17 +5,18 @@ import { nextSevenDays } from './planDates.js';
 import { resolveDayTotals } from '../../api/nutrition.js';
 import { markEaten, unmarkEaten } from '../../state/dailyPlan.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
+import { getOverlayImageFile } from '../../api/localTables.js';
 import { PLAN_SLOTS } from '../../api/config.js';
 import MealTypeTag from '../../components/shared/mealTypeMeta.jsx';
 
 const calmSpring = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
 
 function cardImage(item) {
-  return item.image || getIngredientImage(item.name, item.group);
+  return item.image || getIngredientImage(item.name, item.group, getOverlayImageFile(item.id));
 }
 
 /**
- * SchedulerView — "Week view" tab of the Plan screen: a 7-day accordion that
+ * SchedulerView — "List view" tab of the Plan screen: a 7-day accordion that
  * mirrors the REAL weekly plan (`planDays`, from `src/state/dailyPlan.js`),
  * not a separate manually-scheduled list. One day expanded at a time; each
  * expanded day groups its items by `PLAN_SLOTS` order, each row tagged with
@@ -40,7 +41,7 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
           <div key={day.key}>
             <button
               onClick={() => setExpandedKey(expanded ? null : day.key)}
-              className={`w-full bg-sand-100 rounded-xl px-4 py-3 flex items-center justify-between
+              className={`w-full bg-white rounded-xl px-4 py-3 flex items-center justify-between
                 ${expanded ? 'rounded-b-none' : ''}`}
             >
               <div className="flex items-baseline gap-2">
@@ -71,7 +72,7 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
                   transition={calmSpring}
                   className="overflow-hidden"
                 >
-                  <div className="bg-sand-100 rounded-xl rounded-t-none p-4">
+                  <div className="bg-white rounded-xl rounded-t-none p-4">
                     {allItems.length === 0 ? (
                       <div className="border border-dashed border-blue-950/30 rounded-xl px-4 py-4 text-sm text-blue-950/60">
                         Nothing planned for this day yet.

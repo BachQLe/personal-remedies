@@ -14,17 +14,13 @@ import { numericIdToRating } from '../../utils/rating.js';
  * slots so the row's width is stable across every possible verdict, never
  * shifting surrounding layout as data loads in.
  *
- * Three honestly-distinct "nothing to show" cases, each rendering
+ * Two honestly-distinct "nothing to show" cases, each rendering
  * differently on purpose:
  *   - No data (`numericId` null/undefined/out of 1-7 range) → renders
  *     nothing at all. We never fake a rating for an unassessed item.
- *   - Neutral, compact context (`showNeutralLabel: false`, the default,
- *     used on small cards like FoodImageCard) → also renders nothing. A
- *     "Neutral" pill would be visual noise across a whole grid of cards.
- *   - Neutral, detail context (`showNeutralLabel: true`, used on
- *     FoodDetailCard's larger single-item view) → renders a small
- *     "Neutral" pill, because on a detail view silence would read as a
- *     loading/error state rather than an honest "neither helps nor hurts."
+ *   - Neutral (numericId 4) → renders a single unfilled/outline star, in
+ *     every context (compact cards and detail views alike). This is a
+ *     temporary placeholder pending a real "neutral" glyph.
  *
  * Surfaces: defaults to `tone="dark"` — colors (`text-white`,
  * `text-white/25`, `text-red-400`, `bg-white/15`, ...) tuned for the dark
@@ -48,15 +44,12 @@ import { numericIdToRating } from '../../utils/rating.js';
  *   (1-7). Anything else (null/undefined/out of range) renders nothing.
  * @param {number} [props.size] - Icon glyph size in px, default 15.
  * @param {boolean} [props.loading] - Renders a skeleton placeholder instead.
- * @param {boolean} [props.showNeutralLabel] - Show a "Neutral" pill for
- *   numericId 4 instead of rendering nothing. Default false (compact card
- *   contexts); pass true on detail views. See the three-case doc above.
  * @param {'dark'|'light'} [props.tone] - Surface the row sits on. Default
  *   'dark' (photo overlays). Use 'light' on a white/paper card.
  * @param {string} [props.className] - Appended to the root element.
  */
 export default function FoodRating({
-  numericId, size = 15, loading = false, showNeutralLabel = false, tone = 'dark', className = '',
+  numericId, size = 15, loading = false, tone = 'dark', className = '',
 }) {
   const isLight = tone === 'light';
 
@@ -71,11 +64,13 @@ export default function FoodRating({
   if (!rating) return null;
 
   if (rating.kind === 'neutral') {
-    if (!showNeutralLabel) return null;
+    // Temporary placeholder: a single unfilled/outline star, in every
+    // context (compact cards and detail views alike), until there's a
+    // real "neutral" glyph.
     return (
-      <span className={`inline-flex items-center rounded-pill px-2 py-[3px] font-label text-[10px] uppercase tracking-eyebrow ${isLight ? 'bg-sand-100 text-char-500' : 'bg-white/15 text-white/80'} ${className}`}>
-        Neutral
-      </span>
+      <div className={`flex items-center gap-[2px] ${className}`} role="img" aria-label="Neutral — neither helps nor hurts">
+        <Star size={size} fill="none" aria-hidden="true" className={`flex-shrink-0 ${isLight ? 'text-char-400' : 'text-white/70'}`} />
+      </div>
     );
   }
 

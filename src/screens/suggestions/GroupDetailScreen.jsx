@@ -24,6 +24,7 @@ export default function GroupDetailScreen() {
   const { groupId } = useParams();
   const navigate = useNavigate();
   const [selectedFood, setSelectedFood] = useState(null);
+  const [selectedListType, setSelectedListType] = useState(undefined);
   const [groupLabel, setGroupLabel] = useState(() => COARSE_GROUP_LABELS[groupId] ?? groupId);
 
   // Resolve the real group label (CATEGORY_GRID_GROUPS's coarse codes only
@@ -46,6 +47,11 @@ export default function GroupDetailScreen() {
     return <Navigate to="/app/suggestions?tab=groups" replace />;
   }
 
+  function handleSelectFood(food, listType) {
+    setSelectedFood(food);
+    setSelectedListType(listType);
+  }
+
   return (
     // -mb-28 cancels the AppShell main's pb-28 navbar reserve so the
     // background reaches behind the floating TabBar (appshell-cream-fix
@@ -66,18 +72,38 @@ export default function GroupDetailScreen() {
           group={groupId}
           groupLabel={groupLabel}
           hideTitle
-          onSelectFood={setSelectedFood}
+          onSelectFood={handleSelectFood}
         />
       </GlassPanel>
 
-      {/* Food detail card (self-loads facts + assessment from the id/name) */}
-      {selectedFood && (
-        <FoodDetailCard
-          item={{ foodId: selectedFood.id, name: selectedFood.name }}
-          open={!!selectedFood}
-          onClose={() => setSelectedFood(null)}
-        />
-      )}
+      {/* Food detail card (self-loads facts + assessment from the id/name).
+          group/fineGroup are passed through from CategoryDetailPanel's row
+          data (real values — `group` is the coarse group this screen is
+          browsing, injected by adapter.js's normalizeDetailedFood) as a
+          fallback source for FoodDetailCard's non-food icon rule when the
+          self-loaded assessment fails/times out — see FoodDetailCard's
+          nonFoodIcon computation. CategoryDetailPanel forwards its active
+          Eat/Avoid tab as onSelectFood(food, listType); that listType is
+          passed straight through so the card's front-face condition groups
+          order Avoid-first when the row was tapped from the Avoid tab.
+          Rendered unconditionally (not gated behind `{selectedFood && ...}`)
+          so FoodDetailCard stays mounted through its own close animation —
+          a gating wrapper here would unmount it the instant `onClose` fires,
+          before it gets a chance to animate out. */}
+      <FoodDetailCard
+        item={selectedFood ? {
+          foodId: selectedFood.id,
+          name: selectedFood.name,
+          group: selectedFood.group,
+          fineGroup: selectedFood.fineGroup,
+        } : null}
+        listType={selectedListType}
+        open={!!selectedFood}
+        onClose={() => {
+          setSelectedFood(null);
+          setSelectedListType(undefined);
+        }}
+      />
     </div>
   );
 }

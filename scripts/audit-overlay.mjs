@@ -9,18 +9,17 @@
  *   node scripts/audit-overlay.mjs --json   — machine-readable report
  *
  * WHAT THIS IS FOR: the Nutridigm item dictionary (src/data/cache/items.json,
- * ~1,485 rows) has no isSnack/isBeverage/imageFile columns — those live only
- * in the two-layer overlay (scripts/flag-snack-beverage.mjs's generated
- * guesses, then Sunny's hand-curated itemOverlay.json on top, generated
- * first per ITEM_OVERLAY_LAYERS in localTables.js so manual always wins).
- * This script tells Sunny which items still have NO overlay row at all
+ * ~1,485 rows) has no isBreakfast/isSnack/isBeverage/imageFile columns —
+ * those live only in the two-layer overlay (scripts/flag-snack-beverage.mjs's
+ * generated guesses, then Sunny's hand-curated itemOverlay.json on top,
+ * generated first per ITEM_OVERLAY_LAYERS in localTables.js so manual always
+ * wins). This script tells Sunny which items still have NO overlay row at all
  * (coverage, broken out by food group so she can work group-by-group), which
  * ones have a row that looks like it disagrees with the item's own food
  * group (suspected mis-flags), and ranks the missing rows by how much the
  * shipped app actually depends on the flag today — reading that dependency
- * live off PLAN_SLOTS (src/api/config.js) and the (unexported)
- * SLOT_FLAG_KEY wiring in src/api/adapter.js's flaggedPoolAcrossGroups,
- * rather than assuming every group matters equally.
+ * live off PLAN_SLOTS (src/api/config.js), including each slot's own
+ * `itemFlagKey` field, rather than assuming every group matters equally.
  *
  * READ-ONLY: this script only reads src/data/cache/*.json and
  * src/api/config.js. It never writes to src/data/cache/ (that directory's
@@ -53,26 +52,28 @@ const CONFIG_PATH = path.join(ROOT, 'src', 'api', 'config.js');
 // ═════════════════════════════════════════════════════════════════════════
 
 /**
- * Mirrors src/api/adapter.js's (unexported, module-private) `SLOT_FLAG_KEY`
- * constant: `{ snacks: 'isSnack', beverages: 'isBeverage' }`. Not derivable
- * from PLAN_SLOTS' own shape (a slot entry has no "which overlay flag do I
- * consume" field), so this mapping is transcribed from adapter.js's source
- * rather than computed — verified by reading `flaggedPoolAcrossGroups` and
- * its call site in `getMealPlanSuggestionsRaw` directly. If adapter.js's
- * SLOT_FLAG_KEY ever changes, this constant needs a matching update.
- * @type {Record<string, 'isSnack'|'isBeverage'>}
+ * Slot key -> `itemFlagKey`, read straight off the already-loaded PLAN_SLOTS
+ * (config.js) instead of a hand-transcribed mirror constant — PLAN_SLOTS now
+ * carries `itemFlagKey` (breakfast->isBreakfast, snacks->isSnack,
+ * beverages->isBeverage, lunch/dinner->null) as a first-class field, so
+ * there's nothing left to re-derive from adapter.js's source by hand. Only
+ * slots with a non-null `itemFlagKey` are included.
+ *
+ * Every slot with a non-null `itemFlagKey` is wired live in adapter.js's
+ * `getMealPlanSuggestionsRaw` (`if (slot.itemFlagKey) { ... }` ->
+ * `mergeCandidatePools`) — unlike the old design there's no more
+ * "designated but not yet wired" middle state: `itemFlagKey` non-null now
+ * IS "active."
+ * @param {Array<{key:string, itemFlagKey:string|null}>} planSlots
+ * @returns {Record<string, string>} slot key -> itemFlagKey, only for slots where it's set
  */
-const SLOT_FLAG_KEY = { snacks: 'isSnack', beverages: 'isBeverage' };
-
-/**
- * Slot keys whose flag actually gates a shipped candidate pool TODAY, per
- * adapter.js's own comment on `SLOT_FLAG_KEY`: "Only `beverages` is
- * actually wired to it below... `snacks` stays recipes-only... `isSnack` is
- * intentionally unused for now — kept here as the fast-follow hook." Read
- * literally from that comment, not inferred.
- * @type {Set<string>}
- */
-const ACTIVE_SLOT_FLAG_KEYS = new Set(['beverages']);
+export function buildSlotFlagKeyIndex(planSlots) {
+  const index = {};
+  for (const slot of planSlots) {
+    if (slot.itemFlagKey) index[slot.key] = slot.itemFlagKey;
+  }
+  return index;
+}
 
 /**
  * Does foodItemID have an overlay row in ANY layer (generated or manual)?
@@ -89,28 +90,31 @@ export function hasOverlayRow(foodItemID, layers) {
 }
 
 /**
- * Resolve the merged isSnack/isBeverage/imageFile for one foodItemID exactly
- * as `getOverlayFlags`/`getOverlayImageFile` do in src/api/localTables.js:
- * layers applied in order, later layers win per-field (not per-row), and an
- * unset field is NOT treated as false-was-set — only a field the row
- * explicitly defines overrides an earlier layer's value for that field.
+ * Resolve the merged isBreakfast/isSnack/isBeverage/imageFile for one
+ * foodItemID exactly as `getOverlayFlags`/`getOverlayImageFile` do in
+ * src/api/localTables.js: layers applied in order, later layers win
+ * per-field (not per-row), and an unset field is NOT treated as
+ * false-was-set — only a field the row explicitly defines overrides an
+ * earlier layer's value for that field.
  * @param {number|string} foodItemID
  * @param {Record<string, Object>[]} layers
- * @returns {{isSnack: boolean, isBeverage: boolean, imageFile: string|undefined}}
+ * @returns {{isBreakfast: boolean, isSnack: boolean, isBeverage: boolean, imageFile: string|undefined}}
  */
 export function resolveOverlayFlags(foodItemID, layers) {
   const key = String(foodItemID);
+  let isBreakfast;
   let isSnack;
   let isBeverage;
   let imageFile;
   for (const layer of layers) {
     const row = layer[key];
     if (!row) continue;
+    if (row.isBreakfast !== undefined) isBreakfast = !!row.isBreakfast;
     if (row.isSnack !== undefined) isSnack = !!row.isSnack;
     if (row.isBeverage !== undefined) isBeverage = !!row.isBeverage;
     if (row.imageFile) imageFile = row.imageFile;
   }
-  return { isSnack: !!isSnack, isBeverage: !!isBeverage, imageFile };
+  return { isBreakfast: !!isBreakfast, isSnack: !!isSnack, isBeverage: !!isBeverage, imageFile };
 }
 
 /**
@@ -179,16 +183,16 @@ export function buildFineGroupSlotIndex(planSlots) {
  * suspected-wrong-value — see `computeMisflags` for that) by how much the
  * shipped app depends on the flag its fine group would carry:
  *
- *   tier 0 — fine group feeds a slot whose flag is ACTIVE today (currently
- *            only 'h2' -> beverages/isBeverage): missing row starves a real,
- *            rendered product surface right now.
- *   tier 1 — fine group feeds a slot whose flag is designated but not yet
- *            wired up (currently 'h1'/'c3' -> snacks/isSnack): inert today,
- *            matters the moment that slot switches on.
- *   tier 2 — fine group is fetched for some PLAN_SLOTS entry, but that
- *            slot's candidates are recipes-only (breakfast/lunch/dinner) —
- *            the overlay flag doesn't affect slot output at all today.
- *   tier 3 — fine group isn't referenced by any PLAN_SLOTS entry — fully
+ *   tier 0 — fine group feeds a slot with a non-null `itemFlagKey`
+ *            (breakfast/isBreakfast, snacks/isSnack, beverages/isBeverage):
+ *            missing row starves a real, rendered product surface right
+ *            now — every such slot is wired live in adapter.js, so there's
+ *            no more "designated but not yet active" middle tier.
+ *   tier 1 — fine group is fetched for some PLAN_SLOTS entry, but that
+ *            slot's `itemFlagKey` is null and its candidates are
+ *            recipes-only (lunch/dinner) — the overlay flag doesn't affect
+ *            slot output at all today.
+ *   tier 2 — fine group isn't referenced by any PLAN_SLOTS entry — fully
  *            inert for the meal plan today.
  *
  * `excludedFineGroups` (EXCLUDED_FINE_GROUPS from config.js — 'x'/'j1'/'l')
@@ -206,6 +210,7 @@ export function buildFineGroupSlotIndex(planSlots) {
  */
 export function rankMissingOverlayItems(items, layers, planSlots, excludedFineGroups = []) {
   const fineGroupSlots = buildFineGroupSlotIndex(planSlots);
+  const slotFlagKey = buildSlotFlagKeyIndex(planSlots);
   const excluded = new Set(excludedFineGroups);
 
   const missing = items.filter((item) => !hasOverlayRow(item.foodItemID, layers));
@@ -213,22 +218,18 @@ export function rankMissingOverlayItems(items, layers, planSlots, excludedFineGr
   const ranked = missing.map((item) => {
     const fine = item.fineFoodGroup;
     const slotKeys = fineGroupSlots[fine] || [];
-    const flagSlotKeys = slotKeys.filter((key) => SLOT_FLAG_KEY[key]);
-    const activeFlagSlotKeys = flagSlotKeys.filter((key) => ACTIVE_SLOT_FLAG_KEYS.has(key));
+    const flagSlotKeys = slotKeys.filter((key) => slotFlagKey[key]);
 
     let tier;
     let reason;
-    if (activeFlagSlotKeys.length > 0) {
+    if (flagSlotKeys.length > 0) {
       tier = 0;
-      reason = `fine group '${fine}' feeds the ${activeFlagSlotKeys.join('/')} slot's LIVE candidate pool via ${activeFlagSlotKeys.map((k) => SLOT_FLAG_KEY[k]).join('/')} — missing row starves a shipped feature today`;
-    } else if (flagSlotKeys.length > 0) {
-      tier = 1;
-      reason = `fine group '${fine}' is designated for the ${flagSlotKeys.join('/')} slot's flagged pool (${flagSlotKeys.map((k) => SLOT_FLAG_KEY[k]).join('/')}) but that slot is recipes-only today — inert until wired up`;
+      reason = `fine group '${fine}' feeds the ${flagSlotKeys.join('/')} slot's LIVE candidate pool via ${flagSlotKeys.map((k) => slotFlagKey[k]).join('/')} — missing row starves a shipped feature today`;
     } else if (slotKeys.length > 0) {
-      tier = 2;
+      tier = 1;
       reason = `fine group '${fine}' is fetched for the ${slotKeys.join('/')} slot(s), but that slot draws recipes only, not items — the overlay flag doesn't affect it today`;
     } else {
-      tier = 3;
+      tier = 2;
       reason = `fine group '${fine}' isn't referenced by any PLAN_SLOTS entry — fully inert for the meal plan today`;
     }
 
@@ -264,11 +265,21 @@ export function rankMissingOverlayItems(items, layers, planSlots, excludedFineGr
  * nut/seed milks ('c3'), dairy milks ('g1'), and rice milk ('f') as
  * isBeverage even though they don't live in 'h2' — this function surfaces
  * the disagreement either way and leaves the judgment call to Sunny/Mory.
+ *
+ * `isBreakfast` has no "always this group" canonical mapping the way
+ * isBeverage/h2 does (the classifier — `classifyBreakfast` in
+ * flag-snack-beverage.mjs — is a deliberately tight, name-pattern-gated
+ * allowlist over only 'f' and 'g1', not "every row in a group"), so there's
+ * no `*MissingBreakfast` counterpart; `breakfastOutsideExpectedGroups`
+ * catches the one anomaly that IS meaningful: an isBreakfast row outside
+ * both groups the classifier ever writes to, which given how the script
+ * works can only mean a hand-edit in itemOverlay.json.
  * @param {Array} items
  * @param {Record<string, Object>[]} layers
  * @returns {{
  *   h2MissingBeverage: Array, beverageOutsideH2: Array,
- *   h1MissingSnack: Array, snackOutsideH1: Array
+ *   h1MissingSnack: Array, snackOutsideH1: Array,
+ *   breakfastOutsideExpectedGroups: Array
  * }}
  */
 export function computeMisflags(items, layers) {
@@ -276,6 +287,7 @@ export function computeMisflags(items, layers) {
   const beverageOutsideH2 = [];
   const h1MissingSnack = [];
   const snackOutsideH1 = [];
+  const breakfastOutsideExpectedGroups = [];
 
   for (const item of items) {
     const flags = resolveOverlayFlags(item.foodItemID, layers);
@@ -292,9 +304,10 @@ export function computeMisflags(items, layers) {
     if (fine !== 'h2' && flags.isBeverage) beverageOutsideH2.push(row);
     if (fine === 'h1' && !flags.isSnack) h1MissingSnack.push(row);
     if (fine !== 'h1' && flags.isSnack) snackOutsideH1.push(row);
+    if (flags.isBreakfast && fine !== 'f' && fine !== 'g1') breakfastOutsideExpectedGroups.push(row);
   }
 
-  return { h2MissingBeverage, beverageOutsideH2, h1MissingSnack, snackOutsideH1 };
+  return { h2MissingBeverage, beverageOutsideH2, h1MissingSnack, snackOutsideH1, breakfastOutsideExpectedGroups };
 }
 
 /**
@@ -308,7 +321,7 @@ export function computeMisflags(items, layers) {
  * @returns {Array<{foodItemID:string, field:string, generatedValue:*, manualValue:*}>}
  */
 export function computeConflicts(generatedOverlay, manualOverlay) {
-  const FIELDS = ['isSnack', 'isBeverage', 'imageFile'];
+  const FIELDS = ['isBreakfast', 'isSnack', 'isBeverage', 'imageFile'];
   const conflicts = [];
   for (const key of Object.keys(manualOverlay)) {
     const genRow = generatedOverlay[key];
@@ -523,13 +536,14 @@ function printHumanReport(report) {
 
   console.log('\n── Priority ranking (missing-overlay items only) ───────────────────────');
   console.log(`${ranked.length} items have no overlay row at all, ranked by product impact:`);
-  for (let tier = 0; tier <= 3; tier++) printRankedSample(ranked, tier, groupLabels);
+  for (let tier = 0; tier <= 2; tier++) printRankedSample(ranked, tier, groupLabels);
 
   console.log('\n── Suspected mis-flags (rows present but disagree with the fine group) ─');
   printMisflagList("h2 (Beverages) items NOT flagged isBeverage", misflags.h2MissingBeverage, groupLabels);
   printMisflagList('Items flagged isBeverage OUTSIDE h2', misflags.beverageOutsideH2, groupLabels);
   printMisflagList('h1 (Sweets & Snacks) items NOT flagged isSnack', misflags.h1MissingSnack, groupLabels);
   printMisflagList('Items flagged isSnack OUTSIDE h1', misflags.snackOutsideH1, groupLabels);
+  printMisflagList('Items flagged isBreakfast OUTSIDE f/g1 (classifier never writes here)', misflags.breakfastOutsideExpectedGroups, groupLabels);
 
   console.log('\n── Manual-vs-generated conflicts ───────────────────────────────────────');
   console.log(`${conflicts.length} field-level disagreement(s) between itemOverlay.json and itemOverlay.generated.json`);

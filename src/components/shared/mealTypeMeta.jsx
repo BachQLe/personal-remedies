@@ -58,8 +58,11 @@ const isValidSlotKey = (key) => typeof key === 'string' && PLAN_SLOT_KEYS.includ
  *
  * Resolution order: an explicit `fromSlot`/`slotKey` the item already carries
  * (e.g. plan/queue items placed by the user) wins over derived data; next,
- * a recipe's `mealType` (mapping the legacy singular 'snack' → 'snacks');
- * finally `inferSlotKey`, which buckets by food group for anything else.
+ * a recipe's `mealType` (mapping the legacy singular 'snack' → 'snacks',
+ * and — Task C1, Sept 2026 — the distinct 'dessert' mealType → 'snacks'
+ * too, since snacks and desserts share one Plan slot/listing, told apart by
+ * a tag rather than a separate slot); finally `inferSlotKey`, which buckets
+ * by food group for anything else.
  *
  * @param {Object} item
  * @returns {string} one of PLAN_SLOT_KEYS
@@ -70,7 +73,7 @@ export function mealTypeForItem(item) {
   if (isValidSlotKey(item?.slotKey)) return item.slotKey;
 
   const mealType = item?.mealType;
-  if (mealType === 'snack') return 'snacks';
+  if (mealType === 'snack' || mealType === 'dessert') return 'snacks';
   if (mealType === 'breakfast' || mealType === 'lunch' || mealType === 'dinner') {
     return mealType;
   }

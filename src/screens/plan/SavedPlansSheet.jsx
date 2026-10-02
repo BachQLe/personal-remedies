@@ -24,7 +24,13 @@ import { MAX_SAVED_PLANS } from '../../api/config.js';
  * @param {() => void} props.onClose
  * @param {boolean} props.hasActivePlan - whether there's a current plan to save
  * @param {Array<import('../../api/planBuilder.js').SavedPlanEntry>} props.savedPlans
+ * @param {string|null} [props.activeSavedPlanId] - Task C (#16): the entry
+ *   (if any) the live plan traces back to — marked "Active" and given an
+ *   "Update" action in place of the plain load/delete row.
  * @param {(name: string) => void} props.onSave
+ * @param {(id: string) => void} [props.onUpdate] - Task C (#16): overwrite
+ *   `activeSavedPlanId`'s snapshot in place (planBuilder.js's
+ *   `updateSavedPlan`).
  * @param {(id: string) => void} props.onLoad
  * @param {(id: string) => void} props.onDelete
  */
@@ -33,7 +39,9 @@ export default function SavedPlansSheet({
   onClose,
   hasActivePlan,
   savedPlans,
+  activeSavedPlanId = null,
   onSave,
+  onUpdate,
   onLoad,
   onDelete,
 }) {
@@ -88,33 +96,52 @@ export default function SavedPlansSheet({
         </p>
       ) : (
         <div className="flex flex-col gap-2">
-          {savedPlans.map((entry) => (
-            <div
-              key={entry.id}
-              className="w-full flex items-center justify-between gap-3 rounded-xl bg-paper-200 py-3 px-4"
-            >
-              <button
-                onClick={() => onLoad(entry.id)}
-                className="flex-1 min-w-0 text-left flex items-center gap-2"
+          {savedPlans.map((entry) => {
+            const isActive = entry.id === activeSavedPlanId;
+            return (
+              <div
+                key={entry.id}
+                className="w-full flex items-center justify-between gap-3 rounded-xl bg-paper-200 py-3 px-4"
               >
-                <Bookmark size={15} className="text-blue-950/50 shrink-0" aria-hidden="true" />
-                <span className="flex flex-col min-w-0">
-                  <span className="font-sans text-sm font-semibold text-blue-950 truncate">{entry.name}</span>
-                  <span className="font-sans text-xs text-char-500">
-                    Saved {new Date(entry.savedAt).toLocaleDateString()}
+                <button
+                  onClick={() => onLoad(entry.id)}
+                  className="flex-1 min-w-0 text-left flex items-center gap-2"
+                >
+                  <Bookmark size={15} className="text-blue-950/50 shrink-0" aria-hidden="true" />
+                  <span className="flex flex-col min-w-0">
+                    <span className="font-sans text-sm font-semibold text-blue-950 truncate flex items-center gap-1.5">
+                      {entry.name}
+                      {isActive && (
+                        <span className="shrink-0 rounded-full bg-forest-300 text-blue-950 text-[10px] font-semibold px-1.5 py-0.5">
+                          Active
+                        </span>
+                      )}
+                    </span>
+                    <span className="font-sans text-xs text-char-500">
+                      Saved {new Date(entry.savedAt).toLocaleDateString()}
+                    </span>
                   </span>
-                </span>
-              </button>
-              <button
-                onClick={() => onDelete(entry.id)}
-                aria-label={`Delete ${entry.name}`}
-                className="tap-target w-8 h-8 shrink-0 rounded-full flex items-center justify-center
-                  text-char-500 hover:bg-sand-200 transition-colors duration-fast"
-              >
-                <Trash2 size={15} aria-hidden="true" />
-              </button>
-            </div>
-          ))}
+                </button>
+                {isActive && onUpdate && (
+                  <button
+                    onClick={() => onUpdate(entry.id)}
+                    className="tap-target shrink-0 rounded-pill bg-white hover:bg-sand-100 text-blue-950/70
+                      text-xs font-semibold font-sans px-3 py-1.5 transition-colors duration-fast"
+                  >
+                    Update
+                  </button>
+                )}
+                <button
+                  onClick={() => onDelete(entry.id)}
+                  aria-label={`Delete ${entry.name}`}
+                  className="tap-target w-8 h-8 shrink-0 rounded-full flex items-center justify-center
+                    text-char-500 hover:bg-sand-200 transition-colors duration-fast"
+                >
+                  <Trash2 size={15} aria-hidden="true" />
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
     </BottomSheet>

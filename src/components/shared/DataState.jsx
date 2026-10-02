@@ -29,7 +29,9 @@
  *   error-shaped status ('error-network', 'error-api', 'offline-no-cache').
  *   Omit to hide the button entirely (e.g. a screen that only wants the
  *   message, with its own retry affordance elsewhere).
- * @param {string} [props.emptyTitle] - Overrides the default 'empty' copy.
+ * @param {string|null} [props.emptyTitle] - Overrides the default 'empty'
+ *   copy. Pass `null` (not omitted, not `''`) to explicitly render no title
+ *   at all; omitting the prop keeps falling back to the per-status default.
  * @param {string} [props.emptyBody] - Overrides the default 'empty' copy.
  * @param {import('react').ReactNode} [props.emptyAction] - Optional CTA
  *   rendered under the empty-state copy (e.g. "Browse foods").
@@ -119,12 +121,15 @@ export default function DataState({
   const isEmptyStatus = status === 'empty' || status === 'empty-no-profile';
   const copy = STATUS_COPY[status] || STATUS_COPY.empty;
   const showRetry = ERROR_STATUSES.includes(status) && typeof onRetry === 'function';
+  // emptyTitle === null is an explicit "render no title"; omitting the prop
+  // (undefined) keeps falling back to the per-status default title.
+  const resolvedEmptyTitle = emptyTitle === null ? null : emptyTitle !== undefined ? emptyTitle : copy.title;
 
   return (
     <div aria-label={screenName ? `${copy.title} — ${screenName}` : undefined}>
       <EmptyState
         icon={copy.icon}
-        title={isEmptyStatus ? emptyTitle || copy.title : copy.title}
+        title={isEmptyStatus ? resolvedEmptyTitle : copy.title}
         body={isEmptyStatus ? emptyBody || copy.body : copy.body}
         action={
           isEmptyStatus ? (

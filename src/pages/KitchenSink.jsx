@@ -38,8 +38,8 @@ const PALETTES = {
   ],
   Neutrals: [
     ['char-900', '#211E1B'], ['char-700', '#423D36'], ['char-500', '#6B645A'],
-    ['char-400', '#8A8377'], ['char-300', '#B7AF9F'], ['sand-200', '#E6E6E0'],
-    ['sand-100', '#EEEEE9'], ['paper-200', '#F5F5F0'], ['paper-100', '#FAFAF8'],
+    ['char-400', '#8A8377'], ['char-300', '#B7AF9F'], ['sand-200', '#FFFFFF'],
+    ['sand-100', '#FFFFFF'], ['paper-200', '#F5F5F0'], ['paper-100', '#FAFAF8'],
   ],
   Signals: [
     ['beneficial', '#2F8C5A'], ['beneficial-tint', '#DCEDE2'],

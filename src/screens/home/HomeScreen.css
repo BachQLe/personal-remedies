@@ -1,0 +1,86 @@
+.home-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  /* AppShell already reserves 7rem for the tabs. Paint that reserve here so
+     the blue-gray surface continues behind them, with one document scroll. */
+  margin-bottom: -7rem;
+  overflow-x: clip;
+}
+
+.home-screen__header {
+  flex-shrink: 0;
+}
+
+.home-screen__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0;
+  padding: 1.25rem 1.25rem calc(7rem + env(safe-area-inset-bottom, 0px));
+  border-radius: 2rem 2rem 0 0;
+  background: var(--paper-100);
+}
+
+.home-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.625rem;
+}
+
+.home-shortcut {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  min-width: 0;
+  min-height: 6.25rem;
+  padding: 0.875rem 0.8125rem;
+  border-radius: 1.25rem;
+  text-decoration: none;
+  transition: transform 180ms ease, border-color 180ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.home-shortcut__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.home-shortcut__label {
+  max-width: 100%;
+  text-align: center;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.home-shortcut:focus-visible {
+  outline: 3px solid #244835;
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .home-shortcut:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.home-shortcut:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-shortcut {
+    transition: none;
+  }
+
+  .home-shortcut:hover,
+  .home-shortcut:active {
+    transform: none;
+  }
+}

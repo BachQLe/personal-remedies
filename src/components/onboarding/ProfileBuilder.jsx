@@ -244,7 +244,7 @@ function ConditionsPanel({
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder="Search conditions, diets, allergies..."
-            className="w-full pl-11 pr-4 py-[15px] rounded-full border-[1.5px] border-[#E6E6E0] bg-white text-[16px] text-char-900 placeholder:text-[#8A8377] font-sans shadow-sm transition-all duration-fast ease-ds-out focus:outline-none focus:border-[#9B7DC8] focus:shadow-sm"
+            className="w-full pl-11 pr-4 py-[15px] rounded-full border-[1.5px] border-white bg-white text-[16px] text-char-900 placeholder:text-[#8A8377] font-sans shadow-sm transition-all duration-fast ease-ds-out focus:outline-none focus:border-[#9B7DC8] focus:shadow-sm"
           />
         </div>
 

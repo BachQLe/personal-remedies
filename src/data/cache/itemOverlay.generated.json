@@ -320,11 +320,36 @@
   "353": {
     "isSnack": true
   },
+  "463": {
+    "isBreakfast": true
+  },
   "466": {
     "isSnack": true
   },
+  "470": {
+    "isBreakfast": true
+  },
+  "478": {
+    "isBreakfast": true
+  },
+  "479": {
+    "isBreakfast": true
+  },
+  "481": {
+    "isBreakfast": true
+  },
   "482": {
-    "isSnack": true
+    "isSnack": true,
+    "isBreakfast": true
+  },
+  "483": {
+    "isBreakfast": true
+  },
+  "484": {
+    "isBreakfast": true
+  },
+  "485": {
+    "isBreakfast": true
   },
   "490": {
     "isSnack": true
@@ -344,8 +369,36 @@
   "496": {
     "isSnack": true
   },
+  "501": {
+    "isBreakfast": true
+  },
+  "502": {
+    "isBreakfast": true
+  },
   "504": {
-    "isSnack": true
+    "isSnack": true,
+    "isBreakfast": true
+  },
+  "506": {
+    "isBreakfast": true
+  },
+  "507": {
+    "isBreakfast": true
+  },
+  "508": {
+    "isBreakfast": true
+  },
+  "509": {
+    "isBreakfast": true
+  },
+  "514": {
+    "isBreakfast": true
+  },
+  "515": {
+    "isBreakfast": true
+  },
+  "540": {
+    "isBreakfast": true
   },
   "547": {
     "isSnack": true
@@ -369,7 +422,8 @@
     "isSnack": true
   },
   "554": {
-    "isSnack": true
+    "isSnack": true,
+    "isBreakfast": true
   },
   "555": {
     "isSnack": true
@@ -438,7 +492,8 @@
     "isBeverage": true
   },
   "633": {
-    "isSnack": true
+    "isSnack": true,
+    "isBreakfast": true
   },
   "634": {
     "isBeverage": true
@@ -698,11 +753,17 @@
   "1258": {
     "isSnack": true
   },
+  "1262": {
+    "isBreakfast": true
+  },
   "1279": {
     "isBeverage": true
   },
   "1286": {
     "isBeverage": true
+  },
+  "1294": {
+    "isBreakfast": true
   },
   "1297": {
     "isBeverage": true

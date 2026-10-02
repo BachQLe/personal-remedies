@@ -35,8 +35,19 @@
 
 import overlayRaw from '../data/recipeOverlay.json';
 
-/** @type {ReadonlyArray<string>} */
-const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack', 'beverage'];
+/**
+ * @type {ReadonlyArray<string>}
+ * 'dessert' added Sept 2026 (user decision, verbatim: "Snacks and deserts
+ * are going to be shown at once. But theyre going to have different tags.
+ * So yeah add as another meal type.") — a FIRST-CLASS meal type, NOT an
+ * alias/synonym for 'snack'. Mory's real 119-recipe source spreadsheet
+ * codes 11 recipes as dessert ("Ds"). The UI groups dessert recipes
+ * alongside snacks but tags them distinctly — that presentation decision
+ * belongs to the UI layer (adapter.js / the screens), not here. This
+ * module's only job is to accept 'dessert' as a valid `mealType`/`alsoFits`
+ * member, exactly like any other meal type.
+ */
+const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack', 'beverage', 'dessert'];
 
 function isFiniteNumber(v) {
   return typeof v === 'number' && Number.isFinite(v);
@@ -75,6 +86,34 @@ function isNumberArray(v) {
  * Deliberately does NOT check for a `directions`/`instructions` field —
  * the schema has none, so there is nothing to reject there; it simply
  * never gets read.
+ *
+ * Required: `name`, `sourceUrl`, `mealType`, and `fineFoodGroup: 'l'`.
+ * Everything else — `attribution`, `nutritionPerServing` (whole object, see
+ * NUTRITION RELAXATION below), `rawIngredients`, `ingredientFoodItemIds`,
+ * `servings`, `totalTimeMinutes` — is optional: valid if absent, but still
+ * strictly type-checked when present, so a partially-populated content
+ * pipeline row degrades to "field missing" rather than "field silently
+ * wrong". `rawIngredients` is one exception worth calling out: absent means
+ * "we don't have it yet" (fine), but an explicit `[]` is still rejected —
+ * that shape only happens if the content pipeline broke.
+ *
+ * NUTRITION RELAXATION (Sept 2026, user-approved — Mory's real 119-recipe
+ * source spreadsheet has NO calorie column at all, unlike the placeholder
+ * schema this validator originally enforced): `nutritionPerServing` is now
+ * optional AS A WHOLE, not just its `calories` sub-field — a row with no
+ * macro data whatsoever (the common case for this source) is valid; never
+ * fabricate a calorie value or fall back to a default when one is missing,
+ * absent means unknown, all the way through to the UI (RecipeLinkSheet
+ * renders no calorie line at all when it's absent — see
+ * foodDetailCard.js's `resolveRecipePreview`). When the key IS present, it
+ * must still be a plain object, and each of `calories`/`protein`/`carbs`/
+ * `fat` — all individually optional — must be a finite number when
+ * present. An explicit empty object (`nutritionPerServing: {}`) is
+ * REJECTED, not accepted-but-pointless: same convention as
+ * `rawIngredients` above — "we don't have this yet" is expressed by
+ * omitting the key entirely, so an empty-but-present object can only mean
+ * a content-pipeline bug (e.g. a spreadsheet transform that always emits
+ * the key with nothing in it).
  * @param {*} row
  * @returns {{ valid: true } | { valid: false, reason: string }}
  */
@@ -88,8 +127,8 @@ export function validateOverlayRow(row) {
   if (!isHttpsUrl(row.sourceUrl)) {
     return { valid: false, reason: 'sourceUrl must be an https:// URL' };
   }
-  if (!isNonEmptyString(row.attribution)) {
-    return { valid: false, reason: 'attribution must be a non-empty string' };
+  if (row.attribution !== undefined && !isNonEmptyString(row.attribution)) {
+    return { valid: false, reason: 'attribution, when present, must be a non-empty string' };
   }
   if (!MEAL_TYPES.includes(row.mealType)) {
     return { valid: false, reason: `mealType must be one of ${MEAL_TYPES.join(', ')}` };
@@ -97,28 +136,50 @@ export function validateOverlayRow(row) {
   if (row.alsoFits !== undefined && !isMealTypeArray(row.alsoFits)) {
     return { valid: false, reason: 'alsoFits, when present, must be an array of valid mealTypes' };
   }
-  if (!isStringArray(row.rawIngredients) || row.rawIngredients.length === 0) {
-    return { valid: false, reason: 'rawIngredients must be a non-empty string array' };
-  }
-  if (!isNumberArray(row.ingredientFoodItemIds)) {
-    return { valid: false, reason: 'ingredientFoodItemIds must be an array of numbers' };
-  }
-  if (!isFiniteNumber(row.servings) || row.servings <= 0) {
-    return { valid: false, reason: 'servings must be a positive finite number' };
-  }
-  const n = row.nutritionPerServing;
   if (
-    !n || typeof n !== 'object' ||
-    !isFiniteNumber(n.calories) || !isFiniteNumber(n.protein) ||
-    !isFiniteNumber(n.carbs) || !isFiniteNumber(n.fat)
+    row.rawIngredients !== undefined &&
+    (!isStringArray(row.rawIngredients) || row.rawIngredients.length === 0)
   ) {
-    return { valid: false, reason: 'nutritionPerServing must have numeric calories/protein/carbs/fat' };
+    return { valid: false, reason: 'rawIngredients, when present, must be a non-empty string array' };
+  }
+  if (row.ingredientFoodItemIds !== undefined && !isNumberArray(row.ingredientFoodItemIds)) {
+    return { valid: false, reason: 'ingredientFoodItemIds, when present, must be an array of numbers' };
+  }
+  if (row.servings !== undefined && (!isFiniteNumber(row.servings) || row.servings <= 0)) {
+    return { valid: false, reason: 'servings, when present, must be a positive finite number' };
+  }
+  if (row.nutritionPerServing !== undefined) {
+    const n = row.nutritionPerServing;
+    if (!n || typeof n !== 'object' || Array.isArray(n)) {
+      return { valid: false, reason: 'nutritionPerServing, when present, must be an object' };
+    }
+    if (Object.keys(n).length === 0) {
+      return {
+        valid: false,
+        reason: 'nutritionPerServing, when present, must not be an empty object — omit the field entirely to mean "unknown"',
+      };
+    }
+    if (n.calories !== undefined && !isFiniteNumber(n.calories)) {
+      return { valid: false, reason: 'nutritionPerServing.calories, when present, must be a finite number' };
+    }
+    if (n.protein !== undefined && !isFiniteNumber(n.protein)) {
+      return { valid: false, reason: 'nutritionPerServing.protein, when present, must be a finite number' };
+    }
+    if (n.carbs !== undefined && !isFiniteNumber(n.carbs)) {
+      return { valid: false, reason: 'nutritionPerServing.carbs, when present, must be a finite number' };
+    }
+    if (n.fat !== undefined && !isFiniteNumber(n.fat)) {
+      return { valid: false, reason: 'nutritionPerServing.fat, when present, must be a finite number' };
+    }
   }
   if (row.dietaryTags !== undefined && !isStringArray(row.dietaryTags)) {
     return { valid: false, reason: 'dietaryTags, when present, must be a string array' };
   }
-  if (!isFiniteNumber(row.totalTimeMinutes) || row.totalTimeMinutes <= 0) {
-    return { valid: false, reason: 'totalTimeMinutes must be a positive finite number' };
+  if (
+    row.totalTimeMinutes !== undefined &&
+    (!isFiniteNumber(row.totalTimeMinutes) || row.totalTimeMinutes <= 0)
+  ) {
+    return { valid: false, reason: 'totalTimeMinutes, when present, must be a positive finite number' };
   }
   if (row.fineFoodGroup !== 'l') {
     return { valid: false, reason: "fineFoodGroup must be 'l'" };
@@ -188,15 +249,37 @@ export function loadRecipeOverlay() {
  * under `overlayMealType` (alongside the untouched `mealType` it inherited
  * from `apiRecipes`) rather than silently deciding the precedence itself.
  *
+ * Every field below the required four (`sourceUrl`, and `overlayMealType`
+ * from the required `mealType`) is copied onto the result ONLY when the
+ * overlay row actually carries it — an absent optional field is OMITTED
+ * from the joined object entirely, never set to `null`/`undefined`/`[]`.
+ * This keeps "we don't have this yet" (key absent) distinguishable from "we
+ * checked and it's empty" (key present, empty value) all the way through to
+ * consumers like `getRecipesRaw`'s `if (!rawIngredients)` guard
+ * (adapter.js), which an omitted key still satisfies. `dietaryTags` and
+ * `alsoFits` are the one exception, kept at their pre-existing `?? []`
+ * fill — they were already optional before this schema relaxation and nothing
+ * here changes their contract.
+ *
+ * `nutritionPerServing` (Sept 2026 relaxation — see `validateOverlayRow`'s
+ * NUTRITION RELAXATION note) is now itself one of the "only when present"
+ * fields: a row with no macro data omits the key entirely from the joined
+ * result rather than joining an object with a missing/undefined `calories`.
+ * When the row does carry it, only the sub-fields the row actually has
+ * (`calories`/`protein`/`carbs`/`fat`, independently) are copied — same
+ * "omit, don't null-fill" rule as everything else here.
+ *
  * @param {Array<import('./types.js').Recipe>} apiRecipes - Recipes already
  *   returned by the live API (each must carry its own foodItemID via `id`
  *   and/or `foodId`, and its own `numericId`/`tier`).
  * @returns {Array<import('./types.js').Recipe>} Same recipes, in the same
- *   order, enriched with overlay fields (`sourceUrl`, `attribution`,
- *   `servings`, `nutritionPerServing`, `rawIngredients`,
- *   `ingredientFoodItemIds`, `dietaryTags`, `totalTimeMinutes`, `alsoFits`,
- *   `overlayMealType`) where a matching row exists; recipes with no
- *   matching overlay row pass through unchanged (same object reference).
+ *   order, enriched with overlay fields (`sourceUrl` always;
+ *   `attribution`, `servings`, `nutritionPerServing` (whole object, with
+ *   only its present sub-fields), `rawIngredients`, `ingredientFoodItemIds`,
+ *   `totalTimeMinutes` only when the overlay row has them; `dietaryTags`/
+ *   `alsoFits` always, `?? []` filled; `overlayMealType` always) where a
+ *   matching row exists; recipes with no matching overlay row pass through
+ *   unchanged (same object reference).
  */
 export function joinRecipeOverlay(apiRecipes) {
   if (!Array.isArray(apiRecipes)) return [];
@@ -218,23 +301,34 @@ export function joinRecipeOverlay(apiRecipes) {
     const row = overlayByFoodItemId.get(String(key));
     if (!row) return recipe;
 
-    return {
+    const joined = {
       ...recipe, // recipe's own (API-sourced) fields are untouched, including numericId/tier/id/foodId
       sourceUrl: row.sourceUrl,
-      attribution: row.attribution,
-      servings: row.servings,
-      nutritionPerServing: {
-        calories: row.nutritionPerServing.calories,
-        protein: row.nutritionPerServing.protein,
-        carbs: row.nutritionPerServing.carbs,
-        fat: row.nutritionPerServing.fat,
-      },
-      rawIngredients: row.rawIngredients,
-      ingredientFoodItemIds: row.ingredientFoodItemIds,
       dietaryTags: row.dietaryTags ?? [],
-      totalTimeMinutes: row.totalTimeMinutes,
       alsoFits: row.alsoFits ?? [],
       overlayMealType: row.mealType,
     };
+    if (row.attribution !== undefined) joined.attribution = row.attribution;
+    if (row.servings !== undefined) joined.servings = row.servings;
+    if (row.nutritionPerServing !== undefined) {
+      // nutritionPerServing is now OPTIONAL on the overlay row as a whole
+      // (Mory's real source data has no calorie column at all — see
+      // validateOverlayRow's NUTRITION RELAXATION note), so this block, and
+      // each macro within it, is copied over only when the row actually
+      // carries it. `row.nutritionPerServing.calories` is never read
+      // unconditionally here — that field can itself be absent even when
+      // the object is present (e.g. a row transcribed with protein/carbs
+      // but no calorie figure) — never fabricate/default a missing macro.
+      const nutritionPerServing = {};
+      if (row.nutritionPerServing.calories !== undefined) nutritionPerServing.calories = row.nutritionPerServing.calories;
+      if (row.nutritionPerServing.protein !== undefined) nutritionPerServing.protein = row.nutritionPerServing.protein;
+      if (row.nutritionPerServing.carbs !== undefined) nutritionPerServing.carbs = row.nutritionPerServing.carbs;
+      if (row.nutritionPerServing.fat !== undefined) nutritionPerServing.fat = row.nutritionPerServing.fat;
+      joined.nutritionPerServing = nutritionPerServing;
+    }
+    if (row.rawIngredients !== undefined) joined.rawIngredients = row.rawIngredients;
+    if (row.ingredientFoodItemIds !== undefined) joined.ingredientFoodItemIds = row.ingredientFoodItemIds;
+    if (row.totalTimeMinutes !== undefined) joined.totalTimeMinutes = row.totalTimeMinutes;
+    return joined;
   });
 }

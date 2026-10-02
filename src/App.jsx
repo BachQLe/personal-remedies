@@ -19,6 +19,7 @@ import HomeScreen from "./screens/home/HomeScreen";
 import SearchScreen from "./screens/search/SearchScreen";
 import SuggestionsScreen from "./screens/suggestions/SuggestionsScreen";
 import GroupDetailScreen from "./screens/suggestions/GroupDetailScreen";
+import FineGroupDetailScreen from "./screens/suggestions/FineGroupDetailScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
 import MealQueueScreen from "./screens/plan/MealQueueScreen";
 import RecipesScreen from "./screens/recipes/RecipesScreen";
@@ -192,6 +193,7 @@ function App() {
               <Route path="/app/search" element={<SearchRouteScreen />} />
               <Route path="/app/suggestions" element={<SuggestionsScreen />} />
               <Route path="/app/suggestions/group/:groupId" element={<GroupDetailScreen />} />
+              <Route path="/app/suggestions/fine/:fineGroupId" element={<FineGroupDetailScreen />} />
               <Route path="/app/recipes" element={<RecipesScreen />} />
               <Route path="/app/plan" element={<MealQueueScreen />} />
               <Route path="/app/profile" element={<ProfileScreen />} />

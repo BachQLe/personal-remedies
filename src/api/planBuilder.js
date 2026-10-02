@@ -64,6 +64,27 @@ async function loadCandidates(profile) {
 }
 
 /**
+ * Get the cached candidate pool for ONE Plan slot — the same ranked list
+ * `ensurePlanForWeek`/`shuffleSlot`/etc. draw from (via `loadCandidates`'
+ * session memo, so this triggers zero extra network calls beyond whatever
+ * this profile's conditions already fetched this session/8h-cache window).
+ *
+ * Used by SuggestionsSheet's empty-slot / no-scope fallback (Task 13): when
+ * a Plan slot has nothing in it yet, or nothing in it resolves to a
+ * same-group substitute scope (e.g. every current item is a recipe outside
+ * the C1 overlay dataset), `getSlotSubstitutes` has nothing to scope a
+ * same-group search by — this gives the sheet the slot's full candidate
+ * list to offer instead.
+ * @param {import('./types.js').Profile} profile
+ * @param {string} slotKey - one of PLAN_SLOT_KEYS
+ * @returns {Promise<import('./types.js').PlanCandidate[]>}
+ */
+export async function getCandidatesForSlot(profile, slotKey) {
+  const { candidates } = await loadCandidates(profile);
+  return candidates[slotKey] || [];
+}
+
+/**
  * Heuristic to bucket a food/recipe item into a Plan slot key — shared by
  * the legacy-queue migration (below) and Cookbook "add to plan". Mirrors
  * adapter.js's `buildMealPlanRaw` bucketing: fine-group overrides
@@ -106,6 +127,10 @@ export function inferSlotKey(item) {
  * `daily_plan` row small and matches dailyPlan.js's `PlanItem` typedef
  * exactly. Drops anything else (e.g. stray fields from older shapes).
  *
+ * Ten fields are copied unconditionally (as possibly-undefined, same as the
+ * candidate carried them): `id`, `name`, `image`, `group`, `fineGroup`,
+ * `tier`, `numericId`, `kind`, `sourceName`, `substituteFineGroup`.
+ *
  * `substituteFineGroup` (additive, Substitutions feature): carried through
  * unchanged when present on a recipe candidate (see `recipeToPlanCandidate`
  * in adapter.js) so `getSlotSubstitutes` can scope a persisted recipe's
@@ -113,10 +138,15 @@ export function inferSlotKey(item) {
  * candidate built before this field existed, same as every other optional
  * field here.
  *
- * Exported (unlike the rest of this module's internals) so MealQueueScreen's
- * "swap a substitute into the plan" handler converts a PlanCandidate the
- * exact same way every other slot-fill path here does, instead of
- * duplicating a second, potentially-divergent conversion.
+ * `sourceUrl`/`attribution`/`nutritionPerServing` (additive, in-app recipe
+ * preview sheet — RecipeLinkSheet.jsx/foodDetailCard.js's
+ * `resolveRecipePreview`): UNLIKE the ten fields above, these three are
+ * only ever set on the output when the candidate actually has them —
+ * omitted (not merely `undefined`-valued) otherwise, so a plain food's
+ * persisted PlanItem — and any plan saved before this task — stays exactly
+ * as lean as before. `sourceUrl` is carried through, never dropped: it's
+ * what lets the preview sheet's hand-off button work for a recipe pulled
+ * back out of a saved plan, not just one freshly loaded from candidates.
  * @param {Object} candidate
  * @returns {import('../state/dailyPlan.js').PlanItem}
  */
@@ -132,6 +162,11 @@ export function toPlanItem(candidate) {
     kind: candidate.kind,
     sourceName: candidate.sourceName,
     substituteFineGroup: candidate.substituteFineGroup,
+    ...(candidate.sourceUrl !== undefined && { sourceUrl: candidate.sourceUrl }),
+    ...(candidate.attribution !== undefined && { attribution: candidate.attribution }),
+    ...(candidate.nutritionPerServing !== undefined && {
+      nutritionPerServing: candidate.nutritionPerServing,
+    }),
   };
 }
 
@@ -435,6 +470,7 @@ export async function ensurePlanForWeek(profile) {
     // (never regenerate from pools, never carry picks over) and hand back
     // the same no-plan shape a first-ever build returns. See the doc above.
     setPlan(null);
+    clearActiveSavedPlan();
     return { plan: null, usedFallback: false };
   }
 
@@ -539,6 +575,7 @@ export function purgeDerivedDataForConditionsChange(newConditions) {
   if (existing.conditionsKey === newKey) return false;
 
   setPlan(null);
+  clearActiveSavedPlan();
   return true;
 }
 
@@ -630,6 +667,11 @@ export async function generatePlanFromPicks(profile, pickedItems) {
   };
 
   setPlan(plan);
+  // A freshly-picked plan is a brand-new week, not an edit of whatever saved
+  // entry the previous plan traced back to (Task C/#16) — clear the
+  // active-saved-plan pointer so the "unsaved changes" indicator doesn't
+  // compare this new plan against an unrelated old save.
+  clearActiveSavedPlan();
   return { plan, usedFallback };
 }
 
@@ -766,6 +808,13 @@ export async function regenerateWeek(profile) {
  * already present in any OTHER slot that day, ids already marked eaten, and
  * every id pinned anywhere that day. Other slots (and other days) are left
  * untouched. Zero API calls.
+ *
+ * No-op when this slot's candidate pool is empty (returns the plan
+ * unchanged, writes nothing): `fillSlots` treats every non-pinned position
+ * as a hole to refill, and with zero candidates to draw from it would just
+ * drop those holes from the output — i.e. silently DELETE the slot's
+ * unpinned items instead of shuffling them. Bailing out here keeps "nothing
+ * to shuffle in" from ever reading as "clear the slot".
  * @param {import('./types.js').Profile} profile
  * @param {string} dateKey
  * @param {string} slotKey
@@ -782,8 +831,10 @@ export async function shuffleSlot(profile, dateKey, slotKey) {
   const pool = candidates[slotKey] || [];
   const len = pool.length;
 
+  if (len === 0) return existing;
+
   const prevOffset = day.offsets[slotKey] || 0;
-  const nextOffset = len > 0 ? (prevOffset + slot.size) % len : prevOffset;
+  const nextOffset = (prevOffset + slot.size) % len;
 
   const pinnedIds = new Set(day.pinned);
   const otherIds = new Set(
@@ -826,6 +877,15 @@ export async function shuffleSlot(profile, dateKey, slotKey) {
 const SAVED_PLANS_KEY = 'savedPlans';
 
 /**
+ * storage.js key for the "active saved plan" pointer (Task C/#16) — tracks
+ * which saved entry (if any) the LIVE plan currently traces back to, and a
+ * fingerprint of its content at that moment, so the Plan screen can detect
+ * drift (edits made since) and offer "Save"/"Save as new" instead of only
+ * ever creating a new entry.
+ */
+const ACTIVE_SAVED_PLAN_KEY = 'activeSavedPlan';
+
+/**
  * @typedef {Object} SavedPlanEntry
  * @property {string} id
  * @property {string} name
@@ -834,6 +894,13 @@ const SAVED_PLANS_KEY = 'savedPlans';
  *   independent from this point on: loading it back (`loadSavedPlan`) copies
  *   it into the live `dailyPlan` store, and subsequent edits to either the
  *   live plan or this saved copy never affect the other.
+ */
+
+/**
+ * @typedef {Object} ActiveSavedPlan
+ * @property {string} id - the `SavedPlanEntry.id` the live plan traces back to.
+ * @property {string} fingerprint - `planFingerprint()` of the plan at the
+ *   moment it was saved/updated/loaded (see `planFingerprint` below).
  */
 
 /**
@@ -847,7 +914,114 @@ export function getSavedPlans() {
 }
 
 /**
+ * Restore a previously-deleted saved-plan ENTRY verbatim (id, name, savedAt,
+ * plan all preserved) — the Plan screen's Undo action after `deleteSavedPlan`
+ * (Task A/#14). Appended at the end, same as any other save; never subject
+ * to `MAX_SAVED_PLANS` — undoing a delete hands back what the user already
+ * had, it isn't a new save. No-op if an entry with this id already exists
+ * (defensive against a double-invoked Undo).
+ * @param {SavedPlanEntry} entry
+ */
+export function restoreSavedPlan(entry) {
+  if (!entry || typeof entry.id !== 'string') return;
+  const saved = getSavedPlans();
+  if (saved.some((p) => p.id === entry.id)) return;
+  storage.set(SAVED_PLANS_KEY, [...saved, entry]);
+}
+
+/**
+ * The saved entry (if any) the LIVE plan currently traces back to — Task C
+ * (#16). `null` when the live plan has never been saved/loaded, or was
+ * cleared by a purge/new-plan event (see `clearActiveSavedPlan`'s call
+ * sites: `generatePlanFromPicks`, the conditions-change discard paths in
+ * `ensurePlanForWeek`/`purgeDerivedDataForConditionsChange`, and deleting
+ * this exact entry via `deleteSavedPlan`).
+ * @returns {ActiveSavedPlan|null}
+ */
+export function getActiveSavedPlan() {
+  const active = storage.get(ACTIVE_SAVED_PLAN_KEY, null);
+  return active && typeof active === 'object' && typeof active.id === 'string' ? active : null;
+}
+
+/** Point the active-saved-plan pointer at `id`, fingerprinting `plan` now. */
+function setActiveSavedPlan(id, plan) {
+  storage.set(ACTIVE_SAVED_PLAN_KEY, { id, fingerprint: planFingerprint(plan) });
+}
+
+/**
+ * Clear the active-saved-plan pointer — see `getActiveSavedPlan`'s doc for
+ * every call site. No-op (safe to call unconditionally) if already clear.
+ */
+export function clearActiveSavedPlan() {
+  storage.remove(ACTIVE_SAVED_PLAN_KEY);
+}
+
+/**
+ * Restore a previously-captured active-saved-plan pointer verbatim — the
+ * Plan screen's Undo action after `loadSavedPlan` replaced an unsaved plan
+ * (Task A/#14): the caller captures `getActiveSavedPlan()` BEFORE the load,
+ * and on Undo hands it back here — paired with restoring the plan itself via
+ * `dailyPlan.js`'s `setPlan` — so the pointer and the live plan stay in
+ * sync. `null` (or anything else not shaped like an `ActiveSavedPlan`)
+ * clears it, same as `clearActiveSavedPlan`.
+ * @param {ActiveSavedPlan|null} pointer
+ */
+export function restoreActiveSavedPlan(pointer) {
+  if (pointer && typeof pointer === 'object' && typeof pointer.id === 'string') {
+    storage.set(ACTIVE_SAVED_PLAN_KEY, pointer);
+  } else {
+    clearActiveSavedPlan();
+  }
+}
+
+/**
+ * Stable fingerprint of a plan's user-editable CONTENT — Task C (#16). Two
+ * plans that hold the exact same picks/slot-items/pins fingerprint
+ * identically even if they were built on different calendar weeks, so
+ * loading a snapshot back (which re-keys its days onto the current window —
+ * see `refitPlanToWindow`) never reads as "dirty" against itself. Concretely:
+ *   - Days are walked in SORTED (chronological) key order and identified by
+ *     POSITION in that order, not by their real date key — shifting the
+ *     7-day window (a new day rolling in, `handleChangeWeekStartDay`, a
+ *     `refitPlanToWindow` reload) never changes the fingerprint on its own.
+ *   - Per day: each slot's item ids IN ORDER (position within the slot is
+ *     meaningful content — a reorder is a real edit) plus that day's pinned
+ *     ids (order-independent — sorted — since pin MEMBERSHIP is what
+ *     matters, not the order toggled).
+ *   - `eaten` is deliberately excluded — marking something eaten isn't an
+ *     edit to the PLAN, and would otherwise mark every saved plan dirty the
+ *     moment its Today gets checked off.
+ *   - `picksBySlot` (present on every plan built since Aug 2026) is
+ *     fingerprinted by id list per slot — this is the user's actual
+ *     "what did I choose" state, independent of which day currently shows it.
+ * @param {import('../state/dailyPlan.js').WeeklyPlan|null} plan
+ * @returns {string}
+ */
+export function planFingerprint(plan) {
+  if (!plan) return '';
+
+  const dayKeys = Object.keys(plan.days || {}).sort();
+  const days = dayKeys.map((key) => {
+    const day = plan.days[key] || {};
+    const slots = {};
+    for (const slotKey of PLAN_SLOT_KEYS) {
+      slots[slotKey] = (day.slots?.[slotKey] || []).map((item) => item.id);
+    }
+    return { slots, pinned: [...(day.pinned || [])].sort() };
+  });
+
+  const picksBySlot = plan.picksBySlot
+    ? Object.fromEntries(
+        PLAN_SLOT_KEYS.map((slotKey) => [slotKey, (plan.picksBySlot[slotKey] || []).map((item) => item.id)])
+      )
+    : null;
+
+  return JSON.stringify({ picksBySlot, days });
+}
+
+/**
  * Save a snapshot of the currently active plan (`getPlan()`) under a name.
+ * Marks the new entry as the ACTIVE saved plan (Task C/#16).
  * @param {string} [name] - trimmed; falls back to `Plan N` when blank.
  * @returns {{ ok: true, entry: SavedPlanEntry } | { ok: false, reason: 'no-plan'|'at-cap' }}
  */
@@ -865,26 +1039,92 @@ export function saveCurrentPlan(name) {
     plan,
   };
   storage.set(SAVED_PLANS_KEY, [...saved, entry]);
+  setActiveSavedPlan(entry.id, plan);
   return { ok: true, entry };
+}
+
+/**
+ * Overwrite an EXISTING saved-plan entry's `plan` snapshot + `savedAt` in
+ * place — Task A (#14)/B (#15)'s "Save"/"Update" action on a plan that's
+ * already been saved once. UNLIKE `saveCurrentPlan`, this never touches
+ * `MAX_SAVED_PLANS` — it replaces an entry already counted against the cap
+ * rather than appending a new one, so it's never blocked by it. Marks the
+ * entry as the ACTIVE saved plan (Task C/#16), same as a fresh save.
+ * @param {string} id
+ * @returns {{ ok: true, entry: SavedPlanEntry } | { ok: false, reason: 'no-plan'|'not-found' }}
+ */
+export function updateSavedPlan(id) {
+  const plan = getPlan();
+  if (!plan) return { ok: false, reason: 'no-plan' };
+
+  const saved = getSavedPlans();
+  const index = saved.findIndex((p) => p.id === id);
+  if (index === -1) return { ok: false, reason: 'not-found' };
+
+  const entry = { ...saved[index], plan, savedAt: new Date().toISOString() };
+  const next = saved.slice();
+  next[index] = entry;
+  storage.set(SAVED_PLANS_KEY, next);
+  setActiveSavedPlan(entry.id, plan);
+  return { ok: true, entry };
+}
+
+/**
+ * Refit a saved snapshot's days onto the CURRENT rolling 7-day window
+ * (`nextSevenDays()`) by day POSITION, not by matching the snapshot's
+ * original date keys — Task A (#14). A saved snapshot's day keys are real
+ * calendar dates as of when it was saved; loading it back later (or after a
+ * `handleChangeWeekStartDay` change) would otherwise land every one of its
+ * days OUTSIDE the live window and render as an empty week until the next
+ * remount happened to re-derive `nextSevenDays()`. Each of the snapshot's
+ * day keys, walked in sorted (chronological) order, is remapped onto the
+ * live window's keys at the same index — everything on that day's state
+ * (`picksBySlot`-filled slots, `pinned`, `eaten`) carries over untouched. A
+ * snapshot with fewer than 7 days simply leaves the window's remaining
+ * trailing day(s) unset — the same "missing day" shape `ensurePlanForWeek`
+ * already knows how to fill on its next call.
+ * @param {import('../state/dailyPlan.js').WeeklyPlan} plan
+ * @returns {import('../state/dailyPlan.js').WeeklyPlan}
+ */
+function refitPlanToWindow(plan) {
+  const currentKeys = nextSevenDays().map((d) => d.key);
+  const snapshotKeys = Object.keys(plan.days || {}).sort();
+  const days = {};
+  currentKeys.forEach((key, i) => {
+    const sourceKey = snapshotKeys[i];
+    if (sourceKey && plan.days[sourceKey]) {
+      days[key] = plan.days[sourceKey];
+    }
+  });
+  return { ...plan, days };
 }
 
 /**
  * Load a saved plan back into the live `dailyPlan` store, REPLACING whatever
  * plan is currently active — same whole-plan-overwrite contract every other
  * export here uses via `setPlan`. The saved entry is left in place; loading
- * is non-destructive to the saved list.
+ * is non-destructive to the saved list. The snapshot is refit onto the
+ * current rolling window first (`refitPlanToWindow`) so it never silently
+ * renders as an empty week. Marks this entry as the ACTIVE saved plan (Task
+ * C/#16), fingerprinted from the REFITTED plan (position-based, so refitting
+ * itself never reads as an edit).
  * @param {string} id
  * @returns {boolean} true if a matching saved plan was found and loaded.
  */
 export function loadSavedPlan(id) {
   const entry = getSavedPlans().find((p) => p.id === id);
   if (!entry) return false;
-  setPlan(entry.plan);
+  const refitted = refitPlanToWindow(entry.plan);
+  setPlan(refitted);
+  setActiveSavedPlan(entry.id, refitted);
   return true;
 }
 
 /**
- * Delete a saved plan by id. No-op (returns false) if not found.
+ * Delete a saved plan by id. No-op (returns false) if not found. Clears the
+ * active-saved-plan pointer (Task C/#16) if the deleted entry was the active
+ * one — the live plan no longer traces back to anything once its saved copy
+ * is gone.
  * @param {string} id
  * @returns {boolean}
  */
@@ -893,5 +1133,6 @@ export function deleteSavedPlan(id) {
   const next = saved.filter((p) => p.id !== id);
   if (next.length === saved.length) return false;
   storage.set(SAVED_PLANS_KEY, next);
+  if (getActiveSavedPlan()?.id === id) clearActiveSavedPlan();
   return true;
 }

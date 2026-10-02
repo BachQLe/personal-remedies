@@ -66,10 +66,19 @@ export default function NutritionFactsSheet({ open, onClose, dayLabel, items }) 
           <div className="flex flex-col gap-2">
             {list.map((item) => {
               const resolved = resolveNutrition(item, item.fromSlot);
+              // A tier can resolve (panel/USDA/estimate) with `calories`
+              // itself `null` — e.g. a C1 overlay panel that has macros but
+              // no calorie figure (recipeIngestion.js's nutrition
+              // relaxation). Never render a calorie string for that case:
+              // no fabricated number, no "undefined kcal"/"null kcal" — the
+              // same honest "no estimate" treatment as a fully unresolved
+              // item (see MealQueueScreen.jsx's print view: "foods only, no
+              // calories, no fabricated placeholders").
+              const hasCalories = resolved && resolved.calories != null;
               return (
                 <div key={item.id} className="flex items-center justify-between text-sm gap-3">
                   <span className="text-blue-950 truncate">{item.name}</span>
-                  {resolved ? (
+                  {hasCalories ? (
                     <span className="text-char-500 shrink-0">
                       {resolved.estimated
                         ? `~${resolved.calories} kcal · estimated`

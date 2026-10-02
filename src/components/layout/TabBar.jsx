@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import Icon from '../shared/Icon.jsx';
 
 const TABS = [
@@ -9,37 +10,61 @@ const TABS = [
   { to: '/app/profile', label: 'Profile', icon: 'user' },
 ];
 
+const PILL_SPRING = { type: 'spring', stiffness: 420, damping: 34 };
+
 export default function TabBar() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none safe-area-bottom">
-      <div className="max-w-[430px] mx-auto px-5 pb-4">
-        <div className="pointer-events-auto flex items-center justify-around px-2 h-16
-          bg-white/90 backdrop-blur-md rounded-pill border border-sand-200 shadow-lg">
-        {TABS.map((tab) => {
-          return (
-            <NavLink
-              key={tab.to}
-              to={tab.to}
-              className="flex flex-col items-center gap-0.5 px-3 py-1.5 min-w-[44px] min-h-[44px] justify-center"
-            >
-              {({ isActive }) => (
-                <>
-                  <span className={`transition-colors duration-fast ${isActive ? 'text-blue-950' : 'text-char-400'}`}>
-                    <Icon name={tab.icon} size={24} aria-hidden="true" />
-                  </span>
-                  <span
-                    className={`text-[10px] font-semibold font-sans transition-colors duration-fast ${
-                      isActive ? 'text-blue-950' : 'text-char-400'
-                    }`}
-                  >
-                    {tab.label}
-                  </span>
-                </>
-              )}
-            </NavLink>
-          );
-        })}
-        </div>
+      <div className="flex justify-center px-3 pb-4">
+        <LayoutGroup id="tabbar">
+          <div className="pointer-events-auto inline-flex items-center justify-center gap-2 px-2 h-14
+            bg-char-900/95 backdrop-blur-md rounded-md border border-char-700 shadow-lg">
+          {TABS.map((tab) => {
+            return (
+              <NavLink
+                key={tab.to}
+                to={tab.to}
+                aria-label={tab.label}
+                className="relative flex items-center justify-center h-11 min-w-[44px] px-2.5 rounded-md"
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <motion.span
+                        layoutId="tabbar-pill"
+                        transition={PILL_SPRING}
+                        className="absolute inset-0 rounded-md bg-white"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span
+                      className={`relative flex items-center gap-1.5 transition-colors duration-fast ${
+                        isActive ? 'text-char-900' : 'text-char-300'
+                      }`}
+                    >
+                      <Icon name={tab.icon} size={21} aria-hidden="true" />
+                      <AnimatePresence initial={false}>
+                        {isActive && (
+                          <motion.span
+                            key="label"
+                            initial={{ opacity: 0, width: 0 }}
+                            animate={{ opacity: 1, width: 'auto' }}
+                            exit={{ opacity: 0, width: 0 }}
+                            transition={{ duration: 0.18, ease: 'easeOut' }}
+                            className="overflow-hidden whitespace-nowrap text-[11px] font-semibold font-sans"
+                          >
+                            {tab.label}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </span>
+                  </>
+                )}
+              </NavLink>
+            );
+          })}
+          </div>
+        </LayoutGroup>
       </div>
     </nav>
   );

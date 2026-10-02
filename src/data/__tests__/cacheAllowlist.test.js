@@ -7,9 +7,12 @@
  *   outside it."
  *
  * Three angles on the same rule:
- *   (i)   nothing beyond the known 5 files is ever committed to
+ *   (i)   nothing beyond the known 6 files is ever committed to
  *         src/data/cache/ (the overlay files are hand/machine-curated
- *         flags, not remedy data, hence allowed alongside the 3 dictionaries).
+ *         flags/images, not remedy data, hence allowed alongside the 3
+ *         dictionaries — `itemImages.generated.json` is a per-item Unsplash
+ *         `imageFile` layer, same non-remedy-data status as the other two
+ *         overlay files, just image URLs instead of flags).
  *   (ii)  scripts/snapshot-nutridigm.mjs — the only writer of this
  *         directory — is statically limited to writing items/conditions/
  *         groups, by source inspection of its TABLES definition.
@@ -36,12 +39,13 @@ const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
 describe('(i) src/data/cache/ contains only the dictionary + overlay allowlist', () => {
-  it('has exactly {items,conditions,groups,itemOverlay,itemOverlay.generated}.json — nothing else', () => {
+  it('has exactly {items,conditions,groups,itemOverlay,itemOverlay.generated,itemImages.generated}.json — nothing else', () => {
     const cacheDir = path.join(ROOT, 'src', 'data', 'cache');
     const actual = readdirSync(cacheDir).sort();
     const allowed = [
       'conditions.json',
       'groups.json',
+      'itemImages.generated.json',
       'itemOverlay.generated.json',
       'itemOverlay.json',
       'items.json',

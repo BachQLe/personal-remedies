@@ -270,10 +270,14 @@ export function getIngredientImage(name, group, imageFile) {
  * This function is additive instead: `getIngredientImage`'s behavior is
  * completely unchanged, and only callers that explicitly adopt this new
  * function get sentinel-aware resolution. Today that's `FoodImageCard`'s
- * `nonFoodIcon` prop and `RankedRow` (both call `getNonFoodIcon` directly,
- * since they already have `group`/`fineGroup` in hand); wiring the screens
- * above to call this function instead of `getIngredientImage` is a
- * caller-side follow-up, not something this module can do unilaterally.
+ * `nonFoodIcon` prop (which calls `getNonFoodIcon` directly, since it
+ * already has `group`/`fineGroup` in hand). `RankedRow` no longer does this
+ * — its image-right experiment (see RankedRow.jsx header) calls
+ * `getIngredientImage` directly for every row, including lifestyle/nutrient
+ * items, so they get a real (fallback) photo instead of a category icon;
+ * wiring the screens above to call this function instead of
+ * `getIngredientImage` is a caller-side follow-up, not something this
+ * module can do unilaterally.
  *
  * @param {string} name
  * @param {string} [group] - coarse food group code

@@ -1,1 +1,1140 @@
-[]
+[
+  {
+    "foodItemID": 5000,
+    "name": "Lemon-Garlic Shrimp and Grits",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/lemon-garlic-shrimp-and-grits-recipe-1973610"
+  },
+  {
+    "foodItemID": 5001,
+    "name": "Low-Cal Fettuccine Alfredo",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/low-cal-fettuccine-alfredo-recipe-2118317"
+  },
+  {
+    "foodItemID": 5003,
+    "name": "American Macaroni Salald",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/american-macaroni-salad-recipe-2011554"
+  },
+  {
+    "foodItemID": 5004,
+    "name": "Linguine with Chicken Ragu",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/giada-de-laurentiis/linguine-with-chicken-ragu-recipe-1916204"
+  },
+  {
+    "foodItemID": 5005,
+    "name": "Spicy Cauliflower Stir-Fry",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ree-drummond/spicy-cauliflower-stir-fry-2684044"
+  },
+  {
+    "foodItemID": 5006,
+    "name": "Portobello Lasagna Rollups",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ellie-krieger/portobello-lasagna-rollups-recipe-1947518"
+  },
+  {
+    "foodItemID": 5007,
+    "name": "Slow-Cooker Pork Tacos",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/slow-cooker-pork-tacos-recipe-1972753"
+  },
+  {
+    "foodItemID": 5008,
+    "name": "Shrimp Stir-Fry",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ree-drummond/shrimp-stir-fry-2171534"
+  },
+  {
+    "foodItemID": 5009,
+    "name": "Vietnamese Noodle Soup",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/vietnamese-noodle-soup-recipe-1972821"
+  },
+  {
+    "foodItemID": 5010,
+    "name": "Broccoli Cheddar Soup",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/healthified-broccoli-cheddar-soup-recipe-2119129"
+  },
+  {
+    "foodItemID": 5011,
+    "name": "Lemony Yogurt Pound Cake",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/healthy-lemony-yogurt-loaf-cake-recipe-2112126"
+  },
+  {
+    "foodItemID": 5012,
+    "name": "Pasta e Fagioli",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/rachael-ray/pasta-and-beans-pasta-e-fagioli-recipe-1939374"
+  },
+  {
+    "foodItemID": 5013,
+    "name": "Hash Brown Casserole",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "lunch"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/hash-brown-casserole-recipe-2121182"
+  },
+  {
+    "foodItemID": 5014,
+    "name": "Chicken & Broccoli Stir-fry",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/chicken-and-broccoli-stir-fry-recipe-1942670"
+  },
+  {
+    "foodItemID": 5016,
+    "name": "Steel Cut Oatmeal",
+    "mealType": "breakfast",
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/alton-brown/steel-cut-oatmeal-recipe-1939448"
+  },
+  {
+    "foodItemID": 5018,
+    "name": "Green Beans w/Lemon & Garlic",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/patrick-and-gina-neely/green-beans-with-lemon-and-garlic-recipe-1938670"
+  },
+  {
+    "foodItemID": 5020,
+    "name": "Oven \"Fries\"",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner",
+      "snack"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/oven-fries-recipe-1958449"
+  },
+  {
+    "foodItemID": 5021,
+    "name": "Marinated Pork Tenderloins",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ina-garten/herb-marinated-pork-tenderloins-recipe-1948375"
+  },
+  {
+    "foodItemID": 5022,
+    "name": "Herbed Quinoa w/Dressing",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/giada-de-laurentiis/herbed-quinoa-recipe-2012212"
+  },
+  {
+    "foodItemID": 5023,
+    "name": "Frozen Blueberries Smoothies",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/frozen-fruit-smoothies-recipe-1914927"
+  },
+  {
+    "foodItemID": 5025,
+    "name": "Overnight Oatmeal",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/alton-brown/overnight-oatmeal-recipe-1939324"
+  },
+  {
+    "foodItemID": 5027,
+    "name": "Zucchini Parmesan Crisps",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner",
+      "snack"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ellie-krieger/zucchini-parmesan-crisps-recipe-1939866"
+  },
+  {
+    "foodItemID": 5028,
+    "name": "Frozen Strawberries Smoothies",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "beverage"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/frozen-fruit-smoothies-recipe-1914927"
+  },
+  {
+    "foodItemID": 5029,
+    "name": "Roman-Style Chicken",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/giada-de-laurentiis/roman-style-chicken-recipe-1945439"
+  },
+  {
+    "foodItemID": 5030,
+    "name": "Frozen Raspberries Smoothies",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "beverage"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/frozen-fruit-smoothies-recipe-1914927"
+  },
+  {
+    "foodItemID": 5031,
+    "name": "Lentil Soup",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/alton-brown/lentil-soup-recipe-1947017"
+  },
+  {
+    "foodItemID": 5032,
+    "name": "Marinated Chicken Breast",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/marinated-chicken-breasts-recipe-1951801"
+  },
+  {
+    "foodItemID": 5033,
+    "name": "Chicken Saltimbocca",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/giada-de-laurentiis/chicken-saltimbocca-recipe-1942157"
+  },
+  {
+    "foodItemID": 5034,
+    "name": "Garden Vegetable Soup",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/alton-brown/garden-vegetable-soup-recipe.html"
+  },
+  {
+    "foodItemID": 5035,
+    "name": "Salmon w/ Herb Mustard Glaze",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/giada-de-laurentiis/broiled-salmon-with-herb-mustard-glaze-recipe-2103443"
+  },
+  {
+    "foodItemID": 5036,
+    "name": "Healthy Cauliflower Rice",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/healthy-cauliflower-rice-3363582"
+  },
+  {
+    "foodItemID": 5037,
+    "name": "Roasted Brussels Sprout",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ina-garten/roasted-brussels-sprouts-recipe-1913316"
+  },
+  {
+    "foodItemID": 5038,
+    "name": "Sauteed Kale",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/bobby-flay/sauteed-kale-recipe-1960155"
+  },
+  {
+    "foodItemID": 5039,
+    "name": "Chicken Pot Pie (no crust)",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ellie-krieger/you-and-me-chicken-pot-pies-recipe-1952274"
+  },
+  {
+    "foodItemID": 5040,
+    "name": "Three Bean and Beef Chili",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ellie-krieger/three-bean-and-beef-chili-recipe-1917076"
+  },
+  {
+    "foodItemID": 5042,
+    "name": "Hasselback Sweet Potatoes",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "lunch",
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/hasselback-sweet-potatoes-recipe-2106932"
+  },
+  {
+    "foodItemID": 5043,
+    "name": "Tuscan Vegetable Soup",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ellie-krieger/tuscan-vegetable-soup-recipe-1957503"
+  },
+  {
+    "foodItemID": 5044,
+    "name": "Salmon Baked in Foil",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/giada-de-laurentiis/salmon-baked-in-foil-recipe-1914818"
+  },
+  {
+    "foodItemID": 5045,
+    "name": "Garlic Sauteed Spinach",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ina-garten/garlic-sauteed-spinach-recipe-1944598"
+  },
+  {
+    "foodItemID": 5046,
+    "name": "Roasted Caulif. & Broccoli",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ellie-krieger/roasted-cauliflower-and-broccoli-recipe-1947594"
+  },
+  {
+    "foodItemID": 5048,
+    "name": "Chia Seed Pudding",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/giada-de-laurentiis/chia-seed-pudding-3362661"
+  },
+  {
+    "foodItemID": 5049,
+    "name": "Easy Tomato Sauce",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ellie-krieger/easy-tomato-sauce-recipe-1947455"
+  },
+  {
+    "foodItemID": 5050,
+    "name": "Roasted Carrots",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ina-garten/roasted-carrots-recipe-1940444"
+  },
+  {
+    "foodItemID": 5051,
+    "name": "Fish Tacos",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/bobby-flay/fish-tacos-recipe-1940773"
+  },
+  {
+    "foodItemID": 5052,
+    "name": "Marinara Sauce - FN Recipe",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/giada-de-laurentiis/marinara-sauce-recipe-2103577"
+  },
+  {
+    "foodItemID": 5053,
+    "name": "Guacamole",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner",
+      "snack"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/alton-brown/guacamole-recipe-1940609"
+  },
+  {
+    "foodItemID": 5054,
+    "name": "Apple Sandwiches",
+    "mealType": "breakfast",
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/apple-sandwiches/"
+  },
+  {
+    "foodItemID": 5055,
+    "name": "Applesauce French Toast",
+    "mealType": "breakfast",
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/applesauce-french-toast/"
+  },
+  {
+    "foodItemID": 5056,
+    "name": "Baked Apple and Cranberries",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dessert"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/baked-apple-and-cranberries/"
+  },
+  {
+    "foodItemID": 5057,
+    "name": "Baked Berry Oatmeal",
+    "mealType": "breakfast",
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/baked-berry-oatmeal/"
+  },
+  {
+    "foodItemID": 5058,
+    "name": "Baked Tilapia with Tomatoes",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/baked-tilapia-with-tomatoes/"
+  },
+  {
+    "foodItemID": 5059,
+    "name": "Banana Oatmeal Bread",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dessert"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/banana-oatmeal-bread/"
+  },
+  {
+    "foodItemID": 5060,
+    "name": "Barley, Bean, and Corn Salad",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/barley-bean-and-corn-salad/"
+  },
+  {
+    "foodItemID": 5061,
+    "name": "Bean Salad",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/bean-salad/"
+  },
+  {
+    "foodItemID": 5062,
+    "name": "Beef and Broccoli",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/beef-and-broccoli/"
+  },
+  {
+    "foodItemID": 5063,
+    "name": "Bell Pepper Nachos",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/bell-pepper-nachos/"
+  },
+  {
+    "foodItemID": 5064,
+    "name": "Berry Blast Off",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dessert"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/berry-blast-off/"
+  },
+  {
+    "foodItemID": 5065,
+    "name": "Black Bean Soup",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/black-bean-soup/"
+  },
+  {
+    "foodItemID": 5066,
+    "name": "Blueberry Tofu Smoothie",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "beverage"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/blueberry-tofu-smoothie/"
+  },
+  {
+    "foodItemID": 5067,
+    "name": "Breakfast Banana Split",
+    "mealType": "breakfast",
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/breakfast-banana-split/"
+  },
+  {
+    "foodItemID": 5068,
+    "name": "Breakfast Burritos",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "lunch",
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/breakfast-burritos/"
+  },
+  {
+    "foodItemID": 5069,
+    "name": "Broccoli Everything Salad",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/broccoli-and-everything-salad/"
+  },
+  {
+    "foodItemID": 5070,
+    "name": "Buttermilk Scones",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "snack"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/buttermilk-scones/"
+  },
+  {
+    "foodItemID": 5071,
+    "name": "Cheesy Polenta Pie",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/cheesy-polenta-pie/"
+  },
+  {
+    "foodItemID": 5072,
+    "name": "Cherry Puff Pancake",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dessert"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/cherry-puff-pancake/"
+  },
+  {
+    "foodItemID": 5073,
+    "name": "Chicken Cabbage Stir-fry",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/chicken-cabbage-stir-fry/"
+  },
+  {
+    "foodItemID": 5074,
+    "name": "Chicken Creole",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/chicken-creole/"
+  },
+  {
+    "foodItemID": 5075,
+    "name": "Chicken Pepper Bake",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/chicken-pepper-bake/"
+  },
+  {
+    "foodItemID": 5076,
+    "name": "Chicken Soup with Tortilla",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/chicken-soup-with-tortilla/"
+  },
+  {
+    "foodItemID": 5077,
+    "name": "Chicken and Black Bean...",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/chicken-and-black-bean-salsa-burritos/"
+  },
+  {
+    "foodItemID": 5078,
+    "name": "Chicken Dumpling Casserole",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/chicken-and-dumpling-casserole/"
+  },
+  {
+    "foodItemID": 5079,
+    "name": "Chicken and Rice",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/chicken-and-rice/"
+  },
+  {
+    "foodItemID": 5080,
+    "name": "Easy Cheesy Enchiladas",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/easy-cheesy-enchiladas/"
+  },
+  {
+    "foodItemID": 5081,
+    "name": "Fiesta Barley Salad",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/fiesta-barley-salad/"
+  },
+  {
+    "foodItemID": 5082,
+    "name": "Fish Salad",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/fish-salad/"
+  },
+  {
+    "foodItemID": 5083,
+    "name": "Fish Tacos",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/fish-tacos/"
+  },
+  {
+    "foodItemID": 5084,
+    "name": "Fish and Spinach Bake",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/fish-and-spinach-bake/"
+  },
+  {
+    "foodItemID": 5085,
+    "name": "Fruity French Toast …",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dessert"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/fruity-french-toast-casserole/"
+  },
+  {
+    "foodItemID": 5086,
+    "name": "Garden Vegetable Cakes",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/garden-vegetable-cakes/"
+  },
+  {
+    "foodItemID": 5087,
+    "name": "Green Pineapple Smoothie",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "beverage"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/green-pineapple-power-smoothie/"
+  },
+  {
+    "foodItemID": 5088,
+    "name": "Grilled Tuna with Chickpea...",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/grilled-tuna-with-chickpea-and-spinach-salad/"
+  },
+  {
+    "foodItemID": 5089,
+    "name": "Indian Lentils and Pasta",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/indian-lentils-and-pasta/"
+  },
+  {
+    "foodItemID": 5090,
+    "name": "Kale and White Bean Soup",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/kale-and-white-bean-soup/"
+  },
+  {
+    "foodItemID": 5091,
+    "name": "Lentil Confetti Salad",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/lentil-confetti-salad/"
+  },
+  {
+    "foodItemID": 5092,
+    "name": "Meatball Soup",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/meatball-soup/"
+  },
+  {
+    "foodItemID": 5093,
+    "name": "Melon and Mint",
+    "mealType": "dessert",
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/melon-and-mint/"
+  },
+  {
+    "foodItemID": 5094,
+    "name": "Minestrone Soup",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/minestrone-soup/"
+  },
+  {
+    "foodItemID": 5095,
+    "name": "Mushroom Bulgur Pilaf",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/mushroom-bulgur-pilaf/"
+  },
+  {
+    "foodItemID": 5096,
+    "name": "Oatmeal Pecan Waffles",
+    "mealType": "breakfast",
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/oatmeal-pecan-waffles-or-pancakes/"
+  },
+  {
+    "foodItemID": 5097,
+    "name": "Pasta Caprese",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/pasta-caprese/"
+  },
+  {
+    "foodItemID": 5098,
+    "name": "Pasta Ratatouille",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/pasta-ratatouille/"
+  },
+  {
+    "foodItemID": 5099,
+    "name": "Peach Sundae",
+    "mealType": "dessert",
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/peach-sundae/"
+  },
+  {
+    "foodItemID": 5100,
+    "name": "Peach Yogurt Smoothie",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "beverage"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/peach-yogurt-smoothie/"
+  },
+  {
+    "foodItemID": 5101,
+    "name": "Peanut Butter Cereal Bars",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "snack"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/peanut-butter-cereal-bars/"
+  },
+  {
+    "foodItemID": 5102,
+    "name": "Peanut Power Smoothie",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "beverage"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/peanut-power-smoothie/"
+  },
+  {
+    "foodItemID": 5103,
+    "name": "Pineapple Veggie Chicken",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/pineapple-veggie-chicken/"
+  },
+  {
+    "foodItemID": 5104,
+    "name": "Pozole with Chicken",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/pozole-with-chicken/"
+  },
+  {
+    "foodItemID": 5105,
+    "name": "Pumpkin Breakfast Cookies",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "snack"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/pumpkin-breakfast-cookies/"
+  },
+  {
+    "foodItemID": 5106,
+    "name": "Pumpkin Ricotta Stuffed Shells",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/pumpkin-ricotta-stuffed-shells/"
+  },
+  {
+    "foodItemID": 5107,
+    "name": "Pupusas Revueltas",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/pupusas-revueltas/"
+  },
+  {
+    "foodItemID": 5108,
+    "name": "Quick Beef Casserole",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/quick-beef-casserole/"
+  },
+  {
+    "foodItemID": 5109,
+    "name": "Quinoa Salad",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/quinoa-salad/"
+  },
+  {
+    "foodItemID": 5110,
+    "name": "Raspberry Oatmeal Bars",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dessert"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/raspberry-oatmeal-bars/"
+  },
+  {
+    "foodItemID": 5111,
+    "name": "Rice Bowl Southwestern Style",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/rice-bowl-southwestern-style/"
+  },
+  {
+    "foodItemID": 5112,
+    "name": "Summer Breeze Smoothie",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "beverage"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/summer-breeze-smoothie/"
+  },
+  {
+    "foodItemID": 5113,
+    "name": "Sweet Potato, Orange Muffin",
+    "mealType": "breakfast",
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/sweet-potato-and-orange-muffins/"
+  },
+  {
+    "foodItemID": 5114,
+    "name": "Tofu Banana Pudding",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dessert"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/tofu-banana-pudding/"
+  },
+  {
+    "foodItemID": 5115,
+    "name": "Tomato Pasta Salad",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/tomato-pasta-salad/"
+  },
+  {
+    "foodItemID": 5116,
+    "name": "Tuna Veggie Melt",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/tuna-veggie-melt/"
+  },
+  {
+    "foodItemID": 5117,
+    "name": "Turkey Ginger Rice Lettuce...",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/turkey-ginger-rice-lettuce-wraps/"
+  },
+  {
+    "foodItemID": 5118,
+    "name": "Un-beet-able Berry Smoothie",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "beverage"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/un-beet-able-berry-smoothie/"
+  },
+  {
+    "foodItemID": 5119,
+    "name": "Vegetarian Chili",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/vegetarian-chili/"
+  },
+  {
+    "foodItemID": 5120,
+    "name": "Vegetarian Tofu Enchiladas",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/vegetarian-tofu-enchiladas/"
+  },
+  {
+    "foodItemID": 5121,
+    "name": "Watermelon and Fruit Salad",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dessert"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/watermelon-and-fruit-salad/"
+  },
+  {
+    "foodItemID": 5122,
+    "name": "Whole-Wheat Zucchini Bread",
+    "mealType": "breakfast",
+    "alsoFits": [
+      "dessert"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/whole-wheat-zucchini-bread/"
+  },
+  {
+    "foodItemID": 5123,
+    "name": "Zucchini Pizza Boats",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://medlineplus.gov/recipes/zucchini-pizza-boats/"
+  }
+]

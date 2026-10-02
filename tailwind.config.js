@@ -103,12 +103,13 @@ export default {
           950: "#300404",
         },
         sand: {
-          100: "#EEEEE9",
-          200: "#E6E6E0",
+          50: "#FFFFFF",
+          100: "#FFFFFF",
+          200: "#FFFFFF",
         },
         paper: {
-          100: "#FAFAF8",
-          200: "#F5F5F0",
+          100: "#E9EEF1",
+          200: "#DEE5E9",
         },
         benefit: {
           DEFAULT: "#2F8C5A",

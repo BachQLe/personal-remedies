@@ -26,7 +26,11 @@
  *   hideTitle   — when true, skip rendering the h2 group title (default false —
  *                 e.g. GroupDetailScreen already renders the group name in its
  *                 own header row)
- *   onSelectFood — callback(food) — tap a row → parent opens FoodDetailCard
+ *   onSelectFood — callback(food, listType) — tap a row → parent opens
+ *                 FoodDetailCard; listType ('helpful'|'harmful') is the
+ *                 panel's currently active Eat/Avoid tab, forwarded so the
+ *                 parent can pass it straight through to FoodDetailCard's
+ *                 own `listType` prop (front-face condition-group ordering)
  *
  * State-matrix (T5B): resolves its own profile (see profileFallback.js) and
  * fetches through useAsyncData, keyed on [group, listType] — real error/
@@ -45,8 +49,18 @@ import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
 
 const LIST_TYPES = [
-  { key: 'helpful', label: 'Eat', tone: 'positive' },
-  { key: 'harmful', label: 'Avoid', tone: 'negative' },
+  {
+    key: 'helpful',
+    label: 'Eat',
+    tone: 'positive',
+    emptyBody: 'There are no common food items within this food group that are helpful to your health profile.',
+  },
+  {
+    key: 'harmful',
+    label: 'Avoid',
+    tone: 'negative',
+    emptyBody: 'There are no common food items within this food group that are harmful to your health profile.',
+  },
 ];
 
 // ── Skeleton row (card-shaped, matches the button-card result rows) ─────────
@@ -119,8 +133,8 @@ export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp,
           status={status}
           onRetry={retry}
           screenName={`${groupLabel || 'category'} — ${LIST_TYPES.find((t) => t.key === listType)?.label}`}
-          emptyTitle="Nothing curated here yet"
-          emptyBody="We don't have items for this group and your conditions right now."
+          emptyTitle={status === 'empty' ? null : undefined}
+          emptyBody={status === 'empty' ? LIST_TYPES.find((t) => t.key === listType)?.emptyBody : undefined}
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
         >
           <div className="flex flex-col gap-2">
@@ -130,7 +144,7 @@ export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp,
                 key={food.id}
                 food={food}
                 studyCount={food.referenceTotal}
-                onSelect={onSelectFood}
+                onSelect={(selected) => onSelectFood(selected, listType)}
               />
             ))}
           </div>

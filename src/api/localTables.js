@@ -10,27 +10,34 @@
  * just reading an already-parsed in-memory array.
  *
  * Overlay layering: `itemOverlay.json` is the hand-curated layer (imageFile
- * / isSnack / isBeverage per foodItemID, keyed as a string since it's JSON).
- * `itemOverlay.generated.json` (Phase 2, see
+ * / isBreakfast / isSnack / isBeverage per foodItemID, keyed as a string
+ * since it's JSON). `itemOverlay.generated.json` (Phase 2, see
  * scripts/flag-snack-beverage.mjs) is a machine-generated layer inferring
- * isSnack/isBeverage from fine food group + name heuristics —
- * `ITEM_OVERLAY_LAYERS` below applies it BEFORE the manual one, so manual
- * curation always has the final say over any machine-inferred flag.
+ * isBreakfast/isSnack/isBeverage from fine food group + name heuristics.
+ * `itemImages.generated.json` (a separate machine pipeline) is a third
+ * layer contributing ONLY `imageFile` — per-item Unsplash photo URLs for
+ * the ~1485 items the curated set doesn't cover. `ITEM_OVERLAY_LAYERS`
+ * below applies both generated layers BEFORE the manual one, so hand
+ * curation in `itemOverlay.json` always has the final say over any
+ * machine-inferred flag OR machine-picked image.
  */
 
 import itemsRaw from '../data/cache/items.json';
 import conditionsRaw from '../data/cache/conditions.json';
 import groupsRaw from '../data/cache/groups.json';
 import generatedOverlay from '../data/cache/itemOverlay.generated.json';
+import itemImages from '../data/cache/itemImages.generated.json';
 import manualOverlay from '../data/cache/itemOverlay.json';
 
 /**
  * Overlay layers applied to each item, in order — later layers win.
- * Generated (machine-inferred) flags go first so the hand-curated
- * `itemOverlay.json` layer can override any individual row.
+ * `generatedOverlay` (machine-inferred isBreakfast/isSnack/isBeverage) and
+ * `itemImages` (machine-picked per-item imageFile) both go before
+ * `manualOverlay` so the hand-curated `itemOverlay.json` layer can override
+ * any individual row on either flags or image.
  * @type {Record<string, Object>[]}
  */
-const ITEM_OVERLAY_LAYERS = [generatedOverlay, manualOverlay];
+const ITEM_OVERLAY_LAYERS = [generatedOverlay, itemImages, manualOverlay];
 
 /** @type {Array|null} Memoized merged item table (built lazily on first read). */
 let _mergedItems = null;
@@ -55,9 +62,9 @@ function buildMergedItems() {
 
 /**
  * Full food item dictionary, each row merged with its curation overlay
- * (overlay columns — imageFile/isSnack/isBeverage — win over any same-named
- * base field, though in practice the base API rows never define those
- * columns). Synchronous; memoized after first call.
+ * (overlay columns — imageFile/isBreakfast/isSnack/isBeverage — win over any
+ * same-named base field, though in practice the base API rows never define
+ * those columns). Synchronous; memoized after first call.
  * @returns {Array}
  */
 export function getItemTable() {
@@ -102,27 +109,30 @@ export function getOverlayImageFile(foodItemID) {
 }
 
 /**
- * Look up the curated snack/beverage flags for a single foodItemID. Same
- * by-ID, layer-ordered read as `getOverlayImageFile` — deliberately NOT off an
- * already-merged item row, so the UI can ask about any id it holds, including
- * one restored from a plan persisted before these flags existed.
+ * Look up the curated breakfast/snack/beverage flags for a single
+ * foodItemID. Same by-ID, layer-ordered read as `getOverlayImageFile` —
+ * deliberately NOT off an already-merged item row, so the UI can ask about
+ * any id it holds, including one restored from a plan persisted before
+ * these flags existed.
  *
- * This is the only path by which `isSnack`/`isBeverage` reach the UI at all:
- * `flaggedPoolAcrossGroups` (src/api/adapter.js) consumes them as a filter
- * predicate and discards them, and `toPlanItem` (src/api/planBuilder.js) keeps
- * a strict nine-field whitelist that excludes them.
+ * This is the only path by which `isBreakfast`/`isSnack`/`isBeverage` reach
+ * the UI at all: `flaggedPoolAcrossGroups` (src/api/adapter.js) consumes
+ * them as a filter predicate and discards them, and `toPlanItem`
+ * (src/api/planBuilder.js) keeps a strict whitelist that excludes them.
  * @param {number|string} foodItemID
- * @returns {{isSnack: boolean, isBeverage: boolean}}
+ * @returns {{isBreakfast: boolean, isSnack: boolean, isBeverage: boolean}}
  */
 export function getOverlayFlags(foodItemID) {
   const key = String(foodItemID);
+  let isBreakfast = false;
   let isSnack = false;
   let isBeverage = false;
   for (const layer of ITEM_OVERLAY_LAYERS) {
     const row = layer[key];
     if (!row) continue;
+    if (row.isBreakfast !== undefined) isBreakfast = !!row.isBreakfast;
     if (row.isSnack !== undefined) isSnack = !!row.isSnack;
     if (row.isBeverage !== undefined) isBeverage = !!row.isBeverage;
   }
-  return { isSnack, isBeverage };
+  return { isBreakfast, isSnack, isBeverage };
 }

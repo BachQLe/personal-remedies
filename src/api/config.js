@@ -130,10 +130,25 @@ export const MEAL_SLOT_MAP = {
  *   carry tier-bearing descriptionNumericID data, unlike /topdoordonts-free
  *   surfaces) are pooled and round-robin interleaved to fill the slot.
  * - `recipeMealType` — links to the `mealType` field on Recipe (see
- *   getRecipes()/guessMealType in adapter.js).
+ *   getRecipes()/guessMealType in adapter.js). A single string, or (Task C1,
+ *   Sept 2026) an array of strings when more than one Recipe mealType feeds
+ *   the same slot — `snacks` accepts `['snack', 'dessert']` per the product
+ *   decision that dessert recipes are shown together with snacks in one
+ *   slot/listing (not a separate Dessert slot), distinguished by a tag on
+ *   the card instead (see RecipesScreen.jsx's `MEAL_TAG_CONFIG`). adapter.js
+ *   normalizes either shape before filtering.
  * - `recipeLead` — when true, matching recipes are prepended ahead of plain
  *   foods for this slot (lunch/dinner lead with a recipe); when false they're
- *   appended (breakfast/snacks).
+ *   appended (breakfast/snacks). Feeds `mergeCandidatePools`' tie-break order
+ *   in adapter.js when `itemFlagKey` is non-null (below); ignored for
+ *   lunch/dinner, which are recipes-only regardless.
+ * - `itemFlagKey` — the merged item table's curated flag column
+ *   (isBreakfast/isSnack/isBeverage, see scripts/flag-snack-beverage.mjs +
+ *   localTables.js) whose flagged items are pooled alongside this slot's
+ *   recipes via `flaggedPoolAcrossGroups` + `mergeCandidatePools`
+ *   (adapter.js). `null` for lunch/dinner — those slots are recipes-only by
+ *   design, so raw meat/fish cuts and other non-recipe items never surface
+ *   there.
  * - `size` — number of items auto-filled into this slot per generation.
  *
  * The `beverages` slot was removed July 2026 (user-approved) and restored
@@ -147,11 +162,11 @@ export const MEAL_SLOT_MAP = {
  * assume the key exists.
  */
 export const PLAN_SLOTS = [
-  { key: 'breakfast', label: 'Breakfast', fineGroups: ['f', 'd', 'g1'], recipeMealType: 'breakfast', recipeLead: false, size: 3 },
-  { key: 'lunch',     label: 'Lunch',     fineGroups: ['c2', 'e', 'b1'], recipeMealType: 'lunch',   recipeLead: true,  size: 3 },
-  { key: 'dinner',    label: 'Dinner',    fineGroups: ['b3', 'b1', 'e'], recipeMealType: 'dinner',  recipeLead: true,  size: 3 },
-  { key: 'snacks',    label: 'Snacks & Desserts', fineGroups: ['h1', 'c3'], recipeMealType: 'snack',   recipeLead: false, size: 2 },
-  { key: 'beverages', label: 'Beverages', fineGroups: ['h2'],           recipeMealType: 'beverage', recipeLead: false, size: 1 },
+  { key: 'breakfast', label: 'Breakfast', fineGroups: ['f', 'd', 'g1'], recipeMealType: 'breakfast', recipeLead: false, itemFlagKey: 'isBreakfast', size: 3 },
+  { key: 'lunch',     label: 'Lunch',     fineGroups: ['c2', 'e', 'b1'], recipeMealType: 'lunch',   recipeLead: true,  itemFlagKey: null,          size: 3 },
+  { key: 'dinner',    label: 'Dinner',    fineGroups: ['b3', 'b1', 'e'], recipeMealType: 'dinner',  recipeLead: true,  itemFlagKey: null,          size: 3 },
+  { key: 'snacks',    label: 'Snacks & Desserts', fineGroups: ['h1', 'c3'], recipeMealType: ['snack', 'dessert'], recipeLead: false, itemFlagKey: 'isSnack',    size: 2 },
+  { key: 'beverages', label: 'Beverages', fineGroups: ['h2'],           recipeMealType: 'beverage', recipeLead: false, itemFlagKey: 'isBeverage', size: 1 },
 ];
 
 /** Slot keys in render order — `PLAN_SLOTS.map((s) => s.key)`. */

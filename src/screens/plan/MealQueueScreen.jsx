@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, BookmarkPlus, Bookmark, ArrowRight, RotateCw, RefreshCw, CalendarPlus, Printer, Share2, HelpCircle, CalendarRange } from 'lucide-react';
+import { Plus, BookmarkPlus, Bookmark, ArrowRight, RotateCw, RefreshCw, CalendarPlus, Printer, Share2, HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
@@ -18,8 +18,14 @@ import HowToUseSheet from './HowToUseSheet.jsx';
 import MealPlannerPicker from './MealPlannerPicker.jsx';
 import SuggestionsSheet from './SuggestionsSheet.jsx';
 import SavedPlansSheet from './SavedPlansSheet.jsx';
-import { nextSevenDays, todayKey, getDayLabelMode, setDayLabelMode } from './planDates.js';
+import {
+  nextSevenDays,
+  todayKey,
+  getDayLabelMode,
+  setDayLabelMode,
+} from './planDates.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
+import { getOverlayImageFile } from '../../api/localTables.js';
 import {
   getProfile,
   ensurePlanForWeek,
@@ -32,8 +38,14 @@ import {
   toPlanItem,
   getSavedPlans,
   saveCurrentPlan,
+  updateSavedPlan,
   loadSavedPlan,
   deleteSavedPlan,
+  restoreSavedPlan,
+  planFingerprint,
+  getActiveSavedPlan,
+  restoreActiveSavedPlan,
+  guessMealType,
 } from '../../api/api.js';
 import { estimatePlanDayCalories } from '../../api/calorieNeeds.js';
 import { formatWeekPlanText, buildPrintModel } from '../../api/planExport.js';
@@ -41,6 +53,7 @@ import { printPage, share } from '../../api/browser.js';
 import { PLAN_SLOTS, DEFAULT_DEV_CONDITIONS, MAX_SAVED_PLANS } from '../../api/config.js';
 import {
   getPlan,
+  setPlan,
   subscribePlan,
   addToSlot,
   removeFromSlot,
@@ -68,9 +81,17 @@ const daySlideVariants = {
 // invalidate `handleSelect`'s useCallback memoization.
 const EMPTY_CONDITION_NAMES = [];
 
+/**
+ * Whether the "Show calendar days" / "Show Day 1–7" toggle renders above the
+ * day strip. Off for now at the user's request — the flag only hides the
+ * TRIGGER: `getDayLabelMode()` still drives SchedulerView's week view, and the
+ * strip itself now always shows weekday + date regardless (see DayStrip.jsx).
+ */
+const SHOW_DAY_LABEL_TOGGLE = false;
+
 const VIEW_OPTIONS = [
   { key: 'queue', label: 'Day view' },
-  { key: 'scheduler', label: 'Week view' },
+  { key: 'scheduler', label: 'List view' },
   { key: 'cookbook', label: 'Saved recipes' },
 ];
 
@@ -80,7 +101,7 @@ const COOKBOOK_SORT_OPTIONS = [
 ];
 
 function cardImage(item) {
-  return item.image || getIngredientImage(item.name, item.group);
+  return item.image || getIngredientImage(item.name, item.group, getOverlayImageFile(item.id));
 }
 
 function cardSubtitle(item) {
@@ -94,34 +115,33 @@ function cardSubtitle(item) {
 // — id/name/image/kind:'recipe'/tier/numericId only, with `group`/
 // `fineGroup` always null and no `mealType` at all. Without SOME per-item
 // slot signal, every saved recipe falls through `mealTypeForItem`'s
-// `inferSlotKey` default and lands in Lunch alone. Title-keyword matching
-// only (never invents tier/nutrition data) — same spirit as adapter.js's
-// private `guessMealType`, duplicated in miniature here since that helper
-// isn't exported from core and this track doesn't touch adapter.js.
-const SAVED_RECIPE_SLOT_KEYWORDS = [
-  ['smoothie', 'breakfast'], ['oatmeal', 'breakfast'], ['pancake', 'breakfast'],
-  ['omelet', 'breakfast'], ['granola', 'breakfast'], ['parfait', 'breakfast'], ['waffle', 'breakfast'],
-  ['tea', 'beverages'], ['juice', 'beverages'], ['latte', 'beverages'], ['lemonade', 'beverages'],
-  ['cookie', 'snacks'], ['cake', 'snacks'], ['snack bar', 'snacks'], ['pie', 'snacks'],
-  ['brownie', 'snacks'], ['muffin', 'snacks'], ['pudding', 'snacks'], ['tart', 'snacks'],
-  ['cheesecake', 'snacks'], ['ice cream', 'snacks'], ['dip', 'snacks'],
-  ['soup', 'dinner'], ['stew', 'dinner'], ['chili', 'dinner'], ['roast', 'dinner'],
-  ['salad', 'lunch'], ['sandwich', 'lunch'], ['wrap', 'lunch'],
-];
+// `inferSlotKey` default and lands in Lunch alone.
+//
+// (Task 13 fix, #8/#13 follow-up) This used to duplicate a small
+// title-keyword table in miniature here, independently of — and drifting
+// from — adapter.js's own recipe-meal-type keyword table (which maps 'soup'
+// to lunch, not dinner, for instance). adapter.js now exports its own
+// `guessMealType` for exactly this reuse, so this just maps ITS mealType
+// vocabulary ('breakfast'/'lunch'/'dinner'/'snack'/'beverage') onto Plan
+// slot keys ('snack' -> 'snacks', 'beverage' -> 'beverages', the rest
+// identity) rather than re-deriving a second, inevitably-diverging guess.
+const MEAL_TYPE_TO_SLOT_KEY = {
+  breakfast: 'breakfast',
+  lunch: 'lunch',
+  dinner: 'dinner',
+  snack: 'snacks',
+  beverage: 'beverages',
+};
 
 /**
- * Best-effort slot guess for a saved recipe, by title keyword. Falls back to
- * 'dinner' (matching adapter.js's own guessMealType fallback) when nothing
- * matches.
+ * Best-effort slot guess for a saved recipe, by title keyword — reuses
+ * adapter.js's `guessMealType` (the same classification every other recipe
+ * in the app gets) rather than a second, independent guess.
  * @param {string} name
  * @returns {string} one of PLAN_SLOT_KEYS
  */
 function guessSlotForSavedRecipe(name) {
-  const lower = (name || '').toLowerCase();
-  for (const [keyword, slotKey] of SAVED_RECIPE_SLOT_KEYWORDS) {
-    if (lower.includes(keyword)) return slotKey;
-  }
-  return 'dinner';
+  return MEAL_TYPE_TO_SLOT_KEY[guessMealType(name)] || 'dinner';
 }
 
 /**
@@ -148,16 +168,25 @@ function libraryItemsToPicks(library) {
  * The plan-day calorie line — the ONE quiet piece of numeric context this
  * screen shows (never a badge, never a bar, never per-food). Omits itself
  * entirely when nothing is countable (`total <= 0`) rather than show "~0".
+ *
+ * Deliberately just the one number ("~1,850 cal"), kept on a single line:
+ * the "planned (estimated)" wording and the daily-need comparison are gone
+ * (2026-09) — the leading "~" already says it's an estimate. It sits in an
+ * understated container: a sand tint at 70% over paper-100 plus a hairline,
+ * so the estimate reads as its own small surface next to the "Regenerate
+ * day" pill without competing with it — the pill is an action, this is only
+ * context, so it stays a shade lighter.
  */
-function CalorieLine({ slots, need }) {
+function CalorieLine({ slots }) {
   const { total } = estimatePlanDayCalories(slots);
   if (total <= 0) return null;
 
   return (
-    <p className="text-xs font-sans text-blue-950/60 leading-relaxed">
-      {`~${Math.round(total).toLocaleString()} cal planned (estimated)`}
-      {` · your estimated need ~${need.toLocaleString()}`}
-    </p>
+    <div className="shrink-0 rounded-xl bg-white/70 border border-blue-950/[0.06] px-3 py-1.5">
+      <p className="text-xs font-sans text-blue-950/60 leading-relaxed whitespace-nowrap">
+        {`~${Math.round(total).toLocaleString()} cal`}
+      </p>
+    </div>
   );
 }
 
@@ -254,6 +283,7 @@ export default function MealQueueScreen() {
   const [buildingFromSaved, setBuildingFromSaved] = useState(false);
   const [savedPlansOpen, setSavedPlansOpen] = useState(false);
   const [savedPlans, setSavedPlans] = useState(getSavedPlans);
+  const [activeSavedPlan, setActiveSavedPlanState] = useState(getActiveSavedPlan);
   const [dayLabelMode, setDayLabelModeState] = useState(getDayLabelMode);
   const [snackbar, setSnackbar] = useState(null);
   const snackbarRef = useRef(null);
@@ -284,6 +314,12 @@ export default function MealQueueScreen() {
         profileRef.current = fullProfile;
         setProfile(fullProfile);
         await ensurePlanForWeek(fullProfile);
+        // A conditions change can silently discard the plan (and, inside
+        // that, clear the active-saved-plan pointer — see
+        // `ensurePlanForWeek`'s doc) before this component ever renders it —
+        // resync the local mirror so a stale "active" badge/banner can't
+        // survive a mount that started with a mismatched plan.
+        if (!cancelled) setActiveSavedPlanState(getActiveSavedPlan());
       } catch (err) {
         console.error('MealQueueScreen: failed to build plan', err);
       } finally {
@@ -347,7 +383,6 @@ export default function MealQueueScreen() {
   const dayState = displayPlan?.days?.[activeDay] ?? null;
   const daySlots = dayState?.slots ?? {};
   const dayPinned = dayState?.pinned ?? [];
-  const dailyNeed = profile?.calorieTarget ?? 2000;
 
   // First-run empty state (1.3): `ensurePlanForWeek` returns `{ plan: null }`
   // immediately on a first-ever run — no network, no auto-fill (see
@@ -448,6 +483,36 @@ export default function MealQueueScreen() {
     });
   }, [showSnackbar, activeDay, suggestionsSlot]);
 
+  // Suggestions — add a candidate straight into the currently-open slot, no
+  // source item to swap for (that's `handleSwapSubstitute`, above — a
+  // genuinely different action, not reused here). Originated as Task 13's
+  // fallback-mode add; Wave 4 generalizes it to every path that can hand
+  // this sheet an `onAdd` candidate — the full fine-group menu's "+" and the
+  // always-shown "All {slot} options" list alike. `toPlanItem` is the same
+  // PlanCandidate -> PlanItem conversion every other slot-fill path uses
+  // (planBuilder.js); SuggestionsSheet is responsible for only ever handing
+  // this a Plan-safe, `kind`-stamped candidate (see its `toPlanSafeCandidates`
+  // for the full-menu case, or `getCandidatesForSlot` for the "All options"
+  // case — both already exclude numericId 5-7). `addToSlot` cross-slot-
+  // dedupes by id and no-ops (false) if the item is already in the plan that
+  // day — surfaced honestly rather than claiming a second add succeeded.
+  // Undo mirrors handleRemove's pattern: remove the exact id just added.
+  const handleAddSuggestion = useCallback((candidate) => {
+    const dateKey = activeDay;
+    const slotKey = suggestionsSlot;
+    if (!slotKey) return;
+
+    const item = toPlanItem(candidate);
+    const added = addToSlot(dateKey, slotKey, item);
+    if (!added) {
+      showSnackbar('Already in plan');
+      return;
+    }
+    showSnackbar(`Added — ${candidate.name}`, true, () => {
+      removeFromSlot(dateKey, slotKey, item.id);
+    });
+  }, [showSnackbar, activeDay, suggestionsSlot]);
+
   // Task 10: display-only Day-label mode toggle (see planDates.js's NOTE) —
   // swaps whether each day chip's PRIMARY label is the weekday name or a
   // relative "Day N"; `nextSevenDays()` (called fresh in this render body,
@@ -468,28 +533,117 @@ export default function MealQueueScreen() {
   // after each mutation and surfaces a snackbar.
   const refreshSavedPlans = useCallback(() => setSavedPlans(getSavedPlans()), []);
 
+  // Task C (#16): local mirror of planBuilder.js's `activeSavedPlan` storage
+  // pointer — re-read after every mutation that can set/clear it (save,
+  // update, load, delete-the-active-entry, plus the conditions-change/
+  // new-plan purges threaded through the profile-load effect above and
+  // `handlePlanGenerated` below).
+  const refreshActiveSavedPlan = useCallback(() => setActiveSavedPlanState(getActiveSavedPlan()), []);
+
+  // Task C (#16): whether the live plan has drifted from the saved entry it
+  // traces back to. `null`/no active entry never reads as dirty — there's
+  // nothing to compare against, and SavedPlansSheet's naming flow already
+  // treats that as the save-as-new case. Recomputed only when `plan` or
+  // `activeSavedPlan` actually change (`planFingerprint` walks the whole
+  // plan, not free to run every render).
+  const dirty = useMemo(
+    () => !!activeSavedPlan && !!plan && planFingerprint(plan) !== activeSavedPlan.fingerprint,
+    [plan, activeSavedPlan]
+  );
+  const activeSavedPlanName = activeSavedPlan
+    ? savedPlans.find((p) => p.id === activeSavedPlan.id)?.name ?? null
+    : null;
+
   const handleSavePlan = useCallback((name) => {
     const result = saveCurrentPlan(name);
     if (result.ok) {
       refreshSavedPlans();
+      refreshActiveSavedPlan();
       showSnackbar(`Saved as "${result.entry.name}"`);
     } else if (result.reason === 'at-cap') {
       showSnackbar(`You can save up to ${MAX_SAVED_PLANS} plans — delete one first`);
     } else {
       showSnackbar('Nothing to save yet — build a plan first');
     }
-  }, [refreshSavedPlans, showSnackbar]);
+  }, [refreshSavedPlans, refreshActiveSavedPlan, showSnackbar]);
 
+  // Task A (#14)/B (#15): overwrite the ACTIVE saved entry in place — the
+  // "Save"/"Update" action (header, the unsaved-changes banner, and
+  // SavedPlansSheet's per-entry "Update"). No-op with a friendly snackbar if there's somehow no active
+  // entry left (e.g. a race with it being deleted elsewhere).
+  const handleUpdateActivePlan = useCallback(() => {
+    if (!activeSavedPlan) return;
+    const result = updateSavedPlan(activeSavedPlan.id);
+    if (result.ok) {
+      refreshSavedPlans();
+      refreshActiveSavedPlan();
+      showSnackbar('Saved');
+    } else {
+      showSnackbar('Could not save — try again');
+    }
+  }, [activeSavedPlan, refreshSavedPlans, refreshActiveSavedPlan, showSnackbar]);
+
+  // Task A (#14): loading a saved plan REPLACES the live plan outright (same
+  // whole-plan-overwrite contract `loadSavedPlan` always had). When the plan
+  // being replaced has unsaved changes (`dirty`, Task C), this offers Undo
+  // instead of a plain confirm — `window.confirm` would block and this
+  // screen's `showSnackbar` already supports an Undo action everywhere else
+  // (handleRemove/handleSwapSubstitute/handleAddSuggestion above). Undo
+  // restores both the previous plan (`setPlan`) and the previous
+  // active-saved-plan pointer (`restoreActiveSavedPlan`) so the two stay in
+  // sync, exactly as they were before the load.
   const handleLoadSavedPlan = useCallback((id) => {
+    const previousPlan = plan;
+    const previousActive = activeSavedPlan;
+    const wasDirty = dirty;
+
     const ok = loadSavedPlan(id);
     setSavedPlansOpen(false);
-    showSnackbar(ok ? 'Plan loaded' : 'Could not load that plan');
-  }, [showSnackbar]);
+    refreshActiveSavedPlan();
 
+    if (ok && profileRef.current) {
+      // Refit already landed the snapshot on the current window (see
+      // loadSavedPlan's doc) — this just fills any day the snapshot didn't
+      // cover and re-runs the same ensure path every other mount/rebuild
+      // uses, so the screen renders the loaded week immediately without
+      // needing a remount.
+      ensurePlanForWeek(profileRef.current).catch((err) => {
+        console.error('MealQueueScreen: failed to refresh plan after loading saved plan', err);
+      });
+    }
+
+    if (ok && wasDirty) {
+      showSnackbar('Plan loaded — unsaved changes were replaced', true, () => {
+        setPlan(previousPlan);
+        restoreActiveSavedPlan(previousActive);
+        refreshActiveSavedPlan();
+      });
+    } else {
+      showSnackbar(ok ? 'Plan loaded' : 'Could not load that plan');
+    }
+  }, [showSnackbar, plan, activeSavedPlan, dirty, refreshActiveSavedPlan]);
+
+  // Task A (#14): delete with Undo — restores the exact entry (id/name/
+  // savedAt/plan preserved via `restoreSavedPlan`) and, if it was the active
+  // entry, the active-saved-plan pointer too.
   const handleDeleteSavedPlan = useCallback((id) => {
-    deleteSavedPlan(id);
+    const entry = savedPlans.find((p) => p.id === id);
+    const wasActive = activeSavedPlan?.id === id;
+    const previousActive = activeSavedPlan;
+
+    const ok = deleteSavedPlan(id);
+    if (!ok) return;
     refreshSavedPlans();
-  }, [refreshSavedPlans]);
+    refreshActiveSavedPlan();
+
+    if (!entry) return;
+    showSnackbar(`Deleted "${entry.name}"`, true, () => {
+      restoreSavedPlan(entry);
+      if (wasActive) restoreActiveSavedPlan(previousActive);
+      refreshSavedPlans();
+      refreshActiveSavedPlan();
+    });
+  }, [savedPlans, activeSavedPlan, refreshSavedPlans, refreshActiveSavedPlan, showSnackbar]);
 
   // Print & share the whole week (T4C, REMEDI_MASTER_PLAN.md §1.9) — plain,
   // ink-friendly output; FOODS only, never a calorie tally (see
@@ -514,11 +668,15 @@ export default function MealQueueScreen() {
 
   // New meal plan picker: called right after `generatePlanFromPicks`
   // succeeds — lands the user on Day view, today, with a confirmation toast.
+  // `generatePlanFromPicks` always clears the active-saved-plan pointer
+  // internally (Task C/#16 — a freshly-picked week isn't an edit of
+  // whatever was active before), so resync the local mirror here too.
   const handlePlanGenerated = useCallback(() => {
     setView('queue');
     setSelectedDay(todayKey());
+    refreshActiveSavedPlan();
     showSnackbar('Meal plan created');
-  }, [showSnackbar]);
+  }, [showSnackbar, refreshActiveSavedPlan]);
 
   // First-run empty state (1.3/1.4): build straight from the saved-recipes
   // library, skipping the picker entirely. Shares `handlePlanGenerated`'s
@@ -566,10 +724,11 @@ export default function MealQueueScreen() {
   // exactly like SuggestionsScreen's BestRecipesTab.
   const handleSelect = useCallback((item) => {
     if (item.kind === 'recipe') {
-      // sourceUrl/attribution/ingredients thread through from the plan
-      // item/candidate onto the FoodDetailCard seed when present (they flow
-      // from PlanCandidate — see api/types.js) — `?? null`/`?? []` keeps this
-      // a no-op today, before those fields exist on a persisted PlanItem.
+      // sourceUrl/attribution/nutritionPerServing/ingredients thread through
+      // from the plan item/candidate onto the FoodDetailCard seed when
+      // present (they flow from PlanCandidate — see api/types.js) —
+      // `?? null`/`?? []` keeps this a no-op for sources that don't carry
+      // them yet.
       const seed = {
         foodId: item.id,
         name: item.name,
@@ -577,6 +736,7 @@ export default function MealQueueScreen() {
         sourceName: item.sourceName ?? null,
         sourceUrl: item.sourceUrl ?? null,
         attribution: item.attribution ?? null,
+        nutritionPerServing: item.nutritionPerServing ?? null,
         conditions: conditionNames,
         ingredients: item.ingredients ?? [],
         isRecipe: true,
@@ -628,12 +788,20 @@ export default function MealQueueScreen() {
             <button
               type="button"
               onClick={() => setSavedPlansOpen(true)}
-              aria-label="Saved plans"
-              className="inline-flex items-center justify-center w-11 h-11 rounded-full
+              aria-label={dirty ? 'Saved plans — unsaved changes' : 'Saved plans'}
+              className="relative inline-flex items-center justify-center w-11 h-11 rounded-full
                 bg-white/40 hover:bg-white/60 text-blue-950/70 shadow-sm
                 transition-all duration-fast active:scale-95"
             >
               <Bookmark size={18} aria-hidden="true" />
+              {/* Task C (#16): unsaved-changes indicator — small dot, same
+                  pattern as ProfileScreen's SubEditRow `dot` badge. */}
+              {dirty && (
+                <span
+                  aria-hidden="true"
+                  className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-avoid-700 ring-2 ring-forest-300"
+                />
+              )}
             </button>
             {plan && (
               <>
@@ -674,22 +842,29 @@ export default function MealQueueScreen() {
           header and the white body. ─────────────────────────────────────── */}
       <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-8 mt-4 rm-print-hide">
         <div className="flex flex-col gap-4">
-          <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} />
+          <PillSwitcher options={VIEW_OPTIONS} value={view} onChange={handleToggleView} trackClassName="bg-white" />
 
           {view === 'queue' && !firstRunEmpty && (
             <>
+              {/* The read-only week-range chip that used to label the strip is
+                  gone (2026-09) — the strip's own dates already say which
+                  window this is, and the extra row cost vertical space above
+                  the fold. The week-start CHOICE lives in MealPlannerPicker.
+                  All that can render here now is the display-only day-label
+                  toggle, itself hidden — see SHOW_DAY_LABEL_TOGGLE. */}
+              {SHOW_DAY_LABEL_TOGGLE && (
+                <div className="flex items-center justify-end">
+                  <button
+                    onClick={handleToggleDayLabelMode}
+                    className="shrink-0 text-xs font-semibold font-sans
+                      text-blue-950/50 hover:text-blue-950/70 transition-colors duration-fast"
+                  >
+                    {dayLabelMode === 'dayNumber' ? 'Show calendar days' : 'Show Day 1–7'}
+                  </button>
+                </div>
+              )}
+
               <DayStrip days={days} selected={activeDay} onSelect={handleSelectDay} bgClassName="bg-paper-100" />
-              {/* Task 10: display-only Day 1-7 <-> calendar-day toggle — see
-                  planDates.js's NOTE for why this is a display swap, not a
-                  change to which real date each day chip represents. */}
-              <button
-                onClick={handleToggleDayLabelMode}
-                className="inline-flex items-center gap-1.5 self-end text-xs font-semibold font-sans
-                  text-blue-950/50 hover:text-blue-950/70 transition-colors duration-fast"
-              >
-                <CalendarRange size={12} aria-hidden="true" />
-                {dayLabelMode === 'dayNumber' ? 'Show calendar days' : 'Show Day 1–7'}
-              </button>
             </>
           )}
         </div>
@@ -699,23 +874,22 @@ export default function MealQueueScreen() {
             <EmptyState
               icon="calendar"
               title="No meal plan yet"
+              size="lg"
+              iconBgClassName="bg-blue-50"
+              iconClassName="text-blue-950"
               action={
                 <div className="flex flex-col items-center gap-3">
                   <button
                     onClick={() => setPickerOpen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-pill bg-blue-950 text-white
-                      text-sm font-semibold font-sans px-5 py-2.5
+                    className="inline-flex items-center gap-2 rounded-pill bg-blue-950 text-white
+                      text-base font-semibold font-sans px-7 py-3.5
                       hover:bg-blue-900 active:scale-[0.99] transition-all duration-fast"
                   >
-                    <CalendarPlus size={16} aria-hidden="true" />
+                    <CalendarPlus size={19} aria-hidden="true" />
                     Build my meal plan
                   </button>
 
-                  <p className="text-xs text-char-500 font-sans max-w-[260px] text-center leading-snug">
-                    Pick recipes you like and we'll build your week around them — nothing gets added automatically.
-                  </p>
-
-                  {library.length > 0 ? (
+                  {library.length > 0 && (
                     <button
                       onClick={handleBuildFromSaved}
                       disabled={buildingFromSaved}
@@ -724,34 +898,46 @@ export default function MealQueueScreen() {
                     >
                       {buildingFromSaved ? 'Building…' : 'Build from saved recipes'}
                     </button>
-                  ) : (
-                    <div className="flex flex-col items-center gap-1.5">
-                      <p className="text-xs text-char-500 font-sans max-w-[260px] text-center leading-snug">
-                        Save recipes you like and we'll build a plan around them.
-                      </p>
-                      <button
-                        onClick={() => navigate('/app/recipes')}
-                        className="text-sm font-semibold font-sans text-blue-950/70 hover:text-blue-950
-                          transition-colors duration-fast"
-                      >
-                        Browse recipes
-                      </button>
-                    </div>
                   )}
                 </div>
               }
             />
           ) : (
             <div className="flex flex-col gap-4">
+              {/* Task C (#16): unsaved-changes banner — a clear, dismissable-
+                  by-action alternative to the header dot alone, since a
+                  small badge is easy to miss. Only shown once there's an
+                  active saved entry to name and drift to report. */}
+              {dirty && (
+                <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3">
+                  <p className="text-xs font-sans text-blue-950/80 leading-snug min-w-0">
+                    Unsaved changes to &ldquo;{activeSavedPlanName ?? 'your plan'}&rdquo;
+                  </p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={handleUpdateActivePlan}
+                      className="rounded-pill bg-blue-950 text-white text-xs font-semibold font-sans px-3 py-1.5
+                        hover:bg-blue-900 active:scale-[0.99] transition-all duration-fast"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setSavedPlansOpen(true)}
+                      className="text-xs font-semibold font-sans text-blue-950/70 hover:text-blue-950
+                        transition-colors duration-fast"
+                    >
+                      Save as new
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-start justify-between gap-3">
-                <CalorieLine
-                  slots={daySlots}
-                  need={dailyNeed}
-                />
+                <CalorieLine slots={daySlots} />
                 <button
                   onClick={handleRegenerateDay}
                   disabled={showGhost || regeneratingDay}
-                  className={`shrink-0 inline-flex items-center gap-1.5 rounded-pill bg-sand-100 hover:bg-sand-200
+                  className={`shrink-0 inline-flex items-center gap-1.5 rounded-pill bg-white hover:bg-sand-100
                     px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
                     ${showGhost || regeneratingDay ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
                 >
@@ -837,6 +1023,7 @@ export default function MealQueueScreen() {
                   value={cookbookSort}
                   onChange={setCookbookSort}
                   size="sm"
+                  trackClassName="bg-white"
                 />
               </div>
             )}
@@ -922,17 +1109,18 @@ export default function MealQueueScreen() {
           `data-print-hide`: a plain UI control, not content — never belongs
           on a printed page. ─────────────────────────────────────────────── */}
       {!firstRunEmpty && (
-        <button
-          onClick={() => setPickerOpen(true)}
-          data-print-hide
-          className="fixed right-5 bottom-[88px] z-50 inline-flex items-center gap-2
-            rounded-pill bg-blue-950 text-white px-4 py-3 shadow-lg
-            font-sans text-sm font-semibold transition-all duration-fast
-            hover:bg-blue-900 active:scale-95"
-        >
-          <CalendarPlus size={16} aria-hidden="true" />
-          New meal plan
-        </button>
+        <div className="fixed right-5 bottom-[88px] z-50 flex flex-col items-end gap-2" data-print-hide>
+          <button
+            onClick={() => setPickerOpen(true)}
+            className="inline-flex items-center gap-2
+              rounded-pill bg-blue-950 text-white px-4 py-3 shadow-lg
+              font-sans text-sm font-semibold transition-all duration-fast
+              hover:bg-blue-900 active:scale-95"
+          >
+            <CalendarPlus size={16} aria-hidden="true" />
+            New meal plan
+          </button>
+        </div>
       )}
 
       {/* ── Snackbar ─────────────────────────────────────────────────────── */}
@@ -988,6 +1176,7 @@ export default function MealQueueScreen() {
           profile={profile}
           onSelect={handleSelect}
           onSwap={handleSwapSubstitute}
+          onAdd={handleAddSuggestion}
         />
       </div>
 
@@ -998,7 +1187,9 @@ export default function MealQueueScreen() {
           onClose={() => setSavedPlansOpen(false)}
           hasActivePlan={!!plan}
           savedPlans={savedPlans}
+          activeSavedPlanId={activeSavedPlan?.id ?? null}
           onSave={handleSavePlan}
+          onUpdate={handleUpdateActivePlan}
           onLoad={handleLoadSavedPlan}
           onDelete={handleDeleteSavedPlan}
         />

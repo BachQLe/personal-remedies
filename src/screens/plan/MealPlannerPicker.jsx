@@ -14,23 +14,29 @@
  * decision b — an empty pick list now yields an honestly empty week rather
  * than pool-filling), so the confirm CTA below is disabled at zero picks —
  * see planBuilder.js.
+ *
+ * The "Week starts" row above the tabs is the ONLY place that choice is made
+ * (2026-09): it has to be settled before the plan exists, since
+ * `generatePlanFromPicks` reads `nextSevenDays()` to lay out its 7 days. The
+ * Plan screen now only displays the resulting window as a read-only chip.
  */
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, RefreshCw } from 'lucide-react';
+import { X, Search, RefreshCw, CalendarRange } from 'lucide-react';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import BestRecipesRails from '../../components/shared/BestRecipesRails.jsx';
 import Snackbar from '../../components/shared/Snackbar.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import { getMealPlanSuggestions, generatePlanFromPicks, buildRecipeDetail } from '../../api/api.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
+import { getOverlayImageFile } from '../../api/localTables.js';
 import { getLibrary, subscribeLibrary } from '../../state/library.js';
 import { mealTypeForItem } from '../../components/shared/mealTypeMeta.jsx';
 import { PLAN_SLOT_KEYS } from '../../api/config.js';
 import { estimatePlanDayCalories } from '../../api/calorieNeeds.js';
-import { todayKey } from './planDates.js';
+import { todayKey, getWeekStartDay, setWeekStartDay } from './planDates.js';
 import CalorieGapSheet from './CalorieGapSheet.jsx';
 import SlotBrowseSheet from './SlotBrowseSheet.jsx';
 
@@ -50,6 +56,23 @@ const TAB_OPTIONS = [
 // as too thin to hand over without comment. Deliberately not 100% — these are
 // coarse estimates on both sides, so only a clear shortfall is worth a prompt.
 const CALORIE_GAP_RATIO = 0.8;
+
+// The week-start choice lives HERE, before the plan is built, rather than on
+// the Plan screen after the fact (where it was a 7-pill row that crowded the
+// day strip). `null` = "Today" — planDates.js's default rolling window. The
+// value is only persisted (`setWeekStartDay`) in `handleCreatePlan`, right
+// before `generatePlanFromPicks` reads `nextSevenDays()`, so closing the
+// picker without creating anything leaves the live plan's window untouched.
+const WEEK_START_OPTIONS = [
+  { value: null, label: 'Today' },
+  { value: 0, label: 'Su' },
+  { value: 1, label: 'Mo' },
+  { value: 2, label: 'Tu' },
+  { value: 3, label: 'We' },
+  { value: 4, label: 'Th' },
+  { value: 5, label: 'Fr' },
+  { value: 6, label: 'Sa' },
+];
 
 function emptySlotMap() {
   return Object.fromEntries(PLAN_SLOT_KEYS.map((key) => [key, []]));
@@ -105,6 +128,8 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
   /** @type {[{need: number, total: number}|null, Function]} */
   const [gap, setGap] = useState(null);
   const [browseSlot, setBrowseSlot] = useState(null);
+  /** Pending week-start weekday (0=Su..6=Sa) or `null` for "Today". */
+  const [weekStartDay, setWeekStartDayState] = useState(getWeekStartDay);
   const [snackbar, setSnackbar] = useState(null);
   const snackbarRef = useRef(null);
   const snackbarIdRef = useRef(0);
@@ -138,6 +163,9 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
     setLoading(true);
     setGap(null);
     setBrowseSlot(null);
+    // Re-read the stored week start each open so the row reflects whatever
+    // the last created plan used (it's only written on create, below).
+    setWeekStartDayState(getWeekStartDay());
   } else if (!open && sessionOpen) {
     setSessionOpen(false);
   }
@@ -183,7 +211,7 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
     const out = emptySlotMap();
     for (const item of library) {
       const slotKey = mealTypeForItem(item);
-      const image = item.image || getIngredientImage(item.name, item.group);
+      const image = item.image || getIngredientImage(item.name, item.group, getOverlayImageFile(item.id));
       out[slotKey] = [...(out[slotKey] || []), { ...item, image, fromSlot: slotKey }];
     }
     return out;
@@ -226,6 +254,12 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
       sourceName: item.sourceName ?? null,
       matchedConditions: [],
     };
+    // PlanCandidates carry these when their source Recipe had a C1 overlay
+    // match (see adapter.js's recipeToPlanCandidate) — forward when present
+    // so buildRecipeDetail can read them through onto the card payload.
+    if (item.sourceUrl) seed.sourceUrl = item.sourceUrl;
+    if (item.attribution) seed.attribution = item.attribution;
+    if (item.nutritionPerServing) seed.nutritionPerServing = item.nutritionPerServing;
     setSelectedRecipe({
       foodId: seed.foodId,
       name: seed.name,
@@ -249,6 +283,9 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
   const handleCreatePlan = useCallback(async () => {
     setGenerating(true);
     try {
+      // Commit the week start FIRST — `generatePlanFromPicks` derives its 7
+      // day keys from `nextSevenDays()`, which reads this stored value.
+      setWeekStartDay(weekStartDay);
       const { plan } = await generatePlanFromPicks(profile, [...selected.values()]);
 
       const need = profile.calorieTarget ?? 2000;
@@ -263,7 +300,7 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
     } finally {
       setGenerating(false);
     }
-  }, [profile, selected, finish]);
+  }, [profile, selected, weekStartDay, finish]);
 
   // Task 9: the gap sheet's "Choose more recipes" action closes both the gap
   // sheet and this whole picker overlay, then routes to the full Recipes
@@ -307,10 +344,37 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
             </button>
           </div>
 
+          {/* Week start — chosen up front, applied at create time (see
+              WEEK_START_OPTIONS). Same pill language as the Plan screen's
+              day strip, so it reads as a date control rather than a form. */}
+          <div className="shrink-0 px-4 pt-3 flex items-center gap-1.5 overflow-x-auto hide-scrollbar">
+            <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold font-sans
+              uppercase tracking-eyebrow text-blue-950/40 mr-0.5">
+              <CalendarRange size={12} aria-hidden="true" />
+              Week starts
+            </span>
+            {WEEK_START_OPTIONS.map(({ value, label }) => {
+              const isSelected = weekStartDay === value;
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setWeekStartDayState(value)}
+                  aria-pressed={isSelected}
+                  className={`shrink-0 px-2.5 py-1 rounded-pill text-[11px] font-semibold font-sans
+                    transition-all duration-fast active:scale-95
+                    ${isSelected ? 'bg-blue-950 text-white' : 'bg-white text-blue-950/60 hover:bg-sand-100'}`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Tabs + refresh */}
           <div className="shrink-0 px-4 pt-4 pb-2 flex items-center gap-2">
             <div className="flex-1">
-              <PillSwitcher options={TAB_OPTIONS} value={activeTab} onChange={setActiveTab} size="sm" />
+              <PillSwitcher options={TAB_OPTIONS} value={activeTab} onChange={setActiveTab} size="sm" trackClassName="bg-white" />
             </div>
             {activeTab === 'best' && (
               <button
@@ -336,7 +400,6 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
                   selectedIds={selectedIds}
                   onToggleSelect={handleToggleSelect}
                   showAdd
-                  edgeFadeClass="bg-paper-100"
                   showScrollbar
                   onSeeMore={setBrowseSlot}
                   onSaveBlocked={showSnackbar}
@@ -349,7 +412,6 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
                 selectedIds={selectedIds}
                 onToggleSelect={handleToggleSelect}
                 showAdd
-                edgeFadeClass="bg-paper-100"
                 showScrollbar
                 onSeeMore={setBrowseSlot}
                 onSaveBlocked={showSnackbar}

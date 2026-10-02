@@ -296,6 +296,67 @@ export async function getFineGroupLabelsByCoarse() {
   return _fineGroupLabelsByCoarseCache;
 }
 
+/** @type {Array<{ code: string, label: string, coarse: string }>|null} */
+let _fineFoodGroupsCache = null;
+
+/**
+ * The flat, ordered fine-food-group menu that powers the Suggest browse
+ * surface (the `/suggest` endpoint's own fine-group list — see this file's
+ * top-of-module doc for the coarse-vs-fine distinction; coarse groups power
+ * the separate `/detailed` "choose this, not that" surface and are untouched
+ * by this function). Sourced from the same cached /foodgroups dictionary as
+ * `getFineGroupLabelsByCoarse`/`getGroupLabels`: every record with
+ * `isFineFoodGroup: true`, minus `EXCLUDED_FINE_GROUPS` ('x'/'j1' lifestyle,
+ * 'l' recipes — recipes have their own surface, RecipesScreen). That yields
+ * exactly the 17 real fine groups (b1,b2,b3,c1,c2,c3,d,e,f,g1,g2,h1,h2,i1,
+ * i2,k1,k2) as of this writing.
+ *
+ * SUBTLETY (the same one `getFineGroupLabelsByCoarse` documents, resolved
+ * the OPPOSITE way here — read this before touching either function): d, e,
+ * and f are flagged BOTH `isCoarseFoodGroup` and `isFineFoodGroup` on the
+ * very same record, with no real b1/b2-style subdivisions underneath.
+ * `getFineGroupLabelsByCoarse` excludes that record from its own bucket
+ * because THERE it would be a self-referential entry inside a coarse
+ * group's "fine subdivisions" list (the tile's title and its one listed
+ * subdivision would read identically). HERE there is no such bucket — a
+ * flat menu of fine groups to browse — and for d/e/f that single record IS
+ * the legitimate, only fine group for Fruits & Juices / Vegetables / Breads,
+ * Grains, Cereals & Pasta. So this function does NOT apply that same
+ * exclusion: d, e, and f MUST appear in this menu (17 groups total, not
+ * 14) — only `isFineFoodGroup` + the `EXCLUDED_FINE_GROUPS` check gate
+ * inclusion here. This is why the two functions don't share a filter
+ * helper despite both reading the same "both flags set" record shape: the
+ * correct handling of that record is inverted between them, not duplicated.
+ *
+ * Cached in a module-level variable exactly like `_fineGroupLabelsByCoarseCache`
+ * — same source dictionary, same cache-once-forever lifetime, so adding this
+ * export costs zero extra /foodgroups reads.
+ *
+ * Order: ascending by `code` (plain string compare). Every code is either a
+ * single coarse letter (d, e, f) or a coarse-letter-plus-single-digit (b1,
+ * c3, …) — never multi-digit — so a plain string sort keeps each coarse
+ * group's codes contiguous and correctly ordered (b1 < b2 < b3) with no need
+ * for a numeric-aware comparator.
+ *
+ * Profile-independent — no /goodfor or condition scoring involved, this is
+ * the static menu of groups to browse, not a ranked result. Pair with
+ * `getFineGroupSuggestions(profile, code)` for the actual condition-ranked
+ * items within one of these groups.
+ * @returns {Promise<Array<{ code: string, label: string, coarse: string }>>}
+ */
+export async function getFineFoodGroups() {
+  if (_fineFoodGroupsCache) return _fineFoodGroupsCache;
+
+  const groups = await ensureFoodGroups();
+  const menu = groups
+    .filter((g) => g.isFineFoodGroup && !EXCLUDED_FINE_GROUPS.includes(g.foodGroupID))
+    .map((g) => ({ code: g.foodGroupID, label: g.description, coarse: g.foodGroupID.charAt(0) }))
+    .sort((a, b) => (a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
+
+  _fineFoodGroupsCache = menu;
+  return _fineFoodGroupsCache;
+}
+
 /**
  * Resolve a single food group code (fine or coarse) to its real display
  * label. Checks fine groups first (more specific, e.g. 'b1' → 'Fish &
@@ -419,8 +480,9 @@ function normalizeTopFood(raw) {
  * list membership (helpful/neutral/harmful) IS the verdict for this
  * endpoint, and the raw `value` must never be exposed. `referenceTotal` is
  * NOT set here either — this function stays synchronous; the caller
- * (`getCategoryDetailRaw`) attaches it afterward via `fetchReferenceTotal`,
- * the same async per-condition /references lookup `assessFoodRaw` uses.
+ * (`getCategoryDetailRaw`) attaches it afterward via the cache-only
+ * `getCachedRefCount` (no /references network call — see that function's
+ * docblock).
  * @param {Object} raw
  * @param {string} coarseGroup - The coarse group requested (injected, not on raw)
  * @returns {import('./types.js').Food}
@@ -537,6 +599,23 @@ function parseSourceName(notes) {
  * that otherwise starves. This is a genuine classification-accuracy fix, not
  * a fallback: it changes which honest bucket a recipe lands in, never
  * fabricates one.
+ *
+ * FURTHER FIX (lunch rail still blank, #8/#13): re-checked the same 54-title
+ * dictionary against this table and found two more genuine
+ * misclassifications:
+ * - "American Macaroni Salald" — a dictionary typo ("Salald", not "Salad")
+ *   that never substring-matched the existing 'salad' keyword, so it fell
+ *   all the way through to the 'dinner' default. Added `salald` as its own
+ *   keyword (matching the API's actual string, not "fixing" the typo).
+ * - "Chicken Pot Pie (no crust)" — matched 'pie' → 'snack', which is wrong
+ *   (it's a dinner dish, not a dessert). `pot pie` → 'dinner' is added ahead
+ *   of `pie` so it wins the first-match race.
+ * The rest of the dictionary was left alone deliberately (conservative per
+ * task instructions) — e.g. "Pasta e Fagioli"/"Hash Brown Casserole" still
+ * default to 'dinner' with no keyword hit, a reasonable bucket rather than a
+ * bug on the level of the two fixed above. Any recipe still stuck on the
+ * 'dinner' default (not a real keyword match) is now also eligible for the
+ * lunch-slot top-up — see `topUpLunchFromDefaultedDinnerRecipes` below.
  */
 const RECIPE_MEAL_TYPE_KEYWORDS = [
   ['oatmeal', 'breakfast'],
@@ -550,7 +629,9 @@ const RECIPE_MEAL_TYPE_KEYWORDS = [
   ['stew', 'dinner'],
   ['roast', 'dinner'],
   ['salmon', 'dinner'],
+  ['pot pie', 'dinner'],
   ['salad', 'lunch'],
+  ['salald', 'lunch'],
   ['sandwich', 'lunch'],
   ['wrap', 'lunch'],
   ['soup', 'lunch'],
@@ -571,17 +652,36 @@ const RECIPE_MEAL_TYPE_KEYWORDS = [
 ];
 
 /**
+ * Best-effort mealType match for a recipe title's keywords, reporting
+ * whether the result came from a real keyword hit or fell through to the
+ * 'dinner' default. Internal — `getRecipesRaw` uses this directly (rather
+ * than the exported `guessMealType` below) so it can stamp
+ * `mealTypeDefaulted` on the Recipe it builds; that flag is what
+ * `getMealPlanSuggestionsRaw`'s lunch top-up (see
+ * `topUpLunchFromDefaultedDinnerRecipes`) uses to tell "genuinely a dinner
+ * dish" apart from "landed on dinner only because nothing matched" — a
+ * distinction `guessMealType`'s plain string return can't express.
+ * @param {string} title
+ * @returns {{ mealType: string, defaulted: boolean }}
+ */
+function matchMealType(title) {
+  const lower = (title || '').toLowerCase();
+  for (const [keyword, mealType] of RECIPE_MEAL_TYPE_KEYWORDS) {
+    if (lower.includes(keyword)) return { mealType, defaulted: false };
+  }
+  return { mealType: 'dinner', defaulted: true };
+}
+
+/**
  * Best-effort mealType guess from a recipe title's keywords.
- * Falls back to 'dinner' when nothing matches.
+ * Falls back to 'dinner' when nothing matches. Exported so a screen can
+ * reuse the exact same classification (e.g. previewing how a title would be
+ * bucketed) without duplicating RECIPE_MEAL_TYPE_KEYWORDS.
  * @param {string} title
  * @returns {string}
  */
-function guessMealType(title) {
-  const lower = (title || '').toLowerCase();
-  for (const [keyword, mealType] of RECIPE_MEAL_TYPE_KEYWORDS) {
-    if (lower.includes(keyword)) return mealType;
-  }
-  return 'dinner';
+export function guessMealType(title) {
+  return matchMealType(title).mealType;
 }
 
 // ── Condition name lookup ────────────────────────────────────────────────────
@@ -748,16 +848,50 @@ export async function assessFood(foodId, profile) {
 }
 
 /**
+ * Internal sentinel thrown from `assessFoodRaw`'s `cachedFetch` fetcher when
+ * `/goodfor` resolves with no result (HTTP 220 — a valid "nothing to
+ * assess" response, `null`) — see `assessFoodRaw` for why.
+ */
+class GoodForEmptyResult extends Error {}
+
+/**
  * Unwrapped assessFood body — used by withConditionFallback for the retry.
+ *
+ * BUG FIX: `cachedFetch` persists whatever its fetcher resolves with, for
+ * the full `ttlMs` it's given — including a null `/goodfor` result — so a
+ * food with no assessment data got that `null` cached for the entire 8h
+ * `GOODFOR_TTL_MS`, same as a real result. That's wrong for a value this
+ * cheap and likely to change (data curation catching up, a retry after a
+ * transient upstream gap): once null, a food stayed "unassessable" for the
+ * rest of the day even if `/goodfor` would answer differently moments
+ * later. `cache.js` isn't owned by this task, so instead of adding a
+ * conditional-TTL option there, the fetcher throws this module-private
+ * `GoodForEmptyResult` sentinel when the result is null; `cachedFetch`
+ * (cache.js) only ever writes an entry from a fetcher's RESOLVED value — a
+ * rejection is never persisted on a first fetch, and for an already-cached
+ * STALE entry a background-revalidation rejection is swallowed while the
+ * old stale value keeps serving (see cache.js's `cachedFetchWithMeta` doc)
+ * — so this gets "never cache a null" with zero changes to cache.js. The
+ * catch below turns the sentinel back into the same `null` this function
+ * always returned for "no assessment"; any OTHER error (a real fetch
+ * failure) is rethrown unchanged.
  * @param {number} foodId
  * @param {number[]} conditionIds
  * @returns {Promise<import('./types.js').Assessment|null>}
  */
 async function assessFoodRaw(foodId, conditionIds) {
   const conditionIdStr = conditionIds.join(',');
-  const raw = await cachedFetch(`goodfor:${conditionIdStr}:${foodId}`, GOODFOR_TTL_MS, () =>
-    fetchGoodFor(foodId, conditionIdStr)
-  );
+  let raw;
+  try {
+    raw = await cachedFetch(`goodfor:${conditionIdStr}:${foodId}`, GOODFOR_TTL_MS, async () => {
+      const result = await fetchGoodFor(foodId, conditionIdStr);
+      if (result == null) throw new GoodForEmptyResult();
+      return result;
+    });
+  } catch (err) {
+    if (err instanceof GoodForEmptyResult) return null;
+    throw err;
+  }
 
   if (!raw) return null;
 
@@ -999,12 +1133,16 @@ export async function getCategoryDetail(profile, coarseGroup, listType) {
  * Unwrapped getCategoryDetail body.
  *
  * Each item's `referenceTotal` is attached here (not in
- * `normalizeDetailedFood`, which is synchronous) via `fetchReferenceTotal` —
- * the same per-condition /references fan-out + honest-total reduction
- * `assessFoodRaw` uses — keyed on the SAME `conditionIds` this raw list was
- * fetched with. `fetchReferenceTotal` never rejects (its internal
- * Promise.allSettled absorbs per-condition failures into `null`), so mapping
- * it directly inside this `Promise.all` is safe.
+ * `normalizeDetailedFood`, which is synchronous), but CACHE-ONLY via
+ * `getCachedRefCount` — exactly like TopDosTab's list view. A `/detailed`
+ * response can carry 100+ items; fanning `fetchReferenceTotal` (a
+ * per-condition /references fetch) out over every one of them concurrently
+ * was overwhelming Nutridigm (HTTP 500s, "Connection problem" failures) and
+ * is now gone from this path entirely. `getCachedRefCount` reads whatever
+ * `refs:{conditionId}:{foodId}` entries are already persisted from prior
+ * calls and never hits the network, so unopened rows simply show no count
+ * (`null`) until something else (FoodDetailCard's `assessFood` on the one
+ * item the user actually opens) warms the cache.
  * @param {number[]} conditionIds
  * @param {string} coarseGroup
  * @param {'helpful'|'neutral'|'harmful'} listType
@@ -1021,8 +1159,7 @@ async function getCategoryDetailRaw(conditionIds, coarseGroup, listType) {
   return Promise.all(
     raw.map(async (item) => {
       const food = await attachGroupLabel(normalizeDetailedFood(item, coarseGroup));
-      const { referenceTotal } = await fetchReferenceTotal(item.foodItemID, conditionIds);
-      food.referenceTotal = referenceTotal;
+      food.referenceTotal = getCachedRefCount(item.foodItemID, conditionIds);
       return food;
     })
   );
@@ -1066,8 +1203,23 @@ export async function getRecipes(profile) {
  *   keyword heuristic when present, because it's the ONLY way a recipe can
  *   ever land as 'beverage' — `guessMealType`/RECIPE_MEAL_TYPE_KEYWORDS
  *   above never returns 'beverage', by design (see
- *   adapter.beveragesPool.test.js). The keyword guess remains the fallback
- *   for any recipe the overlay hasn't reached.
+ *   adapter.beveragesPool.test.js). The SAME invariant holds for 'dessert'
+ *   (Task C1, Sept 2026): RECIPE_MEAL_TYPE_KEYWORDS deliberately keeps
+ *   dessert-sounding keywords ('cake'/'cookie'/'pie'/'brownie'/'pudding'/
+ *   'tart'/'ice cream'/'cheesecake'/'muffin') mapped to `'snack'`, not
+ *   `'dessert'` — the keyword guess is a coarse title heuristic with no way
+ *   to tell "snack" and "dessert" apart reliably (a "protein bar" and a
+ *   "candy bar" both match `'bar'`), so only a human-curated overlay row may
+ *   assign `'dessert'`. Guessing it from a title would misclassify real
+ *   snacks as desserts (and vice versa) with no way to correct it short of
+ *   an editorial pass anyway, so the keyword table just never tries — see
+ *   adapter.dessertPool.test.js. The keyword guess remains the fallback
+ *   for any recipe the overlay hasn't reached. `mealTypeDefaulted` tracks
+ *   this same precedence: it's `true` only when the FINAL mealType is the
+ *   honest keyword-miss 'dinner' default (`matchMealType`'s `defaulted`
+ *   flag) — the overlay winning always forces it back to `false`, since an
+ *   editorial categorization (even "dinner") is never a default. Consumed
+ *   by `getMealPlanSuggestionsRaw`'s lunch top-up.
  * - `ingredients`: built from the overlay's parallel `rawIngredients`
  *   (strings) + `ingredientFoodItemIds` (numbers) arrays, zipped by index
  *   into a light `{ name, foodItemID? }` shape — NOT the full `Food[]` the
@@ -1094,6 +1246,7 @@ async function getRecipesRaw(conditionIds) {
 
   const recipes = raw.map((item) => {
     const title = item.foodItemDisplayAs || item.foodDescription || item.description || 'Unknown recipe';
+    const { mealType, defaulted } = matchMealType(title);
     return {
       id: item.foodItemID,
       foodId: item.foodItemID,
@@ -1103,21 +1256,25 @@ async function getRecipesRaw(conditionIds) {
       sourceName: parseSourceName(item.notes),
       matchedConditions,
       photo: getIngredientImage(title, item.coarseFoodGroup, getOverlayImageFile(item.foodItemID)),
-      mealType: guessMealType(title),
+      mealType,
+      mealTypeDefaulted: defaulted,
     };
   });
 
   return joinRecipeOverlay(recipes).map((recipe) => {
     const { overlayMealType, rawIngredients, ingredientFoodItemIds, ...rest } = recipe;
     const mealType = overlayMealType ?? recipe.mealType;
+    // Overlay wins the mealType, and an editorial categorization is never a
+    // "default" — see the doc above.
+    const mealTypeDefaulted = overlayMealType != null ? false : recipe.mealTypeDefaulted;
 
-    if (!rawIngredients) return { ...rest, mealType };
+    if (!rawIngredients) return { ...rest, mealType, mealTypeDefaulted };
 
     const ingredients = rawIngredients.map((name, i) => {
       const foodItemID = ingredientFoodItemIds?.[i];
       return foodItemID !== undefined ? { name, foodItemID } : { name };
     });
-    return { ...rest, mealType, ingredients };
+    return { ...rest, mealType, mealTypeDefaulted, ingredients };
   });
 }
 
@@ -1125,18 +1282,53 @@ async function getRecipesRaw(conditionIds) {
 const TIER_TO_NUMERIC_ID = { Top: 1, Strong: 2, Good: 3 };
 
 /**
+ * Shared per-item mapping from a raw /suggest item to its tier/numericId-
+ * bearing display shape — id, name, resolved image, group, fineGroup, tier,
+ * numericId. Factored out of `normalizePlanGroup` so `getFineGroupSuggestions`
+ * (the Suggest browse surface) can reuse the exact same field resolution
+ * WITHOUT `normalizePlanGroup`'s numericId 1-4 filter, which is a Plan-only
+ * safety rule (a Plan slot must never suggest a harmful 5-7 food) that is
+ * wrong for a browse surface — a fine-group browse list's whole point is
+ * showing the group's full condition-ranked spread, including the "Avoid"
+ * end (5-7), not just the Plan-safe subset. Does NOT apply `isExcludedItem`
+ * or any filtering/sorting at all — purely the per-item field mapping;
+ * callers own their own filter/sort pass.
+ * @param {Object} item - Raw /suggest item
+ * @param {string} fineGroup - The fine food group requested (injected, not
+ *   on raw — unlike /topdoordonts, /suggest items carry no
+ *   coarseFoodGroup/fineFoodGroup fields at all, so every item in this batch
+ *   is implicitly that group; without this every candidate's group/fineGroup
+ *   normalizes to '', which silently breaks downstream calorie/grouping
+ *   logic that keys off those fields).
+ * @returns {{ id: number, name: string, image: string, group: string, fineGroup: string, tier: import('./types.js').TierOrPoor, numericId: number }}
+ */
+function suggestItemToCandidate(item, fineGroup) {
+  const food = normalizeFood(item);
+  const resolvedFineGroup = food.fineGroup || fineGroup || '';
+  const resolvedGroup = food.group || resolvedFineGroup.charAt(0);
+  return {
+    id: food.id,
+    name: food.name,
+    image: getIngredientImage(food.name, resolvedGroup, getOverlayImageFile(food.id)),
+    group: resolvedGroup,
+    fineGroup: resolvedFineGroup,
+    tier: numericIdToTier(item.descriptionNumericID),
+    numericId: item.descriptionNumericID,
+  };
+}
+
+/**
  * Normalize one /suggest fine-group response into slot-ready
  * PlanCandidates. Filters to `descriptionNumericID` 1-4 (CRITICAL — 5-7 are
  * harmful; a Plan slot must never suggest them) and excluded items (see
  * `isExcludedItem`), then stable-sorts ascending by descriptionNumericID so
- * the best matches lead each group's list.
+ * the best matches lead each group's list. Per-item field mapping is shared
+ * with `getFineGroupSuggestions` via `suggestItemToCandidate` — see that
+ * function's doc for why its SAFETY FILTER (not its field mapping) is
+ * Plan-specific and deliberately not reused there.
  * @param {Object[]} raw - Raw /suggest items for one fine food group
- * @param {string} fineGroup - The fine food group requested (injected, not
- *   on raw — unlike /topdoordonts, /suggest items carry no
- *   coarseFoodGroup/fineFoodGroup fields at all, so every item in this batch
- *   is implicitly that group; without this every Plan candidate's
- *   group/fineGroup normalizes to '', which silently breaks
- *   `estimateNutrition`'s calorie estimate for the whole Plan screen).
+ * @param {string} fineGroup - The fine food group requested (injected — see
+ *   `suggestItemToCandidate`).
  * @returns {import('./types.js').PlanCandidate[]}
  */
 function normalizePlanGroup(raw, fineGroup) {
@@ -1150,21 +1342,7 @@ function normalizePlanGroup(raw, fineGroup) {
 
   filtered.sort((a, b) => a.descriptionNumericID - b.descriptionNumericID);
 
-  return filtered.map((item) => {
-    const food = normalizeFood(item);
-    const resolvedFineGroup = food.fineGroup || fineGroup || '';
-    const resolvedGroup = food.group || resolvedFineGroup.charAt(0);
-    return {
-      id: food.id,
-      name: food.name,
-      image: getIngredientImage(food.name, resolvedGroup, getOverlayImageFile(food.id)),
-      group: resolvedGroup,
-      fineGroup: resolvedFineGroup,
-      tier: numericIdToTier(item.descriptionNumericID),
-      numericId: item.descriptionNumericID,
-      kind: 'food',
-    };
-  });
+  return filtered.map((item) => ({ ...suggestItemToCandidate(item, fineGroup), kind: 'food' }));
 }
 
 /**
@@ -1194,17 +1372,75 @@ function normalizePlanGroup(raw, fineGroup) {
  * dictionary — an honest degradation (recipes outside the ~150-recipe C1
  * overlay dataset), never a fabricated fallback. Purely additive: never
  * read from/written to `tier`/`numericId`.
+ *
+ * `nutritionPerServing` (added for the recipe-calories feature) is copied
+ * onto the candidate ONLY when the recipe carries it (from the C1 overlay
+ * join — see recipeIngestion.js) — the key is omitted entirely, never set
+ * to `undefined`, when absent, so the Plan screen can never render a
+ * fabricated calorie number for a recipe with no real overlay data.
+ *
+ * `mealTypeDefaulted` is always copied over (coerced to a plain boolean,
+ * unlike the omit-when-absent fields above) — it's a cheap internal flag,
+ * never rendered, that `topUpLunchFromDefaultedDinnerRecipes` reads straight
+ * off a slot's already-built dinner candidates to find lunch top-up
+ * eligible recipes.
  * @param {import('./types.js').Recipe} recipe
  * @param {Map<number, Object>} itemsMap - foodItemID -> merged item row (from `ensureFoodItems`)
  * @returns {import('./types.js').PlanCandidate}
  */
+/**
+ * Split `recipes` into the pool eligible for a Plan slot whose accepted
+ * meal types are `recipeMealTypes`, honoring BOTH a recipe's primary
+ * `mealType` and its secondary `alsoFits` (Task D, Sept 2026 — see the bug
+ * this fixes: Mory's real overlay data encodes slash-coded meals like
+ * `L/D`/`B/Bv` as `mealType` (first code) + `alsoFits` (remaining codes),
+ * and `alsoFits` existed on the joined Recipe object but was never
+ * consulted here, so recipes coded dinner- or beverage-*secondary* never
+ * reached those slots even though the whole point of `alsoFits` is
+ * multi-slot placement).
+ *
+ * Returns primary matches BEFORE alsoFits-only matches (each group
+ * internally in `recipes`' original relative order, since `Array#filter`
+ * is stable) rather than interleaving them: a recipe's primary `mealType`
+ * is a human's editorial call that THIS is the dish's main slot, while
+ * `alsoFits` is a secondary "also works here" — a stronger signal should
+ * outrank a weaker one when both are eligible for the same slot, e.g. a
+ * lunch-primary/dinner-secondary soup should show up after (not blended
+ * randomly with) dishes actually authored as dinner-primary. A recipe is
+ * counted at most once: the alsoFits pass explicitly excludes anything
+ * already claimed by the primary pass, so a recipe never appears twice in
+ * one slot's pool.
+ *
+ * `alsoFits` is optional on a Recipe (recipes with no matching overlay row
+ * pass through `joinRecipeOverlay` unchanged and never gain the key at
+ * all — see recipeIngestion.js), so this reads it defensively
+ * (`r.alsoFits ?? []`) rather than assuming an array.
+ * @param {import('./types.js').Recipe[]} recipes
+ * @param {string[]} recipeMealTypes - this slot's accepted meal type(s),
+ *   already normalized to an array (see call site).
+ * @returns {import('./types.js').Recipe[]}
+ */
+function recipesEligibleForSlot(recipes, recipeMealTypes) {
+  const primary = recipes.filter(
+    (r) => recipeMealTypes.includes(r.mealType) && TIER_TO_NUMERIC_ID[r.tier] != null
+  );
+  const primaryIds = new Set(primary.map((r) => r.id));
+  const viaAlsoFits = recipes.filter(
+    (r) =>
+      !primaryIds.has(r.id) &&
+      TIER_TO_NUMERIC_ID[r.tier] != null &&
+      (r.alsoFits ?? []).some((mt) => recipeMealTypes.includes(mt))
+  );
+  return [...primary, ...viaAlsoFits];
+}
+
 function recipeToPlanCandidate(recipe, itemsMap) {
   const firstResolvableIngredient = recipe.ingredients?.find((ing) => ing.foodItemID != null);
   const substituteFineGroup = firstResolvableIngredient
     ? itemsMap.get(firstResolvableIngredient.foodItemID)?.fineFoodGroup || null
     : null;
 
-  return {
+  const candidate = {
     id: recipe.id,
     name: recipe.title,
     image: recipe.photo,
@@ -1217,20 +1453,11 @@ function recipeToPlanCandidate(recipe, itemsMap) {
     sourceUrl: recipe.sourceUrl,
     attribution: recipe.attribution,
     substituteFineGroup,
+    mealTypeDefaulted: !!recipe.mealTypeDefaulted,
   };
+  if (recipe.nutritionPerServing) candidate.nutritionPerServing = recipe.nutritionPerServing;
+  return candidate;
 }
-
-/**
- * Which flag column on the merged item table (isSnack/isBeverage) each of
- * these two slot keys WOULD draw its candidates from, via
- * `flaggedPoolAcrossGroups`. Only `beverages` is actually wired to it below
- * (restored Aug 2026 — zero recipes carry `mealType: 'beverage'` yet, so an
- * items-only pool is the only way that slot isn't permanently empty);
- * `snacks` stays recipes-only like breakfast/lunch/dinner, so `isSnack` is
- * intentionally unused for now — kept here as the fast-follow hook if
- * Snacks & Desserts ever needs the same items+recipes treatment.
- */
-const SLOT_FLAG_KEY = { snacks: 'isSnack', beverages: 'isBeverage' };
 
 /**
  * Build a slot's candidate pool from flagged items scattered across EVERY
@@ -1254,7 +1481,7 @@ const SLOT_FLAG_KEY = { snacks: 'isSnack', beverages: 'isBeverage' };
  * never backfills from unflagged items.
  * @param {Map<string, import('./types.js').PlanCandidate[]>} byGroup
  * @param {Map<number, Object>} itemsMap - foodItemID -> merged item row (from ensureFoodItems)
- * @param {'isSnack'|'isBeverage'} flagKey
+ * @param {'isBreakfast'|'isSnack'|'isBeverage'} flagKey
  * @returns {import('./types.js').PlanCandidate[]}
  */
 function flaggedPoolAcrossGroups(byGroup, itemsMap, flagKey) {
@@ -1271,6 +1498,76 @@ function flaggedPoolAcrossGroups(byGroup, itemsMap, flagKey) {
   }
   pool.sort((a, b) => a.numericId - b.numericId);
   return pool;
+}
+
+/**
+ * Merge a slot's flagged-item pool with its recipe pool into one ranked
+ * candidate list (see `PLAN_SLOTS`' `itemFlagKey`/`recipeLead` in
+ * config.js). Concatenates the two pools in tie-break order —
+ * `recipeLead: true` puts `recipes` ahead of `items`, `false` puts `items`
+ * ahead of `recipes` — then dedupes by `id` (first occurrence, i.e. the
+ * tie-break winner, is kept) and stable-sorts ascending by `numericId`
+ * (1 = best condition-tier match). `Array#sort` is spec-stable, so within a
+ * numericId tie the concat order decides who wins — the same technique
+ * `flaggedPoolAcrossGroups` above already relies on. Zero new API calls:
+ * both pools were already fetched by the caller.
+ * @param {import('./types.js').PlanCandidate[]} items
+ * @param {import('./types.js').PlanCandidate[]} recipes
+ * @param {boolean} recipeLead
+ * @returns {import('./types.js').PlanCandidate[]}
+ */
+function mergeCandidatePools(items, recipes, recipeLead) {
+  const ordered = recipeLead ? [...recipes, ...items] : [...items, ...recipes];
+  const seen = new Set();
+  const pool = [];
+  for (const candidate of ordered) {
+    if (seen.has(candidate.id)) continue;
+    seen.add(candidate.id);
+    pool.push(candidate);
+  }
+  pool.sort((a, b) => a.numericId - b.numericId);
+  return pool;
+}
+
+/**
+ * Task 1c lunch top-up: lunch is deliberately recipes-only (`PLAN_SLOTS`'
+ * `itemFlagKey: null` — a user decision, not a bug to "fix" by mixing in
+ * plain food items), and even after the Task 1a keyword-table fixes only a
+ * fraction of the real recipe dictionary keyword-matches to 'lunch' — most
+ * of the rest land on 'dinner' purely because `matchMealType` found nothing
+ * to key off (`mealTypeDefaulted: true`, see `getRecipesRaw`), not because
+ * they're genuinely dinner-only dishes. When the honest lunch pool still
+ * comes up short of the slot's `size`, this borrows from that pool of
+ * dinner candidates that are ONLY dinner by default (never a real keyword
+ * match, and never an overlay's editorial call — both force
+ * `mealTypeDefaulted` back to `false`) and adds them to lunch, in the
+ * dinner list's existing order, stopping once lunch reaches exactly
+ * `lunchSize` (or the eligible pool runs out first, in which case lunch
+ * stays honestly short rather than a made-up length).
+ *
+ * This is additive, not a move: `dinnerCandidates` is read, never mutated,
+ * so a borrowed recipe still shows up as a dinner option too — an honest
+ * "this recipe reasonably fits either" outcome, not a duplicate-selection
+ * bug. Every borrowed candidate already passed the same Top/Strong/Good
+ * (`TIER_TO_NUMERIC_ID`) filter dinner's own candidate list was built with
+ * (see `getMealPlanSuggestionsRaw`), so this never fabricates a score or
+ * relaxes the tier gate — it only widens WHERE an already-qualified recipe
+ * is allowed to appear.
+ * @param {import('./types.js').PlanCandidate[]} lunchCandidates
+ * @param {import('./types.js').PlanCandidate[]} dinnerCandidates
+ * @param {number} lunchSize - the lunch slot's `PLAN_SLOTS` `size`
+ * @returns {import('./types.js').PlanCandidate[]}
+ */
+function topUpLunchFromDefaultedDinnerRecipes(lunchCandidates, dinnerCandidates, lunchSize) {
+  const needed = lunchSize - lunchCandidates.length;
+  if (needed <= 0) return lunchCandidates;
+
+  const lunchIds = new Set(lunchCandidates.map((c) => c.id));
+  const topUp = dinnerCandidates
+    .filter((c) => c.kind === 'recipe' && c.mealTypeDefaulted && !lunchIds.has(c.id))
+    .slice(0, needed);
+
+  return [...lunchCandidates, ...topUp];
 }
 
 /**
@@ -1410,39 +1707,58 @@ async function getMealPlanSuggestionsRaw(conditionIds) {
 
   const itemsMap = await ensureFoodItems();
 
-  // Every slot's candidate pool is recipes-only EXCEPT `beverages`: zero
-  // recipes carry `mealType: 'beverage'` TODAY (`guessMealType`, above,
-  // never returns it — the only path to 'beverage' is the C1 overlay's
-  // editorial `overlayMealType` winning mealType precedence in
-  // `getRecipesRaw`, and the overlay ships empty until Track C content
-  // lands), so a recipes-only pool for that slot would be permanently
-  // empty in the meantime. Beverages is therefore item-driven for now
-  // (this stays correct even once beverage recipes exist: `slotRecipes`
-  // below already includes any recipe whose `mealType` resolves to
-  // 'beverage', appended after the item pool), via
-  // `flaggedPoolAcrossGroups`: it
-  // pulls every `isBeverage`-flagged item already fetched across ALL of
-  // this plan's /suggest pools (already numericId 1-4-filtered by
-  // `normalizePlanGroup`) — 'h2' (Beverages) is one of those pools because
-  // it's this slot's own `fineGroups` entry, feeding `uniqueGroups` above.
-  // Items lead (`slot.recipeLead: false`), with any (currently zero)
-  // beverage recipes appended after.
+  // Category-scoped selection rule (see `PLAN_SLOTS`' `itemFlagKey` in
+  // config.js): a slot with a non-null `itemFlagKey`
+  // (breakfast/snacks/beverages) pools BOTH its matching recipes AND every
+  // already-fetched item carrying that flag (isBreakfast/isSnack/
+  // isBeverage — see scripts/flag-snack-beverage.mjs + localTables.js),
+  // ranked together by `mergeCandidatePools`. A slot with `itemFlagKey:
+  // null` (lunch/dinner) stays recipes-only — non-recipe items, raw
+  // meat/fish cuts especially, must never surface there. Zero new API
+  // calls: every candidate here was already fetched for one of this plan's
+  // /suggest pools or the shared recipes call.
   /** @type {Record<string, import('./types.js').PlanCandidate[]>} */
   const candidates = {};
   for (const slot of PLAN_SLOTS) {
-    const slotRecipes = slot.recipeMealType
-      ? recipes
-          .filter((r) => r.mealType === slot.recipeMealType && TIER_TO_NUMERIC_ID[r.tier] != null)
-          .map((r) => recipeToPlanCandidate(r, itemsMap))
+    // Task C1 (Sept 2026): `recipeMealType` may be a single string or an
+    // array — `snacks` is `['snack', 'dessert']` so dessert recipes are
+    // eligible for the Snack slot too, per the product decision that
+    // desserts are shown together with snacks (one slot, one listing),
+    // never a separate Dessert slot. Normalize to an array once so the
+    // filter below is shape-agnostic.
+    const recipeMealTypes = Array.isArray(slot.recipeMealType)
+      ? slot.recipeMealType
+      : slot.recipeMealType
+        ? [slot.recipeMealType]
+        : null;
+    // Task D (Sept 2026): eligibility honors BOTH primary `mealType` and
+    // secondary `alsoFits` — see `recipesEligibleForSlot`'s doc for why
+    // this bug existed (only `mealType` was ever checked) and why primary
+    // matches are ordered ahead of alsoFits matches.
+    const slotRecipes = recipeMealTypes
+      ? recipesEligibleForSlot(recipes, recipeMealTypes).map((r) => recipeToPlanCandidate(r, itemsMap))
       : [];
 
-    if (slot.key === 'beverages') {
-      const beverageItems = flaggedPoolAcrossGroups(byGroup, itemsMap, SLOT_FLAG_KEY.beverages);
-      candidates[slot.key] = [...beverageItems, ...slotRecipes];
+    if (slot.itemFlagKey) {
+      const flaggedItems = flaggedPoolAcrossGroups(byGroup, itemsMap, slot.itemFlagKey);
+      candidates[slot.key] = mergeCandidatePools(flaggedItems, slotRecipes, slot.recipeLead);
       continue;
     }
 
     candidates[slot.key] = slotRecipes;
+  }
+
+  // Lunch top-up (Task 1c — see `topUpLunchFromDefaultedDinnerRecipes`):
+  // runs AFTER the loop above (not inside it) because it needs dinner's
+  // candidates already built. Only ever ADDS to lunch — dinner's own
+  // candidate list is left exactly as the loop produced it.
+  const lunchSlot = PLAN_SLOTS.find((slot) => slot.key === 'lunch');
+  if (lunchSlot) {
+    candidates.lunch = topUpLunchFromDefaultedDinnerRecipes(
+      candidates.lunch,
+      candidates.dinner ?? [],
+      lunchSlot.size
+    );
   }
 
   const conditionNames = await getConditionNames(conditionIds).catch(() => []);
@@ -1596,6 +1912,178 @@ export async function getSlotSubstitutes(profile, slotItems) {
 }
 
 /**
+ * Unwrapped getIngredientAlternatives body — used by withConditionFallback
+ * for the retry. One /suggest call, scoped to the ingredient's own fine food
+ * group, filtered through the same safety gate (`normalizePlanGroup`:
+ * numericId 1-4 only, `isExcludedItem` applied) every other food-facing list
+ * in this app goes through, and sorted best-verdict-first by /suggest itself.
+ * @param {number[]} conditionIds
+ * @param {string} suggestGroup - fine food group to scope by
+ * @param {number|null} excludeFoodId - the ingredient itself
+ * @param {number} limit
+ * @returns {Promise<import('./types.js').PlanCandidate[]>}
+ */
+async function getIngredientAlternativesRaw(conditionIds, suggestGroup, excludeFoodId, limit) {
+  const raw = await cachedSuggest(conditionIds.join(','), suggestGroup);
+  return normalizePlanGroup(raw || [], suggestGroup)
+    .filter((candidate) => candidate.id !== excludeFoodId)
+    .slice(0, limit);
+}
+
+/**
+ * Healthier/more useful stand-ins for ONE ingredient, ranked for the user's
+ * conditions — powers the ingredient swap rows on FoodDetailCard's back face.
+ *
+ * Same data path as the Plan screen's per-slot Suggestions sheet
+ * (`getSlotSubstitutes`): /suggest scoped by fine food group, so every
+ * alternative is a food the API already ranks as helpful-or-better for the
+ * profile's conditions within the ingredient's own category — swapping Beef
+ * stays inside "Meat, Red Meat & Organ Meats" rather than proposing a
+ * different food group. The scoping group comes from
+ * `resolveSuggestGroup` (ingredientDerivation.js), which also rescues the
+ * dictionary's generic 'x' staples (Beef/Chicken/Fish) via their siblings.
+ *
+ * Returns an honestly-empty list (never an error, never a fabricated
+ * suggestion) when the ingredient has no resolvable group or the profile has
+ * no conditions; a real API failure propagates so the UI can offer a retry
+ * instead of implying "no alternatives exist".
+ *
+ * @param {import('./types.js').Profile} profile
+ * @param {{name?: string, foodItemID?: number|null, suggestGroup?: string|null}} ingredient
+ * @param {Object} [options]
+ * @param {number} [options.limit] - max alternatives (default 6)
+ * @returns {Promise<{alternatives: import('./types.js').PlanCandidate[], suggestGroup: string|null, usedFallback: boolean}>}
+ */
+export async function getIngredientAlternatives(profile, ingredient, { limit = 6 } = {}) {
+  const conditionIds = profile?.conditions || [];
+  const suggestGroup = ingredient?.suggestGroup ?? null;
+
+  if (!suggestGroup || !conditionIds.length) {
+    return { alternatives: [], suggestGroup, usedFallback: false };
+  }
+
+  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
+    getIngredientAlternativesRaw(ids, suggestGroup, ingredient?.foodItemID ?? null, limit)
+  );
+
+  return { alternatives: result, suggestGroup, usedFallback };
+}
+
+// ── Fine-group browse (Suggest surface) ──────────────────────────────────────
+
+/**
+ * Unwrapped getFineGroupSuggestions body — used by withConditionFallback for
+ * the retry. One /suggest call via the SAME `cachedSuggest` the Plan screen
+ * and Suggestions sheet already share (zero new network surface — the
+ * Nutridigm API has a daily rate limit, so this browse feature must ride the
+ * existing 8h cache rather than add its own fetch path).
+ *
+ * Deliberately does NOT reuse `normalizePlanGroup` here (see
+ * `suggestItemToCandidate`'s doc): that function's numericId 1-4 filter
+ * exists to keep harmful (5-7) foods out of a Plan slot, which is the wrong
+ * rule for a browse surface whose job is showing a fine group's FULL
+ * condition-ranked spread, "Avoid" end included — a user browsing "Fish &
+ * Seafood" should see which fish to avoid, not have them silently vanish.
+ * This keeps every item that has a `descriptionNumericID` at all (can't rank
+ * without one) and only drops `isExcludedItem` hits (defensive — /suggest
+ * items carry no fineFoodGroup/coarseFoodGroup of their own today, so this
+ * is currently a no-op, exactly as it already is in `normalizePlanGroup`;
+ * kept for parity/future-proofing, not because it does anything yet).
+ * Stable-sorts ascending by descriptionNumericID (best match leads), same
+ * convention as every other ranked surface in this file.
+ *
+ * `referenceTotal` is attached CACHE-ONLY via `getCachedRefCount` — same
+ * reasoning as `getCategoryDetailRaw`: a /suggest response for a busy fine
+ * group can be large, and fanning a per-item /references fetch out over all
+ * of them overwhelmed Nutridigm before (HTTP 500s). Unopened rows simply
+ * show no count (`null`) until something else (FoodDetailCard's `assessFood`
+ * on the one item the user actually opens) warms the cache.
+ *
+ * `matchedConditions` (display names of the profile's conditions) is
+ * resolved ONCE and copied onto every item — same convention as
+ * `getRecipesRaw` — since it describes the whole request, not a per-item
+ * fact.
+ * @param {number[]} conditionIds
+ * @param {string} fineGroupCode
+ * @returns {Promise<Array<{
+ *   id: number, name: string, image: string, group: string, fineGroup: string,
+ *   groupLabel: string, tier: import('./types.js').TierOrPoor, numericId: number,
+ *   referenceTotal: number|null, matchedConditions: string[]
+ * }>>}
+ */
+async function getFineGroupSuggestionsRaw(conditionIds, fineGroupCode) {
+  const raw = await cachedSuggest(conditionIds.join(','), fineGroupCode);
+  if (!raw || !raw.length) return [];
+
+  const filtered = raw.filter((item) => item.descriptionNumericID != null && !isExcludedItem(item));
+  filtered.sort((a, b) => a.descriptionNumericID - b.descriptionNumericID);
+
+  const matchedConditions = await getConditionNames(conditionIds);
+
+  return Promise.all(
+    filtered.map(async (item) => {
+      const candidate = suggestItemToCandidate(item, fineGroupCode);
+      const groupLabel = await getGroupLabel(candidate.fineGroup || candidate.group);
+      return {
+        ...candidate,
+        groupLabel,
+        referenceTotal: getCachedRefCount(candidate.id, conditionIds),
+        matchedConditions,
+      };
+    })
+  );
+}
+
+/**
+ * Condition-ranked browse list for ONE fine food group — the Suggest
+ * browse surface's data layer (see `getFineFoodGroups` for the 17-group
+ * menu this is paired with). Mirrors `getCategoryDetail` (the coarse
+ * `/detailed` equivalent) and `getSlotSubstitutes`'s envelope/fallback
+ * shape, so the UI's shared `DataState` + `CoverageNotice` components work
+ * against this unchanged: `usedFallback` flags a demo-conditions retry (see
+ * `withConditionFallback`) and `requestedConditionIds` is always the
+ * profile's ORIGINAL requested conditions (not the post-fallback ids), same
+ * pairing `CoverageNotice` already reads elsewhere (e.g.
+ * `SuggestionsScreen.jsx`) to compute how many requested conditions the
+ * fallback couldn't actually score.
+ *
+ * Goes through `cachedSuggest` — the exact same 8h cache key
+ * (`suggest:{conditionsCSV}:{fineFoodGroup}`) the meal-planner's
+ * `getMealPlanSuggestions`/`getSlotSubstitutes` already populate — so
+ * browsing a fine group the planner also uses (e.g. 'e' Vegetables) can
+ * reuse an already-warm cache entry, and this feature adds zero new network
+ * surface either way (hard requirement: the Nutridigm API has a daily rate
+ * limit).
+ *
+ * @param {import('./types.js').Profile} profile
+ * @param {string} fineGroupCode - One of the 17 codes `getFineFoodGroups`
+ *   returns (e.g. 'b1', 'e'). An empty/falsy code or a profile with no
+ *   conditions short-circuits to an honestly-empty result.
+ * @returns {Promise<{
+ *   items: Array<{
+ *     id: number, name: string, image: string, group: string, fineGroup: string,
+ *     groupLabel: string, tier: import('./types.js').TierOrPoor, numericId: number,
+ *     referenceTotal: number|null, matchedConditions: string[]
+ *   }>,
+ *   usedFallback: boolean,
+ *   requestedConditionIds: number[]
+ * }>}
+ */
+export async function getFineGroupSuggestions(profile, fineGroupCode) {
+  const conditionIds = profile?.conditions || [];
+
+  if (!conditionIds.length || !fineGroupCode) {
+    return { items: [], usedFallback: false, requestedConditionIds: conditionIds };
+  }
+
+  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
+    getFineGroupSuggestionsRaw(ids, fineGroupCode)
+  );
+
+  return { items: result, usedFallback, requestedConditionIds: conditionIds };
+}
+
+/**
  * Build a meal plan from the profile via /topdoordonts.
  * @param {import('./types.js').Profile} profile
  * @param {import('./types.js').Food[]} [libraryItems]
@@ -1742,8 +2230,13 @@ export async function getFoodGroups() {
  * null so the UI can self-hide the paragraph (many dictionary entries carry
  * thin values like "Cooked" or nothing at all — never fabricate copy).
  *
+ * `group`/`fineGroup` are the same raw coarse/fine codes `normalizeFood`
+ * attaches (via `effectiveCoarseGroup`/`item.fineFoodGroup`) — additive so
+ * callers (e.g. FoodDetailCard's non-food icon fallback) can compute
+ * `getNonFoodIcon` from dictionary facts alone, even when `assessFood`
+ * fails/times out and no assessment-sourced group is available.
  * @param {number} foodId
- * @returns {Promise<{ name: string, photo: string, longDescription: string|null, groupLabel: string }|null>}
+ * @returns {Promise<{ name: string, photo: string, longDescription: string|null, groupLabel: string, group: string, fineGroup: string }|null>}
  *   null when the id isn't in the dictionary.
  */
 export async function getFoodFacts(foodId) {
@@ -1760,6 +2253,8 @@ export async function getFoodFacts(foodId) {
     photo: getIngredientImage(name, coarse, getOverlayImageFile(foodId)),
     longDescription: trimmed || null,
     groupLabel: await getGroupLabel(item.fineFoodGroup || coarse),
+    group: coarse,
+    fineGroup: item.fineFoodGroup || '',
   };
 }
 

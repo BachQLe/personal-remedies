@@ -51,6 +51,24 @@ import { storage } from '../api/storage.js';
  *   the C1 overlay), used to scope `getSlotSubstitutes` — a recipe's own
  *   `fineGroup` is always the hardcoded recipe group 'l', useless for that.
  *   `null`/absent when unresolvable (recipe outside the overlay dataset).
+ * @property {string} [sourceUrl] - Recipe-kind items only: link to the
+ *   original recipe (MedlinePlus, etc.), from the C1 content overlay.
+ *   Carried through by `toPlanItem` (src/api/planBuilder.js) ONLY when the
+ *   source candidate has one — absent (not `undefined`-valued) on plain
+ *   foods and on recipes with no overlay match, so old persisted plans
+ *   round-trip unchanged. Feeds `RecipeLinkSheet`'s hand-off button via
+ *   `resolveRecipePreview` (src/utils/foodDetailCard.js).
+ * @property {string} [attribution] - Recipe-kind items only: source
+ *   attribution string from the C1 overlay, e.g. "MedlinePlus". Same
+ *   present-only-when-real carry-through as `sourceUrl`.
+ * @property {{calories:number, protein?:number, carbs?:number, fat?:number}} [nutritionPerServing] -
+ *   Recipe-kind items only: per-serving macros transcribed from the C1
+ *   overlay's source Nutrition Facts panel — never computed/estimated (see
+ *   `types.js`'s `Recipe.nutritionPerServing` for the full provenance
+ *   note). Same present-only-when-real carry-through as `sourceUrl`.
+ *   `resolveRecipePreview` reads `nutritionPerServing.calories` directly
+ *   and never falls back to `resolveNutrition`/`estimateNutrition` for a
+ *   recipe — fabricating a recipe calorie number is forbidden.
  */
 
 /**

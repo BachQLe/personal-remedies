@@ -9,6 +9,7 @@ import { buildMealPlan, getConditionNames, dedupeNotes, getTopDosAndDonts } from
 import { DEFAULT_DEV_CONDITIONS } from './config.js';
 import { storage } from './storage.js';
 import { getIngredientImage } from './ingredientImages.js';
+import { getOverlayImageFile } from './localTables.js';
 
 /** Cap for a cleaned notes-derived blurb, matching the group-label blurb length. */
 const BLURB_MAX_LEN = 90;
@@ -92,7 +93,7 @@ async function loadSlots() {
         referenceCount: 0,
         blurb: cleanNotes(food.notes) || food.groupLabel || undefined,
         matchedConditions: conditionNames,
-        image: getIngredientImage(food.name, food.group),
+        image: getIngredientImage(food.name, food.group, getOverlayImageFile(food.id)),
       }));
     }
 

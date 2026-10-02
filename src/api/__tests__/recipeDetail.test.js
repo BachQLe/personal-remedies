@@ -139,6 +139,23 @@ describe('buildRecipeDetail: sourceUrl / attribution passthrough (never fabricat
   });
 });
 
+describe('buildRecipeDetail: nutritionPerServing passthrough (never fabricated)', () => {
+  it('is absent when not present on card', async () => {
+    const payload = await buildRecipeDetail(HERO_CARD, { conditions: [9001] });
+    expect(payload.nutritionPerServing).toBeUndefined();
+    expect('nutritionPerServing' in payload).toBe(false);
+  });
+
+  it('is forwarded through unchanged when present on card', async () => {
+    const cardWithOverlay = {
+      ...HERO_CARD,
+      nutritionPerServing: { calories: 420 },
+    };
+    const payload = await buildRecipeDetail(cardWithOverlay, { conditions: [9001] });
+    expect(payload.nutritionPerServing).toEqual(cardWithOverlay.nutritionPerServing);
+  });
+});
+
 describe('buildRecipeDetail: unchanged base behavior', () => {
   it('derives conditions from assessFood when it returns helpful per-condition tiers', async () => {
     assessFood.mockResolvedValue({

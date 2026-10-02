@@ -3,31 +3,52 @@ import { Shuffle, X, BookmarkPlus } from 'lucide-react';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
 import { getIngredientImage } from '../../api/ingredientImages.js';
+import { getOverlayImageFile } from '../../api/localTables.js';
 import { displayTagForItem } from '../../components/shared/mealTypeMeta.jsx';
 
 const calmSpring = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
 
+/**
+ * Whether the per-slot suggestions link renders at all. Was off (2026-09,
+ * user request) with the feature's wiring left fully in place underneath
+ * (SuggestionsSheet and MealQueueScreen's whole swap/add plumbing never
+ * stopped working) specifically so flipping this back to `true` would
+ * restore it with no other changes — Wave 4 is that flip, per explicit
+ * product direction ("bring back suggestions"). Kept as a named flag rather
+ * than removed outright, in case it needs to come back off again.
+ */
+const SHOW_SUGGESTIONS = true;
+
 function cardImage(item) {
-  return item.image || getIngredientImage(item.name, item.group);
+  return item.image || getIngredientImage(item.name, item.group, getOverlayImageFile(item.id));
 }
 
 /**
  * SlotSection — one meal-plan slot (Breakfast/Lunch/Dinner/Snacks/Beverages)
- * for a SINGLE day: header (label + Shuffle + Suggestions) and a 2-col
- * FoodImageCard grid, or a dashed-border empty state when the slot has no
- * items.
+ * for a SINGLE day: header (label + "See other healthy suggestions" +
+ * Shuffle) and a 2-col FoodImageCard grid, or a dashed-border empty state
+ * when the slot has no items.
  *
  * Each card carries a meal-type corner tag (the slot IS its meal type) and
  * two circular actions: Remove (drop from the plan, with Undo upstream, top
  * corner) and Save (bookmark to the user's library, bottom corner).
  *
- * The "Suggestions" trigger (Task 11 — renamed + re-skinned from
- * "Substitutions") is a plain text LINK, not an icon button, and is still a
- * per-SLOT affordance (one trigger covering every item in the slot), not a
- * per-card one — see SuggestionsSheet.jsx's doc for why that distinction
- * matters (it's what keeps this feature structurally distinct from the
- * deleted SwapSheet) and for what opens when it's tapped (a group-tile grid
- * matching the website's Suggest screen, not a flat card list).
+ * The suggestions trigger (Task 11 — renamed + re-skinned from
+ * "Substitutions" to "Suggestions"; Wave 4 — renamed again to "See other
+ * healthy suggestions", per explicit product direction) is a plain text
+ * LINK, not an icon button, and is still a per-SLOT affordance (one trigger
+ * covering every item in the slot), not a per-card one — see
+ * SuggestionsSheet.jsx's doc for why that distinction matters (it's what
+ * keeps this feature structurally distinct from the deleted SwapSheet) and
+ * for what opens when it's tapped (now the FULL 17-fine-group menu, not a
+ * slot-specific subset — see that file's doc for the Wave 4 change).
+ *
+ * LAYOUT (Wave 4): the new label is ~2.5x longer than "Suggestions" and no
+ * longer fits sharing one row with Shuffle at phone width. It now renders on
+ * its own full-width row directly below the slot-label/Shuffle row (still
+ * inside the same header block), right-aligned to match Shuffle's position,
+ * so it has room to wrap onto two lines on narrow screens instead of
+ * fighting Shuffle for space.
  */
 export default function SlotSection({
   slot,
@@ -47,34 +68,26 @@ export default function SlotSection({
 }) {
   const allPinned = items.length > 0 && items.every((item) => pinnedIds?.includes(item.id));
   const shuffleDisabled = ghost || items.length === 0 || shuffling || allPinned;
-  const suggestionsDisabled = ghost || items.length === 0;
+  // Task 13 (still true under Wave 4's full-menu picker — see
+  // SuggestionsSheet.jsx's doc): suggestions must stay open for an EMPTY
+  // slot too. The full 17-group menu never depended on the slot's current
+  // contents in the first place, so this was never actually at risk — only
+  // ghost mode (no real plan to suggest into yet) disables it.
+  const suggestionsDisabled = ghost;
 
   return (
     <section className={ghost ? 'rm-ghost' : ''}>
-      <div className="flex items-center justify-between mb-4">
-        <p className="font-label text-xs tracking-widest uppercase text-blue-950/70">
-          {slot.label}
-        </p>
-
-        <div className="flex items-center gap-3">
-          {/* Task 11: plain text link, not an icon button — tapping it opens
-              SuggestionsSheet's group-tile picker (GroupsTab's visual
-              pattern), not a flat substitute-card list. */}
-          <button
-            onClick={() => onOpenSuggestions(slot.key)}
-            disabled={suggestionsDisabled}
-            className={`text-xs font-semibold text-blue-950/70 underline decoration-blue-950/30
-              underline-offset-2 transition-colors duration-fast hover:text-blue-950
-              ${suggestionsDisabled ? 'opacity-40 pointer-events-none' : ''}`}
-          >
-            Suggestions
-          </button>
+      <div className="flex flex-col gap-2 mb-4">
+        <div className="flex items-center justify-between">
+          <p className="font-label text-xs tracking-widest uppercase text-blue-950/70">
+            {slot.label}
+          </p>
 
           <button
             onClick={() => onShuffle(slot.key)}
             disabled={shuffleDisabled}
             title={allPinned ? 'Everything here is pinned' : undefined}
-            className={`inline-flex items-center gap-1.5 rounded-pill bg-sand-100 hover:bg-sand-200
+            className={`inline-flex items-center gap-1.5 rounded-pill bg-white hover:bg-sand-100
               px-3 py-1.5 text-xs font-semibold text-blue-950/70 transition-all duration-fast
               ${shuffleDisabled ? 'opacity-40 pointer-events-none' : 'active:scale-95'}`}
           >
@@ -82,6 +95,26 @@ export default function SlotSection({
             Shuffle
           </button>
         </div>
+
+        {/* Own row (Wave 4) — "See other healthy suggestions" is too long
+            to share the row above with Shuffle at phone width; right-aligned
+            to line up under Shuffle, and free to wrap onto two lines rather
+            than forcing a horizontal scroll. Tapping it opens
+            SuggestionsSheet's full fine-group menu (see that file's doc),
+            not a flat substitute-card list. */}
+        {SHOW_SUGGESTIONS && (
+          <div className="flex justify-end">
+            <button
+              onClick={() => onOpenSuggestions(slot.key)}
+              disabled={suggestionsDisabled}
+              className={`text-xs font-semibold text-blue-950/70 underline decoration-blue-950/30
+                underline-offset-2 transition-colors duration-fast hover:text-blue-950 text-right
+                ${suggestionsDisabled ? 'opacity-40 pointer-events-none' : ''}`}
+            >
+              See other healthy suggestions
+            </button>
+          </div>
+        )}
       </div>
 
       {items.length === 0 ? (

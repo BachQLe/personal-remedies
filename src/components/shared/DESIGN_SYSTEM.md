@@ -260,6 +260,10 @@ Match `bg-{color}` to the carousel's parent background color.
 
 Always match bar color to the surrounding background. Do not use a CSS gradient for carousel edges.
 
+## When to skip the fade
+
+The bars only read as intentional chrome over an empty/solid background. If a rail's cards can run flush to the container edge (e.g. a photo card with no padding, like `FoodImageCard`), translucent bars laid over that photo wash it out and look like a gradient anyway — the exact artifact this pattern exists to avoid. `BestRecipesRails.jsx` (Recipes screen, Meal Planner picker) dropped the edge fade entirely for this reason. Prefer no fade over a fade that lands on photo content.
+
 ---
 
 ## Future Enhancements

@@ -246,6 +246,12 @@ export default function SearchScreen({ active, onClose }) {
       sourceName: recipe.sourceName ?? null,
       matchedConditions: recipe.matchedConditions ?? [],
     };
+    // Forward the real C1 overlay fields (when present upstream on the
+    // Recipe — see adapter.js's getRecipesRaw) so buildRecipeDetail can
+    // read them through onto the card payload.
+    if (recipe.sourceUrl) card.sourceUrl = recipe.sourceUrl;
+    if (recipe.attribution) card.attribution = recipe.attribution;
+    if (recipe.nutritionPerServing) card.nutritionPerServing = recipe.nutritionPerServing;
     // Seed immediately with what the search result already carries; enrich
     // async via the same buildRecipeDetail flow MealprepCarousel/SuggestionsScreen use.
     setSelectedItem({

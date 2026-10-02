@@ -65,6 +65,12 @@ describe('getIngredientImage: unchanged for existing (unowned) call sites', () =
     expect(getIngredientImage('Vitamin D', 'k', 'vitamin-d.jpg')).toBe('/images/vitamin-d.jpg');
   });
 
+  it('resolveOverlayImage: an absolute https URL (e.g. from the itemImages.generated.json machine layer) passes through unchanged, while a bare filename (the manual itemOverlay.json convention) is rewritten to /images/<file>', () => {
+    const absolute = 'https://images.unsplash.com/photo-abc123?w=600&q=80&auto=format&fit=crop';
+    expect(getIngredientImage('Kale', 'e', absolute)).toBe(absolute);
+    expect(getIngredientImage('Kale', 'e', 'kale.jpg')).toBe('/images/kale.jpg');
+  });
+
   it('resolves an ordinary food to a photo URL as before', () => {
     const result = getIngredientImage('Spinach', 'e');
     expect(result).toMatch(/^https:\/\/images\.unsplash\.com/);

@@ -14,6 +14,10 @@
  *                                    // facts, never fabricated
  *     sourceUrl?: string,            // present only with an overlay match
  *     attribution?: string,          // present only with an overlay match
+ *     nutritionPerServing?: {calories: number, ...},
+ *                                    // present only with an overlay match —
+ *                                    // the transcribed source calorie
+ *                                    // number; never derived/estimated here
  *   }
  *
  * WHAT CHANGED AND WHY: the previous version of this module fetched
@@ -52,6 +56,7 @@
 import { assessFood, isExcludedItem } from './adapter.js';
 import { fetchTopDoOrDonts } from './nutridigm.js';
 import { getIngredientImage } from './ingredientImages.js';
+import { getOverlayImageFile } from './localTables.js';
 import { storage } from './storage.js';
 import { DEFAULT_DEV_CONDITIONS } from './config.js';
 
@@ -63,14 +68,17 @@ import { DEFAULT_DEV_CONDITIONS } from './config.js';
  *   image, matchedConditions, group). When `card` is (or forwards fields
  *   from) a Recipe that went through `joinRecipeOverlay` — see
  *   `getRecipesRaw` in adapter.js — its `sourceUrl`/`attribution`/
- *   `ingredients` (the light `{name, foodItemID?}[]` shape) are read
- *   through onto the output below as `sourceUrl`/`attribution`/
- *   `realIngredients`. Today's screen callers (RecipesScreen,
- *   MealQueueScreen, SuggestionsScreen, etc.) build a stripped-down `card`
- *   that doesn't carry these fields yet — that's a caller-side gap for a
- *   later wave to close, not something this function can fix — so until
- *   then these output fields simply stay absent, which is correct (never
- *   fabricated) rather than wrong.
+ *   `nutritionPerServing`/`ingredients` (the light `{name, foodItemID?}[]`
+ *   shape) are read through onto the output below as `sourceUrl`/
+ *   `attribution`/`nutritionPerServing`/`realIngredients`. The caller-side
+ *   gap this comment used to describe (screen callers building a
+ *   stripped-down `card` that dropped these fields) was closed in the wave
+ *   that added the in-app recipe preview sheet: RecipesScreen,
+ *   SuggestionsScreen, SearchScreen, MealQueueScreen and MealPlannerPicker
+ *   now forward `sourceUrl`/`attribution`/`nutritionPerServing` from the
+ *   `Recipe`/`PlanCandidate` they already hold. When a given recipe truly
+ *   has no overlay match, these fields are absent on `card` too, and stay
+ *   absent on the output — correct (never fabricated) rather than wrong.
  * @param {Object} [profile] - User profile from storage (optional; read from storage if omitted)
  * @returns {Promise<Object>} FoodDetailCard item prop — see module header
  *   for the full shape.
@@ -111,7 +119,11 @@ export async function buildRecipeDetail(card, profile) {
           .slice(0, 4)
           .map((f) => ({
             name: f.displayAs || f.description || 'Unknown',
-            image: getIngredientImage(f.displayAs || f.description || '', f.coarseFoodGroup),
+            image: getIngredientImage(
+              f.displayAs || f.description || '',
+              f.coarseFoodGroup,
+              getOverlayImageFile(f.foodItemID)
+            ),
             foodId: f.foodItemID,
           }));
         // Hero food first
@@ -152,6 +164,9 @@ export async function buildRecipeDetail(card, profile) {
   }
   if (card.attribution) {
     payload.attribution = card.attribution;
+  }
+  if (card.nutritionPerServing) {
+    payload.nutritionPerServing = card.nutritionPerServing;
   }
 
   return payload;

@@ -47,6 +47,66 @@ describe('resolveNutrition — tier 1: recipe panel', () => {
     expect(result.source).toBe('panel');
     expect(result.calories).toBe(111);
   });
+
+  // Anti-fabrication guard (Track 1A — relaxed overlay schema): a recipe
+  // whose C1 overlay row only had a transcribed calorie number (no
+  // protein/carbs/fat) must still resolve at tier 1 with the real calorie
+  // figure intact — it must NEVER fall through to tier 3 and have
+  // `estimateNutrition` invent a calorie number for it. `fineGroup: 'b1'`
+  // here is deliberately a group `estimateNutrition` WOULD resolve, so a
+  // fall-through would be silently indistinguishable by calorie count alone
+  // if this test only checked `source`.
+  it('a recipe with only nutritionPerServing.calories (no macros) resolves at tier 1, never estimated', () => {
+    const recipe = {
+      id: 503,
+      kind: 'recipe',
+      fineGroup: 'b1',
+      nutritionPerServing: { calories: 210 },
+    };
+    const result = resolveNutrition(recipe, 'lunch');
+    expect(result.calories).toBe(210);
+    expect(result.source).toBe('panel');
+    expect(result.estimated).toBe(false);
+  });
+
+  // Bug fix (Task C2, Sept 2026): the schema now permits a panel with
+  // macros but NO calorie figure (Mory's real recipe source has no calorie
+  // column at all — see recipeIngestion.js's "NUTRITION RELAXATION" note),
+  // and this module's own contract (see file header) is that an absent
+  // value is always `null`, never `undefined`. Before the fix, a bare
+  // destructure let `calories` come back `undefined` here, which
+  // NutritionFactsSheet then rendered as the literal string "undefined
+  // kcal" (no guard beyond `resolved` being truthy).
+  it('a recipe with nutritionPerServing present but calories absent resolves calories to null, not undefined', () => {
+    const recipe = {
+      id: 504,
+      kind: 'recipe',
+      nutritionPerServing: { protein: 12, carbs: 20, fat: 5 },
+    };
+    const result = resolveNutrition(recipe, 'lunch');
+    expect(result.source).toBe('panel');
+    expect(result.estimated).toBe(false);
+    expect(result.calories).toBeNull();
+    expect(result.calories).not.toBeUndefined();
+    expect(result.protein).toBe(12);
+    expect(result.carbs).toBe(20);
+    expect(result.fat).toBe(5);
+  });
+
+  it('a recipe with only nutritionPerServing.calories resolves the absent macros to null, not undefined', () => {
+    const recipe = {
+      id: 505,
+      kind: 'recipe',
+      nutritionPerServing: { calories: 210 },
+    };
+    const result = resolveNutrition(recipe, 'lunch');
+    expect(result.protein).toBeNull();
+    expect(result.carbs).toBeNull();
+    expect(result.fat).toBeNull();
+    expect(result.protein).not.toBeUndefined();
+    expect(result.carbs).not.toBeUndefined();
+    expect(result.fat).not.toBeUndefined();
+  });
 });
 
 // ── Tier 2 absent (empty tables) → falls through to tier 3 ─────────────────

@@ -10,8 +10,16 @@
  * - "N studies" is cache-only (getCachedRefCount) — this tab NEVER warms
  *   /references (rate-limit safety); counts appear opportunistically when
  *   some other surface (FoodDetailCard, Food Groups) already cached them.
- * - Lifestyle items (Exercise, Smoking, …) stay inline in rank order with a
- *   "Lifestyle" chip and their cleaned advisory notes.
+ * - Lifestyle items (Exercise, Smoking, …) stay inline in rank order,
+ *   structurally identical to ordinary food rows — no chip, no icon, no
+ *   separate notes/description text; nothing visually marks a row as
+ *   lifestyle vs. food.
+ * - RankedRow's `imageRight` image-card layout is enabled here (and only
+ *   here — CategoryDetailPanel keeps the plain text row): each row shows
+ *   the item's resolved photo over its right half, fading into the white
+ *   row background via stacked bars (see RankedRow's header doc). This tab
+ *   never surfaces a "showing demo/fallback condition data" notice either —
+ *   CoverageNotice is intentionally not rendered here.
  *
  * State-matrix (T5B): both directions are fetched together through a single
  * useAsyncData call (src/hooks/useAsyncData.js) so loading/error/offline/
@@ -27,7 +35,6 @@ import { useAsyncData } from '../../hooks/useAsyncData.js';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
 import DataState from '../../components/shared/DataState.jsx';
-import CoverageNotice from './CoverageNotice.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
 
@@ -38,9 +45,9 @@ function SkeletonRows() {
   return (
     <div className="flex flex-col gap-2">
       {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-        <div key={i} className="flex items-center gap-3 py-3.5 px-4 rounded-xl bg-white border border-sand-200 shadow-xs">
+        <div key={i} className="relative flex items-center gap-3 min-h-[68px] py-3 px-4 rounded-xl bg-white border border-sand-200 shadow-xs overflow-hidden">
           <div className="h-3.5 flex-1 rounded animate-pulse bg-sand-200" />
-          <div className="h-3 w-12 rounded animate-pulse bg-sand-200 flex-shrink-0" />
+          <div className="absolute inset-y-0 right-0 w-1/2 animate-pulse bg-sand-200" />
         </div>
       ))}
     </div>
@@ -78,15 +85,14 @@ export default function TopDosTab({ onSelectFood }) {
   const activeResult = data?.[direction];
   const items = activeResult?.items ?? [];
   const visibleItems = items.slice(0, MAX_RECOMMENDATIONS_PER_CATEGORY);
-  const usedFallback = !!(data?.consume?.usedFallback || data?.avoid?.usedFallback);
   const firstConditionId = data?.requestedConditionIds?.[0] ?? null;
 
   return (
     <div className="flex flex-col gap-4">
       <PillSwitcher
         options={[
-          { key: 'consume', label: 'Do', tone: 'positive' },
-          { key: 'avoid', label: "Don't", tone: 'negative' },
+          { key: 'consume', label: 'Do', tone: 'neutral' },
+          { key: 'avoid', label: "Don't", tone: 'neutral' },
         ]}
         value={direction}
         onChange={setDirection}
@@ -105,8 +111,6 @@ export default function TopDosTab({ onSelectFood }) {
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
         >
           <div className="flex flex-col gap-2">
-            <CoverageNotice usedFallback={usedFallback} requestedConditionIds={data?.requestedConditionIds} />
-
             {visibleItems.length === 0 ? (
               <p className="text-sm text-char-500 font-sans text-center py-6">
                 {direction === 'consume'
@@ -124,6 +128,7 @@ export default function TopDosTab({ onSelectFood }) {
                       : null
                   }
                   onSelect={onSelectFood}
+                  imageRight
                 />
               ))
             )}

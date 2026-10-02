@@ -19,6 +19,8 @@ import {
   getRecipes,
   getMealPlanSuggestions,
   getSlotSubstitutes,
+  getIngredientAlternatives,
+  guessMealType,
   getConditions,
   getFoodGroups,
   getFoodDictionary,
@@ -28,6 +30,8 @@ import {
   getGroupLabel,
   getGroupLabels,
   getFineGroupLabelsByCoarse,
+  getFineFoodGroups,
+  getFineGroupSuggestions,
   getCachedRefCount,
   getFoodIdByName,
 } from './adapter.js';
@@ -48,6 +52,8 @@ export {
   getRecipes,
   getMealPlanSuggestions,
   getSlotSubstitutes,
+  getIngredientAlternatives,
+  guessMealType,
   getConditions,
   getFoodGroups,
   getFoodDictionary,
@@ -57,11 +63,13 @@ export {
   getGroupLabel,
   getGroupLabels,
   getFineGroupLabelsByCoarse,
+  getFineFoodGroups,
+  getFineGroupSuggestions,
   getCachedRefCount,
   getFoodIdByName,
 };
 export { buildRecipeDetail } from './recipeDetail.js';
-export { ensurePlanForWeek, regenerateDay, regenerateWeek, shuffleSlot, inferSlotKey, generatePlanFromPicks, toPlanItem, getSavedPlans, saveCurrentPlan, loadSavedPlan, deleteSavedPlan } from './planBuilder.js';
+export { ensurePlanForWeek, regenerateDay, regenerateWeek, shuffleSlot, inferSlotKey, generatePlanFromPicks, toPlanItem, getSavedPlans, saveCurrentPlan, updateSavedPlan, loadSavedPlan, deleteSavedPlan, restoreSavedPlan, getCandidatesForSlot, planFingerprint, getActiveSavedPlan, clearActiveSavedPlan, restoreActiveSavedPlan } from './planBuilder.js';
 
 // ── Unified search (foods + recipes) ─────────────────────────────────────────
 

@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Bookmark, ChevronLeft, ExternalLink } from 'lucide-react';
 import ConditionTag from './shared/ConditionTag.jsx';
 import Icon from './shared/Icon.jsx';
@@ -7,16 +8,54 @@ import FoodRating from './shared/FoodRating.jsx';
 import StudyReferences from './shared/StudyReferences.jsx';
 import EmptyState from './shared/EmptyState.jsx';
 import { getLibrary, addToLibrary, removeFromLibrary } from '../state/library.js';
-import { getFoodFacts, assessFood, getFoodIdByName } from '../api/api.js';
+import { getFoodFacts, assessFood, getFoodIdByName, getGroupLabel } from '../api/api.js';
 import { storage } from '../api/storage.js';
-import { DEFAULT_DEV_CONDITIONS } from '../api/config.js';
+import { DEFAULT_DEV_CONDITIONS, EXCLUDED_FINE_GROUPS } from '../api/config.js';
 import { getSaveBlockReason, SAVE_BLOCK_MESSAGES } from '../utils/saveGate.js';
-import { resolveIsRecipe, resolveRecipeLinkTarget } from '../utils/foodDetailCard.js';
+import {
+  resolveIsRecipe,
+  resolveRecipeLinkTarget,
+  groupConditionsByVerdict,
+  orderVerdictGroups,
+  deriveAssessStatus,
+} from '../utils/foodDetailCard.js';
 import { getNonFoodIcon } from '../api/ingredientImages.js';
-import { openUrl } from '../api/browser.js';
+import { resolveCardIngredients } from '../api/ingredientDerivation.js';
+import IngredientSwaps from './shared/IngredientSwaps.jsx';
 import Snackbar from './shared/Snackbar.jsx';
+import RecipeLinkSheet from './RecipeLinkSheet.jsx';
+import { openUrl } from '../api/browser.js';
 
 const DISMISS_THRESHOLD = 100;
+
+// Recipe back face: ingredients block is hidden for now (not deleted) — flip
+// back to true to restore it.
+const SHOW_RECIPE_INGREDIENTS = false;
+
+// Open/close entrance-exit animation (separate from the drag-dismiss
+// transform above, which only ever applies while fully open). Opening lifts
+// the card up from a lower, tilted-back resting position straight to rest,
+// no overshoot/bounce-back; closing reverses the same transform on a
+// quicker ease-in. No scale/size change at any point — only translateY and
+// rotateX move. Blur/opacity resolve faster than the transform and on a
+// plain ease-out, so the card is already sharp/opaque well before the
+// transform finishes settling. EXIT_MS must cover the slowest of the exit
+// transitions below so handleClose's unmount timer never cuts the animation
+// off mid-flight.
+const CLOSED_OFFSET_PX = 28;
+const CLOSED_TILT_DEG = 6;
+const CLOSED_BLUR_PX = 4;
+const ENTER_TRANSITION =
+  'transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.16s ease-out, filter 0.14s ease-out';
+const EXIT_TRANSITION =
+  'transform 0.24s cubic-bezier(0.4, 0, 1, 1), opacity 0.2s ease-in, filter 0.2s ease-in';
+const EXIT_MS = 260;
+
+// assessFood() has no built-in timeout — a hung fetch left the back face's
+// skeleton spinning forever with no way out. Raced against this in the load
+// effect below; a loss here is treated as an 'error' (never silently folded
+// into the "genuinely empty" state — see deriveAssessStatus).
+const ASSESS_TIMEOUT_MS = 15000;
 
 // The Nutridigm API exposes no nutrition-fact fields anywhere (fooditems/
 // goodfor/detailed all probed, July 2026) — no nutrition UI is shown.
@@ -58,7 +97,7 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
           {conditionName}
         </span>
         <div className="flex items-center gap-2">
-          <FoodRating numericId={numericId} size={14} tone="light" showNeutralLabel />
+          <FoodRating numericId={numericId} size={14} tone="light" />
           {showReferences && !refsErrored && referenceCount > 0 && (
             <span className="text-[11px] text-char-400 font-sans whitespace-nowrap">
               {referenceCount} {referenceCount === 1 ? 'study' : 'studies'}
@@ -81,24 +120,175 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
   );
 }
 
+// Exported alongside the component (not split into utils/foodDetailCard.js,
+// where resolveIsRecipe/resolveRecipeLinkTarget/etc. already live) — Wave 3
+// scope for this file is deliberately narrow and this codebase's precedent
+// for a component file that needs a directly-testable pure helper is
+// RecipesScreen.jsx's own exported `matchesMealFilter`, not an extraction.
+// Both trip eslint's react-refresh/only-export-components warning exactly
+// like that precedent already does; harmless (a lint warning, not a build
+// break) and consistent with it.
+
+/**
+ * Resolve the plain-FOOD "other options" link target: this item's own fine
+ * food group's Suggest page (`/app/suggestions/fine/:code`) when that code
+ * resolves to something real and useful, else the coarse group's existing
+ * page (`/app/suggestions/group/:code`), else no link at all.
+ *
+ * Fine wins over coarse UNLESS it's one of `EXCLUDED_FINE_GROUPS`
+ * ('x'/'j1' lifestyle codes, plus every recipe's blanket 'l' — recipes
+ * never reach this function at all, see `mealTypeToRecipesHref` below for
+ * their own link, but 'l' is excluded here too for any plain-food item that
+ * somehow carries it) — those codes are too generic to deep-link into, so
+ * the coarse parent is used instead.
+ *
+ * `fineGroup`/`group` resolution mirrors the non-food icon lookup further
+ * down this file EXACTLY: assessment's own Food (fresh off the /fooditems
+ * dictionary) wins, then `facts` (getFoodFacts — which per that same
+ * comment does NOT currently return these fields, so this layer is inert
+ * until/unless that adapter export changes), then whatever the caller
+ * already seeded on `item` (e.g. GroupDetailScreen passing through the
+ * coarse group it's already browsing). Kept as its own function (duplicating
+ * that lookup) rather than sharing one computation, because this one feeds
+ * an effect that must be declared before this component's
+ * `if (!open || !item) return null` early return, while the icon lookup is
+ * a plain render-time expression after it.
+ *
+ * Deliberately independent of `topFoodsForConditions` (the rail rendered
+ * just above this link) — that rail is gated on a DIFFERENT signal (the
+ * /topdoordonts companions list) and can be empty while a perfectly good
+ * group still resolves here, or vice versa. See the render site for why
+ * this link is its own block rather than nested inside that rail's `&&`.
+ *
+ * @param {Object|null} item
+ * @param {Object|null} facts
+ * @param {Object|null} assessment
+ * @returns {{ path: string, code: string, kind: 'fine'|'coarse' } | null}
+ */
+export function resolveGroupLinkTarget(item, facts, assessment) {
+  const fineGroup = assessment?.food?.fineGroup ?? facts?.fineGroup ?? item?.fineGroup ?? null;
+  const group = assessment?.food?.group ?? facts?.group ?? item?.group ?? null;
+
+  if (fineGroup && !EXCLUDED_FINE_GROUPS.includes(fineGroup)) {
+    return { path: `/app/suggestions/fine/${fineGroup}`, code: fineGroup, kind: 'fine' };
+  }
+  if (group) {
+    return { path: `/app/suggestions/group/${group}`, code: group, kind: 'coarse' };
+  }
+  return null;
+}
+
+// Recipe meal-type labels this card can deep-link a recipe's "other
+// options" button into. Deliberately duplicated from RecipesScreen.jsx's
+// MEAL_TYPES labels + its matchesMealFilter docblock's Task C1 dessert→Snack
+// rule, rather than imported from there: RecipesScreen.jsx imports THIS
+// file (FoodDetailCard), so an import running the other way would be
+// circular. Keep this list and the dessert rule in sync with
+// RecipesScreen.jsx by hand if either changes.
+const RECIPE_MEAL_LABELS = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+
+/**
+ * Resolve a recipe's raw `mealType` (lowercase: breakfast/lunch/dinner/
+ * snack/dessert/beverage — recipeIngestion.js's MEAL_TYPES) to the recipe
+ * browser link its "other options" button should open: `/app/recipes`
+ * pre-filtered to the matching tab via `?meal=`.
+ *
+ * `dessert` maps to the `Snack` tab, not a `Dessert` tab — there isn't one;
+ * RecipesScreen's Snack tab deliberately shows snack AND dessert recipes
+ * together (Task C1). `beverage` has no tab at all and, like a
+ * missing/unrecognized mealType, falls back to a plain unfiltered
+ * `/app/recipes` link rather than guessing one.
+ *
+ * @param {string|undefined|null} mealType
+ * @returns {string}
+ */
+export function mealTypeToRecipesHref(mealType) {
+  const lower = mealType?.toLowerCase?.();
+  if (!lower) return '/app/recipes';
+  if (lower === 'dessert') return '/app/recipes?meal=Snack';
+  const match = RECIPE_MEAL_LABELS.find((label) => label.toLowerCase() === lower);
+  return match ? `/app/recipes?meal=${match}` : '/app/recipes';
+}
+
 /**
  * @param {Object} props
  * @param {Object} props.item - `{ foodId, name, image?, sourceName?,
  *   conditions?, topFoodsForConditions?, realIngredients?, sourceUrl?,
- *   attribution?, isRecipe? }` — see recipeDetail.js's `buildRecipeDetail`
- *   for the full recipe-detail payload shape.
+ *   attribution?, isRecipe?, group?, fineGroup? }` — see recipeDetail.js's
+ *   `buildRecipeDetail` for the full recipe-detail payload shape.
  * @param {boolean} props.open
  * @param {() => void} props.onClose
+ * @param {'helpful'|'harmful'} [props.listType] - Which category list this
+ *   card was opened from, when the caller knows it — reorders the front
+ *   face's verdict-group chips so "Avoid for" leads when browsing an Avoid
+ *   list. Undefined (most callers) keeps the default Helps→Neutral→Avoid
+ *   for order — see `orderVerdictGroups` in utils/foodDetailCard.js.
  */
-export default function FoodDetailCard({ item, open, onClose }) {
+export default function FoodDetailCard({ item: itemProp, open, onClose, listType }) {
+  const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
   const [flipped, setFlipped] = useState(false);
   const [dragY, setDragY] = useState(0);
 
+  // Open/close animation lifecycle. Every caller nulls its `item` state in
+  // the same tick it flips `open` to false (see call sites), so `itemProp`
+  // itself disappears right as the close animation should be starting —
+  // `renderItem` holds the last real item so the card still has content to
+  // show while it animates down, and `mounted` keeps the component rendered
+  // (rather than the old `if (!open) return null`) for that same window.
+  const [mounted, setMounted] = useState(open);
+  const [animateIn, setAnimateIn] = useState(false);
+  const [renderItem, setRenderItem] = useState(itemProp);
+
+  // Render-time derived-state adjustments (same escape hatch the resetKey/
+  // savedSyncKey blocks further down use) rather than effects, so opening
+  // mounts and starting the close transition both happen in the SAME render
+  // the prop changed in — no one-frame lag, and no synchronous setState
+  // inside an effect body.
+  if (itemProp && itemProp !== renderItem) {
+    setRenderItem(itemProp);
+  }
+  if (open && !mounted) {
+    setMounted(true);
+  }
+  if (!open && animateIn) {
+    setAnimateIn(false);
+  }
+
+  // Deferred side effects only: kicking off the entrance transition (has to
+  // wait a couple of frames past the mount above so the browser actually
+  // paints the "closed" transform first) and the exit unmount (has to wait
+  // out the close transition). Both setState calls here are async callbacks
+  // (rAF / setTimeout), not synchronous effect-body calls.
+  useEffect(() => {
+    if (!open) return undefined;
+    const raf = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setAnimateIn(true));
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [open]);
+
+  useEffect(() => {
+    if (open || !mounted) return undefined;
+    const t = setTimeout(() => setMounted(false), EXIT_MS);
+    return () => clearTimeout(t);
+  }, [open, mounted]);
+
+  const item = itemProp ?? renderItem;
+  const isExiting = mounted && !open;
+
   const [facts, setFacts] = useState(null);
   const [assessment, setAssessment] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  // 'loading' | 'success' | 'empty' | 'error' — see deriveAssessStatus.
+  // Distinct from `detailLoading` (which also covers the `facts` fetch):
+  // this one is specifically the assessFood() outcome, so the back face can
+  // tell a genuine "nothing for this pairing" apart from a network error or
+  // a timed-out request instead of collapsing all three into one state.
+  const [assessStatus, setAssessStatus] = useState('loading');
   const [resolvedFoodId, setResolvedFoodId] = useState(null);
+  // Bumped by the back face's Retry button to re-run the load effect below.
+  const [retryToken, setRetryToken] = useState(0);
 
   const isDragging = useRef(false);
   const [dragging, setDragging] = useState(false);
@@ -116,6 +306,19 @@ export default function FoodDetailCard({ item, open, onClose }) {
     undoFnRef.current?.();
     setSnackbar(null);
   }, []);
+
+  // The recipe-preview sheet (RecipeLinkSheet) — its own local `open` state
+  // persists across renders even while this component returns null below
+  // (React only resets state on unmount, not on a null render), so it's
+  // explicitly closed whenever the card itself closes rather than relying
+  // on that early return to do it. Guarded render-time state adjustment
+  // (same escape hatch MealPlannerPicker.jsx/SuggestionsSheet.jsx use)
+  // rather than an effect, since synchronous setState in an effect body
+  // trips react-hooks/set-state-in-effect.
+  const [recipeSheetOpen, setRecipeSheetOpen] = useState(false);
+  if (!open && recipeSheetOpen) {
+    setRecipeSheetOpen(false);
+  }
 
   const isRecipe = resolveIsRecipe(item);
   // Hoisted so both the save gate below AND handleSave's addToLibrary
@@ -137,13 +340,15 @@ export default function FoodDetailCard({ item, open, onClose }) {
   const gateItem = { kind, tier: assessment?.tier, numericId: assessment?.numericId };
   const blockReason = (isRecipe && detailLoading) ? null : getSaveBlockReason(gateItem);
 
-  // Lock body scroll while the card is open
+  // Lock body scroll while the card is open or animating closed — tied to
+  // `mounted` rather than `open` so the background doesn't jump/scroll out
+  // from under the card while it's still visibly sliding down.
   useEffect(() => {
-    if (!open) return;
+    if (!mounted) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = prev; };
-  }, [open]);
+  }, [mounted]);
 
   // Reset flip state whenever the card closes or the root item changes.
   // Computed during render (not an effect) per React's "adjusting state
@@ -176,6 +381,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
 
     async function load() {
       setDetailLoading(true);
+      setAssessStatus('loading');
       try {
         let foodId = item.foodId ?? null;
         if (foodId == null && item.name) {
@@ -183,14 +389,35 @@ export default function FoodDetailCard({ item, open, onClose }) {
         }
 
         const profile = getProfile();
-        const [factsResult, assessResult] = await Promise.all([
+
+        // assessFood() is raced against a 15s timeout so a hung fetch can't
+        // spin the back face's skeleton forever — a timeout rejects the
+        // race exactly like a real network error, and both are settled
+        // (never re-thrown) so a rejection here is a classification signal,
+        // not an unhandled promise. `facts` keeps its own independent
+        // catch-to-null — this task only requires distinguishing
+        // loading/success/empty/error for the ASSESSMENT.
+        const assessPromise = foodId != null
+          ? Promise.race([
+            assessFood(foodId, profile),
+            new Promise((_, reject) => {
+              setTimeout(() => reject(new Error('timeout')), ASSESS_TIMEOUT_MS);
+            }),
+          ])
+          : Promise.resolve(null);
+
+        const [factsResult, assessSettled] = await Promise.all([
           foodId != null ? getFoodFacts(foodId).catch(() => null) : Promise.resolve(null),
-          foodId != null ? assessFood(foodId, profile).catch(() => null) : Promise.resolve(null),
+          assessPromise.then(
+            (value) => ({ ok: true, value }),
+            () => ({ ok: false })
+          ),
         ]);
 
         if (!cancelled) {
           setFacts(factsResult);
-          setAssessment(assessResult);
+          setAssessment(assessSettled.ok ? assessSettled.value : null);
+          setAssessStatus(deriveAssessStatus(assessSettled));
           setResolvedFoodId(foodId);
         }
       } finally {
@@ -200,7 +427,63 @@ export default function FoodDetailCard({ item, open, onClose }) {
 
     load();
     return () => { cancelled = true; };
-  }, [open, item?.foodId, item?.name]);
+  }, [open, item?.foodId, item?.name, retryToken]);
+
+  // Re-runs the load effect above via its retryToken dependency — used by
+  // the back face's error-state Retry button (assessStatus === 'error').
+  const handleRetry = useCallback(() => {
+    setRetryToken((t) => t + 1);
+  }, []);
+
+  // "Other options" link target for a plain FOOD item — see
+  // resolveGroupLinkTarget's own doc above for the fine→coarse→nothing
+  // fallback. Recipes get no group link at all here (their own link, below,
+  // goes to the recipe browser instead — recipes' fine group is always the
+  // blanket 'l', which EXCLUDED_FINE_GROUPS would reject anyway, but
+  // short-circuiting on `isRecipe` keeps this item-group computation from
+  // even running for the item shape it isn't meant for).
+  const groupLinkTarget = isRecipe ? null : resolveGroupLinkTarget(item, facts, assessment);
+  const groupLinkCode = groupLinkTarget?.code ?? null;
+
+  // Real display label for that target code (getGroupLabel resolves both
+  // fine and coarse codes — adapter.js). Reset at render time (not inside
+  // the effect below) whenever the resolved code itself changes — new item
+  // opened, this item's code resolving differently as assessment/facts load
+  // in, or the code disappearing — same render-time "derived state changed"
+  // pattern the flip/saved resets above use, so the render site never has
+  // to synchronously setState from inside an effect for what's really a
+  // derived reset rather than an async result arriving.
+  const [lastGroupLinkCode, setLastGroupLinkCode] = useState(groupLinkCode);
+  const [groupLinkLabel, setGroupLinkLabel] = useState(null);
+  if (groupLinkCode !== lastGroupLinkCode) {
+    setLastGroupLinkCode(groupLinkCode);
+    setGroupLinkLabel(null);
+  }
+
+  // The actual label fetch — only runs when there's a real code to resolve,
+  // and only ever writes `groupLinkLabel` from its own async result (never
+  // synchronously), so the render site below can safely treat a null label
+  // as "still loading" and withhold the link rather than flashing a
+  // half-built one (e.g. a bare, un-prettified code).
+  useEffect(() => {
+    if (!groupLinkCode) return;
+    let cancelled = false;
+    getGroupLabel(groupLinkCode).then((label) => {
+      if (!cancelled) setGroupLinkLabel(label);
+    }).catch(() => { });
+    return () => { cancelled = true; };
+  }, [groupLinkCode]);
+
+  // Ingredient rows for the back face (recipes only — see the render site).
+  // Pure/local: real overlay ingredients when the recipe has them, else read
+  // off the recipe name against the bundled food dictionary. Memoized on the
+  // identity of the item this card is showing, since the derivation walks the
+  // dictionary index. Must stay above the `if (!open || !item)` early return
+  // below — it's a hook.
+  const cardIngredients = useMemo(
+    () => resolveCardIngredients(item),
+    [item]
+  );
 
   const handleClose = useCallback(() => {
     setFlipped(false);
@@ -253,7 +536,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
     }
   };
 
-  if (!open || !item) return null;
+  if (!mounted || !item) return null;
 
   const dismissProgress = Math.min(1, dragY / DISMISS_THRESHOLD);
   const cardOpacity = 1 - dismissProgress * 0.4;
@@ -270,56 +553,76 @@ export default function FoodDetailCard({ item, open, onClose }) {
   // Non-food rendering rule (master plan 1.10, decision j): coarse group
   // 'k' (Key Nutrients & Herbal) or fine group 'x'/'j1' (lifestyle) items
   // never get a stock food photo — a category icon renders instead. Group/
-  // fineGroup for the item currently open only become known once the
-  // self-loaded assessment resolves (assessFood's Food carries them; the
-  // seed `item` prop itself never does), so this only takes effect after
-  // load — before that, `nonFoodIcon` is null and the existing "no image"
-  // fallback (leaf icon) covers the loading window for any item that
-  // didn't arrive with a seeded photo.
-  const nonFoodIcon = getNonFoodIcon(assessment?.food?.group, assessment?.food?.fineGroup);
+  // fineGroup for the item currently open primarily come from the
+  // self-loaded assessment (assessFood's Food carries them, straight off
+  // the /fooditems dictionary entry). When assessFood fails/times out
+  // (assessStatus === 'error') or the /goodfor lookup itself came back
+  // genuinely empty, `assessment` is null and that source is gone — falls
+  // back to `facts` (getFoodFacts) next and then to whatever the caller
+  // already seeded on `item` (e.g. GroupDetailScreen passes through the
+  // coarse group it's already browsing). NOTE: getFoodFacts
+  // (src/api/adapter.js ~1767, verified while building this fallback)
+  // does NOT currently return group/fineGroup fields — this fallback layer
+  // is inert until/unless that adapter export is extended, but is wired
+  // defensively (and item.group/fineGroup DOES help today, e.g. the coarse
+  // group is real whenever the caller browsed here by category).
+  const nonFoodIcon = getNonFoodIcon(
+    assessment?.food?.group ?? facts?.group ?? item?.group,
+    assessment?.food?.fineGroup ?? facts?.fineGroup ?? item?.fineGroup
+  );
   const displayImage = nonFoodIcon ? null : (item?.image || facts?.photo || null);
 
-  // Condition chips: use the item's own conditions when given, else derive
-  // from the assessment's helpful conditions (same logic as buildRecipeDetail).
-  const derivedConditions = item?.conditions?.length
-    ? item.conditions
-    : perCondition
-      .filter((c) => c.tier === 'Top' || c.tier === 'Strong' || c.tier === 'Good')
-      .sort((a, b) => (b.referenceCount ?? 0) - (a.referenceCount ?? 0))
-      .map((c) => c.conditionName);
-
-  // Chip row is a single clipped line (no wrap/scroll) — sort shortest-first
-  // so the longest name lands last, where it gets clipped at the panel edge.
-  const sortedConditions = [...derivedConditions].sort((a, b) => a.length - b.length);
+  // Condition chips: use the item's own conditions when given (recipes —
+  // shown as a single "Best for:" group, as before), else group EVERY
+  // entry in the assessment's perCondition by verdict (Helps/Neutral/Avoid
+  // for) via the shared numericId-based bucketing — see
+  // groupConditionsByVerdict in utils/foodDetailCard.js for why this
+  // replaced the old tier-filtered, single-clipped-line chip row (it
+  // silently dropped every condition outside tier Top/Strong/Good).
+  const conditionGroups = item?.conditions?.length
+    ? [{ key: 'best', label: 'Best for:', names: item.conditions }]
+    : orderVerdictGroups(groupConditionsByVerdict(perCondition), listType);
 
   // Link-out target: a real C1 overlay `sourceUrl` always wins (public-
   // domain attribution required, embedded in the label — see
   // resolveRecipeLinkTarget); absent that, falls back to a new-tab web
-  // search exactly as before. Routed through browser.js's `openUrl` (the
-  // only file allowed to touch `window.open`) rather than calling it directly.
+  // search exactly as before. This CTA hands off to the OS browser in one
+  // tap via `openUrl` — no in-app interstitial. (RecipeLinkSheet, the
+  // "before you leave" preview that used to sit in between, is still
+  // mounted below and still owns its own `openUrl` hand-off for any caller
+  // that opens it; it's just no longer this button's first stop.)
   const linkTarget = resolveRecipeLinkTarget(item);
   const handleGetRecipe = () => openUrl(linkTarget.url);
 
   return (
-    <div className="fixed inset-0 z-30 flex items-center justify-center px-4">
-      {/* Scrim */}
+    <div className="fixed inset-0 z-30 flex items-center justify-center px-4" style={{ perspective: '3000px' }}>
+      {/* Scrim — fades with the card's own open/close animation below. */}
       <div
         className="absolute inset-0 bg-char-900/50 backdrop-blur-[3px]"
-        style={{ opacity: backdropOpacity }}
+        style={{
+          opacity: backdropOpacity * (animateIn ? 1 : 0),
+          transition: dragging ? 'none' : (isExiting ? 'opacity 0.2s ease-in' : 'opacity 0.3s ease-out'),
+        }}
         onClick={handleClose}
       />
 
-      {/* Card wrapper — 2:3 ratio */}
+      {/* Card wrapper — 2:3 ratio. Open: lifts up from a lower, tilted-back,
+          blurred resting position straight to rest, no scale/size change.
+          Close: reverses the same transform on a quicker ease-in. `dragY`
+          (drag-dismiss) layers on top of whichever resting position
+          `animateIn` currently targets. */}
       <div
         className="relative w-full max-w-[400px] z-10"
         style={{
           aspectRatio: '2/3',
           maxHeight: 'calc(100dvh - 180px)',
-          opacity: cardOpacity,
-          transform: `translateY(${dragY}px)`,
-          transition: dragging
-            ? 'none'
-            : 'transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1)',
+          transformOrigin: 'center bottom',
+          opacity: cardOpacity * (animateIn ? 1 : 0),
+          filter: animateIn ? 'blur(0px)' : `blur(${CLOSED_BLUR_PX}px)`,
+          transform: animateIn
+            ? `translateY(${dragY}px) rotateX(0deg)`
+            : `translateY(${dragY + CLOSED_OFFSET_PX}px) rotateX(${CLOSED_TILT_DEG}deg)`,
+          transition: dragging ? 'none' : (isExiting ? EXIT_TRANSITION : ENTER_TRANSITION),
         }}
       >
         {/* Flip container */}
@@ -404,18 +707,23 @@ export default function FoodDetailCard({ item, open, onClose }) {
               <X size={20} aria-hidden="true" />
             </button>
 
-            {/* Info panel — pinned to bottom, independent of image. Fixed
-                min-height so the card never jumps between short/long
-                descriptions (worst case: 2-line name + chip row + 4-line
-                description + CTA + padding). */}
+            {/* Info panel — pinned to bottom, independent of image.
+                min-height is a FLOOR (never a cap) so the card doesn't jump
+                for a short description, but is free to grow taller than
+                that when the verdict-group chips below wrap onto several
+                lines — see conditionGroups/groupConditionsByVerdict. */}
             <div
               className="absolute bottom-0 left-0 right-0 z-20 bg-neutral-900/70 backdrop-blur-sm rounded-t-2xl px-5 pt-4 pb-5 flex flex-col gap-2 min-h-[250px]"
               onPointerDown={(e) => e.stopPropagation()}
             >
-              {/* Verdict rating — pinned to top-right of the info panel */}
+              {/* Verdict rating — pinned to top-right of the info panel.
+                  Renders nothing once loading settles into 'error' (rather
+                  than a stale spinner or a fabricated rating) — `assessment`
+                  is null in that state, so `numericId != null` is already
+                  false and this naturally falls through to "render nothing". */}
               {(detailLoading || assessment?.numericId != null) && (
                 <div className="absolute top-3 right-4">
-                  <FoodRating numericId={assessment?.numericId} size={18} loading={detailLoading} showNeutralLabel />
+                  <FoodRating numericId={assessment?.numericId} size={18} loading={detailLoading} />
                 </div>
               )}
 
@@ -424,26 +732,35 @@ export default function FoodDetailCard({ item, open, onClose }) {
                 {item?.name}
               </h2>
 
-              {/* Eyebrow + condition chips — single clipped line, no wrap/scroll */}
-              {sortedConditions.length > 0 && (
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <p className="text-[10px] font-label tracking-[0.14em] uppercase text-white/50 flex-none whitespace-nowrap">
-                    Best for:
-                  </p>
-                  <div className="flex gap-1.5 overflow-hidden">
-                    {sortedConditions.map((c, i) => (
-                      <ConditionTag key={i} condition={c} compact className="flex-none" />
-                    ))}
-                  </div>
+              {/* Eyebrow + verdict-group condition chips — every entry in
+                  perCondition is represented (grouped Helps/Neutral/Avoid
+                  for), and each group's chip row wraps (flex-wrap) rather
+                  than clipping to one line. */}
+              {conditionGroups.length > 0 && (
+                <div className="flex flex-col gap-1 overflow-y-auto max-h-28 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {conditionGroups.map((g) => (
+                    <div key={g.key} className="flex items-start gap-2 flex-wrap">
+                      <p className="text-[10px] font-label tracking-[0.14em] uppercase text-white/50 flex-none whitespace-nowrap pt-0.5">
+                        {g.label}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {g.names.map((c, i) => (
+                          <ConditionTag key={i} condition={c} compact className="flex-none" />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
 
               {/* Description — facts.longDescription for foods, sourceName for
                   recipes. Always rendered (even when null) as a flex-1 area
-                  so the panel height stays constant and the CTA stays pinned
-                  to the bottom regardless of description length. */}
+                  so the CTA stays pinned to the bottom regardless of
+                  description length. Clamped to 2 lines (shorter than
+                  before) to leave room for the (now potentially
+                  multi-group, wrapping) condition chips above. */}
               {description ? (
-                <p className="flex-1 text-sm text-white/70 font-sans leading-snug line-clamp-4">
+                <p className="flex-1 text-sm text-white/70 font-sans leading-snug line-clamp-2">
                   {description}
                 </p>
               ) : (
@@ -487,7 +804,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
                     </p>
                   )
                 ) : (
-                  facts?.groupLabel && (
+                  facts?.groupLabel && facts.groupLabel !== 'x' && (
                     <p className="text-xs text-char-500 font-sans mt-0.5 truncate">
                       {facts.groupLabel}
                     </p>
@@ -502,7 +819,7 @@ export default function FoodDetailCard({ item, open, onClose }) {
                 aria-label="Back to overview"
               >
                 <ChevronLeft size={15} aria-hidden="true" />
-                <span>To front</span>
+                <span>Overview</span>
               </button>
             </div>
 
@@ -535,6 +852,27 @@ export default function FoodDetailCard({ item, open, onClose }) {
                       <Skeleton shape="text" className="w-2/3" />
                       <Skeleton shape="text" className="w-1/2" />
                     </div>
+                  ) : assessStatus === 'error' ? (
+                    // A real failure (network error, or the 15s timeout race
+                    // in the load effect) — distinct from the genuine-empty
+                    // state below, and recoverable via Retry rather than a
+                    // dead end. See deriveAssessStatus in
+                    // utils/foodDetailCard.js.
+                    <EmptyState
+                      icon="alert-triangle"
+                      title="Couldn't load health details"
+                      body="Something went wrong loading condition data for this item."
+                      action={(
+                        <button
+                          type="button"
+                          onClick={handleRetry}
+                          className="px-5 py-2.5 rounded-xs bg-forest-700 text-white text-sm font-semibold font-sans
+                            transition-all duration-fast ease-ds-out hover:bg-forest-800 active:scale-[0.98]"
+                        >
+                          Retry
+                        </button>
+                      )}
+                    />
                   ) : perCondition.length > 0 ? (
                     <div>
                       {perCondition.map((ca, i) => (
@@ -554,26 +892,26 @@ export default function FoodDetailCard({ item, open, onClose }) {
                   )}
                 </div>
 
-                {/* Ingredients — real C1-overlay ingredient facts only
-                    (facts as given by the source, no invented quantities).
-                    Absent entirely (no placeholder row) when the recipe has
-                    no overlay match, per recipeDetail.js's never-fabricate
-                    rule. Directions are never republished — this list plus
-                    the link-out CTA below is the whole of what this app
-                    shows for a recipe's preparation. */}
-                {item?.realIngredients?.length > 0 && (
-                  <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
-                    <p className="text-[11px] font-label tracking-[0.14em] uppercase text-char-400 mb-3">
-                      Ingredients
-                    </p>
-                    <ul className="flex flex-col gap-1.5">
-                      {item.realIngredients.map((ing, i) => (
-                        <li key={ing.foodItemID ?? i} className="text-sm font-sans text-char-700 leading-snug">
-                          {ing.name}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                {/* Ingredients (+ per-ingredient healthy swaps) — recipes
+                    only. Real C1-overlay ingredient facts win whenever the
+                    recipe has an overlay match (facts as given by the
+                    source, no invented quantities); otherwise the list is
+                    read off the recipe's own name against the bundled food
+                    dictionary, and captioned as such — see
+                    api/ingredientDerivation.js for why that beats both an
+                    invented list and the empty block this used to render
+                    for every recipe in the app (no overlay row currently
+                    carries ingredient data at all). Directions are still
+                    never republished — this list plus the link-out CTA
+                    below is the whole of what this app shows for a recipe's
+                    preparation. */}
+                {SHOW_RECIPE_INGREDIENTS && isRecipe && (
+                  <IngredientSwaps
+                    key={`${item?.foodId ?? ''}|${item?.name ?? ''}`}
+                    ingredients={cardIngredients.ingredients}
+                    derived={cardIngredients.derived}
+                    profile={getProfile()}
+                  />
                 )}
 
                 {/* Top foods for your conditions — a "see also" rail of
@@ -627,6 +965,65 @@ export default function FoodDetailCard({ item, open, onClose }) {
                   </div>
                 )}
 
+                {/* "Other options" link — Mory's Wave 3 Suggest tie-in
+                    ("the link that says better/other options... from the
+                    same food group as the card"). Deliberately its OWN
+                    block, not nested inside the rail above: that rail gates
+                    on `topFoodsForConditions` (the /topdoordonts companions
+                    list), a completely different signal from whether this
+                    item's own food group resolves — this link must show up
+                    on its own whenever a group resolves, rail or no rail.
+                    Plain foods link to their own fine (preferred) or coarse
+                    food group's Suggest page — see resolveGroupLinkTarget
+                    above for the fine→coarse→nothing fallback and why
+                    EXCLUDED_FINE_GROUPS routes some items to the coarse
+                    page instead. The target route
+                    (/app/suggestions/fine/:fineGroupId) is being built by a
+                    sibling task in parallel and does not exist yet as of
+                    this writing — linking to it now is intentional; it 404s
+                    until that lands. Withheld until `groupLinkLabel`
+                    resolves (see the effect above) so no bare, un-prettified
+                    group code ever flashes before the real name loads in.
+                    Copy avoids a health claim ("other options", not
+                    "better") per this file's existing C2 audit convention
+                    — see the recipe variant below for the same treatment. */}
+                {!isRecipe && groupLinkTarget && groupLinkLabel && (
+                  <button
+                    type="button"
+                    onClick={() => { onClose?.(); navigate(groupLinkTarget.path); }}
+                    className="w-full flex items-center justify-between gap-3 rounded-xl border border-neutral-300/50
+                      shadow-xs bg-white p-4 text-left transition-all duration-base ease-ds-out
+                      hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
+                  >
+                    {/* COPY-REVIEW: flagged for C2 health-claim audit */}
+                    <span className="text-sm font-sans font-semibold text-char-900">
+                      Other options in {groupLinkLabel}
+                    </span>
+                    <Icon name="chevron-right" size={16} className="text-char-400 flex-shrink-0" aria-hidden="true" />
+                  </button>
+                )}
+
+                {/* Recipe counterpart of the link above — replaces the old
+                    "See other good recipes" link into the recipe browser
+                    (RecipesScreen, via mealTypeToRecipesHref) with a link
+                    into the food-groups browser instead, so a recipe's back
+                    face offers ingredient alternatives rather than more
+                    recipes. */}
+                {isRecipe && (
+                  <button
+                    type="button"
+                    onClick={() => { onClose?.(); navigate('/app/suggestions?tab=groups&mode=fine'); }}
+                    className="w-full flex items-center justify-between gap-3 rounded-xl border border-neutral-300/50
+                      shadow-xs bg-white p-4 text-left transition-all duration-base ease-ds-out
+                      hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
+                  >
+                    <span className="text-sm font-sans font-semibold text-char-900">
+                      Search ingredient alternatives
+                    </span>
+                    <Icon name="chevron-right" size={16} className="text-char-400 flex-shrink-0" aria-hidden="true" />
+                  </button>
+                )}
+
               </div>
             </div>
 
@@ -657,8 +1054,30 @@ export default function FoodDetailCard({ item, open, onClose }) {
 
       {/* Mounted outside the (transformed) card wrapper — a `transform` on an
           ancestor creates a new containing block for `fixed` descendants,
-          which would break Snackbar's viewport-anchored positioning. */}
+          which would break Snackbar's viewport-anchored positioning.
+          RecipeLinkSheet is also `fixed`, but being a sibling in the JSX
+          here isn't enough to get it above the TabBar: this whole
+          component's root is itself `fixed inset-0 z-30`, which is its own
+          stacking context, so a `zClass` passed to a normally-mounted child
+          only ever wins *inside* that z-30 context — the app's TabBar
+          (`z-40`, a sibling stacking context outside this component
+          entirely) would still render on top of it and intercept taps.
+          RecipeLinkSheet.jsx handles this itself by portaling its content
+          straight into `document.body` via `createPortal`, which escapes
+          this z-30 context so its `z-[70]` is compared at the document
+          root instead — there it correctly stacks above both the TabBar
+          (`z-40`) and MealPlannerPicker's full-screen overlay (`z-[60]`)
+          when this card is opened from within it, the established
+          convention for "above MealPlannerPicker". */}
       <Snackbar snackbar={snackbar} onUndo={handleSnackbarUndo} onDismiss={() => setSnackbar(null)} />
+      {isRecipe && (
+        <RecipeLinkSheet
+          open={recipeSheetOpen}
+          onClose={() => setRecipeSheetOpen(false)}
+          item={item}
+          zClass="z-[70]"
+        />
+      )}
     </div>
   );
 }

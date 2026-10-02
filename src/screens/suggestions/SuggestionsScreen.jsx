@@ -14,12 +14,23 @@ import CoverageNotice from './CoverageNotice.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
 import TopDosTab from './TopDosTab.jsx';
-import GroupsTab from './GroupsTab.jsx';
+import FoodGroupsTab from './FoodGroupsTab.jsx';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
 // Screen-level title + description per tab, crossfaded in the shared
 // PageHeader (replaces the per-tab <h1> each tab used to render itself).
+//
+// Food Groups (TAB_META.groups) covers BOTH the coarse 10-group browse and
+// the 17 fine-group browse — basic and fine are two zoom levels of the same
+// idea, not separate tabs. See FoodGroupsTab.jsx's docblock for the full
+// reasoning. There is deliberately no TAB_META entry for 'suggest': it was a
+// short-lived 4th top-level pill (Wave 2) that crowded the strip at phone
+// width and forced "Dos & Don'ts" to be shortened just to make room; it has
+// been folded into Food Groups' inner mode toggle instead. resolveTab()
+// below still matches ?tab=suggest as a backward-compatible alias (resolving
+// to 'groups'; FoodGroupsTab's own resolveMode() puts it in 'fine' mode) so
+// any link shipped during that window keeps landing somewhere correct.
 const TAB_META = {
   top: {
     title: "Top Dos & Don'ts",
@@ -33,12 +44,15 @@ const TAB_META = {
 };
 
 // Resolves the active tab from the URL: ?tab=recipes / ?tab=groups win
-// outright; anything else (including the legacy ?tab=bestworst) lands on
-// Top Dos & Don'ts, the new default.
+// outright; the retired ?tab=suggest aliases to 'groups' (see TAB_META's
+// docblock above — FoodGroupsTab resolves the fine-mode half of that alias
+// itself); anything else (including the legacy ?tab=bestworst) lands on Top
+// Dos & Don'ts, the default.
 function resolveTab(searchParams) {
   const tab = searchParams.get('tab');
   if (tab === 'recipes') return 'recipes';
   if (tab === 'groups') return 'groups';
+  if (tab === 'suggest') return 'groups';
   return 'top';
 }
 
@@ -119,6 +133,12 @@ function BestRecipesTab() {
       sourceName: item.sourceName ?? null,
       matchedConditions: item.matchedConditions ?? [],
     };
+    // PlanCandidates carry these when their source Recipe had a C1 overlay
+    // match (see adapter.js's recipeToPlanCandidate) — forward when present
+    // so buildRecipeDetail can read them through onto the card payload.
+    if (item.sourceUrl) card.sourceUrl = item.sourceUrl;
+    if (item.attribution) card.attribution = item.attribution;
+    if (item.nutritionPerServing) card.nutritionPerServing = item.nutritionPerServing;
     setSelectedRecipe({
       foodId: card.foodId,
       name: card.name,
@@ -194,6 +214,11 @@ export default function SuggestionsScreen() {
     setActiveTab(resolveTab(searchParams));
   }
 
+  // Back to 3 pills: the Wave 2 "Suggest" pill (the 17 fine food groups) now
+  // lives as an inner mode toggle inside Food Groups (FoodGroupsTab) rather
+  // than as a sibling top-level tab — it was the reason "Dos & Don'ts" had
+  // to be shortened to "Do / Don't" to fit a crowded 4th pill. With only 3
+  // pills the full label fits again with room to spare.
   const TAB_OPTIONS = [
     { key: 'top', label: "Dos & Don'ts" },
     { key: 'groups', label: 'Food Groups' },
@@ -259,7 +284,7 @@ export default function SuggestionsScreen() {
             {activeTab === 'top' ? (
               <TopDosTab onSelectFood={setSelectedFood} />
             ) : activeTab === 'groups' ? (
-              <GroupsTab />
+              <FoodGroupsTab />
             ) : (
               <BestRecipesTab />
             )}
@@ -267,14 +292,16 @@ export default function SuggestionsScreen() {
         </AnimatePresence>
       </div>
 
-      {/* Food detail card (self-loads facts + assessment from the id/name) */}
-      {selectedFood && (
-        <FoodDetailCard
-          item={{ foodId: selectedFood.id, name: selectedFood.name }}
-          open={!!selectedFood}
-          onClose={() => setSelectedFood(null)}
-        />
-      )}
+      {/* Food detail card (self-loads facts + assessment from the id/name).
+          Rendered unconditionally (not gated behind `{selectedFood && ...}`)
+          so FoodDetailCard stays mounted through its own close animation —
+          a gating wrapper here would unmount it the instant `onClose` fires,
+          before it gets a chance to animate out. */}
+      <FoodDetailCard
+        item={selectedFood ? { foodId: selectedFood.id, name: selectedFood.name } : null}
+        open={!!selectedFood}
+        onClose={() => setSelectedFood(null)}
+      />
     </div>
   );
 }

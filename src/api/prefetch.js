@@ -16,6 +16,7 @@
 import { getSuggestions, getWorstFoods, getFoodDictionary, getFoodGroups, getConditions } from './adapter.js';
 import { getRecommendations } from './recommendations.js';
 import { getIngredientImage } from './ingredientImages.js';
+import { getOverlayImageFile } from './localTables.js';
 import { IS_CONFIGURED } from './config.js';
 
 /**
@@ -73,7 +74,7 @@ function warmImages(suggestions) {
       const img = new Image();
       img.fetchPriority = 'low';
       img.decoding = 'async';
-      img.src = getIngredientImage(food.name, food.group);
+      img.src = getIngredientImage(food.name, food.group, getOverlayImageFile(food.id));
     } catch {
       /* ignore — best-effort image warming only */
     }

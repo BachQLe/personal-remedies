@@ -14,8 +14,9 @@
  *                     string (rendered via MealTypeTag) or a React node
  *                     rendered as-is. Independent of `badge`/`action`.
  *   numericId       — Nutridigm verdict ladder id (1-7); renders a 3-star /
- *                     3-skull row above the title. Null/undefined or 4
- *                     (neutral) renders nothing (never show a fake rating).
+ *                     3-skull row above the title. Null/undefined renders
+ *                     nothing (never show a fake rating); 4 (neutral)
+ *                     renders a single outline star (temporary placeholder).
  *   title           — card heading (displayed at bottom)
  *   subtitle        — smaller text below title (lead ingredients, description, etc.)
  *   aspectRatio     — aspect ratio string, default '4/5' (full-screen mobile)

@@ -57,22 +57,39 @@ describe('validateOverlayRow', () => {
     expect(validateOverlayRow(rest)).toEqual({ valid: true });
   });
 
+  it('accepts a row with ONLY the four required fields (name, sourceUrl, mealType, fineFoodGroup) — foodItemID and nutritionPerServing both absent', async () => {
+    const { validateOverlayRow } = await import('../recipeIngestion.js');
+    const minimal = {
+      name: VALID_ROW.name,
+      sourceUrl: VALID_ROW.sourceUrl,
+      mealType: VALID_ROW.mealType,
+      fineFoodGroup: 'l',
+    };
+    expect(validateOverlayRow(minimal)).toEqual({ valid: true });
+  });
+
   const invalidCases = [
     ['row is not an object', null],
     ['row is an array', ['not', 'an', 'object']],
     ['missing name', { ...VALID_ROW, name: '' }],
     ['non-https sourceUrl', { ...VALID_ROW, sourceUrl: 'http://medlineplus.gov/x' }],
     ['malformed sourceUrl', { ...VALID_ROW, sourceUrl: 'not-a-url' }],
-    ['missing attribution', { ...VALID_ROW, attribution: undefined }],
+    ['present but empty attribution', { ...VALID_ROW, attribution: '' }],
     ['bad mealType', { ...VALID_ROW, mealType: 'brunch' }],
     ['bad alsoFits entry', { ...VALID_ROW, alsoFits: ['brunch'] }],
-    ['empty rawIngredients', { ...VALID_ROW, rawIngredients: [] }],
+    ['empty rawIngredients (explicit [] stays invalid even though absent is fine)', { ...VALID_ROW, rawIngredients: [] }],
     ['non-string rawIngredients entry', { ...VALID_ROW, rawIngredients: [1, 2] }],
     ['non-numeric ingredientFoodItemIds', { ...VALID_ROW, ingredientFoodItemIds: ['101'] }],
-    ['non-positive servings', { ...VALID_ROW, servings: 0 }],
-    ['missing nutritionPerServing field', { ...VALID_ROW, nutritionPerServing: { calories: 1, protein: 1, carbs: 1 } }],
-    ['non-numeric nutritionPerServing field', { ...VALID_ROW, nutritionPerServing: { calories: '320', protein: 1, carbs: 1, fat: 1 } }],
-    ['non-positive totalTimeMinutes', { ...VALID_ROW, totalTimeMinutes: -5 }],
+    ['present but non-positive servings', { ...VALID_ROW, servings: 0 }],
+    ['nutritionPerServing is null (absent is fine, null is not)', { ...VALID_ROW, nutritionPerServing: null }],
+    ['nutritionPerServing is an array', { ...VALID_ROW, nutritionPerServing: [320] }],
+    ['nutritionPerServing is a string', { ...VALID_ROW, nutritionPerServing: 'high calorie' }],
+    ['nutritionPerServing is an empty object (omit the key instead)', { ...VALID_ROW, nutritionPerServing: {} }],
+    ['non-numeric nutritionPerServing.calories', { ...VALID_ROW, nutritionPerServing: { calories: '320' } }],
+    ['non-numeric nutritionPerServing.protein', { ...VALID_ROW, nutritionPerServing: { calories: 320, protein: 'x' } }],
+    ['non-numeric nutritionPerServing.carbs', { ...VALID_ROW, nutritionPerServing: { calories: 320, carbs: 'x' } }],
+    ['non-numeric nutritionPerServing.fat', { ...VALID_ROW, nutritionPerServing: { calories: 320, fat: 'x' } }],
+    ['present but non-positive totalTimeMinutes', { ...VALID_ROW, totalTimeMinutes: -5 }],
     ["wrong fineFoodGroup (not 'l')", { ...VALID_ROW, fineFoodGroup: 'b1' }],
     ['non-numeric foodItemID', { ...VALID_ROW, foodItemID: 'abc' }],
   ];
@@ -82,9 +99,71 @@ describe('validateOverlayRow', () => {
     expect(validateOverlayRow(row).valid).toBe(false);
   });
 
+  it('accepts a row with attribution/macros/rawIngredients/ingredientFoodItemIds/servings/totalTimeMinutes all absent', async () => {
+    const { validateOverlayRow } = await import('../recipeIngestion.js');
+    const {
+      // eslint-disable-next-line no-unused-vars
+      attribution, rawIngredients, ingredientFoodItemIds, servings, totalTimeMinutes,
+      ...rest
+    } = VALID_ROW;
+    const row = { ...rest, nutritionPerServing: { calories: VALID_ROW.nutritionPerServing.calories } };
+    expect(validateOverlayRow(row)).toEqual({ valid: true });
+  });
+
   it('tolerates an unknown extra field (e.g. a stray "directions") without treating it as required or forbidden', async () => {
     const { validateOverlayRow } = await import('../recipeIngestion.js');
     expect(validateOverlayRow({ ...VALID_ROW, directions: 'Step 1...' })).toEqual({ valid: true });
+  });
+
+  describe('nutritionPerServing relaxation (Sept 2026 — real source spreadsheet has no calorie column)', () => {
+    it('accepts a row with nutritionPerServing entirely absent (the common case for the real source data)', async () => {
+      const { validateOverlayRow } = await import('../recipeIngestion.js');
+      // eslint-disable-next-line no-unused-vars
+      const { nutritionPerServing, ...rest } = VALID_ROW;
+      expect(validateOverlayRow(rest)).toEqual({ valid: true });
+    });
+
+    it('accepts a present nutritionPerServing with protein/carbs/fat but no calories at all', async () => {
+      const { validateOverlayRow } = await import('../recipeIngestion.js');
+      const row = { ...VALID_ROW, nutritionPerServing: { protein: 28, carbs: 4, fat: 20 } };
+      expect(validateOverlayRow(row)).toEqual({ valid: true });
+    });
+
+    it('accepts a present nutritionPerServing with ONLY calories (no protein/carbs/fat)', async () => {
+      const { validateOverlayRow } = await import('../recipeIngestion.js');
+      const row = { ...VALID_ROW, nutritionPerServing: { calories: 320 } };
+      expect(validateOverlayRow(row)).toEqual({ valid: true });
+    });
+
+    it('never fabricates/defaults a missing calories value — an absent nutritionPerServing round-trips through loadRecipeOverlay with no calories key at all', async () => {
+      // eslint-disable-next-line no-unused-vars
+      const { nutritionPerServing, ...rowWithoutNutrition } = VALID_ROW;
+      vi.doMock('../../data/recipeOverlay.json', () => ({ default: [rowWithoutNutrition] }));
+      const { loadRecipeOverlay } = await import('../recipeIngestion.js');
+      const [row] = loadRecipeOverlay();
+      expect(row).toBeDefined();
+      expect('nutritionPerServing' in row).toBe(false);
+    });
+  });
+
+  describe("'dessert' meal type (Sept 2026, user decision — shown with snacks but tagged distinctly, not an alias of 'snack')", () => {
+    it('accepts mealType: "dessert"', async () => {
+      const { validateOverlayRow } = await import('../recipeIngestion.js');
+      expect(validateOverlayRow({ ...VALID_ROW, mealType: 'dessert' })).toEqual({ valid: true });
+    });
+
+    it('accepts "dessert" as an alsoFits entry', async () => {
+      const { validateOverlayRow } = await import('../recipeIngestion.js');
+      expect(validateOverlayRow({ ...VALID_ROW, alsoFits: ['dessert'] })).toEqual({ valid: true });
+    });
+
+    it('"dessert" and "snack" are both independently valid, distinct mealTypes (not aliases of each other)', async () => {
+      const { validateOverlayRow } = await import('../recipeIngestion.js');
+      const dessert = validateOverlayRow({ ...VALID_ROW, mealType: 'dessert' });
+      const snack = validateOverlayRow({ ...VALID_ROW, mealType: 'snack' });
+      expect(dessert).toEqual({ valid: true });
+      expect(snack).toEqual({ valid: true });
+    });
   });
 });
 
@@ -214,5 +293,88 @@ describe('joinRecipeOverlay — the only exposure path (Track B item 2)', () => 
     const { joinRecipeOverlay } = await import('../recipeIngestion.js');
     const recipes = [apiRecipe()];
     expect(joinRecipeOverlay(recipes)).toEqual(recipes);
+  });
+
+  describe('omits absent optional fields (never null/undefined/[] fills them)', () => {
+    const MINIMAL_ROW = {
+      name: 'Baked Salmon',
+      sourceUrl: 'https://medlineplus.gov/recipes/baked-salmon',
+      mealType: 'dinner',
+      fineFoodGroup: 'l',
+      foodItemID: 555,
+      nutritionPerServing: { calories: 320 },
+    };
+
+    it('a joined recipe from a minimal row has no rawIngredients/attribution keys at all', async () => {
+      vi.doMock('../../data/recipeOverlay.json', () => ({ default: [MINIMAL_ROW] }));
+      const { joinRecipeOverlay } = await import('../recipeIngestion.js');
+      const [joined] = joinRecipeOverlay([apiRecipe()]);
+      expect('rawIngredients' in joined).toBe(false);
+      expect('ingredientFoodItemIds' in joined).toBe(false);
+      expect('attribution' in joined).toBe(false);
+      expect('servings' in joined).toBe(false);
+      expect('totalTimeMinutes' in joined).toBe(false);
+    });
+
+    it('nutritionPerServing deep-equals {calories} only, with no protein/carbs/fat keys', async () => {
+      vi.doMock('../../data/recipeOverlay.json', () => ({ default: [MINIMAL_ROW] }));
+      const { joinRecipeOverlay } = await import('../recipeIngestion.js');
+      const [joined] = joinRecipeOverlay([apiRecipe()]);
+      expect(joined.nutritionPerServing).toEqual({ calories: 320 });
+      expect('protein' in joined.nutritionPerServing).toBe(false);
+    });
+
+    it('sourceUrl is always present (required field), dietaryTags/alsoFits still default to []', async () => {
+      vi.doMock('../../data/recipeOverlay.json', () => ({ default: [MINIMAL_ROW] }));
+      const { joinRecipeOverlay } = await import('../recipeIngestion.js');
+      const [joined] = joinRecipeOverlay([apiRecipe()]);
+      expect(joined.sourceUrl).toBe(MINIMAL_ROW.sourceUrl);
+      expect(joined.dietaryTags).toEqual([]);
+      expect(joined.alsoFits).toEqual([]);
+    });
+
+    it('getRecipesRaw-style destructuring: an omitted rawIngredients key still falls into the "!rawIngredients" branch', async () => {
+      vi.doMock('../../data/recipeOverlay.json', () => ({ default: [MINIMAL_ROW] }));
+      const { joinRecipeOverlay } = await import('../recipeIngestion.js');
+      const [joined] = joinRecipeOverlay([apiRecipe()]);
+      // Mirrors adapter.js's getRecipesRaw guard: `if (!rawIngredients) return { ...rest, mealType };`
+      const { overlayMealType, rawIngredients, ingredientFoodItemIds, ...rest } = joined;
+      expect(rawIngredients).toBeUndefined();
+      expect(!rawIngredients).toBe(true);
+      void overlayMealType;
+      void ingredientFoodItemIds;
+      void rest;
+    });
+  });
+
+  describe('nutritionPerServing relaxation — join never crashes on an absent/partial overlay macro object', () => {
+    const ROW_NO_NUTRITION = {
+      name: 'Baked Salmon',
+      sourceUrl: 'https://medlineplus.gov/recipes/baked-salmon',
+      mealType: 'dinner',
+      fineFoodGroup: 'l',
+      foodItemID: 555,
+      // nutritionPerServing entirely absent — the common case for Mory's real
+      // source data, which has no calorie column at all.
+    };
+
+    it('does not throw, and omits nutritionPerServing entirely, when the overlay row has none', async () => {
+      vi.doMock('../../data/recipeOverlay.json', () => ({ default: [ROW_NO_NUTRITION] }));
+      const { joinRecipeOverlay } = await import('../recipeIngestion.js');
+      let joined;
+      expect(() => {
+        [joined] = joinRecipeOverlay([apiRecipe()]);
+      }).not.toThrow();
+      expect('nutritionPerServing' in joined).toBe(false);
+    });
+
+    it('carries only the macros the row actually has when calories itself is missing', async () => {
+      const row = { ...ROW_NO_NUTRITION, nutritionPerServing: { protein: 28, carbs: 4, fat: 20 } };
+      vi.doMock('../../data/recipeOverlay.json', () => ({ default: [row] }));
+      const { joinRecipeOverlay } = await import('../recipeIngestion.js');
+      const [joined] = joinRecipeOverlay([apiRecipe()]);
+      expect(joined.nutritionPerServing).toEqual({ protein: 28, carbs: 4, fat: 20 });
+      expect('calories' in joined.nutritionPerServing).toBe(false);
+    });
   });
 });

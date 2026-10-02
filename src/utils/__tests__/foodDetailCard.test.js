@@ -13,9 +13,29 @@
  *   - `resolveRecipeLinkTarget` — the link-out decision (sourceUrl always
  *     wins over the Google-search fallback, never shown as equals) that
  *     feeds `openUrl` (src/api/browser.js) instead of a raw `window.open`.
+ *   - `resolveRecipePreview` (Track 1D, in-app recipe preview sheet) — the
+ *     display model for `RecipeLinkSheet.jsx`. Its key guard is the
+ *     anti-fabrication rule: `calories` comes ONLY from
+ *     `item.nutritionPerServing.calories`, never from
+ *     `resolveNutrition`/`estimateNutrition`'s group-based estimate tier.
+ *   - `groupConditionsByVerdict` / `orderVerdictGroups` — the front face's
+ *     "Best for:" chip-row fix: every entry in `perCondition` now lands in
+ *     a Helps/Neutral/Avoid for bucket (never silently dropped), and the
+ *     buckets render in a caller-selectable order.
+ *   - `deriveAssessStatus` — the back face's loading/success/empty/error
+ *     classification fix: a genuine empty result, an API error, and a
+ *     timeout must render honestly different states, not the same
+ *     "No data for this item" blank.
  */
 import { describe, expect, it } from 'vitest';
-import { resolveIsRecipe, resolveRecipeLinkTarget } from '../foodDetailCard.js';
+import {
+  resolveIsRecipe,
+  resolveRecipeLinkTarget,
+  resolveRecipePreview,
+  groupConditionsByVerdict,
+  orderVerdictGroups,
+  deriveAssessStatus,
+} from '../foodDetailCard.js';
 
 describe('resolveIsRecipe', () => {
   it('returns false for a null/undefined item', () => {
@@ -89,7 +109,7 @@ describe('resolveRecipeLinkTarget', () => {
   it('falls back to the Google-search behavior/label when sourceUrl is absent', () => {
     const target = resolveRecipeLinkTarget({ name: 'Baked Salmon', sourceName: 'Food Network' });
     expect(target.isSource).toBe(false);
-    expect(target.label).toBe('Get the recipe');
+    expect(target.label).toBe('Open recipe');
     expect(target.url).toBe(
       `https://www.google.com/search?q=${encodeURIComponent('Baked Salmon Food Network recipe')}`
     );
@@ -115,5 +135,198 @@ describe('resolveRecipeLinkTarget', () => {
   it('handles a missing/null item without throwing', () => {
     expect(() => resolveRecipeLinkTarget(null)).not.toThrow();
     expect(resolveRecipeLinkTarget(null).isSource).toBe(false);
+  });
+});
+
+describe('resolveRecipePreview', () => {
+  it('returns a real calorie number when nutritionPerServing.calories is a finite number', () => {
+    const preview = resolveRecipePreview({
+      name: 'Baked Salmon',
+      sourceUrl: 'https://medlineplus.gov/recipes/baked-salmon',
+      attribution: 'MedlinePlus',
+      nutritionPerServing: { calories: 320, protein: 28 },
+    });
+    expect(preview.calories).toBe(320);
+  });
+
+  it('returns null calories when nutritionPerServing is absent — never falls back to an estimate', () => {
+    // This item is shaped exactly like something `estimateNutrition`
+    // (src/data/nutritionEstimates.js) WOULD produce a number for: a
+    // recipe-kind item (per-slot table) whose fineGroup ('b1', a real fine
+    // group entry) would also match the fine-group table. Neither must
+    // leak in here — `resolveRecipePreview` never imports/calls
+    // resolveNutrition or estimateNutrition at all.
+    const preview = resolveRecipePreview({
+      kind: 'recipe',
+      mealType: 'Lunch',
+      fineGroup: 'b1',
+      name: 'Mystery Recipe',
+      sourceName: 'Food Network',
+    });
+    expect(preview.calories).toBeNull();
+  });
+
+  it('returns null calories when nutritionPerServing.calories is not a finite number', () => {
+    expect(
+      resolveRecipePreview({ name: 'X', nutritionPerServing: { calories: null } }).calories
+    ).toBeNull();
+    expect(
+      resolveRecipePreview({ name: 'X', nutritionPerServing: { calories: NaN } }).calories
+    ).toBeNull();
+    expect(resolveRecipePreview({ name: 'X', nutritionPerServing: {} }).calories).toBeNull();
+    expect(resolveRecipePreview({ name: 'X' }).calories).toBeNull();
+  });
+
+  it('source link: hostname-derived ctaLabel and attribution/hostname fields', () => {
+    const preview = resolveRecipePreview({
+      name: 'Baked Salmon',
+      sourceUrl: 'https://www.medlineplus.gov/recipes/baked-salmon',
+      attribution: 'MedlinePlus',
+    });
+    expect(preview.isSource).toBe(true);
+    expect(preview.hostname).toBe('medlineplus.gov');
+    expect(preview.attribution).toBe('MedlinePlus');
+    expect(preview.ctaLabel).toBe('Open at medlineplus.gov');
+    expect(preview.url).toBe('https://www.medlineplus.gov/recipes/baked-salmon');
+  });
+
+  it('source link with no attribution falls back to the hostname for the attribution field', () => {
+    const preview = resolveRecipePreview({
+      name: 'Baked Salmon',
+      sourceUrl: 'https://medlineplus.gov/recipes/baked-salmon',
+    });
+    expect(preview.attribution).toBe('medlineplus.gov');
+  });
+
+  it('source link: body names the real host and showHostname is true', () => {
+    const preview = resolveRecipePreview({
+      name: 'Baked Salmon',
+      sourceUrl: 'https://medlineplus.gov/recipes/baked-salmon',
+      attribution: 'MedlinePlus',
+    });
+    expect(preview.body).toBe('Directions are hosted by MedlinePlus.');
+    expect(preview.showHostname).toBe(true);
+    expect(preview.eyebrow).toBe('Leaving Remedi');
+  });
+
+  it('google-search fallback: honest ctaLabel, isSource false', () => {
+    const preview = resolveRecipePreview({ name: 'Baked Salmon', sourceName: 'Food Network' });
+    expect(preview.isSource).toBe(false);
+    expect(preview.ctaLabel).toBe('Search for this recipe');
+    expect(preview.url).toContain('google.com');
+  });
+
+  it('google-search fallback: honest body copy — never claims Google is hosting the recipe', () => {
+    // Regression guard: the old copy said "Directions are hosted by
+    // google.com." here, which is false — Google isn't hosting the recipe,
+    // it's just where we're sending the user to search for it.
+    const preview = resolveRecipePreview({ name: 'Baked Salmon', sourceName: 'Food Network' });
+    expect(preview.body).toBe(
+      "We don't have a source link for this recipe yet — search the web for it."
+    );
+    expect(preview.body).not.toContain('hosted by');
+    expect(preview.body).not.toContain('google.com');
+    expect(preview.showHostname).toBe(false);
+  });
+
+  it('carries through title/image and handles a missing item without throwing', () => {
+    const preview = resolveRecipePreview({ name: 'Baked Salmon', image: 'https://img/salmon.jpg' });
+    expect(preview.title).toBe('Baked Salmon');
+    expect(preview.image).toBe('https://img/salmon.jpg');
+
+    expect(() => resolveRecipePreview(null)).not.toThrow();
+    expect(resolveRecipePreview(null).calories).toBeNull();
+    expect(resolveRecipePreview(null).image).toBeNull();
+  });
+});
+
+describe('groupConditionsByVerdict', () => {
+  it('buckets every entry — nothing is dropped like the old tier-filtered list did', () => {
+    const perCondition = [
+      { conditionName: 'Diabetes', numericId: 1, referenceCount: 2 },
+      { conditionName: 'Hypertension', numericId: 4, referenceCount: 0 },
+      { conditionName: 'Aging', numericId: 7, referenceCount: 5 },
+    ];
+    const grouped = groupConditionsByVerdict(perCondition);
+    expect(grouped.helps).toEqual(['Diabetes']);
+    expect(grouped.neutral).toEqual(['Hypertension']);
+    expect(grouped.avoid).toEqual(['Aging']);
+  });
+
+  it('treats a null/undefined/out-of-range numericId as neutral, same as an explicit 4', () => {
+    const perCondition = [
+      { conditionName: 'No data A', numericId: null },
+      { conditionName: 'No data B', numericId: undefined },
+      { conditionName: 'Out of range', numericId: 9 },
+      { conditionName: 'Explicit neutral', numericId: 4 },
+    ];
+    const grouped = groupConditionsByVerdict(perCondition);
+    expect(grouped.helps).toEqual([]);
+    expect(grouped.avoid).toEqual([]);
+    expect(grouped.neutral).toEqual(['No data A', 'No data B', 'Out of range', 'Explicit neutral']);
+  });
+
+  it('sorts each bucket by referenceCount descending (more evidence first)', () => {
+    const perCondition = [
+      { conditionName: 'Few studies', numericId: 2, referenceCount: 1 },
+      { conditionName: 'Many studies', numericId: 1, referenceCount: 9 },
+      { conditionName: 'No studies', numericId: 3, referenceCount: 0 },
+    ];
+    const grouped = groupConditionsByVerdict(perCondition);
+    expect(grouped.helps).toEqual(['Many studies', 'Few studies', 'No studies']);
+  });
+
+  it('handles an empty/missing perCondition without throwing', () => {
+    expect(groupConditionsByVerdict([])).toEqual({ helps: [], neutral: [], avoid: [] });
+    expect(groupConditionsByVerdict(undefined)).toEqual({ helps: [], neutral: [], avoid: [] });
+  });
+
+  it('skips a row with no conditionName rather than rendering a blank chip', () => {
+    const grouped = groupConditionsByVerdict([{ numericId: 1 }, { conditionName: 'Real', numericId: 1 }]);
+    expect(grouped.helps).toEqual(['Real']);
+  });
+});
+
+describe('orderVerdictGroups', () => {
+  const grouped = { helps: ['A'], neutral: ['B'], avoid: ['C'] };
+
+  it('defaults to Helps → Neutral → Avoid for when listType is unset', () => {
+    expect(orderVerdictGroups(grouped).map((g) => g.key)).toEqual(['helps', 'neutral', 'avoid']);
+  });
+
+  it('defaults to the same order for listType "helpful"', () => {
+    expect(orderVerdictGroups(grouped, 'helpful').map((g) => g.key)).toEqual(['helps', 'neutral', 'avoid']);
+  });
+
+  it('leads with "Avoid for" when listType is "harmful"', () => {
+    expect(orderVerdictGroups(grouped, 'harmful').map((g) => g.key)).toEqual(['avoid', 'helps', 'neutral']);
+  });
+
+  it('drops empty groups rather than rendering an empty label row', () => {
+    const partial = { helps: ['A'], neutral: [], avoid: [] };
+    expect(orderVerdictGroups(partial).map((g) => g.key)).toEqual(['helps']);
+    expect(orderVerdictGroups({ helps: [], neutral: [], avoid: [] })).toEqual([]);
+  });
+
+  it('carries the display label alongside each group', () => {
+    const result = orderVerdictGroups(grouped);
+    expect(result.find((g) => g.key === 'avoid').label).toBe('Avoid for:');
+  });
+});
+
+describe('deriveAssessStatus', () => {
+  it('returns "error" for a rejected/failed settlement (network error or timeout)', () => {
+    expect(deriveAssessStatus({ ok: false })).toBe('error');
+    expect(deriveAssessStatus(undefined)).toBe('error');
+  });
+
+  it('returns "success" when the assessment resolved with a non-empty perCondition', () => {
+    expect(deriveAssessStatus({ ok: true, value: { perCondition: [{ conditionName: 'A' }] } })).toBe('success');
+  });
+
+  it('returns "empty" for a genuinely empty resolved result — never conflated with "error"', () => {
+    expect(deriveAssessStatus({ ok: true, value: { perCondition: [] } })).toBe('empty');
+    expect(deriveAssessStatus({ ok: true, value: null })).toBe('empty');
+    expect(deriveAssessStatus({ ok: true, value: {} })).toBe('empty');
   });
 });

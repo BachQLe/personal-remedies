@@ -309,7 +309,7 @@ function ConditionDropdown({ value, onChange }) {
         aria-haspopup="listbox"
         aria-expanded={open}
         className="w-full flex items-center justify-between gap-2 pl-4 pr-3 py-[15px] rounded-full border-[1.5px] bg-white text-[16px] text-char-500 font-sans shadow-sm outline-none transition-all duration-fast ease-ds-out disabled:opacity-60"
-        style={{ borderColor: open ? '#111E58' : '#E6E6E0' }}
+        style={{ borderColor: open ? '#111E58' : '#FFFFFF' }}
       >
         <span className="truncate">
           {loading ? 'Loading conditions…' : 'Select your conditions'}
