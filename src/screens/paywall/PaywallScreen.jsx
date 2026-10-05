@@ -20,8 +20,8 @@
  * before this screen can ship for real; the yellow banner below is the
  * visible-in-UI draft indicator required alongside this file-header note.
  */
-import { useNavigate } from 'react-router-dom';
-import { listFeatures } from '../../api/entitlements.js';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ENTITLEMENT_CONFIG, listFeatures } from '../../api/entitlements.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import Icon from '../../components/shared/Icon.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
@@ -31,6 +31,8 @@ export default function PaywallScreen() {
   const navigate = useNavigate();
   const { show } = useSnackbar();
   const features = listFeatures();
+  const [searchParams] = useSearchParams();
+  const requested = ENTITLEMENT_CONFIG.features[searchParams.get('feature')];
 
   const handleUpgrade = () => {
     show("Purchasing isn't available yet — it arrives with the native app.");
@@ -42,11 +44,11 @@ export default function PaywallScreen() {
     // note) so this reads as a natural sub-page of Profile rather than a
     // different surface.
     <div className="min-h-screen -mb-28 bg-forest-300 flex flex-col">
-      <PageHeader label="Remedi Plus" className="pb-4">
+      <PageHeader label="Personal Remedies Plus" className="pb-4">
         <div className="flex items-center gap-3 mt-3">
           <BackButton onClick={() => navigate('/app/profile')} />
           <h1 className="font-display text-[24px] font-semibold text-blue-950 leading-tight">
-            Remedi Plus
+            Personal Remedies Plus
           </h1>
         </div>
       </PageHeader>
@@ -63,10 +65,16 @@ export default function PaywallScreen() {
           </p>
         </div>
 
+        {requested && (
+          <p data-testid="paywall-requested" className="text-sm font-sans text-char-900 px-1">
+            You opened <span className="font-semibold">{requested.label}</span>, which is part of Personal Remedies Plus.
+          </p>
+        )}
+
         {/* Price placeholder — deliberately fake, never a real number */}
         <div className="rounded-xl border border-sand-200 bg-white shadow-xs px-4 py-5 flex flex-col items-center text-center gap-1">
           <p className="font-label text-xs uppercase tracking-eyebrow text-char-400">
-            Remedi Plus
+            Personal Remedies Plus
           </p>
           <p className="font-display text-[32px] font-semibold text-blue-950 leading-tight mt-1">
             $X.XX
@@ -121,7 +129,7 @@ export default function PaywallScreen() {
           Upgrade (placeholder)
         </button>
         <p className="text-[11px] text-char-400 font-sans text-center -mt-3">
-          Not a real purchase — everything in Remedi is currently unlocked.
+          Not a real purchase — everything in Personal Remedies is currently unlocked.
         </p>
       </div>
     </div>

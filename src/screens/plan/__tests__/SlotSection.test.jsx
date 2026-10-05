@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 /**
  * SlotSection.test.jsx — Wave 4 guard test for the renamed suggestions
- * trigger ("Suggestions" -> "See other healthy suggestions") and its
+ * trigger ("Suggestions" -> "See other suggestions") and its
  * restored visibility (SHOW_SUGGESTIONS flipped back to `true`).
  */
 import { act } from 'react';
@@ -54,16 +54,16 @@ afterEach(() => {
 });
 
 describe('SlotSection suggestions trigger (Wave 4 rename)', () => {
-  it('renders "See other healthy suggestions", not the old "Suggestions" label', async () => {
+  it('renders "See other suggestions", not the old "Suggestions" label', async () => {
     await mount();
-    expect(container.textContent).toContain('See other healthy suggestions');
+    expect(container.textContent).toContain('See other suggestions');
     expect(Array.from(container.querySelectorAll('button')).some((b) => b.textContent.trim() === 'Suggestions')).toBe(false);
   });
 
   it('calls onOpenSuggestions with the slot key when tapped', async () => {
     const onOpenSuggestions = vi.fn();
     await mount({ onOpenSuggestions });
-    const trigger = Array.from(container.querySelectorAll('button')).find((b) => b.textContent.includes('See other healthy suggestions'));
+    const trigger = Array.from(container.querySelectorAll('button')).find((b) => b.textContent.includes('See other suggestions'));
     expect(trigger).toBeTruthy();
     await act(async () => { trigger.click(); });
     expect(onOpenSuggestions).toHaveBeenCalledWith('breakfast');
@@ -71,13 +71,13 @@ describe('SlotSection suggestions trigger (Wave 4 rename)', () => {
 
   it('disables the trigger in ghost mode only', async () => {
     await mount({ ghost: true });
-    const trigger = Array.from(container.querySelectorAll('button')).find((b) => b.textContent.includes('See other healthy suggestions'));
+    const trigger = Array.from(container.querySelectorAll('button')).find((b) => b.textContent.includes('See other suggestions'));
     expect(trigger.disabled).toBe(true);
   });
 
   it('keeps the trigger enabled for an empty slot (Task 13 behavior preserved)', async () => {
     await mount({ items: [] });
-    const trigger = Array.from(container.querySelectorAll('button')).find((b) => b.textContent.includes('See other healthy suggestions'));
+    const trigger = Array.from(container.querySelectorAll('button')).find((b) => b.textContent.includes('See other suggestions'));
     expect(trigger.disabled).toBe(false);
   });
 });

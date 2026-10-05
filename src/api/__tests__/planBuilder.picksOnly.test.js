@@ -5,7 +5,7 @@
  *
  * Covers:
  *  - `ensurePlanForWeek`'s NO-PLAN CONTRACT: with no existing plan, it
- *    returns `{ plan: null, usedFallback: false }` synchronously-ish (zero
+ *    returns `{ plan: null }` synchronously-ish (zero
  *    network calls — `getMealPlanSuggestions` is never touched) and writes
  *    nothing to storage. This is the contract the next wave's Plan-screen
  *    UI task builds its empty state against.
@@ -80,7 +80,7 @@ describe('ensurePlanForWeek: no-plan contract (picks-only default, decision b)',
 
     const result = await ensurePlanForWeek({ conditions: [244] });
 
-    expect(result).toEqual({ plan: null, usedFallback: false });
+    expect(result).toEqual({ plan: null });
     expect(getMealPlanSuggestions).not.toHaveBeenCalled();
     expect(getPlan()).toBeNull(); // nothing was written to storage either
   });

@@ -25,7 +25,7 @@ function cardImage(item) {
 
 /**
  * SlotSection — one meal-plan slot (Breakfast/Lunch/Dinner/Snacks/Beverages)
- * for a SINGLE day: header (label + "See other healthy suggestions" +
+ * for a SINGLE day: header (label + "See other suggestions" +
  * Shuffle) and a 2-col FoodImageCard grid, or a dashed-border empty state
  * when the slot has no items.
  *
@@ -96,7 +96,7 @@ export default function SlotSection({
           </button>
         </div>
 
-        {/* Own row (Wave 4) — "See other healthy suggestions" is too long
+        {/* Own row (Wave 4) — "See other suggestions" is too long
             to share the row above with Shuffle at phone width; right-aligned
             to line up under Shuffle, and free to wrap onto two lines rather
             than forcing a horizontal scroll. Tapping it opens
@@ -111,7 +111,7 @@ export default function SlotSection({
                 underline-offset-2 transition-colors duration-fast hover:text-blue-950 text-right
                 ${suggestionsDisabled ? 'opacity-40 pointer-events-none' : ''}`}
             >
-              See other healthy suggestions
+              See other suggestions
             </button>
           </div>
         )}
@@ -125,12 +125,13 @@ export default function SlotSection({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-wrap gap-3">
           <AnimatePresence mode="popLayout">
             {items.map((item) => {
               return (
                 <motion.div
                   key={item.id}
+                  className="w-[calc(50%-0.375rem)] min-w-0"
                   layout
                   initial={{ opacity: 0, scale: 0.92 }}
                   animate={{ opacity: 1, scale: 1 }}

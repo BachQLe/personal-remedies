@@ -78,8 +78,8 @@ export default function FoodRating({
   const on  = isLight ? (isSkull ? 'text-avoid-600' : 'text-benefit-600') : (isSkull ? 'text-red-400'    : 'text-white');
   const off = isLight ? 'text-char-300' : (isSkull ? 'text-red-400/25' : 'text-white/25');
   const label = isSkull
-    ? `${rating.count} of 3 skulls — harmful for your conditions`
-    : `${rating.count} of 3 stars`;
+    ? `${rating.count} of 3 skulls — ranked lower for your conditions`
+    : `${rating.count} of 3 stars — ranked higher for your conditions`;
 
   return (
     <div className={`flex items-center gap-[2px] ${className}`} role="img" aria-label={label}>

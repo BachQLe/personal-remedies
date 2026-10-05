@@ -1,4 +1,13 @@
 /**
+ * HOW TO LOCK A FEATURE (one line): in ENTITLEMENT_CONFIG.features below, add
+ * `locked: true` to that feature's entry (e.g. `plan: { ..., locked: true }`).
+ * Every gated surface (Top Do's & Don'ts tab, /app/suggestions/group/:id,
+ * /app/suggestions/fine/:id, /app/plan, the Saved plans sheet) is wrapped in
+ * <RequireEntitlement feature="..."> (src/components/shared/RequireEntitlement.jsx),
+ * which then renders an upsell linking to /app/upgrade?feature=<key> instead of
+ * the screen. Remove the line (or set `locked: false`) to unlock. `tier: 'plus'`
+ * locks the same way. Nothing ships locked.
+ *
  * entitlements.js — Pure entitlement gate for Remedi's monetization
  * scaffolding (REMEDI_MASTER_PLAN.md Phase 6, item 6.1).
  *
@@ -59,6 +68,7 @@
  * @property {string} [description] - Neutral, non-persuasive one-line
  *   description of what the feature is. NOT marketing copy — see
  *   PaywallScreen.jsx's file-header comment re: the C2 health-claim audit.
+ * @property {boolean} [locked] - `true` locks this feature (gate shows upsell).
  * @property {'plus'} [tier] - Which paid tier unlocks this feature, when
  *   `defaultUnlocked` is false or this feature is explicitly gated. Absent
  *   today because nothing is gated; the shape exists so a future entry can
@@ -96,17 +106,22 @@ export const ENTITLEMENT_CONFIG = {
     top_dos_donts: {
       key: 'top_dos_donts',
       label: "Top Do's & Don'ts",
-      description: 'Condition-ranked list of what to favor and what to limit.',
+      description: 'Condition-ranked list of which foods rank higher and which rank lower.',
     },
     food_group_detail: {
       key: 'food_group_detail',
-      label: 'Food Groups Eat/Avoid detail',
-      description: 'Per-item eat/avoid verdicts within a food group, scored against your conditions.',
+      label: 'Food Groups ranking detail',
+      description: 'Per-item rankings within a food group, scored against your conditions.',
     },
     suggest: {
       key: 'suggest',
       label: 'Suggestions for you',
       description: 'Condition-ranked suggestions within a specific food group.',
+    },
+    good_for_me: {
+      key: 'good_for_me',
+      label: 'Check against my profile',
+      description: 'Check any food against the conditions in your profile.',
     },
     plan: {
       key: 'plan',
@@ -147,7 +162,7 @@ export const ENTITLEMENT_CONFIG = {
  */
 export function hasEntitlement(featureKey) {
   const feature = ENTITLEMENT_CONFIG.features[featureKey];
-  if (feature?.tier) return false;
+  if (feature?.locked || feature?.tier) return false;
   return ENTITLEMENT_CONFIG.defaultUnlocked;
 }
 

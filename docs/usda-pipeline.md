@@ -49,7 +49,14 @@ It's safe to re-run at any time:
 - `manualOverride: true` rows are additionally guarded at the merge step (`mergeMapEntries`) — even if some future change fed a fresh result for the same `foodItemID`, a manual row is never overwritten.
 - Nutrients are fetched for any `fdcId` referenced by the merged map that isn't already in `nutrients.json` — this also backfills nutrients for an `fdcId` a human points a manual override at.
 
-On an HTTP 429 (rate limited), the script stops the current phase cleanly, keeps everything it already resolved, and records why in `_meta.lastRun.stopReason` in the output files. It never fabricates a result to "finish" a run.
+**Resilience (updated 2026-10).**
+
+- Queries are sanitized (`sanitizeSearchQuery`): every non-letter/digit becomes a space. FDC returns HTTP 400 for `/` and similar characters (the 2026-09-06 abort was `#252 "Sugar/snap peas non-org"`, where any error stopped the whole run).
+- One item's failure never aborts the run: it is logged as `[error-skipped]`, not recorded, and retried next run. 5xx/network errors retry 3x first.
+- HTTP 429 waits 5 minutes then retries (up to 20 times); regular keys are paced at 3.7s/request (~970/hour).
+- Items searched with no acceptable match are recorded in `fdcMap.json` under top-level `unmatched` (`{name, reason}`), so reruns skip them. `--retry-unmatched` clears that list and re-searches (use after changing matching rules). `items` is unchanged for consumers.
+- Checkpoints are written atomically every 10 items and after every nutrient batch; Ctrl-C writes a final checkpoint. Resume = rerun `npm run usda:map`.
+- Matching: tokens are singularized (clams = clam), candidates containing derived-product words (soup, juice, oil, mushroom...) absent from the target are rejected, ties prefer "raw" then higher precision.
 
 ## The subset (what gets mapped)
 
@@ -154,3 +161,12 @@ if (mapEntry) {
 ```
 
 A missing `mapEntry` means: fall through to step 3 (group estimate) or step 4 (`null`) — **not** a zero, not an average, not a rounded guess. That's the same rule this pipeline itself follows (see "Matching rules" above) and the master plan's frozen guardrail.
+
+## Micronutrients (`--details`, added 2026-10)
+
+`node scripts/build-usda-map.mjs --details` skips searching and batch-fetches (20 fdcIds per `POST /v1/foods`) the full FDC record for every mapped fdcId that has no `micros` yet; `--refresh-details` refetches all. Each `nutrients.json` row gains `micros: { per100g: {...}, perServing: {...} }` (perServing only when the row already has a portion; macros and `portionSource` are untouched). Keys and units live in `src/data/usda/nutrientCatalog.js` (fiber, sugars, saturated fat, cholesterol, omega-3 = ALA+EPA+DPA+DHA, sodium, potassium, calcium, iron, magnesium, zinc, phosphorus, selenium, copper, manganese, vitamins A (RAE)/C/D/E/K, folate, B1/B2/B3/B6/B12, choline). A nutrient FDC did not report is omitted, never 0-filled. Vitamin D falls back to IU/40 when mcg is absent. Runtime reads: `src/api/nutrientFacts.js`.
+
+Manual overrides added 2026-10 (wrong automatic matches): 595 Skim milk, 596 Whole milk, 593 Chocolate milk, 516 Oats, 440/1414 Spinach, 227 Butternuts, 229 Chestnuts, 232 Coconut meat (dried), 474 White bread, 521 Brown rice, 573 Light cream, 640 Chocolate cake, 689 Hot chocolate, 731 Red wine.
+
+**Unmatched sweep (2026-10-04).** Of the 93 `unmatched` items, 70 were hand-matched via manual override (simpler FDC queries: "sardine", "radish, oriental", "nuts, brazilnuts", "pummelo", beverage/candy/cookie SR Legacy records, etc.; Foundation preferred, SR Legacy otherwise) and nutrients/micros fetched. Fixed 3 wrong matches: 1243 Tomatoes (canned, no salt) -> 170138, 1242 Tomatoes (canned) -> 170051 (both were raw grape tomatoes), 201 White fish (smoked) -> 173712 (was raw sucker). Items 200 White fish (raw) still maps to sucker. Current counts: **609 mapped / 23 unmatched** of 632; `nutrients.json` has 555 fdcId rows. Still unmatched (no confident same-form record, or Branded only): black-eyed peas, apple juice (only baby food), dried banana, cowberries, cloud ear fungus, pimento peppers (x2), cream of wheat, donuts, granola bars, Kaiser rolls, after-dinner mints, chocolate mousse, coffee liqueur, coffeecake, cream puffs/eclair, creme de menthe, malted drinks, pina colada, soft drinks, sports drinks, taro chips, Red Bull. No true non-foods were in the list (all are foods/beverages).
+Additional manual overrides: 70 items above (all `manualOverride: true`), plus 1242, 1243, 201 (override list in `fdcMap.json`, filter `manualOverride`).

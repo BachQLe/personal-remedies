@@ -209,3 +209,59 @@ describe('pullProfile: remote daily_plan/conditions consistency check (gap 2)', 
     expect(getPlan()).toBeNull();
   });
 });
+
+describe('initProfileSync: health-profile-change wipe (gap 5)', () => {
+  const SEED_PROFILE = {
+    firstName: 'Amy',
+    conditions: [203],
+    allergies: ['peanut'],
+    medications: [],
+    dietaryPattern: 'omnivore',
+    religiousRestriction: 'none',
+  };
+
+  async function seeded() {
+    vi.doMock(SUPABASE_MODULE, () => ({ supabase: null, isSupabaseConfigured: false }));
+    const fresh = await loadFresh();
+    const schedule = await import('../../state/schedule.js');
+    fresh.storage.set('profile', SEED_PROFILE);
+    fresh.setPlan({ ...planFixture('203'), picksBySlot: { breakfast: [{ id: 1 }] } });
+    fresh.storage.set('savedPlans', [{ id: 'sp1', name: 'Keep me', plan: planFixture('203') }]);
+    fresh.storage.set('library', [{ id: 9, name: 'Saved recipe' }]);
+    schedule.scheduleItem('2099-01-01', { id: 5, name: 'Oats', kind: 'food' });
+    const teardown = fresh.initProfileSync();
+    return { ...fresh, schedule, teardown };
+  }
+
+  it.each([
+    ['allergies', { allergies: ['peanut', 'shellfish'] }],
+    ['medications', { medications: ['warfarin'] }],
+    ['dietaryPattern', { dietaryPattern: 'vegan' }],
+    ['religiousRestriction', { religiousRestriction: 'halal' }],
+    ['conditions', { conditions: [203, 244] }],
+  ])('wipes plan, picks and schedule when %s changes, keeping library and saved plans', async (_label, patch) => {
+    const { storage, getPlan, schedule, teardown } = await seeded();
+
+    storage.set('profile', { ...SEED_PROFILE, ...patch });
+
+    expect(getPlan()).toBeNull();
+    expect(storage.get('dailyPlan')).toBeNull();
+    expect(Object.keys(schedule.getSchedule().days)).toHaveLength(0);
+    expect(storage.get('library')).toHaveLength(1);
+    expect(storage.get('savedPlans')).toHaveLength(1);
+
+    teardown();
+  });
+
+  it('leaves everything alone for a non-guidance edit (name, calorie target, list order)', async () => {
+    const { storage, getPlan, schedule, teardown } = await seeded();
+
+    storage.set('profile', { ...SEED_PROFILE, firstName: 'Ben', calorieTarget: 1800 });
+
+    expect(getPlan()).not.toBeNull();
+    expect(getPlan().picksBySlot).toBeDefined();
+    expect(Object.keys(schedule.getSchedule().days)).toHaveLength(1);
+
+    teardown();
+  });
+});

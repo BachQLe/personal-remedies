@@ -13,6 +13,8 @@
  *      instead of through a DOM render.
  */
 
+import { EXCLUDED_FINE_GROUPS } from '../api/config.js';
+
 /**
  * Decide whether an `item` handed to FoodDetailCard is a recipe or a plain
  * food/lifestyle entry. `item.isRecipe` (explicitly set by every screen
@@ -45,10 +47,7 @@ export function resolveIsRecipe(item) {
  * Best-effort hostname for display (e.g. "medlineplus.gov"), stripped of a
  * leading "www.". Falls back to the raw url string if it isn't parseable
  * (never throws — this only feeds a button label).
- *
- * Exported (Track 1D, in-app recipe preview sheet) so
- * `resolveRecipePreview` below and `RecipeLinkSheet.jsx` can show the same
- * hostname text independently of `resolveRecipeLinkTarget`'s label string.
+
  * @param {string} url
  * @returns {string}
  */
@@ -84,75 +83,6 @@ export function resolveRecipeLinkTarget(item) {
 }
 
 /**
- * Build the display model for `RecipeLinkSheet.jsx` — the in-app preview
- * shown before the hand-off button, since medlineplus.gov (the only recipe
- * source) sends `x-frame-options: SAMEORIGIN` + `frame-ancestors 'self'`
- * and can never be framed.
- *
- * Pure and reuses `resolveRecipeLinkTarget` for the url/isSource decision
- * (never re-derives it) so the sheet and the CTA it's opened from can never
- * disagree about where the hand-off goes.
- *
- * `calories` reads `item.nutritionPerServing.calories` DIRECTLY — never
- * `resolveNutrition()`/`estimateNutrition()` (src/api/nutrition.js,
- * src/data/nutritionEstimates.js), which fall through to USDA and then to
- * group estimates. Fabricating a recipe calorie number from an estimate is
- * forbidden (REMEDI_MASTER_PLAN.md's calorie-provenance rule) — a recipe
- * with no transcribed source number shows `calories: null`, not a guess,
- * even when its `fineGroup` is one `estimateNutrition` could otherwise
- * produce a number for.
- *
- * `body`/`showHostname` carry the "Leaving Remedi" panel copy so the
- * component never has to branch on `isSource` itself (house convention —
- * copy decisions live in the pure resolver, not the JSX). When `isSource`
- * is false (no real `sourceUrl`, the Google-search fallback), the old copy
- * — "Directions are hosted by google.com." — was a false claim: Google
- * isn't hosting the recipe, it's just where we're sending the user to look
- * for it. That case gets honest copy instead ("We don't have a source link
- * for this recipe yet — search the web for it.") with no hostname caption
- * (`showHostname: false`), since there's no real host to name.
- * @param {Object} item - `{ name?, image?, sourceUrl?, attribution?,
- *   sourceName?, nutritionPerServing?: { calories?: number } }`
- * @returns {{
- *   title: string,
- *   image: string|null,
- *   calories: number|null,
- *   attribution: string,
- *   hostname: string,
- *   url: string,
- *   isSource: boolean,
- *   ctaLabel: string,
- *   eyebrow: string,
- *   body: string,
- *   showHostname: boolean,
- * }}
- */
-export function resolveRecipePreview(item) {
-  const target = resolveRecipeLinkTarget(item);
-  const hostname = hostnameFromUrl(target.url);
-  const calories = Number.isFinite(item?.nutritionPerServing?.calories)
-    ? item.nutritionPerServing.calories
-    : null;
-  const attribution = item?.attribution || hostname;
-
-  return {
-    title: item?.name ?? '',
-    image: item?.image ?? null,
-    calories,
-    attribution,
-    hostname,
-    url: target.url,
-    isSource: target.isSource,
-    ctaLabel: target.isSource ? `Open at ${hostname}` : 'Search for this recipe',
-    eyebrow: 'Leaving Remedi',
-    body: target.isSource
-      ? `Directions are hosted by ${attribution}.`
-      : "We don't have a source link for this recipe yet — search the web for it.",
-    showHostname: target.isSource,
-  };
-}
-
-/**
  * Bucket a food/recipe's per-condition assessment rows into three verdict
  * groups for the front face's "Best for:" chip row. Replaces the old
  * single-line, tier-filtered list (`tier === 'Top'/'Strong'/'Good'` only)
@@ -178,6 +108,8 @@ export function groupConditionsByVerdict(perCondition) {
 
   for (const c of perCondition || []) {
     if (!c?.conditionName) continue;
+    // Unscorable rows (unauthorized/nodata/error) are not a verdict — omit from chips.
+    if (c.status != null && c.status !== 'ok') continue;
     const id = c.numericId;
     if (id >= 1 && id <= 3) helpsRows.push(c);
     else if (id >= 5 && id <= 7) avoidRows.push(c);
@@ -203,9 +135,9 @@ export function groupConditionsByVerdict(perCondition) {
  *   groups only, in display order.
  */
 export function orderVerdictGroups(grouped, listType) {
-  const helps = { key: 'helps', label: 'Helps:', names: grouped?.helps || [] };
+  const helps = { key: 'helps', label: 'Ranked favorably for:', names: grouped?.helps || [] };
   const neutral = { key: 'neutral', label: 'Neutral:', names: grouped?.neutral || [] };
-  const avoid = { key: 'avoid', label: 'Avoid for:', names: grouped?.avoid || [] };
+  const avoid = { key: 'avoid', label: 'Ranked lower for:', names: grouped?.avoid || [] };
   const ordered = listType === 'harmful' ? [avoid, helps, neutral] : [helps, neutral, avoid];
   return ordered.filter((g) => g.names.length > 0);
 }
@@ -229,3 +161,77 @@ export function deriveAssessStatus(settled) {
   const perCondition = settled.value?.perCondition;
   return Array.isArray(perCondition) && perCondition.length > 0 ? 'success' : 'empty';
 }
+
+/**
+ * Resolve the plain-FOOD "other options" link target: this item's own fine
+ * food group's Suggest page (`/app/suggestions/fine/:code`) when that code
+ * resolves to something real and useful, else the coarse group's existing
+ * page (`/app/suggestions/group/:code`), else no link at all.
+ *
+ * Fine wins over coarse UNLESS it's one of `EXCLUDED_FINE_GROUPS`
+ * ('x'/'j1' lifestyle codes, plus every recipe's blanket 'l' — recipes
+ * never reach this function at all, see `mealTypeToRecipesHref` below for
+ * their own link, but 'l' is excluded here too for any plain-food item that
+ * somehow carries it) — those codes are too generic to deep-link into, so
+ * the coarse parent is used instead.
+ *
+ * `fineGroup`/`group` resolution mirrors the non-food icon lookup further
+ * down this file EXACTLY: assessment's own Food (fresh off the /fooditems
+ * dictionary) wins, then `facts` (getFoodFacts — which per that same
+ * comment does NOT currently return these fields, so this layer is inert
+ * until/unless that adapter export changes), then whatever the caller
+ * already seeded on `item` (e.g. GroupDetailScreen passing through the
+ * coarse group it's already browsing). Kept as its own function (duplicating
+ * that lookup) rather than sharing one computation, because this one feeds
+ * an effect that must be declared before this component's
+ * `if (!open || !item) return null` early return, while the icon lookup is
+ * a plain render-time expression after it.
+ *
+ * Deliberately independent of `topFoodsForConditions` (the rail rendered
+ * just above this link) — that rail is gated on a DIFFERENT signal (the
+ * /topdoordonts companions list) and can be empty while a perfectly good
+ * group still resolves here, or vice versa. See the render site for why
+ * this link is its own block rather than nested inside that rail's `&&`.
+ *
+ * @param {Object|null} item
+ * @param {Object|null} facts
+ * @param {Object|null} assessment
+ * @returns {{ path: string, code: string, kind: 'fine'|'coarse' } | null}
+ */
+export function resolveGroupLinkTarget(item, facts, assessment) {
+  const fineGroup = assessment?.food?.fineGroup ?? facts?.fineGroup ?? item?.fineGroup ?? null;
+  const group = assessment?.food?.group ?? facts?.group ?? item?.group ?? null;
+
+  if (fineGroup && !EXCLUDED_FINE_GROUPS.includes(fineGroup)) {
+    return { path: `/app/suggestions/fine/${fineGroup}`, code: fineGroup, kind: 'fine' };
+  }
+  if (group) {
+    return { path: `/app/suggestions/group/${group}`, code: group, kind: 'coarse' };
+  }
+  return null;
+}
+
+/**
+ * Resolve a recipe's raw `mealType` (lowercase: breakfast/lunch/dinner/
+ * snack/dessert/beverage — recipeIngestion.js's MEAL_TYPES) to the recipe
+ * browser link its "other options" button should open: `/app/recipes`
+ * pre-filtered to the matching tab via `?meal=`.
+ *
+ * `dessert` maps to the `Snack` tab, not a `Dessert` tab — there isn't one;
+ * RecipesScreen's Snack tab deliberately shows snack AND dessert recipes
+ * together (Task C1). `beverage` has no tab at all and, like a
+ * missing/unrecognized mealType, falls back to a plain unfiltered
+ * `/app/recipes` link rather than guessing one.
+ *
+ * @param {string|undefined|null} mealType
+ * @returns {string}
+ */
+export function mealTypeToRecipesHref(mealType) {
+  const lower = mealType?.toLowerCase?.();
+  if (!lower) return '/app/recipes';
+  if (lower === 'dessert') return '/app/recipes?meal=Snack';
+  const match = RECIPE_MEAL_LABELS.find((label) => label.toLowerCase() === lower);
+  return match ? `/app/recipes?meal=${match}` : '/app/recipes';
+}
+
+const RECIPE_MEAL_LABELS = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];

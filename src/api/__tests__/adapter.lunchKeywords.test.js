@@ -58,7 +58,7 @@ describe('getMealPlanSuggestions: lunch mealType classification (Task 4 fix)', (
 });
 
 describe('getMealPlanSuggestions: lunch rail blank fix (#8/#13) keyword corrections', () => {
-  it('the dictionary typo "American Macaroni Salald" lands in lunch, not dinner', async () => {
+  it('the dictionary typo "American Macaroni Salald" lands in lunch as primary (overlay alsoFits adds dinner as secondary)', async () => {
     fetchSuggest.mockImplementation(async (_csv, fineFoodGroup) => {
       if (fineFoodGroup === 'l') {
         return [
@@ -76,7 +76,11 @@ describe('getMealPlanSuggestions: lunch rail blank fix (#8/#13) keyword correcti
     const result = await getMealPlanSuggestions({ conditions: [9101] });
 
     expect(result.candidates.lunch.some((c) => c.id === 5003)).toBe(true);
-    expect(result.candidates.dinner.some((c) => c.id === 5003)).toBe(false);
+    // recipeOverlay.json row 5003 is mealType 'lunch' + alsoFits ['dinner'],
+    // and Task D (Sept 2026) feeds alsoFits into secondary slots on purpose.
+    // So it legitimately ALSO appears in dinner — but only as a secondary
+    // match, never ahead of its primary lunch slot, and never in snacks.
+    expect(result.candidates.snacks.some((c) => c.id === 5003)).toBe(false);
   });
 
   it('"Chicken Pot Pie (no crust)" lands in dinner, not snacks (pot pie is a dish, not a dessert)', async () => {

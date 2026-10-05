@@ -12,7 +12,7 @@
  * useAsyncData and every presentational child are mocked out so this test
  * exercises only the screen's own validation logic, not data fetching or
  * child rendering (those are covered elsewhere — RankedRow, DataState,
- * FoodDetailCard, CoverageNotice all have their own tests/are exercised via
+ * FoodDetailCard all have their own tests/are exercised via
  * manual verification).
  */
 import { act } from 'react';
@@ -50,7 +50,6 @@ vi.mock('../../../components/shared/BackButton.jsx', () => ({
   default: () => <button aria-label="Go back" />,
 }));
 vi.mock('../../../components/shared/DataState.jsx', () => ({ default: () => null }));
-vi.mock('../CoverageNotice.jsx', () => ({ default: () => null }));
 vi.mock('../ProfileSetupAction.jsx', () => ({ default: () => null }));
 
 import FineGroupDetailScreen from '../FineGroupDetailScreen.jsx';

@@ -9,6 +9,8 @@ import {
   getFineGroupSuggestions,
   getGroupLabels,
 } from '../../api/api.js';
+import DataState from '../../components/shared/DataState.jsx';
+import { useOnline, planLoadState } from './usePlanLoadState.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import { getOverlayImageFile } from '../../api/localTables.js';
 import { COARSE_GROUP_LABELS } from '../../api/config.js';
@@ -258,6 +260,7 @@ export default function SuggestionsSheet({
   const [fullCandidates, setFullCandidates] = useState([]);
 
   const [retryToken, setRetryToken] = useState(0);
+  const online = useOnline();
 
   // The 17-group menu + coarse labels are profile-independent and cached
   // (getFineFoodGroups reads a bundled local table — no network round trip;
@@ -476,10 +479,11 @@ export default function SuggestionsSheet({
                           No confident suggestions yet for this one.
                         </p>
                       ) : (
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="flex flex-wrap gap-3">
                           {substitutes.map((substitute) => (
                             <FoodImageCard
                               key={substitute.id}
+                              className="w-[calc(50%-0.375rem)] min-w-0"
                               id={substitute.id}
                               image={cardImage(substitute)}
                               numericId={substitute.numericId}
@@ -524,37 +528,29 @@ export default function SuggestionsSheet({
                   </p>
                 )}
 
-                {groupLoading && (
+                {groupLoading ? (
                   <p className="text-sm text-blue-950/60 py-6 text-center">Finding suggestions…</p>
-                )}
-
-                {!groupLoading && groupError && (
-                  <div className="flex flex-col items-center gap-3 py-6">
-                    <p className="text-sm text-blue-950/70 text-center">
-                      Could not load suggestions — try again.
-                    </p>
-                    <button
-                      onClick={handleRetry}
-                      className="rounded-pill bg-blue-950 text-white text-sm font-semibold font-sans px-4 py-2
-                        hover:bg-blue-900 active:scale-[0.99] transition-all duration-fast"
-                    >
-                      Retry
-                    </button>
-                  </div>
-                )}
-
-                {!groupLoading && !groupError && (
-                  groupCandidates.length === 0 ? (
-                    <p className="text-sm text-blue-950/50 py-1">
-                      No confident suggestions yet for this group.
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-3">
+                ) : (
+                  <DataState
+                    status={planLoadState({
+                      loading: false,
+                      hasData: groupCandidates.length > 0,
+                      error: groupError,
+                      online,
+                    })}
+                    onRetry={handleRetry}
+                    screenName="suggestions"
+                    emptyTitle={null}
+                    emptyBody="No confident suggestions yet for this group."
+                  >
+                    <div className="flex flex-wrap gap-3">
                       {groupCandidates.map((candidate) => (
-                        <CandidateCard key={candidate.id} candidate={candidate} onSelect={onSelect} onAdd={onAdd} />
+                        <div key={candidate.id} className="w-[calc(50%-0.375rem)] min-w-0">
+                          <CandidateCard candidate={candidate} onSelect={onSelect} onAdd={onAdd} />
+                        </div>
                       ))}
                     </div>
-                  )
+                  </DataState>
                 )}
               </div>
             </div>
@@ -574,37 +570,29 @@ export default function SuggestionsSheet({
               : `More options for ${slot?.label}, scored against your conditions.`}
           </p>
 
-          {fullLoading && (
+          {fullLoading ? (
             <p className="text-sm text-blue-950/60 py-6 text-center">Finding options…</p>
-          )}
-
-          {!fullLoading && fullError && (
-            <div className="flex flex-col items-center gap-3 py-6">
-              <p className="text-sm text-blue-950/70 text-center">
-                Could not load options — try again.
-              </p>
-              <button
-                onClick={handleRetry}
-                className="rounded-pill bg-blue-950 text-white text-sm font-semibold font-sans px-4 py-2
-                  hover:bg-blue-900 active:scale-[0.99] transition-all duration-fast"
-              >
-                Retry
-              </button>
-            </div>
-          )}
-
-          {!fullLoading && !fullError && (
-            fullCandidates.length === 0 ? (
-              <p className="text-sm text-blue-950/50 py-1">
-                No suggestions yet for {slot?.label}.
-              </p>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
+          ) : (
+            <DataState
+              status={planLoadState({
+                loading: false,
+                hasData: fullCandidates.length > 0,
+                error: fullError,
+                online,
+              })}
+              onRetry={handleRetry}
+              screenName="options"
+              emptyTitle={null}
+              emptyBody={`No suggestions yet for ${slot?.label}.`}
+            >
+              <div className="flex flex-wrap gap-3">
                 {fullCandidates.map((candidate) => (
-                  <CandidateCard key={candidate.id} candidate={candidate} onSelect={onSelect} onAdd={onAdd} />
+                  <div key={candidate.id} className="w-[calc(50%-0.375rem)] min-w-0">
+                    <CandidateCard candidate={candidate} onSelect={onSelect} onAdd={onAdd} />
+                  </div>
                 ))}
               </div>
-            )
+            </DataState>
           )}
         </div>
       </div>

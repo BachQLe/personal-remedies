@@ -57,14 +57,14 @@ describe('getIngredientAlternatives', () => {
       },
     });
 
-    const { alternatives, suggestGroup, usedFallback } = await getIngredientAlternatives(
+    const { alternatives, suggestGroup, unscorableReason } = await getIngredientAlternatives(
       { conditions: CONDITIONS },
       BEEF
     );
 
     expect(calls).toEqual([['9001', 'b2']]);
     expect(suggestGroup).toBe('b2');
-    expect(usedFallback).toBe(false);
+    expect(unscorableReason).toBeNull();
     expect(alternatives.map((a) => a.name)).toEqual(['Beef liver', 'Pork liver']);
     expect(alternatives[0].numericId).toBe(1);
   });

@@ -28,3 +28,6 @@ dist-ssr
 *.sw?
 .qa2/
 .qa_tmp/
+
+# Local agent config (contains plaintext API key)
+.codex/

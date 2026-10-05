@@ -48,7 +48,7 @@ export default function StudyReferences({ references, loading }) {
     );
   }
 
-  const label = references.length === 1 ? '1 study' : `${references.length} studies`;
+  const label = references.length === 1 ? '1 reference' : `${references.length} references`;
 
   return (
     <div className="mt-2">

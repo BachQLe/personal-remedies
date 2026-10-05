@@ -8,7 +8,7 @@
 
 ## What was added
 
-`src/api/nutridigm.js` gained a dev-only, in-memory, per-endpoint request counter. Diff summary (57 lines added, 0 removed, 0 modified — purely additive):
+`src/api/nutridigm.js` gained a per-endpoint request counter (now persisted per day — see `getDailyRequestCounts` in nutridigm.js; the original version was in-memory only). Diff summary (57 lines added, 0 removed, 0 modified — purely additive):
 
 1. **`_requestCounts`** — a module-private `Map<string, number>` keyed by endpoint path (e.g. `'goodfor'`, `'suggest'`, `'topdoordonts'`).
 2. **`recordRequest(urlStr)`** — private helper, parses the endpoint from the final path segment of the request URL (so `performRequest`'s existing signature never changes — no new parameter threaded through) and increments that endpoint's counter.

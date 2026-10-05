@@ -6,7 +6,6 @@
  */
 
 import { buildMealPlan, getConditionNames, dedupeNotes, getTopDosAndDonts } from './adapter.js';
-import { DEFAULT_DEV_CONDITIONS } from './config.js';
 import { storage } from './storage.js';
 import { getIngredientImage } from './ingredientImages.js';
 import { getOverlayImageFile } from './localTables.js';
@@ -62,18 +61,13 @@ async function loadSlots() {
 
   _loading = (async () => {
     const profile = storage.get('profile', null);
-    const conditions = profile?.conditions?.length ? profile.conditions : DEFAULT_DEV_CONDITIONS;
+    const conditions = profile?.conditions ?? [];
 
-    // buildMealPlan already retries with DEFAULT_DEV_CONDITIONS via the
-    // centralized withConditionFallback helper in adapter.js — just read the
-    // propagated flag instead of duplicating the retry here.
     const plan = await buildMealPlan({ ...profile, conditions });
-    const usedFallback = !!plan.usedFallback;
 
     // Cards render matchedConditions as display chips (ConditionTag), so
-    // resolve the numeric healthConditionIDs to names once here.
-    const resolvedConditions = usedFallback ? DEFAULT_DEV_CONDITIONS : conditions;
-    const conditionNames = await getConditionNames(resolvedConditions).catch(() => []);
+    // resolve the scored healthConditionIDs to names once here.
+    const conditionNames = await getConditionNames(plan.conditionIds ?? []).catch(() => []);
 
     const slots = {};
     for (const meal of plan.meals) {

@@ -11,9 +11,8 @@
  * Tiles carry no per-profile data — labels come from adapter.js's
  * getGroupLabels/getFineGroupLabelsByCoarse (coarse group name plus a
  * preview line of its fine-group names, cached and profile-independent), so
- * this tab needs no profile fetch of its own and no partial-data ("demo
- * guidance") notice — labels aren't condition-scored, so
- * withConditionFallback never applies here.
+ * this tab needs no profile fetch of its own; labels aren't
+ * condition-scored.
  *
  * On failure the list still renders using COARSE_GROUP_LABELS with no
  * fine-group preview line — a deliberate graceful degrade (T5B: KEPT as-is,
@@ -81,7 +80,7 @@ function CategoryGrid({ coarseLabels, fineLabelsByGroup, onOpen }) {
             <div className="min-w-0 flex-1">
               <p className="font-sans text-base font-semibold text-char-900 leading-snug">{label}</p>
               {fineLine && (
-                <p className="text-xs text-char-400 font-sans mt-0.5 line-clamp-2">{fineLine}</p>
+                <p className="text-xs font-sans font-semibold uppercase tracking-wide text-char-700 mt-0.5 line-clamp-2">{fineLine}</p>
               )}
             </div>
             <ChevronRight size={16} className="text-char-400 shrink-0" aria-hidden="true" />

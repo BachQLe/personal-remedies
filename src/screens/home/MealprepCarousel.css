@@ -81,9 +81,10 @@
   transition: transform 250ms ease;
 }
 .home-meals__photo-fallback {
-  display: grid;
+  display: flex;
   height: 100%;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
   color: #c8d6c6;
   background: radial-gradient(ellipse at 24% 18%, #7e9b79, transparent 68%), #3d5c53;
 }
@@ -139,8 +140,9 @@
   position: absolute;
   right: 14px;
   bottom: 17px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -154,7 +156,7 @@
 .home-meals__save:active { background: #e0eadd; }
 .home-meals__navigation { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 0; color: var(--meal-muted); }
 .home-meals__navigation > span { min-width: 42px; text-align: center; font-size: 11px; font-variant-numeric: tabular-nums; }
-.home-meals__navigation button { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; transition: background 160ms ease; }
+.home-meals__navigation button { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; transition: background 160ms ease; }
 .home-meals__navigation button:hover:enabled { background: rgb(255 255 255 / 40%); }
 .home-meals__navigation button:disabled { opacity: 0.28; cursor: default; }
 .home-meals button:focus-visible,

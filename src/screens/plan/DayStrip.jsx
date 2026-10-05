@@ -43,7 +43,7 @@ export default function DayStrip({ days, selected, onSelect, bgClassName = 'bg-f
   const today = todayKey();
 
   return (
-    <div className={`grid grid-cols-7 gap-1 ${bgClassName}`}>
+    <div className={`flex gap-1 ${bgClassName}`}>
       {days.map((day) => {
         const isSelected = day.key === selected;
         const isToday = day.key === today;
@@ -54,7 +54,7 @@ export default function DayStrip({ days, selected, onSelect, bgClassName = 'bg-f
             onClick={() => onSelect(day.key)}
             aria-pressed={isSelected}
             aria-label={`${abbr} ${dayOfMonth}${isToday ? ' (today)' : ''}`}
-            className="relative flex flex-col items-center gap-0.5 py-2
+            className="relative flex flex-col items-center flex-1 min-w-0 gap-0.5 py-2
               rounded-xl overflow-hidden transition-colors duration-fast
               active:scale-[0.97]"
           >

@@ -28,9 +28,6 @@
  *   - a bespoke skeleton for the loading state (per DataState's own
  *     docblock — screens with their own loading UI should never pass
  *     'loading' through DataState)
- *   - CoverageNotice rendered from usedFallback + requestedConditionIds —
- *     the app's honesty guarantee that a user whose conditions aren't
- *     scored is told so rather than shown fabricated-looking data.
  *
  * Route-param validation: the 17 valid fine-group codes come from
  * getFineFoodGroups() — an async, cached, local-table read, unlike
@@ -53,7 +50,6 @@ import GlassPanel from '../../components/shared/GlassPanel.jsx';
 import BackButton from '../../components/shared/BackButton.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
 import DataState from '../../components/shared/DataState.jsx';
-import CoverageNotice from './CoverageNotice.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
 
@@ -166,13 +162,12 @@ export default function FineGroupDetailScreen() {
               emptyTitle={status === 'empty' ? null : undefined}
               emptyBody={
                 status === 'empty'
-                  ? 'There are no common food items within this food group ranked for your health profile.'
+                  ? data?.unscorableReason || 'There are no common food items within this food group ranked for your health profile.'
                   : undefined
               }
               emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
             >
               <div className="flex flex-col gap-2">
-                <CoverageNotice usedFallback={!!data?.usedFallback} requestedConditionIds={data?.requestedConditionIds} />
                 {items.map((food) => (
                   <RankedRow
                     key={food.id}

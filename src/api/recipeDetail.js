@@ -58,7 +58,6 @@ import { fetchTopDoOrDonts } from './nutridigm.js';
 import { getIngredientImage } from './ingredientImages.js';
 import { getOverlayImageFile } from './localTables.js';
 import { storage } from './storage.js';
-import { DEFAULT_DEV_CONDITIONS } from './config.js';
 
 /**
  * Build the full detail payload for FoodDetailCard.
@@ -85,9 +84,7 @@ import { DEFAULT_DEV_CONDITIONS } from './config.js';
  */
 export async function buildRecipeDetail(card, profile) {
   const resolvedProfile = profile ?? storage.get('profile', null);
-  const conditions = resolvedProfile?.conditions?.length
-    ? resolvedProfile.conditions
-    : DEFAULT_DEV_CONDITIONS;
+  const conditions = resolvedProfile?.conditions ?? [];
 
   // --- Conditions from assessFood ---
   let derivedConditions = card.matchedConditions ?? [];

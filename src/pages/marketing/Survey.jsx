@@ -13,7 +13,7 @@ const steps = [
       "Manage a chronic condition",
       "Boost energy & focus",
       "Improve gut health",
-      "Reduce inflammation",
+      "Eat more whole foods",
     ],
   },
   {
@@ -47,39 +47,19 @@ const steps = [
 
 const facts = [
   {
-    stat: "30%",
-    claim: "A Mediterranean diet can reduce your risk of heart disease by 30%.",
-    source: "Johns Hopkins Medicine",
+    stat: "your conditions",
+    claim: "Foods are ranked for the conditions you choose, so your list starts from your own profile.",
+    source: "How it works",
   },
   {
-    stat: "8 in 10",
-    claim: "8 in 10 chronic diseases are preventable through nutrition and lifestyle changes.",
-    source: "PMC / peer-reviewed",
+    stat: "your list",
+    claim: "You can change your conditions at any time and the rankings update to match.",
+    source: "How it works",
   },
   {
-    stat: "55%",
-    claim: "Higher folate intake from leafy greens can reduce depression risk by up to 55%.",
-    source: "American Journal of Psychiatry",
-  },
-  {
-    stat: "70%",
-    claim: "70% of the immune system lives in the gut -- what you eat is your first line of defense.",
-    source: "Cleveland Clinic",
-  },
-  {
-    stat: "in just 4-8 weeks",
-    claim: "People who added fermented foods to their diet reported better mood and lower stress in as little as 4-8 weeks.",
-    source: "peer-reviewed study, 2022",
-  },
-  {
-    stat: "80%",
-    claim: "A Mediterranean diet can reduce the risk of early death by up to 80%.",
-    source: "Johns Hopkins Medicine",
-  },
-  {
-    stat: "number 1",
-    claim: "Nutrition is the single most powerful lever you have over your long-term health.",
-    source: "Harvard Health",
+    stat: "your doctor",
+    claim: "Rankings are for general information only. Ask your doctor before changing your diet.",
+    source: "A reminder",
   },
 ];
 
@@ -276,7 +256,7 @@ export default function Survey() {
 
                 <p className="mt-4 text-base leading-[1.65] text-char-500 max-w-[38ch] mx-auto font-sans">
                   {[
-                    answers.goal && `Optimized to help you ${answers.goal.toLowerCase()}`,
+                    answers.goal && "Matched to your goals",
                     answers.condition && answers.condition[0] !== "None" && `with ${answers.condition.join(", ").toLowerCase()} in mind`,
                     answers.diet && answers.diet !== "No restrictions" && `and built around a ${answers.diet.toLowerCase()} lifestyle`,
                   ].filter(Boolean).join(", ")}.

@@ -77,10 +77,11 @@
  * fine for a pilot batch via `--limit`).
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { searchFoods, getFoods, FdcApiError } from '../src/api/usda.js';
+import { extractMicros, scaleMicros } from '../src/data/usda/nutrientCatalog.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -95,7 +96,14 @@ const DEMO_KEY = 'DEMO_KEY';
 
 /** Delay between FDC calls (ms). DEMO_KEY is shared globally and heavily rate-limited. */
 const DEMO_DELAY_MS = 3000;
-const LIVE_DELAY_MS = 400;
+/** Regular api.data.gov keys allow ~1000 req/hour => >= 3.6s/request on average. */
+const LIVE_DELAY_MS = 3700;
+/** Write checkpoint files every N attempted items. */
+const CHECKPOINT_EVERY = 10;
+/** Retry policy. 429 waits (Retry-After header, else this) then retries — up to MAX_429_RETRIES times. */
+const RATE_LIMIT_WAIT_MS = 5 * 60 * 1000;
+const MAX_429_RETRIES = 20;
+const MAX_TRANSIENT_RETRIES = 3;
 /** Max fdcIds per batch nutrient fetch — keeps individual requests/failures cheap. */
 const BATCH_SIZE = 20;
 
@@ -152,8 +160,31 @@ export function normalizeFoodName(name) {
  * @returns {string[]} whitespace-separated tokens
  */
 export function tokenizeName(normalized) {
-  return normalized ? normalized.split(' ').filter(Boolean) : [];
+  return normalized ? normalized.split(' ').filter(Boolean).map(stemToken) : [];
 }
+
+/**
+ * Crude singularizer so "clams" matches "clam" (FDC descriptions are
+ * mostly singular, Nutridigm names mostly plural).
+ * @param {string} t @returns {string}
+ */
+export function stemToken(t) {
+  if (t.length > 4 && t.endsWith('ies')) return `${t.slice(0, -3)}y`;
+  if (t.length > 4 && /(ches|shes|sses|xes|oes)$/.test(t)) return t.slice(0, -2);
+  if (t.length > 3 && t.endsWith('s') && !t.endsWith('ss') && !t.endsWith('us')) return t.slice(0, -1);
+  return t;
+}
+
+/**
+ * Words marking a processed/derived product or a different food. A candidate
+ * containing one of these is rejected unless the target itself has the word
+ * (e.g. target "clams" must not match "Clam chowder" or "Mushroom, oyster").
+ */
+const DERIVED_WORDS = new Set([
+  'soup', 'juice', 'oil', 'beverage', 'sauce', 'chowder', 'babyfood', 'candy', 'cereal',
+  'restaurant', 'cookie', 'cake', 'pie', 'bread', 'powder', 'syrup', 'drink', 'dessert',
+  'snack', 'imitation', 'cooky', 'pastry', 'danish', 'ring', 'ham', 'topping', 'pizza', 'sandwich', 'pudding', 'pretzel', 'frosting', 'gravy', 'substitute', 'mushroom', 'emu', 'ostrich', 'game', 'extract', 'flavor',
+]);
 
 /**
  * Score how well an FDC candidate's raw description matches an
@@ -226,6 +257,13 @@ export function pickBestMatch(normalizedTarget, candidates, options) {
     if (!isAllowedDataType(candidate.dataType)) continue; // NEVER Branded (or anything else)
     const { score, method } = scoreCandidate(normalizedTarget, candidate.description);
     if (score < threshold) continue;
+    // Restaurant/brand records in SR Legacy start with an ALL-CAPS name (e.g. "DENNY'S, onion rings").
+    if (/^[A-Z][A-Z' .&-]{2,}(,|\s|$)/.test(candidate.description)) continue;
+    // Search results carry nutrients: skip candidates that report no energy at all.
+    if (Array.isArray(candidate.foodNutrients) && candidate.foodNutrients.length > 0 && extractPer100g(candidate.foodNutrients).calories == null) continue;
+    const targetSet = new Set(tokenizeName(normalizedTarget));
+    const candTokens = tokenizeName(normalizeFoodName(candidate.description));
+    if (candTokens.some((t) => DERIVED_WORDS.has(t) && !targetSet.has(t))) continue;
 
     const contender = {
       fdcId: candidate.fdcId,
@@ -234,6 +272,8 @@ export function pickBestMatch(normalizedTarget, candidates, options) {
       matchScore: Math.round(score * 100) / 100,
       _methodRank: METHOD_RANK[method] ?? -1,
       _dataTypeRank: DATA_TYPE_PRIORITY.indexOf(candidate.dataType),
+      _raw: candTokens.includes('raw') ? 1 : 0,
+      _precision: targetSet.size / Math.max(candTokens.length, 1),
       _nameLength: candidate.description.length,
     };
 
@@ -247,9 +287,12 @@ export function pickBestMatch(normalizedTarget, candidates, options) {
 
 /** @param {object} a @param {object} b @returns {boolean} true if `a` should win over `b` */
 function isBetterMatch(a, b) {
-  if (a.matchScore !== b.matchScore) return a.matchScore > b.matchScore;
+  // Method first: "Goose, meat only" (startsWith) must beat "Egg, goose" (full token overlap, score 1.0).
   if (a._methodRank !== b._methodRank) return a._methodRank > b._methodRank;
+  if (a.matchScore !== b.matchScore) return a.matchScore > b.matchScore;
   if (a._dataTypeRank !== b._dataTypeRank) return a._dataTypeRank < b._dataTypeRank;
+  if (a._raw !== b._raw) return a._raw > b._raw;
+  if (a._precision !== b._precision) return a._precision > b._precision;
   return a._nameLength < b._nameLength;
 }
 
@@ -417,8 +460,11 @@ function loadEnv() {
  * @returns {{limit: number|null}}
  */
 function parseArgs(argv) {
-  const args = { limit: null };
+  const args = { limit: null, retryUnmatched: false, details: false, refreshDetails: false };
   for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--retry-unmatched') args.retryUnmatched = true;
+    if (argv[i] === '--details') args.details = true;
+    if (argv[i] === '--refresh-details') { args.details = true; args.refreshDetails = true; }
     if (argv[i] === '--limit') {
       const val = Number(argv[i + 1]);
       if (Number.isFinite(val) && val > 0) args.limit = Math.floor(val);
@@ -426,6 +472,68 @@ function parseArgs(argv) {
     }
   }
   return args;
+}
+
+/**
+ * Drop "organic"/"non-organic"/"non-org" qualifiers: they describe farming,
+ * not the USDA food, and break matching ("Apples non-organic").
+ * @param {string} name @returns {string}
+ */
+export function stripOrganicQualifiers(name) {
+  return (name || '')
+    .replace(/\bnon[\s-]*org(anic)?\b\.?/gi, ' ')
+    .replace(/\borganic\b/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Make a free-text query safe for FDC /foods/search: anything other than
+ * letters/digits/spaces becomes a space ("/" in particular causes HTTP 400).
+ * @param {string} name @returns {string}
+ */
+export function sanitizeSearchQuery(name) {
+  return (name || '')
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Run an FDC call with rate-limit backoff + transient retry. Returns the
+ * result, or throws the final error (caller logs + skips; never aborts).
+ * @template T
+ * @param {() => Promise<T>} fn
+ * @param {string} label
+ * @param {(ms: number) => Promise<void>} [sleepFn]
+ * @returns {Promise<T>}
+ */
+export async function callWithRetry(fn, label, sleepFn = sleep) {
+  let rateRetries = 0;
+  let transientRetries = 0;
+  for (;;) {
+    try {
+      return await fn();
+    } catch (err) {
+      const status = err instanceof FdcApiError ? err.status : null;
+      if (status === 429 && rateRetries < MAX_429_RETRIES) {
+        rateRetries++;
+        const ra = Number(err.retryAfter);
+        const wait = Number.isFinite(ra) && ra > 0 ? ra * 1000 : RATE_LIMIT_WAIT_MS;
+        console.warn(`[build-usda-map] 429 on ${label}; waiting ${Math.round(wait / 1000)}s (retry ${rateRetries}/${MAX_429_RETRIES}).`);
+        await sleepFn(wait);
+        continue;
+      }
+      const transient = status === null || status >= 500;
+      if (transient && transientRetries < MAX_TRANSIENT_RETRIES) {
+        transientRetries++;
+        await sleepFn(2000 * transientRetries);
+        continue;
+      }
+      throw err;
+    }
+  }
 }
 
 function sleep(ms) {
@@ -453,6 +561,12 @@ function sortObjectKeysNumeric(obj) {
 
 // ── Main pipeline ────────────────────────────────────────────────────────────
 
+function atomicWrite(file, obj) {
+  const tmp = `${file}.tmp`;
+  writeFileSync(tmp, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+  renameSync(tmp, file);
+}
+
 async function main() {
   const cli = parseArgs(process.argv.slice(2));
   const env = loadEnv();
@@ -471,172 +585,176 @@ async function main() {
   const subset = computeTargetSubset(items, overlay).sort((a, b) => a.foodItemID - b.foodItemID);
 
   const existingMapFile = loadJsonIfExists(MAP_PATH);
-  const existingMapItems = existingMapFile?.items || {};
+  let mapItems = { ...(existingMapFile?.items || {}) };
+  /** foodItemID -> {name, reason}: searched, nothing acceptable. Skipped on resume. */
+  const unmatched = { ...(existingMapFile?.unmatched || {}) };
+  if (cli.retryUnmatched) for (const k of Object.keys(unmatched)) delete unmatched[k];
   const existingNutrientsFile = loadJsonIfExists(NUTRIENTS_PATH);
-  const existingNutrients = existingNutrientsFile?.nutrients || {};
+  let nutrients = { ...(existingNutrientsFile?.nutrients || {}) };
+  /** foodItemID -> {name, error}: failed this run; retried next run. */
+  const errored = {};
 
-  const toAttempt = subset.filter((item) => !existingMapItems[String(item.foodItemID)]);
-  const attemptList = cli.limit ? toAttempt.slice(0, cli.limit) : toAttempt;
+  const toAttempt = subset.filter((item) => {
+    const id = String(item.foodItemID);
+    return !mapItems[id] && !unmatched[id];
+  });
+  const attemptList = cli.details ? [] : cli.limit ? toAttempt.slice(0, cli.limit) : toAttempt;
 
   console.log(
-    `[build-usda-map] Subset size: ${subset.length}. Already resolved (matched or manually set): ${
+    `[build-usda-map] Subset size: ${subset.length}. Already resolved (matched/unmatched/manual): ${
       subset.length - toAttempt.length
     }. To attempt this run: ${attemptList.length}${cli.limit ? ` (--limit ${cli.limit})` : ''}.`
   );
 
-  const newMapEntries = {};
-  const unmatchedThisRun = [];
-  let stoppedEarly = false;
+  const stats = { attempted: 0, matched: 0, unmatched: 0, errored: 0, nutrientsFetched: 0 };
   let stopReason = null;
-  let attempted = 0;
 
+  function writeCheckpoint(final) {
+    const generatedAt = new Date().toISOString();
+    const fdcDataVersion = `FDC API v1 (accessed ${generatedAt.slice(0, 10)}); USDA does not expose a single unified dataset version via the API — each matched item's fdcId links to its own FDC record for provenance.`;
+    const subsetIds = subset.map((it) => String(it.foodItemID));
+    const matchedCount = subsetIds.filter((id) => mapItems[id]).length;
+    const unmatchedCount = subsetIds.filter((id) => !mapItems[id] && unmatched[id]).length;
+    const lastRun = {
+      keyTier,
+      limit: cli.limit,
+      attempted: stats.attempted,
+      matchedThisRun: stats.matched,
+      unmatchedThisRun: stats.unmatched,
+      erroredThisRun: stats.errored,
+      complete: final && !stopReason,
+      stoppedEarly: Boolean(stopReason),
+      stopReason,
+    };
+    mkdirSync(OUT_DIR, { recursive: true });
+    atomicWrite(MAP_PATH, {
+      _meta: {
+        generatedAt,
+        fdcDataVersion,
+        subsetSize: subset.length,
+        matchedCount,
+        unmatchedCount,
+        pendingCount: subset.length - matchedCount - unmatchedCount,
+        matchThreshold: DEFAULT_MATCH_THRESHOLD,
+        dataTypePriority: DATA_TYPE_PRIORITY,
+        lastRun,
+      },
+      items: sortObjectKeysNumeric(mapItems),
+      unmatched: sortObjectKeysNumeric(unmatched),
+    });
+    atomicWrite(NUTRIENTS_PATH, {
+      _meta: {
+        generatedAt,
+        fdcDataVersion,
+        fdcIdCount: Object.keys(nutrients).length,
+        lastRun: { keyTier, fetchedThisRun: stats.nutrientsFetched, stoppedEarly: Boolean(stopReason), stopReason },
+      },
+      nutrients: sortObjectKeysNumeric(nutrients),
+    });
+  }
+
+  let interrupted = false;
+  process.on('SIGINT', () => {
+    interrupted = true;
+    stopReason = 'interrupted (SIGINT)';
+  });
+
+  // Phase 1: search + match. One item failing is logged and skipped.
   for (const item of attemptList) {
-    attempted++;
+    if (interrupted) break;
+    stats.attempted++;
     const rawName = item.displayAs || item.description || '';
-    const normalizedTarget = normalizeFoodName(rawName);
-    // FDC's POST /foods/search returns a hard 400 for any query containing
-    // a "/" (observed on e.g. "Sugar/snap peas non-org") — strip it to a
-    // space for the HTTP query only. rawName (with the slash) is still what
-    // gets displayed/stored; normalizedTarget (used for scoring) already
-    // strips punctuation independently, so match quality is unaffected.
-    const searchQuery = rawName.replace(/\//g, ' ').replace(/\s+/g, ' ').trim();
+    const cleanName = stripOrganicQualifiers(rawName) || rawName;
+    const normalizedTarget = normalizeFoodName(cleanName);
+    const searchQuery = sanitizeSearchQuery(cleanName);
+    const id = String(item.foodItemID);
 
     try {
-      const searchRes = await searchFoods(searchQuery, { apiKey, dataType: DATA_TYPE_PRIORITY, pageSize: 10 });
+      if (!searchQuery) throw new Error('empty query after sanitizing');
+      const searchRes = await callWithRetry(
+        () => searchFoods(searchQuery, { apiKey, dataType: DATA_TYPE_PRIORITY, pageSize: 10 }),
+        `search #${id}`
+      );
       const candidates = searchRes.foods || [];
       const best = pickBestMatch(normalizedTarget, candidates, { threshold: DEFAULT_MATCH_THRESHOLD });
-
       if (best) {
-        newMapEntries[String(item.foodItemID)] = {
+        mapItems[id] = {
           fdcId: best.fdcId,
           matchedName: best.matchedName,
           dataType: best.dataType,
           matchScore: best.matchScore,
           manualOverride: false,
         };
-        console.log(
-          `  [match] #${item.foodItemID} "${rawName}" -> fdcId ${best.fdcId} "${best.matchedName}" (${best.dataType}, score ${best.matchScore})`
-        );
+        stats.matched++;
+        console.log(`  [match] #${id} "${rawName}" -> ${best.fdcId} "${best.matchedName}" (${best.dataType}, ${best.matchScore})`);
       } else {
-        unmatchedThisRun.push({ foodItemID: item.foodItemID, name: rawName });
-        console.log(`  [no match] #${item.foodItemID} "${rawName}"`);
+        unmatched[id] = { name: rawName, reason: candidates.length ? 'below-threshold' : 'no-usda-candidates' };
+        stats.unmatched++;
+        console.log(`  [no match] #${id} "${rawName}" (${unmatched[id].reason})`);
       }
     } catch (err) {
-      if (err instanceof FdcApiError && err.status === 429) {
-        stoppedEarly = true;
-        stopReason = '429 rate limited by FDC API during search phase';
-      } else {
-        stoppedEarly = true;
-        stopReason = `search failed for #${item.foodItemID} "${rawName}": ${err.message}`;
-      }
-      console.warn(`[build-usda-map] Stopping search phase: ${stopReason} (${attempted - 1}/${attemptList.length} attempted this run before stopping).`);
-      break;
+      stats.errored++;
+      errored[id] = { name: rawName, error: err.message };
+      console.warn(`  [error-skipped] #${id} "${rawName}": ${err.message}`);
     }
 
+    if (stats.attempted % CHECKPOINT_EVERY === 0) writeCheckpoint(false);
     await sleep(delayMs);
   }
+  writeCheckpoint(false);
 
-  const mergedMapItems = mergeMapEntries(existingMapItems, newMapEntries);
-
-  // Fetch nutrients for any fdcId the merged map references that we don't
-  // already have cached — covers both newly-matched items AND fdcIds a
-  // human pointed a manualOverride row at without a nutrients.json entry yet.
-  const neededFdcIds = [...new Set(Object.values(mergedMapItems).map((e) => e.fdcId))].filter(
-    (fdcId) => !existingNutrients[String(fdcId)]
-  );
-
-  const newNutrients = {};
-  let fetchedThisRun = 0;
-
-  if (!stoppedEarly) {
-    for (let i = 0; i < neededFdcIds.length; i += BATCH_SIZE) {
-      const batch = neededFdcIds.slice(i, i + BATCH_SIZE);
-      try {
-        const foods = await getFoods(batch, { apiKey, format: 'full' });
-        for (const food of foods) {
-          const per100g = extractPer100g(food.foodNutrients);
-          const portion = pickServingPortion(food.foodPortions);
-          const entry = { per100g, portionSource: portion ? portion.label : 'none' };
-          if (portion) entry.perServing = scaleToServing(per100g, portion.gramWeight);
-          newNutrients[String(food.fdcId)] = entry;
-        }
-        fetchedThisRun += foods.length;
-        console.log(`  [nutrients] fetched batch of ${foods.length} (starting fdcId ${batch[0]})`);
-      } catch (err) {
-        if (err instanceof FdcApiError && err.status === 429) {
-          stoppedEarly = true;
-          stopReason = stopReason || '429 rate limited by FDC API during nutrients phase';
+  // Phase 2: nutrients for any referenced fdcId not yet cached (also runs on
+  // resume, and after a partial phase 1, since matches so far are real).
+  const referencedIds = [...new Set(Object.values(mapItems).map((e) => e.fdcId))];
+  const neededFdcIds = referencedIds.filter((fdcId) => {
+    const row = nutrients[String(fdcId)];
+    if (!row) return !cli.details; // details mode never adds macro-only rows by itself
+    return cli.details && (cli.refreshDetails || !row.micros);
+  });
+  if (cli.details) console.log(`[build-usda-map] --details: ${neededFdcIds.length} fdcIds need micronutrients (batches of ${BATCH_SIZE}).`);
+  for (let i = 0; i < neededFdcIds.length && !interrupted; i += BATCH_SIZE) {
+    const batch = neededFdcIds.slice(i, i + BATCH_SIZE);
+    try {
+      const foods = await callWithRetry(() => getFoods(batch, { apiKey, format: 'full' }), `nutrients batch @${batch[0]}`);
+      for (const food of foods) {
+        const per100g = extractPer100g(food.foodNutrients);
+        const existing = nutrients[String(food.fdcId)];
+        let entry;
+        if (existing) {
+          entry = { ...existing }; // keep macros/portion untouched (backward compatible)
         } else {
-          stoppedEarly = true;
-          stopReason = stopReason || `nutrient fetch failed: ${err.message}`;
+          const portion = pickServingPortion(food.foodPortions);
+          entry = { per100g, portionSource: portion ? portion.label : 'none' };
+          if (portion) entry.perServing = scaleToServing(per100g, portion.gramWeight);
         }
-        console.warn(`[build-usda-map] Stopping nutrient fetch: ${stopReason}`);
-        break;
+        const micro100 = extractMicros(food.foodNutrients);
+        entry.micros = { per100g: micro100 };
+        if (entry.perServing?.amount) entry.micros.perServing = scaleMicros(micro100, entry.perServing.amount);
+        nutrients[String(food.fdcId)] = entry;
       }
-      await sleep(delayMs);
+      stats.nutrientsFetched += foods.length;
+      console.log(`  [nutrients] fetched batch of ${foods.length} (starting fdcId ${batch[0]})`);
+      writeCheckpoint(false);
+    } catch (err) {
+      console.warn(`  [error-skipped] nutrient batch starting ${batch[0]}: ${err.message}`);
+      stats.errored++;
     }
-  } else if (neededFdcIds.length > 0) {
-    console.log('[build-usda-map] Skipping nutrient fetch phase — search phase already stopped early.');
+    await sleep(cli.details ? Math.min(delayMs, 1200) : delayMs);
   }
 
-  const mergedNutrients = { ...existingNutrients, ...newNutrients };
+  writeCheckpoint(true);
 
-  const subsetIds = subset.map((it) => String(it.foodItemID));
-  const matchedCount = subsetIds.filter((id) => mergedMapItems[id]).length;
-  const unmatchedCount = subset.length - matchedCount;
-  const generatedAt = new Date().toISOString();
-  const fdcDataVersion = `FDC API v1 (accessed ${generatedAt.slice(0, 10)}); USDA does not expose a single unified dataset version via the API — each matched item's fdcId links to its own FDC record for provenance.`;
-
-  const mapOut = {
-    _meta: {
-      generatedAt,
-      fdcDataVersion,
-      subsetSize: subset.length,
-      matchedCount,
-      unmatchedCount,
-      matchThreshold: DEFAULT_MATCH_THRESHOLD,
-      dataTypePriority: DATA_TYPE_PRIORITY,
-      lastRun: {
-        keyTier,
-        limit: cli.limit,
-        attempted,
-        matchedThisRun: Object.keys(newMapEntries).length,
-        unmatchedThisRun: unmatchedThisRun.length,
-        stoppedEarly,
-        stopReason,
-      },
-    },
-    items: sortObjectKeysNumeric(mergedMapItems),
-  };
-
-  const nutrientsOut = {
-    _meta: {
-      generatedAt,
-      fdcDataVersion,
-      fdcIdCount: Object.keys(mergedNutrients).length,
-      lastRun: { keyTier, fetchedThisRun, stoppedEarly, stopReason },
-    },
-    nutrients: sortObjectKeysNumeric(mergedNutrients),
-  };
-
-  mkdirSync(OUT_DIR, { recursive: true });
-  writeFileSync(MAP_PATH, JSON.stringify(mapOut, null, 2) + '\n', 'utf8');
-  writeFileSync(NUTRIENTS_PATH, JSON.stringify(nutrientsOut, null, 2) + '\n', 'utf8');
-
-  console.log(`\n[build-usda-map] Wrote ${MAP_PATH}`);
-  console.log(`[build-usda-map] Wrote ${NUTRIENTS_PATH}`);
+  const pending = subset.filter((it) => !mapItems[String(it.foodItemID)] && !unmatched[String(it.foodItemID)]).length;
+  console.log(`\n[build-usda-map] Wrote ${MAP_PATH}\n[build-usda-map] Wrote ${NUTRIENTS_PATH}`);
   console.log(
-    `\n[build-usda-map] TOTALS — subset ${subset.length} | matched ${matchedCount} | unmatched ${unmatchedCount}` +
-      `\n[build-usda-map] THIS RUN — attempted ${attempted} | matched ${Object.keys(newMapEntries).length} | unmatched ${unmatchedThisRun.length} | nutrients fetched ${fetchedThisRun}` +
-      (stoppedEarly ? `\n[build-usda-map] STOPPED EARLY: ${stopReason}` : '')
+    `[build-usda-map] TOTALS — subset ${subset.length} | matched ${Object.keys(mapItems).length} | unmatched ${Object.keys(unmatched).length} | pending ${pending} | nutrients ${Object.keys(nutrients).length}` +
+      `\n[build-usda-map] THIS RUN — attempted ${stats.attempted} | matched ${stats.matched} | unmatched ${stats.unmatched} | errored ${stats.errored} | nutrients fetched ${stats.nutrientsFetched}` +
+      (stopReason ? `\n[build-usda-map] STOPPED EARLY: ${stopReason} — rerun \`npm run usda:map\` to resume.` : '')
   );
-
-  if (unmatchedThisRun.length > 0) {
-    console.log('\n[build-usda-map] Unmatched this run (absent from map — never guessed):');
-    for (const u of unmatchedThisRun.slice(0, 50)) {
-      console.log(`  #${u.foodItemID} "${u.name}"`);
-    }
-    if (unmatchedThisRun.length > 50) console.log(`  ... and ${unmatchedThisRun.length - 50} more`);
+  const errIds = Object.keys(errored);
+  if (errIds.length) {
+    console.log('\n[build-usda-map] Errored (not recorded; retried next run):');
+    for (const id of errIds) console.log(`  #${id} "${errored[id].name}": ${errored[id].error}`);
   }
 }
 

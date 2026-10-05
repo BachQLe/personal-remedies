@@ -9,61 +9,61 @@ const SUPERFOODS = [
   {
     emoji: "🧄",
     name: "Garlic",
-    tag: "Immune Booster",
+    tag: "Leafy bulb",
     stats: [
-      { label: "Immune Support", rating: 10 },
-      { label: "Anti-Inflammatory", rating: 9 },
-      { label: "Blood Pressure", rating: 8 },
-      { label: "Antioxidant", rating: 9 },
-      { label: "Antimicrobial", rating: 9 },
+      { label: "Profile match", rating: 10 },
+      { label: "Condition rank", rating: 9 },
+      { label: "Everyday staple", rating: 8 },
+      { label: "Easy to find", rating: 9 },
+      { label: "Versatile", rating: 9 },
     ],
   },
   {
     emoji: "🌿",
     name: "Turmeric",
-    tag: "Inflammation Fighter",
+    tag: "Root spice",
     stats: [
-      { label: "Anti-Inflammatory", rating: 10 },
-      { label: "Joint Health", rating: 9 },
-      { label: "Brain Health", rating: 8 },
-      { label: "Antioxidant", rating: 9 },
-      { label: "Digestive Health", rating: 7 },
+      { label: "Profile match", rating: 10 },
+      { label: "Condition rank", rating: 9 },
+      { label: "Everyday staple", rating: 8 },
+      { label: "Easy to find", rating: 9 },
+      { label: "Versatile", rating: 7 },
     ],
   },
   {
     emoji: "🫐",
     name: "Blueberries",
-    tag: "Antioxidant Powerhouse",
+    tag: "Berry",
     stats: [
-      { label: "Antioxidant", rating: 10 },
-      { label: "Brain Health", rating: 9 },
-      { label: "Heart Health", rating: 8 },
-      { label: "Blood Sugar", rating: 7 },
-      { label: "Anti-Aging", rating: 9 },
+      { label: "Profile match", rating: 10 },
+      { label: "Condition rank", rating: 9 },
+      { label: "Everyday staple", rating: 8 },
+      { label: "Easy to find", rating: 7 },
+      { label: "Versatile", rating: 9 },
     ],
   },
   {
     emoji: "🥑",
     name: "Avocado",
-    tag: "Heart Health Hero",
+    tag: "Creamy fruit",
     stats: [
-      { label: "Heart Health", rating: 10 },
-      { label: "Healthy Fats", rating: 10 },
-      { label: "Blood Pressure", rating: 8 },
-      { label: "Eye Health", rating: 7 },
-      { label: "Blood Sugar", rating: 8 },
+      { label: "Profile match", rating: 10 },
+      { label: "Condition rank", rating: 10 },
+      { label: "Everyday staple", rating: 8 },
+      { label: "Easy to find", rating: 7 },
+      { label: "Versatile", rating: 8 },
     ],
   },
   {
     emoji: "🥬",
     name: "Spinach",
-    tag: "Nutrient Dense",
+    tag: "Leafy green",
     stats: [
-      { label: "Iron", rating: 9 },
-      { label: "Bone Health", rating: 8 },
-      { label: "Eye Health", rating: 9 },
-      { label: "Heart Health", rating: 8 },
-      { label: "Energy", rating: 7 },
+      { label: "Profile match", rating: 9 },
+      { label: "Condition rank", rating: 8 },
+      { label: "Everyday staple", rating: 9 },
+      { label: "Easy to find", rating: 8 },
+      { label: "Versatile", rating: 7 },
     ],
   },
 ];
@@ -81,8 +81,8 @@ const CHAT = [
   { from: "bot", text: "Steel-cut oats are great for both. Beta-glucan fiber slows blood sugar absorption and reduces LDL — a two-for-one for your conditions." },
   { from: "user", text: "What about fruit? I heard sugar is bad." },
   { from: "bot", text: "Whole fruit is fine — fiber buffers the spike. Blueberries, pears, and apples are ideal. Avoid fruit juice entirely." },
-  { from: "user", text: "Can garlic actually lower blood pressure?" },
-  { from: "bot", text: "Yes — allicin relaxes blood vessels. Studies show 600–1,200mg daily can cut systolic by 10+ mmHg. Raw or aged extract works best." },
+  { from: "user", text: "Is garlic a good fit for my profile?" },
+  { from: "bot", text: "Garlic is ranked favorably for the conditions in your profile. Ask your doctor before changing your diet." },
   { from: "user", text: "What should I cut out completely?" },
   { from: "bot", text: "Top three: processed meats, white bread, and sugary drinks. Cutting these typically moves the needle within 4–6 weeks." },
   { from: "user", text: "Any easy meal I can start with tomorrow?" },
@@ -353,7 +353,7 @@ export default function Hero({ topOffset = 0 }) {
             Get your personalized plan
           </button>
           <p className="font-sans mt-3 text-center text-[11px] sm:text-[12px] text-[#F3EFE6]/80 tracking-tight">
-            Built on 100k+ real scientific articles, for real, unique people
+            Based on Nutridigm's ranked reference database.
           </p>
         </div>
 

@@ -58,7 +58,8 @@ export const storage = {
     _notifyWrite(key);
   },
   clear() {
-    writeAll({});
+    if (typeof window === 'undefined') return;
+    try { window.localStorage.removeItem(ROOT_KEY); } catch { /* ignore */ }
   },
   /**
    * Subscribe to writes (`set`/`remove`) across all keys. Returns an

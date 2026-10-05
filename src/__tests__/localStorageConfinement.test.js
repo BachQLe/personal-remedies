@@ -63,7 +63,7 @@ const KNOWN_LEGACY = new Set([
 
 /**
  * Recursively collect every file under `dir`, skipping test directories
- * (this suite — and any future test file that legitimately needs to write
+ * and *.test.{js,jsx,ts,tsx} files (this suite — and any future test file that legitimately needs to write
  * the literal string "localStorage" in a mock/assertion — isn't production
  * source and shouldn't be scanned).
  * @param {string} dir
@@ -76,7 +76,7 @@ function collectFiles(dir, out = []) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       collectFiles(full, out);
-    } else if (!entry.name.endsWith('.test.js')) {
+    } else if (!/\.test\.[jt]sx?$/.test(entry.name)) {
       out.push(full);
     }
   }

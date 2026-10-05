@@ -13,7 +13,7 @@ export default function TermsOfUse() {
             Terms of use
           </h1>
           <p className="font-sans text-[16px] text-char-500 mb-12">
-            Last updated: January 2026
+            Last updated: October 2026
           </p>
 
           <div className="h-px bg-sand-200 mb-12" />
@@ -72,10 +72,10 @@ export default function TermsOfUse() {
                 The information contained in this Website is provided with the understanding that this Website is not engaged in rendering medical advice or recommendation. In some cases, the material presented on this Website is based on the information you provide to us. If you tell us that you have a certain health condition or risk, we rely upon your representation.
               </p>
               <p>
-                The information here provided is not meant to address severe mental or physical health conditions. Severe health conditions may not be responsive to any specific dietary regimen. However, following a healthy and suitable-to-your-needs diet may help maintain general well-being, increase health fitness, reduce your risk or prevent development of conditions that are known to co-occur with certain illnesses.
+                The information here provided is not meant to address severe mental or physical health conditions. Severe health conditions may not be responsive to any specific dietary regimen. A varied, balanced diet is part of general well-being. Personal Remedies does not claim that any food prevents, treats or cures any condition.
               </p>
               <p>
-                Information provided about herbal / natural remedies and nutrition in the context of any health condition or illness you may have, does not constitute a claim that such remedies or foods will ameliorate you condition(s). While natural / herbal remedies and / or certain foods may be recommended for certain physical, emotional or mental health condition or illness, the Company does not make any claims that use of such remedies / foods will treat or ameliorate or otherwise alleviate any such condition.
+                Information provided about herbal / natural remedies and nutrition in the context of any health condition or illness you may have, does not constitute a claim that such remedies or foods will ameliorate your condition(s). Personal Remedies shows how foods are ranked for the conditions you select. A ranking is not a recommendation to use any food, herb or supplement to treat a condition.
               </p>
               <p>
                 The Company does not recommend or endorse any specific tests, drugs, devices, products, services, physicians, or medical or legal institutions that may be mentioned or referenced on this Website. We do not advertise any third party product on the Website.
@@ -186,7 +186,7 @@ export default function TermsOfUse() {
             </h2>
             <div className="font-sans text-[16px] leading-[1.65] text-char-900 space-y-4">
               <p>
-                This Agreement shall remain in full force and effect while you use the Website and Company Services or are otherwise a user or member of the Website, as applicable. You may terminate your use or participation at any time, for any reason, by ending your use of the Website. The Company can terminate your access to the Website under circumstances listed earlier. If Company terminates your account for any reason, you are prohibited from registering and creating a new account under your name, a fake or borrowed name, or the name of any third party, even if you may be acting on behalf of the third party. In addition to terminating or suspending your account, Company reserves the right to take appropriate legal action, including without limitation pursuing civil, criminal, and injunctive redress.
+                This Agreement shall remain in full force and effect while you use the Website and Company Services or are otherwise a user or member of the Website, as applicable. You may terminate your use or participation at any time, for any reason, by ending your use of the Website. You may also delete your account at any time in the app from Profile. The Company can terminate your access to the Website under circumstances listed earlier. If Company terminates your account for any reason, you are prohibited from registering and creating a new account under your name, a fake or borrowed name, or the name of any third party, even if you may be acting on behalf of the third party. In addition to terminating or suspending your account, Company reserves the right to take appropriate legal action, including without limitation pursuing civil, criminal, and injunctive redress.
               </p>
               <p>
                 Company may modify this Agreement from time to time. Any and all changes to this Agreement will be posted on the Website and revisions will be indicated by date. You agree to be bound to any changes to this Agreement after any such modification becomes effective. Company reserves the right at any time to modify or discontinue, temporarily or permanently, the Website, its content and capabilities with or without notice. You agree that Company shall not be liable to you or to any third party for any modification, suspension or discontinuance of the Company Services.
@@ -195,7 +195,7 @@ export default function TermsOfUse() {
                 All questions of law, rights, and remedies regarding any act, event or occurrence undertaken pursuant or relating to this Website or the Company Services shall be governed and construed by the law of Massachusetts, excluding such state's conflicts of law rules.
               </p>
               <p>
-                Except as explicitly stated otherwise, any notices given to Company shall be given by email to the address listed below. Any notices given to you shall be given to the email address you provided during the registration process or such other address as each party may specify.
+                Except as explicitly stated otherwise, any notices given to Company shall be given by email to hello@personalremedies.com. Any notices given to you shall be given to the email address you provided during the registration process or such other address as each party may specify.
               </p>
               <p>
                 This Agreement constitutes the entire agreement between you and Company regarding the use of the Company Services. The failure of Company to exercise or enforce any right or provision of this Agreement shall not operate as a waiver of such right or provision. The section titles in this Agreement are for convenience only and have no legal or contractual effect.

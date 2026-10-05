@@ -1,10 +1,11 @@
 {
   "_meta": {
-    "generatedAt": "2026-09-06T23:16:59.482Z",
-    "fdcDataVersion": "FDC API v1 (accessed 2026-09-06); USDA does not expose a single unified dataset version via the API — each matched item's fdcId links to its own FDC record for provenance.",
+    "generatedAt": "2026-10-05T00:55:15.587Z",
+    "fdcDataVersion": "FDC API v1 (accessed 2026-10-05); USDA does not expose a single unified dataset version via the API — each matched item's fdcId links to its own FDC record for provenance.",
     "subsetSize": 632,
-    "matchedCount": 125,
-    "unmatchedCount": 507,
+    "matchedCount": 609,
+    "unmatchedCount": 23,
+    "pendingCount": 0,
     "matchThreshold": 0.75,
     "dataTypePriority": [
       "Foundation",
@@ -13,11 +14,13 @@
     "lastRun": {
       "keyTier": "configured",
       "limit": null,
-      "attempted": 109,
-      "matchedThisRun": 90,
-      "unmatchedThisRun": 18,
-      "stoppedEarly": true,
-      "stopReason": "search failed for #252 \"Sugar/snap peas non-org\": [usda] searchFoods(\"Sugar/snap peas non-org\"): HTTP 400 Bad Request"
+      "attempted": 0,
+      "matchedThisRun": 0,
+      "unmatchedThisRun": 0,
+      "erroredThisRun": 0,
+      "complete": true,
+      "stoppedEarly": false,
+      "stopReason": null
     }
   },
   "items": {
@@ -41,6 +44,13 @@
       "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
+    },
+    "5": {
+      "fdcId": 175142,
+      "matchedName": "Fish, sea bass, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
     },
     "6": {
       "fdcId": 171948,
@@ -71,10 +81,10 @@
       "manualOverride": false
     },
     "35": {
-      "fdcId": 174223,
-      "matchedName": "Mollusks, squid, mixed species, raw",
-      "dataType": "SR Legacy",
-      "matchScore": 1,
+      "fdcId": 2747671,
+      "matchedName": "Squid (calamari), frozen, tubes only",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "37": {
@@ -99,10 +109,10 @@
       "manualOverride": false
     },
     "41": {
-      "fdcId": 171474,
-      "matchedName": "Chicken, broilers or fryers, breast, meat and skin, raw",
-      "dataType": "SR Legacy",
-      "matchScore": 1,
+      "fdcId": 2646170,
+      "matchedName": "Chicken, breast, boneless, skinless, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "42": {
@@ -127,17 +137,24 @@
       "manualOverride": false
     },
     "45": {
-      "fdcId": 172928,
-      "matchedName": "Pate, chicken liver, canned",
+      "fdcId": 171060,
+      "matchedName": "Chicken, liver, all classes, raw",
       "dataType": "SR Legacy",
-      "matchScore": 1,
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "46": {
+      "fdcId": 172855,
+      "matchedName": "Chicken, skin (drumsticks and thighs), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "47": {
       "fdcId": 2727568,
       "matchedName": "Chicken, wing, meat and skin, raw",
       "dataType": "Foundation",
-      "matchScore": 1,
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "49": {
@@ -154,12 +171,26 @@
       "matchScore": 1,
       "manualOverride": false
     },
-    "52": {
-      "fdcId": 2684444,
-      "matchedName": "Fish, cod, Atlantic, wild caught, raw",
-      "dataType": "Foundation",
+    "51": {
+      "fdcId": 174214,
+      "matchedName": "Mollusks, clam, mixed species, raw",
+      "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
+    },
+    "52": {
+      "fdcId": 2747654,
+      "matchedName": "Cod, Pacific or Alaskan, frozen, wild caught",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "54": {
+      "fdcId": 175164,
+      "matchedName": "Crustaceans, crab, alaska king, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
     },
     "55": {
       "fdcId": 2684446,
@@ -203,18 +234,25 @@
       "matchScore": 1,
       "manualOverride": false
     },
+    "62": {
+      "fdcId": 2747658,
+      "matchedName": "Mahi mahi, frozen, wild caught",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": true
+    },
     "63": {
-      "fdcId": 172835,
-      "matchedName": "Emu, inside drum, raw",
+      "fdcId": 171960,
+      "matchedName": "Fish, drum, freshwater, raw",
       "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
     },
     "64": {
-      "fdcId": 171823,
-      "matchedName": "Sauce, duck, ready-to-serve",
+      "fdcId": 174467,
+      "matchedName": "Duck, domesticated, liver, raw",
       "dataType": "SR Legacy",
-      "matchScore": 1,
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "65": {
@@ -239,10 +277,10 @@
       "manualOverride": false
     },
     "73": {
-      "fdcId": 173572,
-      "matchedName": "Fat, goose",
+      "fdcId": 172415,
+      "matchedName": "Goose, liver, raw",
       "dataType": "SR Legacy",
-      "matchScore": 1,
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "74": {
@@ -267,15 +305,15 @@
       "manualOverride": false
     },
     "77": {
-      "fdcId": 171965,
-      "matchedName": "Fish, halibut, Greenland, raw",
-      "dataType": "SR Legacy",
-      "matchScore": 1,
+      "fdcId": 2747656,
+      "matchedName": "Halibut, frozen, wild caught",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "78": {
-      "fdcId": 172340,
-      "matchedName": "Fish oil, herring",
+      "fdcId": 173669,
+      "matchedName": "Fish, herring, Pacific, raw",
       "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
@@ -295,10 +333,10 @@
       "manualOverride": false
     },
     "94": {
-      "fdcId": 174208,
-      "matchedName": "Crustaceans, lobster, northern, raw",
-      "dataType": "SR Legacy",
-      "matchScore": 1,
+      "fdcId": 2747657,
+      "matchedName": "Lobster, tail only, frozen, wild caught",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "95": {
@@ -309,8 +347,8 @@
       "manualOverride": false
     },
     "99": {
-      "fdcId": 168149,
-      "matchedName": "Fish, mackerel, salted",
+      "fdcId": 175122,
+      "matchedName": "Fish, mackerel, king, raw",
       "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
@@ -343,6 +381,13 @@
       "matchScore": 1,
       "manualOverride": false
     },
+    "106": {
+      "fdcId": 174216,
+      "matchedName": "Mollusks, mussel, blue, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
     "107": {
       "fdcId": 173680,
       "matchedName": "Fish, pike, northern, raw",
@@ -360,6 +405,13 @@
     "109": {
       "fdcId": 175133,
       "matchedName": "Fish, roughy, orange, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "111": {
+      "fdcId": 174219,
+      "matchedName": "Mollusks, oyster, Pacific, raw",
       "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
@@ -406,11 +458,18 @@
       "matchScore": 1,
       "manualOverride": false
     },
-    "141": {
-      "fdcId": 172191,
-      "matchedName": "Egg, quail, whole, fresh, raw",
+    "140": {
+      "fdcId": 175151,
+      "matchedName": "Fish, sunfish, pumpkin seed, raw",
       "dataType": "SR Legacy",
       "matchScore": 1,
+      "manualOverride": true
+    },
+    "141": {
+      "fdcId": 172419,
+      "matchedName": "Quail, meat only, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "142": {
@@ -435,8 +494,8 @@
       "manualOverride": false
     },
     "147": {
-      "fdcId": 172343,
-      "matchedName": "Fish oil, salmon",
+      "fdcId": 173689,
+      "matchedName": "Fish, salmon, chum, raw",
       "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
@@ -447,6 +506,13 @@
       "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
+    },
+    "149": {
+      "fdcId": 175139,
+      "matchedName": "Fish, sardine, Atlantic, canned in oil, drained solids with bone",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
     },
     "154": {
       "fdcId": 2747667,
@@ -491,10 +557,10 @@
       "manualOverride": false
     },
     "163": {
-      "fdcId": 175146,
-      "matchedName": "Fish, smelt, rainbow, raw",
+      "fdcId": 167654,
+      "matchedName": "Smelt, dried (Alaska Native)",
       "dataType": "SR Legacy",
-      "matchScore": 1,
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "164": {
@@ -505,10 +571,10 @@
       "manualOverride": false
     },
     "165": {
-      "fdcId": 173698,
-      "matchedName": "Fish, snapper, mixed species, raw",
-      "dataType": "SR Legacy",
-      "matchScore": 1,
+      "fdcId": 2747669,
+      "matchedName": "Snapper, frozen, wild caught",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "166": {
@@ -547,10 +613,10 @@
       "manualOverride": false
     },
     "171": {
-      "fdcId": 173703,
-      "matchedName": "Fish, swordfish, raw",
-      "dataType": "SR Legacy",
-      "matchScore": 1,
+      "fdcId": 2747672,
+      "matchedName": "Swordfish, frozen, wild caught",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "172": {
@@ -574,6 +640,13 @@
       "matchScore": 1,
       "manualOverride": false
     },
+    "175": {
+      "fdcId": 173706,
+      "matchedName": "Fish, tuna, fresh, bluefin, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
     "176": {
       "fdcId": 334194,
       "matchedName": "Fish, tuna, light, canned in water, drained solids",
@@ -596,17 +669,17 @@
       "manualOverride": false
     },
     "180": {
-      "fdcId": 171098,
-      "matchedName": "Turkey, whole, breast, meat only, raw",
+      "fdcId": 172941,
+      "matchedName": "Turkey breast, sliced, prepackaged",
       "dataType": "SR Legacy",
-      "matchScore": 1,
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "181": {
-      "fdcId": 171090,
-      "matchedName": "Turkey, whole, dark meat, meat only, raw",
+      "fdcId": 171488,
+      "matchedName": "Turkey, dark meat, meat and skin, raw",
       "dataType": "SR Legacy",
-      "matchScore": 1,
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "182": {
@@ -626,6 +699,13 @@
     "184": {
       "fdcId": 171486,
       "matchedName": "Turkey, all classes, liver, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "185": {
+      "fdcId": 171482,
+      "matchedName": "Turkey, whole, skin (light and dark), raw",
       "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
@@ -652,11 +732,18 @@
       "manualOverride": false
     },
     "201": {
-      "fdcId": 175150,
-      "matchedName": "Fish, sucker, white, raw",
+      "fdcId": 173712,
+      "matchedName": "Fish, whitefish, mixed species, smoked",
       "dataType": "SR Legacy",
       "matchScore": 1,
-      "manualOverride": false
+      "manualOverride": true
+    },
+    "202": {
+      "fdcId": 173713,
+      "matchedName": "Fish, whiting, mixed species, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
     },
     "203": {
       "fdcId": 175162,
@@ -673,17 +760,24 @@
       "manualOverride": false
     },
     "205": {
-      "fdcId": 170157,
-      "matchedName": "Nuts, acorns, raw",
+      "fdcId": 168061,
+      "matchedName": "Acorn stew (Apache)",
       "dataType": "SR Legacy",
-      "matchScore": 1,
+      "matchScore": 0.85,
       "manualOverride": false
     },
-    "207": {
-      "fdcId": 2346393,
-      "matchedName": "Nuts, almonds, whole, raw",
-      "dataType": "Foundation",
+    "206": {
+      "fdcId": 168384,
+      "matchedName": "Alfalfa seeds, sprouted, raw",
+      "dataType": "SR Legacy",
       "matchScore": 1,
+      "manualOverride": true
+    },
+    "207": {
+      "fdcId": 2262074,
+      "matchedName": "Almond butter, creamy",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "208": {
@@ -694,15 +788,15 @@
       "manualOverride": false
     },
     "209": {
-      "fdcId": 2758983,
-      "matchedName": "Beans, baked, canned, vegetarian",
-      "dataType": "Foundation",
+      "fdcId": 173731,
+      "matchedName": "Beans, baked, home prepared",
+      "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
     },
     "210": {
-      "fdcId": 747444,
-      "matchedName": "Beans, Dry, Black (0% moisture)",
+      "fdcId": 2644285,
+      "matchedName": "Beans, black, canned, sodium added, drained and rinsed",
       "dataType": "Foundation",
       "matchScore": 1,
       "manualOverride": false
@@ -722,9 +816,9 @@
       "manualOverride": false
     },
     "214": {
-      "fdcId": 747440,
-      "matchedName": "Beans, Dry, Dark Red Kidney (0% moisture)",
-      "dataType": "Foundation",
+      "fdcId": 173744,
+      "matchedName": "Beans, kidney, red, mature seeds, raw",
+      "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
     },
@@ -735,37 +829,44 @@
       "matchScore": 0.85,
       "manualOverride": false
     },
-    "217": {
-      "fdcId": 170079,
-      "matchedName": "Beans, mung, mature seeds, sprouted, canned, drained solids",
+    "216": {
+      "fdcId": 172425,
+      "matchedName": "Mothbeans, mature seeds, raw",
       "dataType": "SR Legacy",
       "matchScore": 1,
+      "manualOverride": true
+    },
+    "217": {
+      "fdcId": 174256,
+      "matchedName": "Mung beans, mature seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "218": {
-      "fdcId": 747441,
-      "matchedName": "Beans, Dry, Navy (0% moisture)",
+      "fdcId": 2644286,
+      "matchedName": "Beans, navy, canned, sodium added, drained and rinsed",
       "dataType": "Foundation",
       "matchScore": 1,
       "manualOverride": false
     },
     "219": {
-      "fdcId": 747445,
-      "matchedName": "Beans, Dry, Pinto (0% moisture)",
+      "fdcId": 2644292,
+      "matchedName": "Beans, pinto, canned, sodium added, drained and rinsed",
       "dataType": "Foundation",
       "matchScore": 1,
       "manualOverride": false
     },
     "220": {
-      "fdcId": 174283,
-      "matchedName": "Winged beans, mature seeds, raw",
+      "fdcId": 170070,
+      "matchedName": "Winged bean tuber, raw",
       "dataType": "SR Legacy",
       "matchScore": 0.85,
       "manualOverride": false
     },
     "221": {
-      "fdcId": 174281,
-      "matchedName": "Yardlong beans, mature seeds, raw",
+      "fdcId": 169222,
+      "matchedName": "Yardlong bean, raw",
       "dataType": "SR Legacy",
       "matchScore": 0.85,
       "manualOverride": false
@@ -784,6 +885,13 @@
       "matchScore": 1,
       "manualOverride": false
     },
+    "225": {
+      "fdcId": 170569,
+      "matchedName": "Nuts, brazilnuts, dried, unblanched",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
     "226": {
       "fdcId": 170144,
       "matchedName": "Seeds, breadfruit seeds, raw",
@@ -796,7 +904,7 @@
       "matchedName": "Nuts, butternuts, dried",
       "dataType": "SR Legacy",
       "matchScore": 1,
-      "manualOverride": false
+      "manualOverride": true
     },
     "228": {
       "fdcId": 2515374,
@@ -806,11 +914,11 @@
       "manualOverride": false
     },
     "229": {
-      "fdcId": 170164,
-      "matchedName": "Nuts, chestnuts, chinese, raw",
+      "fdcId": 170575,
+      "matchedName": "Nuts, chestnuts, european, raw, peeled",
       "dataType": "SR Legacy",
       "matchScore": 1,
-      "manualOverride": false
+      "manualOverride": true
     },
     "230": {
       "fdcId": 2644282,
@@ -827,15 +935,15 @@
       "manualOverride": false
     },
     "232": {
-      "fdcId": 170169,
-      "matchedName": "Nuts, coconut meat, raw",
+      "fdcId": 170170,
+      "matchedName": "Nuts, coconut meat, dried (desiccated), not sweetened",
       "dataType": "SR Legacy",
       "matchScore": 1,
-      "manualOverride": false
+      "manualOverride": true
     },
     "233": {
-      "fdcId": 168781,
-      "matchedName": "Puddings, coconut cream, dry mix, instant, prepared with 2% milk",
+      "fdcId": 170172,
+      "matchedName": "Nuts, coconut milk, raw (liquid expressed from grated meat and water)",
       "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
@@ -845,7 +953,7 @@
       "matchedName": "Snacks, KRAFT, CORNNUTS, plain",
       "dataType": "SR Legacy",
       "matchScore": 1,
-      "manualOverride": false
+      "manualOverride": true
     },
     "242": {
       "fdcId": 170584,
@@ -861,10 +969,24 @@
       "matchScore": 1,
       "manualOverride": false
     },
+    "244": {
+      "fdcId": 170177,
+      "matchedName": "Nuts, hickorynuts, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
     "245": {
       "fdcId": 2644283,
       "matchedName": "Lentils, dry",
       "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "246": {
+      "fdcId": 172423,
+      "matchedName": "Lupins, mature seeds, raw",
+      "dataType": "SR Legacy",
       "matchScore": 0.85,
       "manualOverride": false
     },
@@ -876,10 +998,10 @@
       "manualOverride": false
     },
     "249": {
-      "fdcId": 171575,
-      "matchedName": "Sauce, peanut, made from coconut, water, sugar, peanuts",
-      "dataType": "SR Legacy",
-      "matchScore": 1,
+      "fdcId": 2515376,
+      "matchedName": "Peanuts, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
       "manualOverride": false
     },
     "250": {
@@ -895,6 +1017,3369 @@
       "dataType": "SR Legacy",
       "matchScore": 1,
       "manualOverride": false
+    },
+    "252": {
+      "fdcId": 170010,
+      "matchedName": "Peas, edible-podded, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "253": {
+      "fdcId": 2346395,
+      "matchedName": "Nuts, pecans, halves, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "254": {
+      "fdcId": 170590,
+      "matchedName": "Nuts, pilinuts, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "255": {
+      "fdcId": 2346392,
+      "matchedName": "Nuts, pine nuts, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "256": {
+      "fdcId": 2515379,
+      "matchedName": "Nuts, pistachio nuts, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "258": {
+      "fdcId": 170552,
+      "matchedName": "Seeds, breadnut tree seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "259": {
+      "fdcId": 2710819,
+      "matchedName": "Chia seeds, dry, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "260": {
+      "fdcId": 170596,
+      "matchedName": "Seeds, cottonseed kernels, roasted (glandless)",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "261": {
+      "fdcId": 2262075,
+      "matchedName": "Flaxseed, ground",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "262": {
+      "fdcId": 170556,
+      "matchedName": "Seeds, pumpkin and squash seed kernels, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "263": {
+      "fdcId": 170558,
+      "matchedName": "Seeds, safflower seed kernels, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "264": {
+      "fdcId": 170191,
+      "matchedName": "Seeds, sesame butter, paste",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "265": {
+      "fdcId": 2515381,
+      "matchedName": "Seeds, sunflower seed, kernel, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "266": {
+      "fdcId": 169407,
+      "matchedName": "Seeds, watermelon seed kernels, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "267": {
+      "fdcId": 2257044,
+      "matchedName": "Soy milk, sweetened, plain, refrigerated",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "268": {
+      "fdcId": 169282,
+      "matchedName": "Soybeans, green, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "269": {
+      "fdcId": 169282,
+      "matchedName": "Soybeans, green, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "270": {
+      "fdcId": 2346394,
+      "matchedName": "Nuts, walnuts, English, halves, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "271": {
+      "fdcId": 170186,
+      "matchedName": "Nuts, walnuts, black, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "272": {
+      "fdcId": 167782,
+      "matchedName": "Abiyuch, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "273": {
+      "fdcId": 171686,
+      "matchedName": "Acerola, (west indian cherry), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "275": {
+      "fdcId": 1750340,
+      "matchedName": "Apples, fuji, with skin, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "276": {
+      "fdcId": 171691,
+      "matchedName": "Apples, dried, sulfured, uncooked",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "277": {
+      "fdcId": 2710815,
+      "matchedName": "Apricot, with skin, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "278": {
+      "fdcId": 173941,
+      "matchedName": "Apricots, dried, sulfured, uncooked",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "279": {
+      "fdcId": 2710824,
+      "matchedName": "Avocado, Hass, peeled, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "280": {
+      "fdcId": 1105073,
+      "matchedName": "Bananas, overripe, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "283": {
+      "fdcId": 173946,
+      "matchedName": "Blackberries, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "284": {
+      "fdcId": 2346411,
+      "matchedName": "Blueberries, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "285": {
+      "fdcId": 171713,
+      "matchedName": "Boysenberries, frozen, unsweetened",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "286": {
+      "fdcId": 171714,
+      "matchedName": "Breadfruit, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "287": {
+      "fdcId": 746770,
+      "matchedName": "Melons, cantaloupe, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "288": {
+      "fdcId": 171719,
+      "matchedName": "Cherries, sweet, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "291": {
+      "fdcId": 171722,
+      "matchedName": "Cranberries, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "292": {
+      "fdcId": 168117,
+      "matchedName": "Cranberry juice, unsweetened",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "293": {
+      "fdcId": 171724,
+      "matchedName": "Currants, zante, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "294": {
+      "fdcId": 173963,
+      "matchedName": "Currants, european black, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "295": {
+      "fdcId": 168191,
+      "matchedName": "Dates, medjool",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "297": {
+      "fdcId": 168192,
+      "matchedName": "Durian, raw or frozen",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "298": {
+      "fdcId": 171727,
+      "matchedName": "Elderberries, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "299": {
+      "fdcId": 746768,
+      "matchedName": "Figs, dried, uncooked",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "300": {
+      "fdcId": 746768,
+      "matchedName": "Figs, dried, uncooked",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "303": {
+      "fdcId": 173030,
+      "matchedName": "Gooseberries, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "304": {
+      "fdcId": 2003592,
+      "matchedName": "Grape juice, purple, with added vitamin C, from concentrate, shelf stable",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "305": {
+      "fdcId": 173034,
+      "matchedName": "Grapefruit, raw, white, Florida",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "306": {
+      "fdcId": 325287,
+      "matchedName": "Grapefruit juice, white, canned or bottled, unsweetened",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "307": {
+      "fdcId": 2346412,
+      "matchedName": "Grapes, red, seedless, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "308": {
+      "fdcId": 173044,
+      "matchedName": "Guavas, common, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "309": {
+      "fdcId": 2710816,
+      "matchedName": "Melons, honeydew, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "310": {
+      "fdcId": 168151,
+      "matchedName": "Jujube, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "311": {
+      "fdcId": 327046,
+      "matchedName": "Kiwifruit, green, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "312": {
+      "fdcId": 168154,
+      "matchedName": "Kumquats, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "313": {
+      "fdcId": 167749,
+      "matchedName": "Lemon peel, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "314": {
+      "fdcId": 168155,
+      "matchedName": "Limes, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "315": {
+      "fdcId": 169086,
+      "matchedName": "Litchis, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "316": {
+      "fdcId": 169087,
+      "matchedName": "Litchis, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "317": {
+      "fdcId": 169088,
+      "matchedName": "Loganberries, frozen",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "318": {
+      "fdcId": 169089,
+      "matchedName": "Longans, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "319": {
+      "fdcId": 169907,
+      "matchedName": "Longans, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "320": {
+      "fdcId": 2710834,
+      "matchedName": "Mango, Ataulfo, peeled, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "321": {
+      "fdcId": 169913,
+      "matchedName": "Mulberries, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "322": {
+      "fdcId": 173952,
+      "matchedName": "Carissa, (natal-plum), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "323": {
+      "fdcId": 327357,
+      "matchedName": "Nectarines, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "324": {
+      "fdcId": 332791,
+      "matchedName": "Olives, green, Manzanilla, stuffed with pimiento",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "325": {
+      "fdcId": 169099,
+      "matchedName": "Orange juice, canned, unsweetened",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "326": {
+      "fdcId": 746771,
+      "matchedName": "Oranges, raw, navels",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "327": {
+      "fdcId": 169926,
+      "matchedName": "Papayas, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "328": {
+      "fdcId": 169108,
+      "matchedName": "Passion-fruit, (granadilla), purple, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "329": {
+      "fdcId": 325430,
+      "matchedName": "Peaches, yellow, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "330": {
+      "fdcId": 169934,
+      "matchedName": "Peaches, dried, sulfured, uncooked",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "331": {
+      "fdcId": 746773,
+      "matchedName": "Pears, raw, bartlett",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "332": {
+      "fdcId": 169121,
+      "matchedName": "Pears, dried, sulfured, uncooked",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "333": {
+      "fdcId": 169943,
+      "matchedName": "Persimmons, native, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "334": {
+      "fdcId": 2346398,
+      "matchedName": "Pineapple, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "335": {
+      "fdcId": 169948,
+      "matchedName": "Pineapple juice, frozen concentrate, unsweetened, undiluted",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "336": {
+      "fdcId": 169129,
+      "matchedName": "Pitanga, (surinam-cherry), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "337": {
+      "fdcId": 2710817,
+      "matchedName": "Plantains, ripe, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "338": {
+      "fdcId": 2710837,
+      "matchedName": "Plum, black, with skin, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "339": {
+      "fdcId": 169134,
+      "matchedName": "Pomegranates, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "340": {
+      "fdcId": 167787,
+      "matchedName": "Pomegranate juice, bottled",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "341": {
+      "fdcId": 167753,
+      "matchedName": "Prune juice, canned",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "342": {
+      "fdcId": 167780,
+      "matchedName": "Prune puree",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "343": {
+      "fdcId": 167754,
+      "matchedName": "Pummelo, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "344": {
+      "fdcId": 168163,
+      "matchedName": "Quinces, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "345": {
+      "fdcId": 168166,
+      "matchedName": "Raisins, seeded",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "346": {
+      "fdcId": 2346410,
+      "matchedName": "Raspberries, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "348": {
+      "fdcId": 167758,
+      "matchedName": "Rhubarb, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "349": {
+      "fdcId": 167783,
+      "matchedName": "Rowal, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "350": {
+      "fdcId": 2346409,
+      "matchedName": "Strawberries, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "351": {
+      "fdcId": 169105,
+      "matchedName": "Tangerines, (mandarin oranges), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "353": {
+      "fdcId": 2747676,
+      "matchedName": "Watermelon, seedless, rind only, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "354": {
+      "fdcId": 168385,
+      "matchedName": "Amaranth leaves, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "355": {
+      "fdcId": 169203,
+      "matchedName": "Arrowhead, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "356": {
+      "fdcId": 168490,
+      "matchedName": "Arrowroot, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "357": {
+      "fdcId": 169205,
+      "matchedName": "Artichokes, (globe or french), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "358": {
+      "fdcId": 169236,
+      "matchedName": "Jerusalem-artichokes, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "359": {
+      "fdcId": 2710822,
+      "matchedName": "Arugula, baby, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "360": {
+      "fdcId": 2710823,
+      "matchedName": "Asparagus, green, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "361": {
+      "fdcId": 168393,
+      "matchedName": "Balsam-pear (bitter gourd), pods, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "362": {
+      "fdcId": 168391,
+      "matchedName": "Balsam-pear (bitter gourd), leafy tips, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "363": {
+      "fdcId": 2747653,
+      "matchedName": "Beet greens, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "364": {
+      "fdcId": 2685576,
+      "matchedName": "Beets, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "365": {
+      "fdcId": 2258588,
+      "matchedName": "Peppers, bell, green, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "366": {
+      "fdcId": 2258590,
+      "matchedName": "Peppers, bell, red, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "367": {
+      "fdcId": 2685572,
+      "matchedName": "Cabbage, bok choy, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "368": {
+      "fdcId": 170481,
+      "matchedName": "Borage, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "369": {
+      "fdcId": 747447,
+      "matchedName": "Broccoli, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "370": {
+      "fdcId": 169404,
+      "matchedName": "Broccoli, chinese, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "371": {
+      "fdcId": 2685575,
+      "matchedName": "Brussels sprouts, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "373": {
+      "fdcId": 2346407,
+      "matchedName": "Cabbage, green, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "374": {
+      "fdcId": 2346408,
+      "matchedName": "Cabbage, red, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "375": {
+      "fdcId": 170388,
+      "matchedName": "Cabbage, savoy, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "376": {
+      "fdcId": 2258587,
+      "matchedName": "Carrots, baby, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "377": {
+      "fdcId": 2685573,
+      "matchedName": "Cauliflower, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "378": {
+      "fdcId": 2346405,
+      "matchedName": "Celery, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "379": {
+      "fdcId": 169990,
+      "matchedName": "Celtuce, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "380": {
+      "fdcId": 169992,
+      "matchedName": "Chicory greens, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "381": {
+      "fdcId": 169995,
+      "matchedName": "Chrysanthemum, garland, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "382": {
+      "fdcId": 168451,
+      "matchedName": "Radishes, oriental, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "383": {
+      "fdcId": 2685574,
+      "matchedName": "Collards, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "384": {
+      "fdcId": 169224,
+      "matchedName": "Cowpeas, leafy tips, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "385": {
+      "fdcId": 168409,
+      "matchedName": "Cucumber, with peel, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "386": {
+      "fdcId": 169226,
+      "matchedName": "Dandelion greens, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "388": {
+      "fdcId": 2685577,
+      "matchedName": "Eggplant, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "389": {
+      "fdcId": 168412,
+      "matchedName": "Endive, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "390": {
+      "fdcId": 169398,
+      "matchedName": "Epazote, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "391": {
+      "fdcId": 2747655,
+      "matchedName": "Fennel, bulb, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "392": {
+      "fdcId": 169405,
+      "matchedName": "Fiddlehead ferns, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "394": {
+      "fdcId": 168407,
+      "matchedName": "Cress, garden, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "395": {
+      "fdcId": 1104647,
+      "matchedName": "Garlic, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "396": {
+      "fdcId": 168575,
+      "matchedName": "Grape leaves, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "397": {
+      "fdcId": 2346400,
+      "matchedName": "Beans, snap, green, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "398": {
+      "fdcId": 170006,
+      "matchedName": "Onions, young green, tops only",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "399": {
+      "fdcId": 167714,
+      "matchedName": "Hearts of palm, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "400": {
+      "fdcId": 323505,
+      "matchedName": "Kale, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "401": {
+      "fdcId": 168457,
+      "matchedName": "Seaweed, kelp, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "402": {
+      "fdcId": 168424,
+      "matchedName": "Kohlrabi, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "403": {
+      "fdcId": 169244,
+      "matchedName": "Lambsquarters, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "404": {
+      "fdcId": 169246,
+      "matchedName": "Leeks, (bulb and lower leaf-portion), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "405": {
+      "fdcId": 2346389,
+      "matchedName": "Lettuce, romaine, green, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "406": {
+      "fdcId": 169248,
+      "matchedName": "Lettuce, iceberg (includes crisphead types), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "407": {
+      "fdcId": 169249,
+      "matchedName": "Lettuce, green leaf, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "408": {
+      "fdcId": 169250,
+      "matchedName": "Lotus root, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "409": {
+      "fdcId": 169237,
+      "matchedName": "Jew's ear, (pepeao), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.75,
+      "manualOverride": false
+    },
+    "410": {
+      "fdcId": 2003598,
+      "matchedName": "Mushroom, portabella",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "411": {
+      "fdcId": 169242,
+      "matchedName": "Mushrooms, shiitake, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "413": {
+      "fdcId": 169256,
+      "matchedName": "Mustard greens, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "414": {
+      "fdcId": 168438,
+      "matchedName": "Mustard spinach, (tendergreen), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "416": {
+      "fdcId": 168571,
+      "matchedName": "Nopales, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "417": {
+      "fdcId": 169260,
+      "matchedName": "Okra, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "418": {
+      "fdcId": 790577,
+      "matchedName": "Onions, red, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "419": {
+      "fdcId": 2747659,
+      "matchedName": "Parsnips, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "420": {
+      "fdcId": 2747660,
+      "matchedName": "Peppers, banana or Hungarian wax, seeded, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "421": {
+      "fdcId": 169396,
+      "matchedName": "Peppers, ancho, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "422": {
+      "fdcId": 170106,
+      "matchedName": "Peppers, hot chili, red, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "423": {
+      "fdcId": 170106,
+      "matchedName": "Peppers, hot chili, red, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "425": {
+      "fdcId": 2747661,
+      "matchedName": "Peppers, jalapeno, seeded, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "426": {
+      "fdcId": 168579,
+      "matchedName": "Peppers, pasilla, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "428": {
+      "fdcId": 172436,
+      "matchedName": "Pigeon peas (red gram), mature seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "429": {
+      "fdcId": 170432,
+      "matchedName": "Pokeberry shoots, (poke), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "430": {
+      "fdcId": 170032,
+      "matchedName": "Potatoes, raw, skin",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "431": {
+      "fdcId": 170026,
+      "matchedName": "Potatoes, flesh and skin, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "432": {
+      "fdcId": 168448,
+      "matchedName": "Pumpkin, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "433": {
+      "fdcId": 169270,
+      "matchedName": "Pumpkin flowers, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "434": {
+      "fdcId": 169274,
+      "matchedName": "Purslane, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "435": {
+      "fdcId": 2747665,
+      "matchedName": "Radishes, red, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "437": {
+      "fdcId": 168454,
+      "matchedName": "Rutabagas, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "438": {
+      "fdcId": 168459,
+      "matchedName": "Sesbania flower, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "439": {
+      "fdcId": 170499,
+      "matchedName": "Shallots, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "440": {
+      "fdcId": 168462,
+      "matchedName": "Spinach, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "441": {
+      "fdcId": 2685571,
+      "matchedName": "Squash, winter, acorn, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "442": {
+      "fdcId": 2685570,
+      "matchedName": "Squash, winter, butternut, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "443": {
+      "fdcId": 169303,
+      "matchedName": "Sweet potato leaves, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "444": {
+      "fdcId": 169303,
+      "matchedName": "Sweet potato leaves, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "445": {
+      "fdcId": 169991,
+      "matchedName": "Chard, swiss, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "446": {
+      "fdcId": 169308,
+      "matchedName": "Taro, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "447": {
+      "fdcId": 168487,
+      "matchedName": "Taro leaves, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "448": {
+      "fdcId": 169310,
+      "matchedName": "Taro, tahitian, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "449": {
+      "fdcId": 2003596,
+      "matchedName": "Tomato juice, with added ingredients, from concentrate, shelf stable",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "450": {
+      "fdcId": 321360,
+      "matchedName": "Tomatoes, grape, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "451": {
+      "fdcId": 168567,
+      "matchedName": "Tomatoes, sun-dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "452": {
+      "fdcId": 170061,
+      "matchedName": "Turnip greens, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "453": {
+      "fdcId": 2747674,
+      "matchedName": "Turnips, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "455": {
+      "fdcId": 170474,
+      "matchedName": "Vinespinach, (basella), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "456": {
+      "fdcId": 168583,
+      "matchedName": "Wasabi, root, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "457": {
+      "fdcId": 170068,
+      "matchedName": "Watercress, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "458": {
+      "fdcId": 170478,
+      "matchedName": "Winged bean leaves, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "459": {
+      "fdcId": 170071,
+      "matchedName": "Yam, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "461": {
+      "fdcId": 2685568,
+      "matchedName": "Squash, summer, green, zucchini, includes skin, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "462": {
+      "fdcId": 168385,
+      "matchedName": "Amaranth leaves, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "463": {
+      "fdcId": 174901,
+      "matchedName": "Bagels, egg",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "464": {
+      "fdcId": 170284,
+      "matchedName": "Barley, pearled, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "465": {
+      "fdcId": 172671,
+      "matchedName": "Biscuits, mixed grain, refrigerated dough",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "466": {
+      "fdcId": 174929,
+      "matchedName": "Bread, sticks, plain",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "467": {
+      "fdcId": 174906,
+      "matchedName": "Bread, banana, prepared from recipe, made with margarine",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "468": {
+      "fdcId": 174910,
+      "matchedName": "Bread, cornbread, prepared from recipe, made with low fat (2%) milk",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "469": {
+      "fdcId": 174913,
+      "matchedName": "Bread, Italian",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "470": {
+      "fdcId": 172676,
+      "matchedName": "Bread, oat bran",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "471": {
+      "fdcId": 174918,
+      "matchedName": "Bread, pumpernickel",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "474": {
+      "fdcId": 2758993,
+      "matchedName": "Bread, white, commercial",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "475": {
+      "fdcId": 174916,
+      "matchedName": "Bread, pita, whole-wheat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "476": {
+      "fdcId": 170286,
+      "matchedName": "Buckwheat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "477": {
+      "fdcId": 2710820,
+      "matchedName": "Bulgur, dry, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "478": {
+      "fdcId": 173888,
+      "matchedName": "Cereals ready-to-eat, POST Bran Flakes",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "479": {
+      "fdcId": 174648,
+      "matchedName": "Cereals ready-to-eat, RALSTON Corn Flakes",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "481": {
+      "fdcId": 171646,
+      "matchedName": "Cereals ready-to-eat, granola, homemade",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "482": {
+      "fdcId": 173887,
+      "matchedName": "Cereals ready-to-eat, RALSTON CRISP RICE",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "483": {
+      "fdcId": 173894,
+      "matchedName": "Cereals ready-to-eat, POST, Honey Nut Shredded Wheat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "484": {
+      "fdcId": 173896,
+      "matchedName": "Cereals ready-to-eat, wheat germ, toasted, plain",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "485": {
+      "fdcId": 171667,
+      "matchedName": "Cereals, whole wheat hot natural cereal, dry",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "487": {
+      "fdcId": 167631,
+      "matchedName": "Corn, dried (Navajo)",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "488": {
+      "fdcId": 170289,
+      "matchedName": "Corn bran, crude",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "489": {
+      "fdcId": 169699,
+      "matchedName": "Couscous, dry",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "490": {
+      "fdcId": 172741,
+      "matchedName": "Crackers, matzo, egg",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "491": {
+      "fdcId": 174977,
+      "matchedName": "Crackers, melba toast, plain",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "492": {
+      "fdcId": 174980,
+      "matchedName": "Crackers, milk",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "493": {
+      "fdcId": 172746,
+      "matchedName": "Crackers, saltines (includes oyster, soda, soup)",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "495": {
+      "fdcId": 172749,
+      "matchedName": "Crackers, whole-wheat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "496": {
+      "fdcId": 172749,
+      "matchedName": "Crackers, whole-wheat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "497": {
+      "fdcId": 174988,
+      "matchedName": "Croissants, apple",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "498": {
+      "fdcId": 172754,
+      "matchedName": "Danish pastry, cheese",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "500": {
+      "fdcId": 169721,
+      "matchedName": "Wheat, durum",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "501": {
+      "fdcId": 174093,
+      "matchedName": "English muffins, whole grain white",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "502": {
+      "fdcId": 172762,
+      "matchedName": "Muffins, English, whole-wheat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "505": {
+      "fdcId": 2512379,
+      "matchedName": "Millet, whole grain",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "506": {
+      "fdcId": 172766,
+      "matchedName": "Muffins, blueberry, dry mix",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "507": {
+      "fdcId": 175004,
+      "matchedName": "Muffins, corn, toaster-type",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "508": {
+      "fdcId": 172769,
+      "matchedName": "Muffins, oat bran",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "509": {
+      "fdcId": 172770,
+      "matchedName": "Muffins, wheat bran, dry mix",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "510": {
+      "fdcId": 168905,
+      "matchedName": "Noodles, chinese, chow mein",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "511": {
+      "fdcId": 169731,
+      "matchedName": "Noodles, egg, dry, enriched",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "512": {
+      "fdcId": 168906,
+      "matchedName": "Noodles, japanese, soba, dry",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "513": {
+      "fdcId": 169742,
+      "matchedName": "Rice noodles, dry",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "514": {
+      "fdcId": 168872,
+      "matchedName": "Oat bran, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "515": {
+      "fdcId": 173905,
+      "matchedName": "Cereals, oats, regular and quick, unenriched, cooked with water (includes boiling and microwaving), without salt",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "516": {
+      "fdcId": 173904,
+      "matchedName": "Cereals, oats, regular and quick, not fortified, dry",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "517": {
+      "fdcId": 169736,
+      "matchedName": "Pasta, dry, enriched",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "518": {
+      "fdcId": 168917,
+      "matchedName": "Quinoa, cooked",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "519": {
+      "fdcId": 169713,
+      "matchedName": "Rice bran, crude",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "521": {
+      "fdcId": 2512380,
+      "matchedName": "Rice, brown, long grain, unenriched, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "523": {
+      "fdcId": 2512381,
+      "matchedName": "Rice, white, long grain, unenriched, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "524": {
+      "fdcId": 2710821,
+      "matchedName": "Wild rice, dry, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "526": {
+      "fdcId": 172794,
+      "matchedName": "Rolls, dinner, whole-wheat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "527": {
+      "fdcId": 172795,
+      "matchedName": "Rolls, french",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "528": {
+      "fdcId": 174090,
+      "matchedName": "Rolls, hamburger or hot dog, whole wheat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "529": {
+      "fdcId": 168884,
+      "matchedName": "Rye grain",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "530": {
+      "fdcId": 169715,
+      "matchedName": "Semolina, enriched",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "531": {
+      "fdcId": 169716,
+      "matchedName": "Sorghum grain",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "532": {
+      "fdcId": 168911,
+      "matchedName": "Spaghetti, spinach, dry",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "533": {
+      "fdcId": 168911,
+      "matchedName": "Spaghetti, spinach, dry",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "534": {
+      "fdcId": 168910,
+      "matchedName": "Pasta, whole-wheat, cooked (Includes foods for USDA's Food Distribution Program)",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "535": {
+      "fdcId": 169746,
+      "matchedName": "Spelt, cooked",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "536": {
+      "fdcId": 175033,
+      "matchedName": "Sweet rolls, cheese",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "537": {
+      "fdcId": 172674,
+      "matchedName": "Bread, egg, toasted",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "538": {
+      "fdcId": 169829,
+      "matchedName": "Tortilla, blue corn, Sakwavikaviki (Hopi)",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "539": {
+      "fdcId": 169718,
+      "matchedName": "Triticale",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "540": {
+      "fdcId": 175039,
+      "matchedName": "Waffles, plain, prepared from recipe",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "541": {
+      "fdcId": 169721,
+      "matchedName": "Wheat, durum",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "542": {
+      "fdcId": 169722,
+      "matchedName": "Wheat bran, crude",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "543": {
+      "fdcId": 168892,
+      "matchedName": "Wheat germ, crude",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "544": {
+      "fdcId": 790085,
+      "matchedName": "Flour, whole wheat, unenriched",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "545": {
+      "fdcId": 173410,
+      "matchedName": "Butter, salted",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "546": {
+      "fdcId": 173410,
+      "matchedName": "Butter, salted",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "547": {
+      "fdcId": 169081,
+      "matchedName": "Cheese spread, cream cheese base",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "548": {
+      "fdcId": 2647439,
+      "matchedName": "Cheese, pasteurized process cheese food or product, American, singles",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "549": {
+      "fdcId": 172175,
+      "matchedName": "Cheese, blue",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "550": {
+      "fdcId": 172177,
+      "matchedName": "Cheese, brie",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "551": {
+      "fdcId": 172178,
+      "matchedName": "Cheese, camembert",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "552": {
+      "fdcId": 328637,
+      "matchedName": "Cheese, cheddar",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "553": {
+      "fdcId": 173416,
+      "matchedName": "Cheese, colby",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "554": {
+      "fdcId": 2346384,
+      "matchedName": "Cottage cheese, full fat, large or small curd",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "555": {
+      "fdcId": 2346385,
+      "matchedName": "Cream cheese, full fat, block",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "556": {
+      "fdcId": 173419,
+      "matchedName": "Cheese, edam",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "557": {
+      "fdcId": 2259796,
+      "matchedName": "Cheese, feta, whole milk, crumbled",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "558": {
+      "fdcId": 170843,
+      "matchedName": "Cheese, fontina",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "559": {
+      "fdcId": 171240,
+      "matchedName": "Cheese, gjetost",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "560": {
+      "fdcId": 172197,
+      "matchedName": "Cheese, goat, hard type",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "561": {
+      "fdcId": 171241,
+      "matchedName": "Cheese, gouda",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "562": {
+      "fdcId": 171242,
+      "matchedName": "Cheese, gruyere",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "563": {
+      "fdcId": 171243,
+      "matchedName": "Cheese, limburger",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "564": {
+      "fdcId": 329370,
+      "matchedName": "Cheese, mozzarella, low moisture, part-skim",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "565": {
+      "fdcId": 325036,
+      "matchedName": "Cheese, parmesan, grated",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "566": {
+      "fdcId": 170854,
+      "matchedName": "Cheese, pasteurized process, pimento",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "567": {
+      "fdcId": 170849,
+      "matchedName": "Cheese, port de salut",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "568": {
+      "fdcId": 746766,
+      "matchedName": "Cheese, ricotta, whole milk",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "569": {
+      "fdcId": 171249,
+      "matchedName": "Cheese, romano",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "570": {
+      "fdcId": 171250,
+      "matchedName": "Cheese, roquefort",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "571": {
+      "fdcId": 746767,
+      "matchedName": "Cheese, swiss",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "573": {
+      "fdcId": 170857,
+      "matchedName": "Cream, fluid, light (coffee cream or table cream)",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "574": {
+      "fdcId": 170860,
+      "matchedName": "Cream, whipped, cream topping, pressurized",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "592": {
+      "fdcId": 746778,
+      "matchedName": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "593": {
+      "fdcId": 170879,
+      "matchedName": "Milk, chocolate, fluid, commercial, whole, with added vitamin A and vitamin D",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "594": {
+      "fdcId": 173441,
+      "matchedName": "Milk, fluid, 1% fat, without added vitamin A and vitamin D",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "595": {
+      "fdcId": 746776,
+      "matchedName": "Milk, nonfat, fluid, with added vitamin A and vitamin D (fat free or skim)",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "596": {
+      "fdcId": 746782,
+      "matchedName": "Milk, whole, 3.25% milkfat, with added vitamin D",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "630": {
+      "fdcId": 173443,
+      "matchedName": "Sour cream, light",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "632": {
+      "fdcId": 171281,
+      "matchedName": "Whey, acid, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "633": {
+      "fdcId": 2647437,
+      "matchedName": "Yogurt, plain, nonfat",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "634": {
+      "fdcId": 174842,
+      "matchedName": "Beverages, carbonated, club soda",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "636": {
+      "fdcId": 2346414,
+      "matchedName": "Applesauce, unsweetened, with added vitamin C",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "637": {
+      "fdcId": 171616,
+      "matchedName": "Beerwurst, beer salami, pork",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "638": {
+      "fdcId": 172694,
+      "matchedName": "Cake, angelfood, commercially prepared",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "639": {
+      "fdcId": 172696,
+      "matchedName": "Cake, boston cream pie, commercially prepared",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "640": {
+      "fdcId": 174934,
+      "matchedName": "Cake, chocolate, commercially prepared with chocolate frosting, in-store bakery",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "641": {
+      "fdcId": 172702,
+      "matchedName": "Cake, gingerbread, prepared from recipe",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "642": {
+      "fdcId": 172704,
+      "matchedName": "Cake, pound, commercially prepared, butter (includes fresh and frozen)",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "643": {
+      "fdcId": 174941,
+      "matchedName": "Cake, shortcake, biscuit-type, prepared from recipe",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "644": {
+      "fdcId": 172706,
+      "matchedName": "Cake, sponge, commercially prepared",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "645": {
+      "fdcId": 173244,
+      "matchedName": "Cake, yellow, light, dry mix",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "648": {
+      "fdcId": 167974,
+      "matchedName": "Candies, caramels",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "649": {
+      "fdcId": 173755,
+      "matchedName": "Carob flour",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "650": {
+      "fdcId": 167996,
+      "matchedName": "Candies, halavah, plain",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "651": {
+      "fdcId": 167990,
+      "matchedName": "Candies, hard",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "652": {
+      "fdcId": 167995,
+      "matchedName": "Candies, marshmallows",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "653": {
+      "fdcId": 169585,
+      "matchedName": "Candies, peanut bar",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "654": {
+      "fdcId": 169586,
+      "matchedName": "Candies, peanut brittle, prepared-from-recipe",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "655": {
+      "fdcId": 169588,
+      "matchedName": "Candies, sesame crunch",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "656": {
+      "fdcId": 167977,
+      "matchedName": "Candies, sweet chocolate",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "657": {
+      "fdcId": 172711,
+      "matchedName": "Cake, cheesecake, commercially prepared",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "658": {
+      "fdcId": 168771,
+      "matchedName": "Chewing gum",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "661": {
+      "fdcId": 170272,
+      "matchedName": "Chocolate, dark, 60-69% cacao solids",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "662": {
+      "fdcId": 171890,
+      "matchedName": "Beverages, coffee, brewed, prepared with tap water",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "666": {
+      "fdcId": 168014,
+      "matchedName": "Cookies, animal crackers (includes arrowroot, tea biscuits)",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "667": {
+      "fdcId": 172713,
+      "matchedName": "Cookies, brownies, commercially prepared",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "668": {
+      "fdcId": 172729,
+      "matchedName": "Cookies, peanut butter, refrigerated dough",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "669": {
+      "fdcId": 174952,
+      "matchedName": "Cookies, chocolate chip, dry mix",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "670": {
+      "fdcId": 174956,
+      "matchedName": "Cookies, gingersnaps",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "671": {
+      "fdcId": 172821,
+      "matchedName": "Cookies, ladyfingers, without lemon juice and rind",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "672": {
+      "fdcId": 172724,
+      "matchedName": "Cookies, molasses",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "673": {
+      "fdcId": 333008,
+      "matchedName": "Cookies, oatmeal, soft, with raisins",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "674": {
+      "fdcId": 172729,
+      "matchedName": "Cookies, peanut butter, refrigerated dough",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "675": {
+      "fdcId": 174087,
+      "matchedName": "Cookies, shortbread, reduced fat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "676": {
+      "fdcId": 174972,
+      "matchedName": "Cookies, sugar, refrigerated dough",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "677": {
+      "fdcId": 174974,
+      "matchedName": "Cookies, vanilla wafers, higher fat",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "680": {
+      "fdcId": 170865,
+      "matchedName": "Dessert topping, powdered",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "682": {
+      "fdcId": 171258,
+      "matchedName": "Eggnog",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "683": {
+      "fdcId": 168803,
+      "matchedName": "Frostings, white, fluffy, dry mix",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "684": {
+      "fdcId": 168104,
+      "matchedName": "Frozen yogurts, chocolate",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "685": {
+      "fdcId": 167541,
+      "matchedName": "Snacks, fruit leather, rolls",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "686": {
+      "fdcId": 171914,
+      "matchedName": "Beverages, fruit punch drink, without added nutrients, canned",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "687": {
+      "fdcId": 174846,
+      "matchedName": "Beverages, carbonated, ginger ale",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "688": {
+      "fdcId": 169640,
+      "matchedName": "Honey",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "689": {
+      "fdcId": 171277,
+      "matchedName": "Milk, chocolate beverage, hot cocoa, homemade",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "690": {
+      "fdcId": 175001,
+      "matchedName": "Ice cream cones, sugar, rolled-type",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "691": {
+      "fdcId": 168809,
+      "matchedName": "Ice creams, chocolate",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "692": {
+      "fdcId": 167575,
+      "matchedName": "Ice creams, vanilla",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "693": {
+      "fdcId": 167706,
+      "matchedName": "Jams, preserves, marmalade, reduced sugar",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "694": {
+      "fdcId": 169642,
+      "matchedName": "Jellies",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "695": {
+      "fdcId": 173666,
+      "matchedName": "Lemonade, frozen concentrate, pink",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "697": {
+      "fdcId": 170884,
+      "matchedName": "Milk shakes, thick vanilla",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "698": {
+      "fdcId": 168820,
+      "matchedName": "Molasses",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "700": {
+      "fdcId": 174086,
+      "matchedName": "Pancakes, plain, reduced fat",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "701": {
+      "fdcId": 2262072,
+      "matchedName": "Peanut butter, creamy",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "702": {
+      "fdcId": 167930,
+      "matchedName": "Pie crust, refrigerated, regular, baked",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "703": {
+      "fdcId": 168822,
+      "matchedName": "Pie fillings, apple, canned",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "704": {
+      "fdcId": 175017,
+      "matchedName": "Pie, coconut cream, prepared from mix, no-bake type",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "705": {
+      "fdcId": 172784,
+      "matchedName": "Pie, fried pies, fruit",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "706": {
+      "fdcId": 172785,
+      "matchedName": "Pie, lemon meringue, commercially prepared",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "707": {
+      "fdcId": 175021,
+      "matchedName": "Pie, pecan, commercially prepared",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "708": {
+      "fdcId": 169273,
+      "matchedName": "Pumpkin pie mix, canned",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "709": {
+      "fdcId": 172789,
+      "matchedName": "Pie, vanilla cream, prepared from recipe",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "712": {
+      "fdcId": 167959,
+      "matchedName": "Snacks, popcorn, air-popped",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "713": {
+      "fdcId": 169861,
+      "matchedName": "Snacks, popcorn, home-prepared, oil-popped, unsalted",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "714": {
+      "fdcId": 169677,
+      "matchedName": "Snacks, potato chips, plain, salted",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "715": {
+      "fdcId": 168854,
+      "matchedName": "Snacks, potato sticks",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "716": {
+      "fdcId": 169064,
+      "matchedName": "Pretzels, soft",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "717": {
+      "fdcId": 168783,
+      "matchedName": "Puddings, rice, dry mix",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "718": {
+      "fdcId": 172790,
+      "matchedName": "Puff pastry, frozen, ready-to-bake",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "719": {
+      "fdcId": 167577,
+      "matchedName": "Sherbet, orange",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "724": {
+      "fdcId": 171917,
+      "matchedName": "Beverages, tea, green, brewed, regular",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "725": {
+      "fdcId": 169828,
+      "matchedName": "Tea, herbal, brewed, Hohoysi (Hopi)",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "726": {
+      "fdcId": 173227,
+      "matchedName": "Beverages, tea, black, brewed, prepared with tap water",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "727": {
+      "fdcId": 171869,
+      "matchedName": "Beverages, carbonated, tonic water",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "728": {
+      "fdcId": 173143,
+      "matchedName": "Tortilla chips, yellow, plain, salted",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "729": {
+      "fdcId": 169301,
+      "matchedName": "Water convolvulus,raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "730": {
+      "fdcId": 173661,
+      "matchedName": "Whiskey sour mix, bottled, with added potassium and sodium",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "731": {
+      "fdcId": 173190,
+      "matchedName": "Alcoholic beverage, wine, table, red",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "732": {
+      "fdcId": 174837,
+      "matchedName": "Alcoholic beverage, wine, table, white",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "995": {
+      "fdcId": 167763,
+      "matchedName": "Tamarinds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1027": {
+      "fdcId": 172673,
+      "matchedName": "Bread, egg",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1146": {
+      "fdcId": 2003602,
+      "matchedName": "Mushroom, maitake",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1197": {
+      "fdcId": 2684443,
+      "matchedName": "Crustaceans, shrimp, farm raised, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1238": {
+      "fdcId": 2259792,
+      "matchedName": "Buttermilk, low fat",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1242": {
+      "fdcId": 170051,
+      "matchedName": "Tomatoes, red, ripe, canned, packed in tomato juice",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1243": {
+      "fdcId": 170138,
+      "matchedName": "Tomatoes, red, ripe, canned, packed in tomato juice, no salt added",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1250": {
+      "fdcId": 173720,
+      "matchedName": "Mollusks, conch, baked or broiled",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1251": {
+      "fdcId": 2747670,
+      "matchedName": "Snow crab, legs only, frozen  ",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1252": {
+      "fdcId": 168148,
+      "matchedName": "Frog legs, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1254": {
+      "fdcId": 168422,
+      "matchedName": "Mushrooms, Chanterelle, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1255": {
+      "fdcId": 168423,
+      "matchedName": "Mushrooms, morel, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1258": {
+      "fdcId": 171715,
+      "matchedName": "Carambola, (starfruit), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1261": {
+      "fdcId": 2644294,
+      "matchedName": "Beans, great northern, canned, sodium added, drained and rinsed",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1262": {
+      "fdcId": 171650,
+      "matchedName": "Cereals ready-to-eat, POST Raisin Bran Cereal",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1268": {
+      "fdcId": 168475,
+      "matchedName": "Squash, winter, hubbard, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1269": {
+      "fdcId": 169298,
+      "matchedName": "Squash, winter, spaghetti, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1279": {
+      "fdcId": 171889,
+      "matchedName": "Beverages, coffee, brewed, prepared with tap water, decaffeinated",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1294": {
+      "fdcId": 174901,
+      "matchedName": "Bagels, egg",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1297": {
+      "fdcId": 170904,
+      "matchedName": "Kefir, lowfat, plain, LIFEWAY",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1298": {
+      "fdcId": 171942,
+      "matchedName": "Beverages, rice milk, unsweetened",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1307": {
+      "fdcId": 168412,
+      "matchedName": "Endive, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1308": {
+      "fdcId": 2647440,
+      "matchedName": "Cheese, provolone, sliced",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1310": {
+      "fdcId": 170073,
+      "matchedName": "Yambean (jicama), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1314": {
+      "fdcId": 173186,
+      "matchedName": "Beverages, V8 SPLASH Smoothies, Peach Mango",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1315": {
+      "fdcId": 174815,
+      "matchedName": "Alcoholic beverage, distilled, all (gin, rum, vodka, whiskey) 80 proof",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1316": {
+      "fdcId": 174817,
+      "matchedName": "Alcoholic beverage, distilled, rum, 80 proof",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1317": {
+      "fdcId": 174818,
+      "matchedName": "Alcoholic beverage, distilled, vodka, 80 proof",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1318": {
+      "fdcId": 2262074,
+      "matchedName": "Almond butter, creamy",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1319": {
+      "fdcId": 2257045,
+      "matchedName": "Almond milk, unsweetened, plain, refrigerated",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1337": {
+      "fdcId": 175202,
+      "matchedName": "Beans, white, mature seeds, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1338": {
+      "fdcId": 2258589,
+      "matchedName": "Peppers, bell, yellow, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1343": {
+      "fdcId": 171723,
+      "matchedName": "Cranberries, dried, sweetened (Includes foods for USDA's Food Distribution Program)",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1344": {
+      "fdcId": 171255,
+      "matchedName": "Cream, fluid, half and half",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1347": {
+      "fdcId": 167747,
+      "matchedName": "Lemon juice, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1349": {
+      "fdcId": 168156,
+      "matchedName": "Lime juice, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1350": {
+      "fdcId": 171275,
+      "matchedName": "Milk, canned, condensed, sweetened",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1351": {
+      "fdcId": 172194,
+      "matchedName": "Milk, canned, evaporated, with added vitamin A",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1354": {
+      "fdcId": 170008,
+      "matchedName": "Onions, sweet, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1360": {
+      "fdcId": 168448,
+      "matchedName": "Pumpkin, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1368": {
+      "fdcId": 170402,
+      "matchedName": "Chayote, fruit, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1374": {
+      "fdcId": 2685569,
+      "matchedName": "Squash, summer, yellow, includes skin, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1382": {
+      "fdcId": 747447,
+      "matchedName": "Broccoli, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1383": {
+      "fdcId": 2685570,
+      "matchedName": "Squash, winter, butternut, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1384": {
+      "fdcId": 2258587,
+      "matchedName": "Carrots, baby, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1385": {
+      "fdcId": 2346405,
+      "matchedName": "Celery, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1386": {
+      "fdcId": 170402,
+      "matchedName": "Chayote, fruit, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1387": {
+      "fdcId": 171719,
+      "matchedName": "Cherries, sweet, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1388": {
+      "fdcId": 2685574,
+      "matchedName": "Collards, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1389": {
+      "fdcId": 168409,
+      "matchedName": "Cucumber, with peel, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1390": {
+      "fdcId": 173034,
+      "matchedName": "Grapefruit, raw, white, Florida",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1391": {
+      "fdcId": 2346412,
+      "matchedName": "Grapes, red, seedless, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1392": {
+      "fdcId": 2346400,
+      "matchedName": "Beans, snap, green, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1393": {
+      "fdcId": 169248,
+      "matchedName": "Lettuce, iceberg (includes crisphead types), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1394": {
+      "fdcId": 170106,
+      "matchedName": "Peppers, hot chili, red, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1395": {
+      "fdcId": 168475,
+      "matchedName": "Squash, winter, hubbard, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1396": {
+      "fdcId": 2747661,
+      "matchedName": "Peppers, jalapeno, seeded, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1397": {
+      "fdcId": 323505,
+      "matchedName": "Kale, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1398": {
+      "fdcId": 169249,
+      "matchedName": "Lettuce, green leaf, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1399": {
+      "fdcId": 169256,
+      "matchedName": "Mustard greens, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1400": {
+      "fdcId": 327357,
+      "matchedName": "Nectarines, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1401": {
+      "fdcId": 746771,
+      "matchedName": "Oranges, raw, navels",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1402": {
+      "fdcId": 168579,
+      "matchedName": "Peppers, pasilla, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1403": {
+      "fdcId": 325430,
+      "matchedName": "Peaches, yellow, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1404": {
+      "fdcId": 746773,
+      "matchedName": "Pears, raw, bartlett",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1406": {
+      "fdcId": 2710837,
+      "matchedName": "Plum, black, with skin, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1407": {
+      "fdcId": 170032,
+      "matchedName": "Potatoes, raw, skin",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1408": {
+      "fdcId": 170026,
+      "matchedName": "Potatoes, flesh and skin, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1409": {
+      "fdcId": 168448,
+      "matchedName": "Pumpkin, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1410": {
+      "fdcId": 168166,
+      "matchedName": "Raisins, seeded",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1411": {
+      "fdcId": 2346410,
+      "matchedName": "Raspberries, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1412": {
+      "fdcId": 2346389,
+      "matchedName": "Lettuce, romaine, green, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1413": {
+      "fdcId": 169298,
+      "matchedName": "Squash, winter, spaghetti, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1414": {
+      "fdcId": 168462,
+      "matchedName": "Spinach, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1415": {
+      "fdcId": 2346409,
+      "matchedName": "Strawberries, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1416": {
+      "fdcId": 170010,
+      "matchedName": "Peas, edible-podded, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": true
+    },
+    "1417": {
+      "fdcId": 169105,
+      "matchedName": "Tangerines, (mandarin oranges), raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1418": {
+      "fdcId": 321360,
+      "matchedName": "Tomatoes, grape, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1419": {
+      "fdcId": 2685569,
+      "matchedName": "Squash, summer, yellow, includes skin, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1420": {
+      "fdcId": 2685568,
+      "matchedName": "Squash, summer, green, zucchini, includes skin, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1422": {
+      "fdcId": 2258588,
+      "matchedName": "Peppers, bell, green, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.75,
+      "manualOverride": false
+    },
+    "1423": {
+      "fdcId": 2258590,
+      "matchedName": "Peppers, bell, red, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.75,
+      "manualOverride": false
+    },
+    "1424": {
+      "fdcId": 170106,
+      "matchedName": "Peppers, hot chili, red, raw",
+      "dataType": "SR Legacy",
+      "matchScore": 0.8,
+      "manualOverride": false
+    },
+    "1425": {
+      "fdcId": 169396,
+      "matchedName": "Peppers, ancho, dried",
+      "dataType": "SR Legacy",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1426": {
+      "fdcId": 2685571,
+      "matchedName": "Squash, winter, acorn, raw",
+      "dataType": "Foundation",
+      "matchScore": 1,
+      "manualOverride": false
+    },
+    "1427": {
+      "fdcId": 2258589,
+      "matchedName": "Peppers, bell, yellow, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.75,
+      "manualOverride": false
+    },
+    "1428": {
+      "fdcId": 1750340,
+      "matchedName": "Apples, fuji, with skin, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1429": {
+      "fdcId": 2346414,
+      "matchedName": "Applesauce, unsweetened, with added vitamin C",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    },
+    "1430": {
+      "fdcId": 2346411,
+      "matchedName": "Blueberries, raw",
+      "dataType": "Foundation",
+      "matchScore": 0.85,
+      "manualOverride": false
+    }
+  },
+  "unmatched": {
+    "211": {
+      "name": "Black-eyed peas",
+      "reason": "below-threshold"
+    },
+    "274": {
+      "name": "Apple juice",
+      "reason": "below-threshold"
+    },
+    "281": {
+      "name": "Dried banana",
+      "reason": "below-threshold"
+    },
+    "290": {
+      "name": "Cowberries",
+      "reason": "no-usda-candidates"
+    },
+    "393": {
+      "name": "Cloud ear fungus",
+      "reason": "below-threshold"
+    },
+    "427": {
+      "name": "Pimento peppers non-org",
+      "reason": "below-threshold"
+    },
+    "480": {
+      "name": "Cream of wheat",
+      "reason": "below-threshold"
+    },
+    "499": {
+      "name": "Donuts",
+      "reason": "below-threshold"
+    },
+    "504": {
+      "name": "Granola bars",
+      "reason": "below-threshold"
+    },
+    "525": {
+      "name": "Kaiser dinner rolls",
+      "reason": "below-threshold"
+    },
+    "635": {
+      "name": "After-dinner mints",
+      "reason": "below-threshold"
+    },
+    "660": {
+      "name": "Chocolate mousse",
+      "reason": "below-threshold"
+    },
+    "663": {
+      "name": "Coffee liqueur",
+      "reason": "below-threshold"
+    },
+    "664": {
+      "name": "Coffeecake",
+      "reason": "below-threshold"
+    },
+    "678": {
+      "name": "Cream puffs/Éclair",
+      "reason": "below-threshold"
+    },
+    "679": {
+      "name": "Crème de menthe",
+      "reason": "below-threshold"
+    },
+    "696": {
+      "name": "Malted drinks (nonalcoholic)",
+      "reason": "below-threshold"
+    },
+    "711": {
+      "name": "Piña colada",
+      "reason": "below-threshold"
+    },
+    "720": {
+      "name": "Soft (carbonated) drinks",
+      "reason": "below-threshold"
+    },
+    "721": {
+      "name": "Sports drinks",
+      "reason": "below-threshold"
+    },
+    "723": {
+      "name": "Taro chips",
+      "reason": "below-threshold"
+    },
+    "1286": {
+      "name": "Red Bull (fortified drink)",
+      "reason": "below-threshold"
+    },
+    "1405": {
+      "name": "Organic pimento peppers",
+      "reason": "below-threshold"
     }
   }
 }

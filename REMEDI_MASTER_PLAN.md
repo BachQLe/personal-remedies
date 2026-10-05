@@ -141,6 +141,8 @@ Source of truth: `src/components/marketing/Pricing.jsx`'s live copy (Free: "Natu
 | Plan screen (meal planner) | Premium | `plan` | Slots are populated from condition-filtered candidate pools (`adapter.js` pre-filters to `numericId` 1-4) — inherently profile-scored. |
 | Saved plans (`SavedPlansSheet.jsx`) | Premium | `saved_plans` | Persisted output of a premium surface; gating the builder but not its saves would be incoherent. |
 
+**Wired (Oct 2026):** each key is enforced by `<RequireEntitlement feature="...">` (`src/components/shared/RequireEntitlement.jsx`) — route wrappers in `App.jsx` for `food_group_detail`, `suggest`, `plan`; inline in `SuggestionsScreen` (Top Do's tab) and as a sheet in `MealQueueScreen` (saved plans). Locking = add `locked: true` to the feature's config entry; the gate shows an upsell linking to `/app/upgrade?feature=<key>`. Nothing is locked by default.
+
 `ENTITLEMENT_CONFIG.features` in `src/api/entitlements.js` registers the last five rows under the keys above. Search, food facts, and plain-language guidance are free by omission — they're deliberately absent from that config, not pending addition. None of the five rows carries a `tier` yet (6.1), so this table is a spec of where gates will eventually go, not a description of current behavior — today every row resolves unlocked via `defaultUnlocked: true`.
 
 ### 6.8 — Trial model implications

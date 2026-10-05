@@ -110,11 +110,11 @@ function StudyCountBadge({ studyCount }) {
         tabIndex={0}
         onClick={toggle}
         onKeyDown={handleKeyDown}
-        aria-label={`${studyCount} ${studyCount === 1 ? 'study' : 'studies'} — what does this mean?`}
+        aria-label={`${studyCount} ${studyCount === 1 ? 'reference' : 'references'} — what does this mean?`}
         className="inline-flex items-center gap-0.5 -m-1 p-1 pt-0.5 text-[11px] text-char-400 font-sans
           whitespace-nowrap cursor-pointer hover:text-char-600"
       >
-        {studyCount} {studyCount === 1 ? 'study' : 'studies'}
+        {studyCount} {studyCount === 1 ? 'reference' : 'references'}
         <Info size={11} aria-hidden="true" />
       </span>
       {open && (
@@ -123,7 +123,7 @@ function StudyCountBadge({ studyCount }) {
           className="absolute z-20 right-0 top-full mt-1 w-44 rounded-sm bg-char-900 text-white
             text-[11px] font-sans leading-snug px-2.5 py-2 shadow-lg"
         >
-          {studyCount} clinical {studyCount === 1 ? 'study supports' : 'studies support'} this item's ranking for your conditions.
+          {studyCount} published {studyCount === 1 ? 'reference' : 'references'} on file for this item.
         </span>
       )}
     </span>

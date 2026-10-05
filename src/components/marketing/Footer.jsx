@@ -90,7 +90,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-16 pt-8 border-t border-[#F3EFE6]/10 flex flex-col gap-4">
           <p className="text-[12.5px] leading-[1.6] font-sans text-[#BFC9BD]/70 max-w-[90ch]">
-            Personal Remedies provides general, evidence-based health
+            Personal Remedies provides general health
             information and is not a substitute for professional medical advice.
             Always consult a qualified healthcare provider.
           </p>

@@ -62,10 +62,10 @@ createRoot(document.getElementById('root')).render(
  */
 const updateSW = registerSW({
   onOfflineReady() {
-    showServiceWorkerNotice('Remedi is ready to work offline.', { autoDismissMs: 6000 })
+    showServiceWorkerNotice('Personal Remedies is ready to work offline.', { autoDismissMs: 6000 })
   },
   onNeedReload() {
-    showServiceWorkerNotice('A new version of Remedi is available.', {
+    showServiceWorkerNotice('A new version of Personal Remedies is available.', {
       actionLabel: 'Reload',
       onAction: () => {
         // `updateSW()` is a documented no-op under `autoUpdate` (the new SW

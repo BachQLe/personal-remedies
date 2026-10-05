@@ -10,10 +10,10 @@ import PageHeader from '../../components/shared/PageHeader.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import BestRecipesRails from '../../components/shared/BestRecipesRails.jsx';
 import DataState from '../../components/shared/DataState.jsx';
-import CoverageNotice from './CoverageNotice.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
 import TopDosTab from './TopDosTab.jsx';
+import RequireEntitlement from '../../components/shared/RequireEntitlement.jsx';
 import FoodGroupsTab from './FoodGroupsTab.jsx';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -99,8 +99,7 @@ async function fetchBestRecipes() {
   const res = await getMealPlanSuggestions(profile);
   return {
     candidates: res?.candidates ?? emptySlotMap(),
-    usedFallback: !!res?.usedFallback,
-    requestedConditionIds: profile.conditions,
+    unscorableReason: res?.unscorableReason ?? null,
   };
 }
 
@@ -163,11 +162,10 @@ function BestRecipesTab() {
           onRetry={retry}
           screenName="Recommendations"
           emptyTitle="No recipes yet"
-          emptyBody="We don't have recipes ranked for your conditions right now."
+          emptyBody={data?.unscorableReason || "We don't have recipes ranked for your conditions right now."}
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
         >
           <div className="flex flex-col gap-3">
-            <CoverageNotice usedFallback={!!data?.usedFallback} requestedConditionIds={data?.requestedConditionIds} />
             <BestRecipesRails
               candidatesBySlot={candidates}
               onSelectCard={openRecipe}
@@ -257,6 +255,9 @@ export default function SuggestionsScreen() {
             </motion.div>
           </AnimatePresence>
         </div>
+        <p className="text-[11px] text-blue-950/60 font-sans mt-1">
+          Ask your doctor before changing your diet, especially if you take medication.
+        </p>
       </PageHeader>
 
       {/* Tab content — solid paper shell, the same container HomeScreen uses
@@ -282,7 +283,7 @@ export default function SuggestionsScreen() {
             exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeOut' } }}
           >
             {activeTab === 'top' ? (
-              <TopDosTab onSelectFood={setSelectedFood} />
+              <RequireEntitlement feature="top_dos_donts" variant="inline"><TopDosTab onSelectFood={setSelectedFood} /></RequireEntitlement>
             ) : activeTab === 'groups' ? (
               <FoodGroupsTab />
             ) : (

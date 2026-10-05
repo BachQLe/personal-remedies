@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, X } from 'lucide-react';
 import { searchEverything, buildRecipeDetail, getGroupLabel } from '../../api/api.js';
 import { storage } from '../../api/storage.js';
-import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { getRecentSearches, addRecentSearch } from '../../state/recentSearches.js';
 import Icon from '../../components/shared/Icon.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
@@ -12,6 +11,12 @@ import DataState from '../../components/shared/DataState.jsx';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import { recipeToSaveItem } from '../../utils/saveGate.js';
+import GoodForMeSheet from './GoodForMeSheet.jsx';
+import TopSources, { NutrientPicker } from './NutrientSources.jsx';
+import { parseNutrientQuery, getNutrientMeta } from '../../api/nutrientFacts.js';
+import RequireEntitlement from '../../components/shared/RequireEntitlement.jsx';
+import { useEntitlement } from '../../components/shared/useEntitlement.js';
+import { nutrientDetail, sortForNutrientQuery } from './nutrientDetail.js';
 
 // Single "Food & Nutrient Lookup" search surface — no mode switcher. One
 // query fans out to `searchEverything` (foods, recipes, and the nutrients/
@@ -81,11 +86,50 @@ async function attachFoodGroupLabels(sections) {
   return sections;
 }
 
-function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked }) {
+function ResultRow({ kind, title, subtitle, detail, onClick, saveItem, onSaveBlocked, onGoodForMe }) {
   // `saveItem` is opt-in — only recipe rows carry one (they're the only
   // saveable kind here; a plain food/nutrient/herbal result has nothing to
   // save, so passing a SaveButton for it would always render as blocked).
   const isRecipe = kind === 'recipe';
+  const goodForMeUnlocked = useEntitlement('good_for_me');
+  if (onGoodForMe) {
+    // Food rows: the row button opens the card; a sibling pill (not nested —
+    // buttons can't nest) answers "Check against my profile" on an explicit tap only.
+    return (
+      <div
+        className="flex-none w-full pl-4 pr-3 py-3 rounded-sm bg-white text-char-900
+          border border-sand-200 shadow-sm font-sans flex items-center gap-3"
+      >
+        <button type="button" onClick={onClick} className="flex-1 min-w-0 flex items-center gap-3 text-left py-2">
+          <span className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-forest-100 text-forest-700">
+            <Icon name="leaf" size={18} aria-hidden="true" />
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block font-semibold text-sm text-char-900 truncate leading-tight">{title}</span>
+            {subtitle && <span className="block text-xs text-char-500 mt-0.5 truncate">{subtitle}</span>}
+            {detail && (
+              <span className="block text-base font-semibold text-forest-700 mt-1 leading-snug" data-testid="nutrient-answer">
+                {detail}
+              </span>
+            )}
+          </span>
+        </button>
+        {goodForMeUnlocked ? (
+        <button
+          type="button"
+          onClick={onGoodForMe}
+          aria-label={`Check ${title} against my profile`}
+          className="flex-shrink-0 px-3 py-2 rounded-pill border border-forest-400 bg-forest-50 text-forest-700
+            text-xs font-semibold transition-colors duration-fast hover:bg-forest-100 active:bg-forest-100"
+        >
+          Check against my profile
+        </button>
+        ) : (
+          <RequireEntitlement feature="good_for_me" variant="inline" />
+        )}
+      </div>
+    );
+  }
   return (
     <motion.button
       whileTap={{ scale: 0.98 }}
@@ -123,8 +167,8 @@ const PAD_CENTER = '40px';
 
 function getProfile() {
   const saved = storage.get('profile', null);
-  if (saved?.conditions?.length) return saved;
-  return { conditions: DEFAULT_DEV_CONDITIONS };
+  // No demo-condition fallback: with no profile conditions, results are unscored.
+  return { ...(saved ?? {}), conditions: saved?.conditions ?? [] };
 }
 
 export default function SearchScreen({ active, onClose }) {
@@ -143,6 +187,9 @@ export default function SearchScreen({ active, onClose }) {
   // covers a fetch actually in flight; the input spinner shows for either.
   const [debouncePending, setDebouncePending] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [goodForFood, setGoodForFood] = useState(null);
+  // Nutrient whose top-sources ranking is open (null = none).
+  const [sourceNutrient, setSourceNutrient] = useState(null);
 
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
@@ -152,11 +199,20 @@ export default function SearchScreen({ active, onClose }) {
   const hasQuery = query.trim().length > 0;
   const trimmedCommitted = committedQuery.trim();
 
+  const parsedQuery = useMemo(() => parseNutrientQuery(trimmedCommitted), [trimmedCommitted]);
+
   const fetcher = useCallback(async () => {
     if (!trimmedCommitted) return EMPTY_SECTIONS;
-    const sections = await searchEverything(trimmedCommitted, profile.current);
+    // "calcium in milk" -> search the food part, then answer with the nutrient.
+    let sections = null;
+    if (parsedQuery?.food) {
+      sections = await searchEverything(parsedQuery.food, profile.current);
+      if (isSectionsEmpty(sections)) sections = null; // food part found nothing: fall back to the raw text
+    }
+    if (!sections) sections = await searchEverything(trimmedCommitted, profile.current);
+    if (parsedQuery?.food) sections = { ...sections, foods: sortForNutrientQuery(sections.foods, parsedQuery) };
     return attachFoodGroupLabels(sections);
-  }, [trimmedCommitted]);
+  }, [trimmedCommitted, parsedQuery]);
 
   const { status, data, retry } = useAsyncData(fetcher, [trimmedCommitted], {
     isEmpty: isSectionsEmpty,
@@ -182,6 +238,8 @@ export default function SearchScreen({ active, onClose }) {
       setCommittedQuery('');
       setDebouncePending(false);
       setSelectedItem(null);
+      setGoodForFood(null);
+      setSourceNutrient(null);
     };
   }, [active]);
 
@@ -189,6 +247,7 @@ export default function SearchScreen({ active, onClose }) {
 
   const handleChange = (val) => {
     setQuery(val);
+    setSourceNutrient(null);
     setSelectedItem(null);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     const trimmed = val.trim();
@@ -336,7 +395,22 @@ export default function SearchScreen({ active, onClose }) {
               <div className="flex-1 min-h-0 mt-4 pointer-events-auto">
                 <div className="h-full p-3 flex flex-col rounded-t-[24px]" style={{ backgroundColor: 'rgba(255,255,255,0.62)', borderTop: '1px solid rgba(255,255,255,0.75)', borderLeft: '1px solid rgba(255,255,255,0.75)', borderRight: '1px solid rgba(255,255,255,0.75)' }}>
                   <AnimatePresence mode="wait">
-                    {hasQuery ? (
+                    {sourceNutrient ? (
+                      <motion.div
+                        key="sources"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                        className="h-full overflow-y-auto hide-scrollbar pb-1"
+                      >
+                        <TopSources
+                          nutrientKey={sourceNutrient}
+                          onBack={() => setSourceNutrient(null)}
+                          onOpenFood={(food) => setSelectedItem({ foodId: food.id, name: food.name })}
+                        />
+                      </motion.div>
+                    ) : hasQuery ? (
                       <motion.div
                         key="results"
                         initial={{ opacity: 0, y: 8 }}
@@ -345,6 +419,16 @@ export default function SearchScreen({ active, onClose }) {
                         transition={{ duration: 0.18, ease: 'easeOut' }}
                         className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
                       >
+                        {parsedQuery && !parsedQuery.food && (
+                          <button
+                            type="button"
+                            onClick={() => setSourceNutrient(parsedQuery.nutrient)}
+                            className="flex-none w-full text-left px-4 py-4 rounded-sm bg-forest-50 border border-forest-400
+                              text-base font-semibold text-forest-700 font-sans"
+                          >
+                            See top food sources of {getNutrientMeta(parsedQuery.nutrient).label}
+                          </button>
+                        )}
                         {/* Idle-vs-no-results distinction (must survive): this
                             DataState only ever mounts once `hasQuery` is true —
                             the idle recents/hint view below is a completely
@@ -372,7 +456,9 @@ export default function SearchScreen({ active, onClose }) {
                                         kind="food"
                                         title={item.food.name}
                                         subtitle={item.food.groupLabel || 'Ingredient'}
+                                        detail={nutrientDetail(parsedQuery?.nutrient, item.food)}
                                         onClick={() => openFood(item.food)}
+                                        onGoodForMe={() => setGoodForFood({ id: item.food.id, name: item.food.name })}
                                       />
                                     ) : (
                                       <ResultRow
@@ -399,8 +485,9 @@ export default function SearchScreen({ active, onClose }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.18, ease: 'easeOut' }}
-                        className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col"
+                        className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
                       >
+                        <NutrientPicker onPick={setSourceNutrient} />
                         {recents.length > 0 && (
                           <>
                             <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
@@ -428,10 +515,7 @@ export default function SearchScreen({ active, onClose }) {
                             status — this is the idle view, shown whenever there's
                             no query at all, distinct from a completed search that
                             found zero results (the DataState branch above). */}
-                        <div className="flex-1 flex flex-col items-center justify-center gap-2">
-                          <Search size={32} strokeWidth={1.5} className="text-blue-950/25" aria-hidden="true" />
-                          <p className="text-sm font-sans text-blue-950/30">Searches appear here</p>
-                        </div>
+
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -447,6 +531,13 @@ export default function SearchScreen({ active, onClose }) {
         open={!!selectedItem}
         onClose={() => setSelectedItem(null)}
       />
+      <RequireEntitlement feature="good_for_me" variant="sheet" open={!!goodForFood} onClose={() => setGoodForFood(null)}>
+        <GoodForMeSheet
+          food={goodForFood}
+          profile={{ conditions: storage.get('profile', null)?.conditions || [] }}
+          onClose={() => setGoodForFood(null)}
+        />
+      </RequireEntitlement>
     </>
   );
 }

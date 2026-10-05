@@ -23,6 +23,7 @@ import {
   NUTRIDIGM_PROXY_URL,
   IS_CONFIGURED,
 } from './config.js';
+import { storage } from './storage.js';
 
 /**
  * Custom error for Nutridigm API failures that should trigger fallback.
@@ -57,22 +58,54 @@ const _loggedErrors = new Set();
 
 // ── Request-count instrumentation (dev-only, P1.2 probe P5) ─────────────────
 //
-// In-memory, per-endpoint counter of real network requests — i.e. actual
-// fetches performed by `performRequest`, NOT calls to `request()` that get
-// served by the in-flight de-dupe map (`_inFlight`) or by the persistent
-// TTL cache in cache.js (those never reach `performRequest` at all). Purely
-// additive: no existing export's signature or behavior changes. Not
-// persisted — resets on every page reload / module reload, which is exactly
-// what "per session" instrumentation should do.
+// Per-endpoint counter of real network requests — i.e. actual fetches
+// performed by `performRequest`, NOT calls to `request()` that get served by
+// the in-flight de-dupe map (`_inFlight`) or the persistent TTL cache in
+// cache.js. Purely additive: no existing export's signature changes.
+//
+// Two views:
+//   - session: in-memory, resets on reload (`getRequestCounts`).
+//   - daily: persisted per local calendar day (YYYY-MM-DD) through
+//     storage.js under the `requestCounts` key, last 14 days kept
+//     (`getDailyRequestCounts`). Local-only — nothing is uploaded, and
+//     `requestCounts` is not in profileSync's SYNCED_KEYS so it never syncs.
+//     The Nutridigm API has a DAILY call limit, hence the daily view.
 
 /** @type {Map<string, number>} endpoint path (e.g. 'goodfor') -> request count. */
 const _requestCounts = new Map();
 
+const DAILY_KEY = 'requestCounts';
+const DAILY_RETENTION_DAYS = 14;
+
+/** Local-date key (YYYY-MM-DD), not UTC, so "today" matches the user's day. */
+function localDateKey(d = new Date()) {
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+function recordDaily(endpoint) {
+  try {
+    const all = storage.get(DAILY_KEY, {});
+    const days = all && typeof all === 'object' && !Array.isArray(all) ? { ...all } : {};
+    const today = localDateKey();
+    const row = { ...(days[today] || {}) };
+    row[endpoint] = (row[endpoint] || 0) + 1;
+    days[today] = row;
+    // ISO dates sort lexicographically; keep the newest N.
+    const keep = Object.keys(days).sort().slice(-DAILY_RETENTION_DAYS);
+    const pruned = {};
+    for (const k of keep) pruned[k] = days[k];
+    storage.set(DAILY_KEY, pruned);
+  } catch {
+    // Instrumentation must never break a request.
+  }
+}
+
 /**
- * Record one real network request against its endpoint's counter. Endpoint
+ * Record one real network request against its endpoint's counters. Endpoint
  * is parsed from the final path segment of the request URL (e.g.
- * '.../api/v2/goodfor?...' -> 'goodfor') rather than threaded through as an
- * extra argument, so `performRequest`'s existing signature never changes.
+ * '.../api/v2/goodfor?...' -> 'goodfor').
  * @param {string} urlStr - Full request URL (as built by `request()`)
  */
 function recordRequest(urlStr) {
@@ -81,34 +114,48 @@ function recordRequest(urlStr) {
     const segments = new URL(urlStr).pathname.split('/').filter(Boolean);
     endpoint = segments[segments.length - 1] || 'unknown';
   } catch {
-    // Malformed URL (shouldn't happen — built by `request()` itself) —
-    // count it under 'unknown' rather than throwing.
+    // Malformed URL — count it under 'unknown' rather than throwing.
   }
   _requestCounts.set(endpoint, (_requestCounts.get(endpoint) || 0) + 1);
+  recordDaily(endpoint);
 }
 
 /**
- * Dev-only per-endpoint request-count snapshot (P5 instrumentation).
- * Returns a plain object copy of the live counts (not the Map itself), so
- * callers can inspect but never mutate internal state.
- *
- * Read it from:
- *   - Browser console: `window.__remediRequestCounts()` (dev builds only —
- *     see the `import.meta.env.DEV` guard below).
- *   - Playwright: `await page.evaluate(() => window.__remediRequestCounts?.())`.
- *   - Any module: `import { getRequestCounts } from './nutridigm.js'`.
+ * Per-endpoint request-count snapshot for THIS session (resets on reload).
  * @returns {Record<string, number>}
  */
 export function getRequestCounts() {
   return Object.fromEntries(_requestCounts);
 }
 
-// Dev-only convenience global so counts are readable from the browser
-// console or a Playwright `page.evaluate` without importing this module.
-// `import.meta.env.DEV` is Vite's dev-mode flag (false in production
-// builds), so this is a complete no-op in prod bundles.
+/**
+ * Persisted daily request counts, last 14 days, oldest first in key order.
+ * With a `date` ('YYYY-MM-DD') returns just that day's per-endpoint counts
+ * ({} if none).
+ * @param {string} [date]
+ * @returns {Record<string, Record<string, number>> | Record<string, number>}
+ */
+export function getDailyRequestCounts(date) {
+  let all = {};
+  try {
+    const raw = storage.get(DAILY_KEY, {});
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) all = raw;
+  } catch {
+    all = {};
+  }
+  if (date !== undefined) return { ...(all[date] || {}) };
+  return JSON.parse(JSON.stringify(all));
+}
+
+/** Today's (local date) per-endpoint counts, e.g. { goodfor: 3 }. */
+export function getTodayRequestCounts() {
+  return getDailyRequestCounts(localDateKey());
+}
+
+// Dev-only globals (no-op in prod bundles via Vite's DEV flag).
 if (import.meta.env?.DEV && typeof window !== 'undefined') {
   window.__remediRequestCounts = getRequestCounts;
+  window.__remediDailyRequestCounts = getDailyRequestCounts;
 }
 
 /**

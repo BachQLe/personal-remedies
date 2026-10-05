@@ -13,28 +13,28 @@ const CONDITIONS = [
 function getRecommendation(profileIds) {
   if (profileIds.includes("kidney")) {
     return {
-      verdict: "Avoid",
+      verdict: "Ranked lower",
       signal: "avoid",
       score: 12,
       reason:
-        "Garlic's potassium content can stress compromised kidneys, and its antiplatelet effect may interact with medications commonly used in CKD management.",
+        "Garlic's potassium content can stress compromised kidneys, and its antiplatelet effect may interact with medications commonly used in CKD management. Please ask your doctor.",
     };
   }
   if (profileIds.includes("hypertension")) {
     return {
-      verdict: "Beneficial",
+      verdict: "Ranked higher",
       signal: "beneficial",
       score: 94,
       reason:
-        "Garlic's allicin compounds have shown meaningful systolic blood pressure reduction in meta-analyses -- a strong advantage for hypertension alongside a diabetes-friendly glycemic profile.",
+        "Garlic is ranked favorably for the profile you selected. Ask your doctor before changing your diet.",
     };
   }
   return {
-    verdict: "Limit",
+    verdict: "Ranked in the middle",
     signal: "limit",
     score: 68,
     reason:
-      "Garlic shows modest improvements in insulin sensitivity and fasting glucose in T2D patients. Benefits are real but secondary to first-line dietary changes.",
+      "Garlic is ranked in the middle for the profile you selected. Ask your doctor before changing your diet.",
   };
 }
 

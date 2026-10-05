@@ -21,9 +21,11 @@ import SuggestionsScreen from "./screens/suggestions/SuggestionsScreen";
 import GroupDetailScreen from "./screens/suggestions/GroupDetailScreen";
 import FineGroupDetailScreen from "./screens/suggestions/FineGroupDetailScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
+import ImportantNotesScreen from "./screens/profile/ImportantNotesScreen";
 import MealQueueScreen from "./screens/plan/MealQueueScreen";
 import RecipesScreen from "./screens/recipes/RecipesScreen";
 import PaywallScreen from "./screens/paywall/PaywallScreen";
+import RequireEntitlement from "./components/shared/RequireEntitlement.jsx";
 // App chrome
 import TabBar from "./components/layout/TabBar";
 import FAB from "./components/layout/FAB";
@@ -192,11 +194,12 @@ function App() {
               <Route path="/app/home" element={<HomeScreen />} />
               <Route path="/app/search" element={<SearchRouteScreen />} />
               <Route path="/app/suggestions" element={<SuggestionsScreen />} />
-              <Route path="/app/suggestions/group/:groupId" element={<GroupDetailScreen />} />
-              <Route path="/app/suggestions/fine/:fineGroupId" element={<FineGroupDetailScreen />} />
+              <Route path="/app/suggestions/group/:groupId" element={<RequireEntitlement feature="food_group_detail"><GroupDetailScreen /></RequireEntitlement>} />
+              <Route path="/app/suggestions/fine/:fineGroupId" element={<RequireEntitlement feature="suggest"><FineGroupDetailScreen /></RequireEntitlement>} />
               <Route path="/app/recipes" element={<RecipesScreen />} />
-              <Route path="/app/plan" element={<MealQueueScreen />} />
+              <Route path="/app/plan" element={<RequireEntitlement feature="plan"><MealQueueScreen /></RequireEntitlement>} />
               <Route path="/app/profile" element={<ProfileScreen />} />
+              <Route path="/app/profile/important-notes" element={<ImportantNotesScreen />} />
               <Route path="/app/upgrade" element={<PaywallScreen />} />
             </Route>
             {/* Retired marketing URLs (/about, /news, …) and any other unknown

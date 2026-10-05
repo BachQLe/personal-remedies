@@ -11,19 +11,19 @@ import Icon from "./Icon.jsx";
 
 const CONFIG = {
   beneficial: {
-    text: "Beneficial",
+    text: "Ranked higher",
     bg: "bg-benefit-100",
     fg: "text-benefit-700",
     dot: "bg-benefit-700",
   },
   limit: {
-    text: "Limit",
+    text: "Ranked lower",
     bg: "bg-caution-100",
     fg: "text-caution-700",
     dot: "bg-caution-700",
   },
   avoid: {
-    text: "Avoid",
+    text: "Ranked lower",
     bg: "bg-avoid-100",
     fg: "text-avoid-700",
     dot: "bg-avoid-700",

@@ -89,7 +89,6 @@ export const GHOST_PLAN = {
   version: 2,
   conditionsKey: '',
   conditionNames: CONDS.slice(0, 2),
-  usedFallback: false,
   generation: 0,
   days: { [todayKey()]: ghostDay() },
 };

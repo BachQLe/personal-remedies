@@ -3,7 +3,6 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { ArrowUpRight, Bookmark, ChevronLeft, ChevronRight, Leaf } from 'lucide-react';
 import { buildRecipeDetail, getMealPlanSuggestions, getRecipes } from '../../api/api.js';
 import { storage } from '../../api/storage.js';
-import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { getSaveBlockReason } from '../../utils/saveGate.js';
 import { addToLibrary, getLibrary, removeFromLibrary, subscribeLibrary } from '../../state/library.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
@@ -33,7 +32,7 @@ const MEAL_TAG_ABBR = {
 
 function getProfile() {
   const saved = storage.get('profile', null);
-  return { ...saved, conditions: saved?.conditions?.length ? saved.conditions : DEFAULT_DEV_CONDITIONS };
+  return { ...saved, conditions: saved?.conditions ?? [] };
 }
 
 function MealCard({ card, label, mealKey, saved, onOpen, onSave }) {
@@ -237,7 +236,7 @@ function MealRecommendations({ profile }) {
             <Skeleton shape="card" className="home-meals__photo" />
           </div>
         ) : (
-          <DataState status={categoryStatus} onRetry={retry} emptyTitle={`No ${meal.label.toLowerCase()} ideas yet`} emptyBody="Try another meal category for now." screenName={`${meal.label.toLowerCase()} ideas`}>
+          <DataState status={categoryStatus} onRetry={retry} emptyTitle={`No ${meal.label.toLowerCase()} ideas yet`} emptyBody={data?.unscorableReason || "Try another meal category for now."} screenName={`${meal.label.toLowerCase()} ideas`}>
             <MealRail key={mealKey} cards={cards} label={meal.label} mealKey={mealKey} library={library} onOpen={openDetail} onSave={toggleSave} />
           </DataState>
         )}

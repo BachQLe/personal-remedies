@@ -60,6 +60,17 @@ function writeEntry(key, entry) {
   }
 }
 
+/** Remove every cached entry (memory + localStorage). Used by account deletion. */
+export function clearCache() {
+  _memory.clear();
+  if (typeof window === 'undefined') return;
+  try {
+    Object.keys(window.localStorage)
+      .filter((k) => k.startsWith(NS))
+      .forEach((k) => window.localStorage.removeItem(k));
+  } catch { /* ignore */ }
+}
+
 /**
  * Fetch-through cache with TTL + stale-while-revalidate semantics, reporting
  * cache provenance alongside the data.

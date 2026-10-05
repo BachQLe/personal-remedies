@@ -9,14 +9,15 @@ import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
 import { MEAL_TYPE_META, displayTagForItem } from '../../components/shared/mealTypeMeta.jsx';
 import { PLAN_SLOT_KEYS } from '../../api/config.js';
-import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { GHOST_RECIPES } from '../../api/ghostData.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
 
-// Demo key conditions (see api/config.js DEFAULT_DEV_CONDITIONS): 203 = Aging, 244 = Pneumonia.
-const DEMO_PROFILE = {
-  conditions: DEFAULT_DEV_CONDITIONS,
+// No demo conditions here: a missing profile means no condition-scored recipes
+// (getRecipes returns an empty list for an empty conditions array), never a
+// borrowed demo profile.
+const EMPTY_PROFILE = {
+  conditions: [],
   medications: [],
   allergies: [],
   dietary: [],
@@ -185,9 +186,9 @@ export default function RecipesScreen() {
   // can genuinely fail (network/API), and that failure now propagates.
   const fetcher = useCallback(async () => {
     let p = await getProfile();
-    if (!p) p = DEMO_PROFILE;
-    const { recipes } = await getRecipes(p);
-    return { profile: p, recipes: recipes ?? [] };
+    if (!p) p = EMPTY_PROFILE;
+    const { recipes, unscorableReason } = await getRecipes(p);
+    return { profile: p, recipes: recipes ?? [], unscorableReason };
   }, []);
 
   const { status, data, retry } = useAsyncData(fetcher, [], {
@@ -291,7 +292,7 @@ export default function RecipesScreen() {
       <div className="px-5 pt-6 pb-6">
         <p className="text-[12px] text-blue-950/60 font-label tracking-[0.14em] uppercase">Personal Remedies</p>
         <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">Recipes</h1>
-        <p className="text-sm text-blue-950/60 mt-0.5 font-sans">Condition-approved for your profile</p>
+        <p className="text-sm text-blue-950/60 mt-0.5 font-sans">Matched to your profile</p>
       </div>
 
       {/* Content shell — full-bleed white container with rounded top corners */}
@@ -309,7 +310,7 @@ export default function RecipesScreen() {
             status={status}
             onRetry={retry}
             emptyTitle="No recipes yet"
-            emptyBody="Set up your health profile to get condition-matched recipes."
+            emptyBody={data?.unscorableReason || "Set up your health profile to get condition-matched recipes."}
             screenName="recipes"
           >
             <BestRecipesRails
@@ -336,9 +337,9 @@ export default function RecipesScreen() {
         {browsePool.length === 0 ? (
           <p className="font-sans text-sm text-char-500 py-4">No options yet.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-wrap gap-3">
             {browsePool.map((item) => (
-              <div key={item.id} style={{ aspectRatio: '4/5' }}>
+              <div key={item.id} className="min-w-0" style={{ aspectRatio: '4/5', width: 'calc(50% - 6px)' }}>
                 <FoodImageCard
                   id={item.id}
                   mealTag={displayTagForItem(item, item.fromSlot ?? browseSlot)}

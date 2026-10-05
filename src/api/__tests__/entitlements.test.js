@@ -123,3 +123,11 @@ describe('fixture: a locked feature flips hasEntitlement to false', () => {
     expect(hasEntitlement('still_unknown')).toBe(false);
   });
 });
+
+describe('good_for_me entitlement', () => {
+  it('is registered, labelled and unlocked by default', async () => {
+    const { ENTITLEMENT_CONFIG, hasEntitlement } = await import('../entitlements.js');
+    expect(ENTITLEMENT_CONFIG.features.good_for_me.label).toBe('Check against my profile');
+    expect(hasEntitlement('good_for_me')).toBe(true);
+  });
+});

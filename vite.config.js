@@ -11,7 +11,7 @@ export default defineConfig({
       manifest: {
         name: 'Personal Remedies',
         short_name: 'Remedies',
-        description: 'Condition-matched foods and meals backed by evidence.',
+        description: 'Food ideas ranked for the health conditions you choose. General information, not medical advice.',
         start_url: '/app/home',
         display: 'standalone',
         background_color: '#FFFFFF',

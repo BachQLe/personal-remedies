@@ -21,7 +21,7 @@
  * instead.
  */
 import { describe, expect, it } from 'vitest';
-import { resolveGroupLinkTarget, mealTypeToRecipesHref } from '../FoodDetailCard.jsx';
+import { resolveGroupLinkTarget, mealTypeToRecipesHref } from '../../utils/foodDetailCard.js';
 
 describe('resolveGroupLinkTarget — fine group wins when it resolves and is not excluded', () => {
   it('links to the fine group page when item.fineGroup is a real, non-excluded code', () => {

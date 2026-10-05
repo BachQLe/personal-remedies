@@ -50,7 +50,7 @@ export default function FinalCTA() {
         </Reveal>
         <Reveal delay={0.1}>
           <h2 className="font-display font-medium tracking-tightish mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06] text-white">
-            Take your first step to a healthier life.{" "}
+            Get started with a plan built around your profile.{" "}
             <em className="font-display italic font-normal text-yellow-300">
               Your first diet plan is on us.
             </em>

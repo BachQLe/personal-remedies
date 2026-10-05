@@ -11,6 +11,7 @@ import {
   searchFoods,
   searchNaturalSources,
   assessFood,
+  getGoodForMe,
   getSuggestions,
   getWorstFoods,
   getTopDosAndDonts,
@@ -35,6 +36,7 @@ import {
   getCachedRefCount,
   getFoodIdByName,
 } from './adapter.js';
+import { rankFoodsByNutrient } from './nutrientFacts.js';
 import { storage } from './storage.js';
 import { schedulePush } from './profileSync.js';
 
@@ -44,6 +46,7 @@ export {
   searchFoods,
   searchNaturalSources,
   assessFood,
+  getGoodForMe,
   getSuggestions,
   getWorstFoods,
   getTopDosAndDonts,
@@ -241,6 +244,21 @@ export async function searchEverything(query, profile) {
     nutrients: nutrients.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f })),
     herbals: herbals.map((f) => ({ kind: 'food', key: `food-${f.id}`, food: f })),
   };
+}
+
+/**
+ * Natural Sources ranking: the top foods for one nutrient, per serving
+ * (per-100g carried as the secondary figure). Candidates are the food
+ * dictionary minus non-food items (adapter `isExcludedItem` — lifestyle,
+ * recipes — already applied by `getFoodDictionary`) and minus coarse group
+ * 'k' supplements. Only foods with real USDA data can rank.
+ * @param {string} nutrientKey - key from PICKABLE_NUTRIENTS (e.g. 'fiber')
+ * @param {{limit?: number}} [opts]
+ */
+export async function getTopNutrientSources(nutrientKey, opts = {}) {
+  const dictionary = await getFoodDictionary();
+  const foods = dictionary.filter((f) => f.group !== 'k');
+  return rankFoodsByNutrient(foods, nutrientKey, { limit: opts.limit ?? 20 });
 }
 
 // ── Profile / storage helpers ────────────────────────────────────────────────

@@ -133,7 +133,6 @@ describe('getFineFoodGroups', () => {
 
 // ── getFineGroupSuggestions ──────────────────────────────────────────────────
 
-const FALLBACK_CSV_FOR = (defaultDevConditions) => defaultDevConditions.join(',');
 
 beforeEach(() => {
   vi.resetModules();
@@ -185,7 +184,7 @@ describe('getFineGroupSuggestions: no profile conditions / no group code', () =>
     });
 
     const result = await getFineGroupSuggestions({ conditions: [] }, 'b1');
-    expect(result).toEqual({ items: [], usedFallback: false, requestedConditionIds: [] });
+    expect(result).toEqual({ items: [], unscorableReason: null, requestedConditionIds: [] });
   });
 
   it('returns an honestly-empty envelope without calling /suggest when fineGroupCode is falsy', async () => {
@@ -196,7 +195,7 @@ describe('getFineGroupSuggestions: no profile conditions / no group code', () =>
     });
 
     const result = await getFineGroupSuggestions({ conditions: CONDITIONS }, null);
-    expect(result).toEqual({ items: [], usedFallback: false, requestedConditionIds: CONDITIONS });
+    expect(result).toEqual({ items: [], unscorableReason: null, requestedConditionIds: CONDITIONS });
   });
 });
 
@@ -297,13 +296,9 @@ describe('getFineGroupSuggestions: shares the planner\'s /suggest cache (zero ne
   });
 });
 
-describe('getFineGroupSuggestions: auth-fallback path (demo key cannot score these conditions)', () => {
-  it('retries with DEFAULT_DEV_CONDITIONS and reports usedFallback + the ORIGINAL requestedConditionIds', async () => {
+describe('getFineGroupSuggestions: partial authorization (key cannot score some conditions)', () => {
+  async function setupAuth() {
     vi.resetModules();
-    const { DEFAULT_DEV_CONDITIONS } = await import('../config.js');
-    const CONDITIONS_CSV = CONDITIONS.join(',');
-    const FALLBACK_CSV = FALLBACK_CSV_FOR(DEFAULT_DEV_CONDITIONS);
-
     vi.doMock('../nutridigm.js', () => {
       class NutridigmAuthError extends Error {
         constructor(code, message) {
@@ -314,13 +309,10 @@ describe('getFineGroupSuggestions: auth-fallback path (demo key cannot score the
       }
       return {
         fetchSuggest: vi.fn(async (csv, fineFoodGroup) => {
-          if (csv === CONDITIONS_CSV) {
-            throw new NutridigmAuthError('NOTAUTHORIZEDHEALTHID', 'demo key cannot score condition 9001');
-          }
-          if (csv === FALLBACK_CSV && fineFoodGroup === 'b1') {
-            return [{ foodItemID: 501, foodItemDisplayAs: 'Salmon', descriptionNumericID: 1 }];
-          }
-          return [];
+          if (csv.split(',').includes('9001')) throw new NutridigmAuthError('NOTAUTHORIZEDHEALTHID', 'nope');
+          return fineFoodGroup === 'b1'
+            ? [{ foodItemID: 501, foodItemDisplayAs: 'Salmon', descriptionNumericID: 1 }]
+            : [];
         }),
         fetchGoodFor: vi.fn(),
         fetchTopDoOrDonts: vi.fn(),
@@ -332,18 +324,29 @@ describe('getFineGroupSuggestions: auth-fallback path (demo key cannot score the
     vi.doMock('../localTables.js', () => ({
       getItemTable: vi.fn(() => []),
       getConditionTable: vi.fn(() => [
-        { healthConditionID: 203, description: 'Condition 203' },
-        { healthConditionID: 244, description: 'Condition 244' },
+        { healthConditionID: 203, description: 'Aging' },
+        { healthConditionID: 9001, description: 'Condition 9001' },
       ]),
       getGroupTable: vi.fn(() => []),
       getOverlayImageFile: vi.fn(() => undefined),
     }));
+    return import('../adapter.js');
+  }
 
-    const { getFineGroupSuggestions } = await import('../adapter.js');
-    const result = await getFineGroupSuggestions({ conditions: CONDITIONS }, 'b1');
+  it('returns results for the scorable condition and names the unscorable one', async () => {
+    const { getFineGroupSuggestions } = await setupAuth();
+    const result = await getFineGroupSuggestions({ conditions: [203, 9001] }, 'b1');
 
-    expect(result.usedFallback).toBe(true);
-    expect(result.requestedConditionIds).toEqual(CONDITIONS);
     expect(result.items.map((i) => i.id)).toEqual([501]);
+    expect(result.unscorableReason).toBe("We can't score food for Condition 9001 yet.");
+    expect(result.requestedConditionIds).toEqual([203, 9001]);
+  });
+
+  it('returns an empty list plus a reason when no condition is scorable', async () => {
+    const { getFineGroupSuggestions } = await setupAuth();
+    const result = await getFineGroupSuggestions({ conditions: [9001] }, 'b1');
+
+    expect(result.items).toEqual([]);
+    expect(result.unscorableReason).toBe("We can't score food for Condition 9001 yet.");
   });
 });

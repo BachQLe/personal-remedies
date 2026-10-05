@@ -1,24 +1,7 @@
 import { motion } from "framer-motion";
 import { Reveal } from "./Reveal";
 
-const PAPERS = [
-  { journal: "Harvard Medical School", year: 2023, title: "Curcumin supplementation reduces HbA1c in type 2 diabetes patients" },
-  { journal: "Nature Medicine", year: 2022, title: "Polyphenol-rich diets reshape gut microbiome and reduce inflammation markers" },
-  { journal: "Yale School of Medicine", year: 2021, title: "Mediterranean diet intervention reverses metabolic syndrome in adults" },
-  { journal: "The Lancet", year: 2023, title: "Aged garlic extract reduces systolic blood pressure by 10 mmHg" },
-  { journal: "Columbia University", year: 2022, title: "Omega-3 fatty acids suppress chronic low-grade systemic inflammation" },
-  { journal: "JAMA", year: 2023, title: "Dietary fiber intake inversely associated with cardiovascular events" },
-  { journal: "Princeton University", year: 2021, title: "Blueberry anthocyanins improve insulin sensitivity in overweight adults" },
-  { journal: "Cell Metabolism", year: 2022, title: "Whole-food plant-based diet reduces all-cause mortality by 23%" },
-  { journal: "Cornell University", year: 2023, title: "Fermented foods increase microbiome diversity and lower inflammatory markers" },
-  { journal: "N Engl J Med", year: 2022, title: "Time-restricted eating improves cardiometabolic health independent of calories" },
-  { journal: "Dartmouth College", year: 2023, title: "Sulforaphane from broccoli activates Nrf2 anti-inflammatory pathway" },
-  { journal: "Science", year: 2022, title: "Prebiotic fiber selectively feeds beneficial Bifidobacterium species" },
-  { journal: "Penn Medicine", year: 2023, title: "Quercetin-rich foods reduce oxidative stress in hypertensive patients" },
-  { journal: "BMJ", year: 2021, title: "Magnesium-rich diet lowers risk of type 2 diabetes by 19%" },
-  { journal: "Brown University", year: 2022, title: "Green tea catechins improve lipid profiles across metabolic subtypes" },
-  { journal: "Cell", year: 2023, title: "Walnuts modulate gut flora and reduce LDL cholesterol after 8 weeks" },
-];
+const PAPERS = Array.from({ length: 16 }, () => ({ title: "Reference on file" }));
 
 const N = PAPERS.length;
 const FACE_H = 76;
@@ -84,14 +67,6 @@ function PaperWheel() {
               padding: "0 20px",
             }}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[10px] font-label font-semibold tracking-eyebrow uppercase text-yellow-400">
-                {paper.journal}
-              </span>
-              <span className="text-[10px] font-mono tabular-nums text-char-400">
-                {paper.year}
-              </span>
-            </div>
             <p className="text-[13px] leading-[1.45] font-sans font-medium text-char-900">
               {paper.title}
             </p>
@@ -132,7 +107,7 @@ export default function Nutri() {
               </Reveal>
               <Reveal delay={0.18}>
                 <p className="mt-3 font-sans text-[18px] sm:text-[20px] text-char-500 tracking-tight leading-[1.5]">
-                  Nutri shows you the everyday foods that can help your chronic conditions -- the same everyday foods medical companies can't monetize.
+                  Nutri shows you the everyday foods that ranked for your conditions -- the same everyday foods medical companies can't monetize.
                 </p>
               </Reveal>
             </div>

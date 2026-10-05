@@ -334,9 +334,8 @@
 /**
  * @typedef {Object} SuggestionsResult
  * @property {SuggestionCategory[]} categories
- * @property {boolean} [usedFallback] - True if this result came from the
- *   DEFAULT_DEV_CONDITIONS retry (see adapter.js withConditionFallback)
- *   rather than the profile's actual conditions.
+ * @property {string|null} [unscorableReason] - Set when some of the profile's
+ *   conditions can't be scored by the API key (see adapter.js withAuthorized).
  */
 
 /**
@@ -354,8 +353,7 @@
  * `value` field from the API response.
  * @property {import('./types.js').Food[]} items - Foods in this
  *   group+listType, in API order (no client-side re-sorting).
- * @property {boolean} usedFallback - True if this result came from the
- *   DEFAULT_DEV_CONDITIONS retry rather than the profile's actual conditions.
+ * @property {string|null} unscorableReason - see SuggestionsResult.
  */
 
 /**
@@ -374,26 +372,6 @@
  *   strings, never bare numeric scores.
  */
 
-/**
- * ── `usedFallback` propagation ──────────────────────────────────────────────
- *
- * Every adapter function wrapped in `withConditionFallback` (getSuggestions,
- * getWorstFoods, assessFood, buildMealPlan) can silently
- * retry with DEFAULT_DEV_CONDITIONS when the demo subscription key can't
- * score the profile's real condition IDs (401 NOTAUTHORIZEDHEALTHID).
- * When that retry happens, the result is flagged so the UI can show a
- * "Demo data" chip instead of pretending the numbers are personalized:
- *
- * - Object-returning functions (Assessment, DayPlan, SuggestionsResult):
- *   `usedFallback: boolean` is set directly as an enumerable property on
- *   the returned object. `assessFood` can also return `null` (no
- *   conditions) — callers must null-check before reading `usedFallback`.
- * - Array-returning functions (Food[]): the array shape is preserved for
- *   existing consumers (`.map`, spread, etc.), and `usedFallback` is
- *   attached as a non-enumerable property via `Object.defineProperty` so
- *   it doesn't show up in JSON.stringify, spread, or Array iteration, but
- *   is still readable via `result.usedFallback` for callers that care.
- */
 
 // This file is purely for documentation — no runtime exports needed.
 export {};

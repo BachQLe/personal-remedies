@@ -202,3 +202,38 @@ describe('SuggestionsSheet — Wave 4 full menu', () => {
     expect(container.textContent).toContain('Pantry Oats');
   });
 });
+
+describe('SuggestionsSheet — shared DataState (checklist #8)', () => {
+  it('shows an error with Retry when the full-list fetch fails, and recovers on Retry', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    api.getCandidatesForSlot.mockRejectedValueOnce(new Error('[nutridigm] boom'));
+    await mount();
+
+    expect(container.textContent).toContain('Something went wrong');
+    const retry = Array.from(container.querySelectorAll('button')).find((b) => b.textContent === 'Retry');
+    expect(retry).toBeTruthy();
+
+    api.getCandidatesForSlot.mockResolvedValue([
+      { id: 300, name: 'Recovered Oats', image: '/r.jpg', group: 'f', fineGroup: 'f', tier: 'Good', numericId: 2, kind: 'food' },
+    ]);
+    await act(async () => { retry.click(); });
+
+    expect(container.textContent).toContain('Recovered Oats');
+    expect(container.textContent).not.toContain('Something went wrong');
+    consoleError.mockRestore();
+  });
+
+  it('shows the offline state (not an empty list) when offline with nothing loaded', async () => {
+    const onLine = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    api.getCandidatesForSlot.mockResolvedValue([]);
+    await mount();
+
+    expect(container.textContent).toContain("You're offline");
+    onLine.mockRestore();
+  });
+
+  it('shows a proper empty state when the slot has no candidates', async () => {
+    await mount();
+    expect(container.textContent).toContain('No suggestions yet for Breakfast.');
+  });
+});

@@ -1,3 +1,4 @@
+import DataState from '../../components/shared/DataState.jsx';
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
 import { estimateDayTotals } from '../../data/nutritionEstimates.js';
 import { resolveNutrition } from '../../api/nutrition.js';
@@ -55,7 +56,12 @@ export default function NutritionFactsSheet({ open, onClose, dayLabel, items }) 
           </div>
         </>
       ) : (
-        <p className="text-sm text-blue-950/60 py-2">No estimate available for this day.</p>
+        <DataState
+          status="empty"
+          screenName="nutrition"
+          emptyTitle={null}
+          emptyBody="No estimate available for this day."
+        />
       )}
 
       {list.length > 0 && (

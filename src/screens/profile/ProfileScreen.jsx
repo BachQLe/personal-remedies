@@ -18,9 +18,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProfile, saveProfile, getConditionNames, getConditions } from '../../api/api.js';
-import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
+import DataState from '../../components/shared/DataState.jsx';
 import ConditionTag from '../../components/shared/ConditionTag.jsx';
 import Icon from '../../components/shared/Icon.jsx';
 import { getConditionMeta } from '../../utils/conditionMeta.js';
@@ -28,18 +28,12 @@ import OtpCodeEntry from '../../components/auth/OtpCodeEntry.jsx';
 import { pullProfile } from '../../api/profileSync.js';
 import { getActiveMessages } from '../../api/messages.js';
 import WhatsNewSheet from './WhatsNewSheet.jsx';
+import { buildSupportMailto } from './supportMailto.js';
+import { deleteAccount } from '../../api/deleteAccount.js';
 
-// ── Demo profile fallback ────────────────────────────────────────────────────
-
-// Demo key conditions (see api/config.js): 203 = Aging, 244 = Pneumonia.
-const DEMO_PROFILE = {
-  conditions: DEFAULT_DEV_CONDITIONS,
-  medications: ['Metformin 500mg', 'Lisinopril 10mg'],
-  allergies: ['Shellfish'],
-  dietary: ['low-sodium'],
-  tasteLikes: [],
-  tasteDislikes: [],
-};
+// No demo-profile fallback: a missing profile renders empty, a failed load
+// shows an error state with Retry.
+const EMPTY_PROFILE = { conditions: [], medications: [] };
 
 // ── Sub-edit sheets (unchanged from prior screen) ────────────────────────────
 
@@ -517,9 +511,62 @@ function BackupSheet({ onClose }) {
             >
               {sending ? 'Sending…' : 'Send code'}
             </button>
+            <p className="text-xs text-char-400 font-sans text-center">
+              By continuing you agree to the{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline">Terms of Use</a>
+              {' '}and{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="underline">Privacy Policy</a>
+            </p>
           </form>
         )}
       </div>
+    </BottomSheet>
+  );
+}
+
+// ── Delete account / data ─────────────────────────────────────────────────────
+
+function DeleteAccountSheet({ user, onClose }) {
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState(null); // null | { ok:false, reason } | { ok:true, mode:'rows-only' }
+  const where = user ? 'on this device and in the cloud' : 'on this device';
+
+  const confirm = async () => {
+    if (busy) return;
+    setBusy(true);
+    const r = await deleteAccount(user);
+    setBusy(false);
+    if (r.ok && r.mode !== 'rows-only') { window.location.replace('/onboarding'); return; }
+    setResult(r);
+  };
+
+  const done = result?.ok;
+  return (
+    <BottomSheet open onClose={done ? () => window.location.replace('/onboarding') : onClose} title={user ? 'Delete account & data' : 'Delete my data'}>
+      {done ? (
+        <div className="flex flex-col gap-4">
+          <p className="text-sm font-sans text-char-700">
+            Your data was removed. We couldn&apos;t remove your sign-in record automatically; it will be removed on request.{' '}
+            <a className="underline" href={buildSupportMailto()}>Email support</a> to finish.
+          </p>
+          <button onClick={() => window.location.replace('/onboarding')} className="w-full py-3 rounded-full bg-char-900 text-white text-sm font-semibold font-sans">Continue</button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          <p className="text-sm font-sans text-char-700">
+            This permanently deletes your profile, health conditions, allergies, medications, saved recipes and meal plans {where}. This can&apos;t be undone.
+          </p>
+          {result && (
+            <p role="alert" className="text-sm font-sans text-avoid-700">
+              {result.reason === 'offline' ? "You're offline." : "Something went wrong."} Nothing was deleted. Check your connection and try again.
+            </p>
+          )}
+          <button onClick={confirm} disabled={busy} className="w-full py-3 rounded-full bg-avoid-700 text-white text-sm font-semibold font-sans disabled:opacity-40">
+            {busy ? 'Deleting…' : result ? 'Retry' : user ? 'Delete account & data' : 'Delete my data'}
+          </button>
+          <button onClick={onClose} disabled={busy} className="w-full py-3 rounded-full border border-sand-200 text-char-900 text-sm font-semibold font-sans disabled:opacity-40">Cancel</button>
+        </div>
+      )}
     </BottomSheet>
   );
 }
@@ -531,6 +578,8 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [saving, setSaving] = useState(false);
   // Display names for profile.conditions (healthConditionID[]), resolved via
   // the cached conditions dictionary.
@@ -545,17 +594,19 @@ export default function ProfileScreen() {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    getProfile().then((p) => {
-      setProfile(p ?? DEMO_PROFILE);
-      setLoading(false);
-    });
-  }, []);
+    let alive = true;
+    getProfile()
+      .then((p) => { if (alive) setProfile(p ?? EMPTY_PROFILE); })
+      .catch(() => { if (alive) setLoadError(true); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [reloadKey]);
 
   useEffect(() => {
     let alive = true;
-    getActiveMessages().then((active) => {
-      if (alive) setMessages(active);
-    });
+    getActiveMessages()
+      .then((active) => { if (alive) setMessages(active); })
+      .catch(() => { if (alive) setMessages([]); });
     return () => { alive = false; };
   }, []);
 
@@ -597,6 +648,20 @@ export default function ProfileScreen() {
           className="w-8 h-8 rounded-full border-2 border-sand-200 animate-spin"
           style={{ borderTopColor: '#4F7118' }}
         />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-paper-100 px-4 pt-10">
+        <DataState
+          status={navigator.onLine === false ? 'offline-no-cache' : 'error-api'}
+          screenName="profile"
+          onRetry={() => { setLoading(true); setLoadError(false); setReloadKey((k) => k + 1); }}
+        >
+          {null}
+        </DataState>
       </div>
     );
   }
@@ -685,6 +750,21 @@ export default function ProfileScreen() {
             />
           </div>
 
+          <div>
+            <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-1">
+              About
+            </p>
+            <SubEditRow icon="info" label="Important notes" onClick={() => navigate('/app/profile/important-notes')} />
+            <a
+              href={buildSupportMailto()}
+              className="w-full flex items-center gap-3 py-4 text-left border-b border-sand-200 last:border-b-0 transition-opacity duration-fast hover:opacity-80"
+            >
+              <span className="text-char-500"><Icon name="mail" size={20} aria-hidden="true" /></span>
+              <span className="flex-1 text-sm font-medium font-sans text-char-900">Help &amp; feedback</span>
+              <span className="text-char-400"><Icon name="chevron-right" size={18} aria-hidden="true" /></span>
+            </a>
+          </div>
+
           {/* Section 2.5 — Remedi Plus. Scaffolding-only entry point (Task
               T5C, master plan §6.2): everything in the app is unlocked
               today, so this just opens the placeholder paywall screen —
@@ -693,7 +773,7 @@ export default function ProfileScreen() {
             <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-1">
               Upgrade
             </p>
-            <SubEditRow icon="award" label="Remedi Plus" onClick={() => navigate('/app/upgrade')} />
+            <SubEditRow icon="award" label="Personal Remedies Plus" onClick={() => navigate('/app/upgrade')} />
           </div>
 
           {/* Section 3 — Account. Auth stays entirely optional (master plan
@@ -726,6 +806,14 @@ export default function ProfileScreen() {
             ) : (
               <SubEditRow icon="shield" label="Back up & sync" onClick={() => setSheet('backup')} />
             )}
+            <button
+              onClick={() => setSheet('delete')}
+              className="w-full flex items-center gap-3 py-4 text-left transition-opacity duration-fast hover:opacity-80"
+              style={{ minHeight: 44 }}
+            >
+              <span className="text-avoid-700"><Icon name="trash-2" size={20} aria-hidden="true" /></span>
+              <span className="flex-1 text-sm font-medium font-sans text-avoid-700">{user ? 'Delete account & data' : 'Delete my data'}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -747,6 +835,7 @@ export default function ProfileScreen() {
           onClose={() => setSheet(null)}
         />
       )}
+      {sheet === 'delete' && <DeleteAccountSheet user={user} onClose={() => setSheet(null)} />}
       {sheet === 'backup' && <BackupSheet onClose={() => setSheet(null)} />}
       {sheet === 'whatsNew' && (
         <WhatsNewSheet

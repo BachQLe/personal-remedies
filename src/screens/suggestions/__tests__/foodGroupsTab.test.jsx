@@ -89,7 +89,7 @@ describe('FoodGroupsTab', () => {
     await mount('/app/suggestions?tab=groups');
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="suggest-tab"]')).toBeNull();
-    expect(container.textContent).toContain('Ten broad categories — good for an everyday look.');
+    expect(container.textContent).toContain('Ten broad categories, good for an everyday look.');
     expect(container.textContent).toContain('Basic groups');
     expect(container.textContent).toContain('Fine groups');
   });
@@ -98,7 +98,7 @@ describe('FoodGroupsTab', () => {
     await mount('/app/suggestions?tab=groups&mode=fine');
     expect(container.querySelector('[data-testid="suggest-tab"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeNull();
-    expect(container.textContent).toContain('Narrower groups — good for finding a swap for a food.');
+    expect(container.textContent).toContain('Narrower groups, good for finding a swap for a food.');
   });
 
   it('?tab=suggest alias also lands in fine mode', async () => {
@@ -115,7 +115,7 @@ describe('FoodGroupsTab', () => {
 
     expect(container.querySelector('[data-testid="suggest-tab"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeNull();
-    expect(container.textContent).toContain('Narrower groups — good for finding a swap for a food.');
+    expect(container.textContent).toContain('Narrower groups, good for finding a swap for a food.');
   });
 
   it('a manual tap back to "Basic groups" swaps back to GroupsTab', async () => {
@@ -126,6 +126,6 @@ describe('FoodGroupsTab', () => {
 
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="suggest-tab"]')).toBeNull();
-    expect(container.textContent).toContain('Ten broad categories — good for an everyday look.');
+    expect(container.textContent).toContain('Ten broad categories, good for an everyday look.');
   });
 });

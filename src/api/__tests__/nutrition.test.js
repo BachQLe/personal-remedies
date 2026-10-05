@@ -199,6 +199,7 @@ describe('resolveNutrition === estimateNutrition today (both USDA tables empty, 
 });
 
 // ── resolveDayTotals ─────────────────────────────────────────────────────────
+// NOTE: ids below use 9000xxx so they never collide with real foodItemIDs in the committed USDA tables.
 
 describe('resolveDayTotals', () => {
   it('returns null for empty/missing items', () => {
@@ -209,13 +210,13 @@ describe('resolveDayTotals', () => {
   it('sums calories/protein/carbs/fat and reports real vs estimated vs none counts', () => {
     const items = [
       // real (panel)
-      { id: 100, kind: 'recipe', name: 'Panel recipe', nutritionPerServing: { calories: 400, protein: 20, carbs: 30, fat: 10 } },
+      { id: 9000100, kind: 'recipe', name: 'Panel recipe', nutritionPerServing: { calories: 400, protein: 20, carbs: 30, fat: 10 } },
       // estimated (fine group)
-      { id: 101, name: 'Fish', fineGroup: 'b1' }, // {calories:180, protein:25, carbs:0, fat:8}
+      { id: 9000101, name: 'Fish', fineGroup: 'b1' }, // {calories:180, protein:25, carbs:0, fat:8}
       // estimated (recipe slot, via item.fromSlot)
-      { id: 102, kind: 'recipe', name: 'Slot recipe', fromSlot: 'snacks' }, // {calories:200, protein:5, carbs:25, fat:8}
+      { id: 9000102, kind: 'recipe', name: 'Slot recipe', fromSlot: 'snacks' }, // {calories:200, protein:5, carbs:25, fat:8}
       // none (unresolvable)
-      { id: 103, name: 'Mystery', group: 'zz' },
+      { id: 9000103, name: 'Mystery', group: 'zz' },
     ];
 
     const totals = resolveDayTotals(items);
@@ -232,7 +233,7 @@ describe('resolveDayTotals', () => {
   });
 
   it('uses item.fromSlot as the slot key, mirroring estimateDayTotals', () => {
-    const items = [{ id: 200, kind: 'recipe', fromSlot: 'dinner' }];
+    const items = [{ id: 9000200, kind: 'recipe', fromSlot: 'dinner' }];
     const totals = resolveDayTotals(items);
     // RECIPE_SLOT_ESTIMATES.dinner = {calories: 550, ...}
     expect(totals.calories).toBe(550);
@@ -240,7 +241,7 @@ describe('resolveDayTotals', () => {
   });
 
   it('a day of entirely unresolvable items still sums to zero with noneCount === itemCount', () => {
-    const items = [{ id: 300, group: 'zz' }, { id: 301, group: 'zz' }];
+    const items = [{ id: 9000300, group: 'zz' }, { id: 301, group: 'zz' }];
     const totals = resolveDayTotals(items);
     expect(totals).toEqual({
       calories: 0,

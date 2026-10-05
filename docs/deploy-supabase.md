@@ -228,6 +228,31 @@ dashboard setting for it.
 
 ---
 
+## 6b. Deploy the delete-account function (in-app account deletion)
+
+Required by Apple 5.1.1(v) and Google Play. Profile > "Delete account &
+data" calls `supabase.functions.invoke('delete-account')`.
+
+```sh
+supabase functions deploy delete-account
+```
+
+- JWT verification stays **on** (the default): only signed-in users can call
+  it, and the function re-verifies the JWT and deletes only that user.
+- Secrets: it needs `SUPABASE_SERVICE_ROLE_KEY` (plus `SUPABASE_URL` and
+  `SUPABASE_ANON_KEY`). Supabase injects all three into deployed functions
+  automatically, so no `supabase secrets set` is needed. Never put the
+  service-role key in a `VITE_` variable or the client bundle. Optionally set
+  `ALLOWED_ORIGINS` (same as the proxy) so browsers on your prod origin pass CORS.
+- It deletes the user's rows in `user_conditions`, `user_allergens`,
+  `user_dietary_restrictions`, `taste_swipes`, `daily_picks`, `profiles`, then
+  the auth user.
+- Until it is deployed, the app falls back to deleting the `profiles` row
+  client-side (cascades to the `user_*` tables) and tells the user the sign-in
+  record will be removed on request.
+
+---
+
 ## 7. CI / validation notes
 
 This function should ideally be checked with `deno check

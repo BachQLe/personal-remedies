@@ -12,6 +12,7 @@
  */
 
 import { Plus, Check } from 'lucide-react';
+import DataState from '../../components/shared/DataState.jsx';
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
@@ -47,13 +48,18 @@ export default function SlotBrowseSheet({
       title={slotKey ? `${MEAL_TYPE_META[slotKey]?.label} options` : undefined}
     >
       {!pool || pool.length === 0 ? (
-        <p className="font-sans text-sm text-char-500 py-4">No options yet.</p>
+        <DataState
+          status="empty"
+          screenName="options"
+          emptyTitle={null}
+          emptyBody="No options yet for this meal."
+        />
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-wrap gap-3">
           {pool.map((item) => {
             const isSelected = selectedIds?.has(item.id);
             return (
-              <div key={item.id} style={{ aspectRatio: '4/5' }}>
+              <div key={item.id} className="w-[calc(50%-0.375rem)] min-w-0" style={{ aspectRatio: '4/5' }}>
                 <FoodImageCard
                   id={item.id}
                   mealTag={displayTagForItem(item, item.fromSlot ?? slotKey)}

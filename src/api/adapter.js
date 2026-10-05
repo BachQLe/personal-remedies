@@ -19,7 +19,7 @@
  * @typedef {import('./types.js')} Types
  */
 
-import { EXCLUDED_FINE_GROUPS, COARSE_GROUP_LABELS, MEAL_SLOT_MAP, DEFAULT_DEV_CONDITIONS, PLAN_SLOTS, PLAN_SLOT_KEYS } from './config.js';
+import { EXCLUDED_FINE_GROUPS, COARSE_GROUP_LABELS, MEAL_SLOT_MAP, PLAN_SLOTS, PLAN_SLOT_KEYS } from './config.js';
 import { getIngredientImage } from './ingredientImages.js';
 import {
   fetchGoodFor,
@@ -63,9 +63,7 @@ const RECIPE_FINE_GROUP = 'l';
 
 /**
  * Cached wrapper around fetchTopDoOrDonts, keyed by the exact request
- * params so a fallback retry with DEFAULT_DEV_CONDITIONS caches under its
- * OWN key rather than colliding with (or shadowing) the profile's real
- * conditions.
+ * params so each condition set caches under its own key.
  * @param {string} conditionsCSV
  * @param {'consume'|'avoid'} consumeOrAvoid
  * @param {number} limit
@@ -82,8 +80,7 @@ function cachedTopDoOrDonts(conditionsCSV, consumeOrAvoid, limit) {
  * Cached wrapper around fetchSuggest, keyed by {conditionsCSV, fineFoodGroup}.
  * Backs both `getRecipes` (fine group 'l', via its own `recipes:{csv}:l`
  * key — see `getRecipesRaw`) and `getMealPlanSuggestions` (the 10 Plan-slot
- * fine groups), so a fallback retry with DEFAULT_DEV_CONDITIONS caches under
- * its OWN key rather than colliding with the profile's real conditions.
+ * fine groups), so each condition set caches under its own key.
  * @param {string} conditionsCSV
  * @param {string} fineFoodGroup
  * @returns {Promise<Array>}
@@ -118,39 +115,44 @@ function cachedReferences(conditionId, foodId) {
   return cachedFetch(key, REFERENCES_TTL_MS, () => fetchReferences(conditionId, foodId));
 }
 
-// ── Condition fallback ───────────────────────────────────────────────────────
+// ── Condition authorization ─────────────────────────────────────────────────
+
+/** Shared copy for conditions the Nutridigm key can't score (UI shows it on empty results). */
+export const cantScoreMessage = (names) => `We can't score food for ${names.join(', ')} yet.`;
+
+function isUnauthorized(err) {
+  const isAuthError = err instanceof NutridigmAuthError || err?.name === 'NutridigmAuthError';
+  return isAuthError && err.code === 'NOTAUTHORIZEDHEALTHID';
+}
 
 /**
- * Centralized demo-condition fallback.
- *
- * Calls `fn(conditionIds)`. If it throws a NutridigmAuthError with code
- * NOTAUTHORIZEDHEALTHID (the demo subscription key can't score these
- * condition IDs), retries ONCE with DEFAULT_DEV_CONDITIONS and marks the
- * result as a fallback so the UI can show a "Demo data" chip.
- *
- * Does NOT retry on APIDAILYLIMITREACHED (quota exhausted — retrying with
- * different conditions won't help and would waste another call) or any
- * other error type (e.g. NutridigmConfigError), which are rethrown as-is.
- *
- * See types.js for how `usedFallback` is attached to object vs array results.
+ * Calls `fn(conditionIds)`. On NOTAUTHORIZEDHEALTHID, probes each condition
+ * alone, drops the unauthorized ones and re-runs with the rest. If none are
+ * scorable returns `empty`. Always returns `unscorableReason` (string|null)
+ * naming the dropped conditions. Other errors (quota, network) rethrow.
  *
  * @template T
  * @param {number[]} conditionIds
  * @param {(ids: number[]) => Promise<T>} fn
- * @returns {Promise<{ result: T, usedFallback: boolean }>}
+ * @param {T} empty - result when no condition is scorable
+ * @returns {Promise<{ result: T, unscorableReason: string|null }>}
  */
-async function withConditionFallback(conditionIds, fn) {
+async function withAuthorized(conditionIds, fn, empty) {
   try {
-    const result = await fn(conditionIds);
-    return { result, usedFallback: false };
+    return { result: await fn(conditionIds), unscorableReason: null };
   } catch (err) {
-    const isAuthError = err instanceof NutridigmAuthError || err?.name === 'NutridigmAuthError';
-    if (isAuthError && err.code === 'NOTAUTHORIZEDHEALTHID') {
-      const result = await fn(DEFAULT_DEV_CONDITIONS);
-      return { result, usedFallback: true };
-    }
-    throw err;
+    if (!isUnauthorized(err)) throw err;
   }
+  const probes = await Promise.allSettled(conditionIds.map((id) => fn([id])));
+  const hard = probes.find((p) => p.status === 'rejected' && !isUnauthorized(p.reason));
+  if (hard) throw hard.reason;
+  const okIdx = probes.flatMap((p, i) => (p.status === 'fulfilled' ? [i] : []));
+  const bad = conditionIds.filter((_, i) => !okIdx.includes(i));
+  const names = await getConditionNames(bad).catch(() => bad.map((id) => `condition ${id}`));
+  const unscorableReason = cantScoreMessage(names);
+  if (!okIdx.length) return { result: empty, unscorableReason };
+  const result = okIdx.length === 1 ? probes[okIdx[0]].value : await fn(okIdx.map((i) => conditionIds[i]));
+  return { result, unscorableReason };
 }
 
 // ── Tier mapping ─────────────────────────────────────────────────────────────
@@ -838,13 +840,11 @@ async function fetchReferenceTotal(foodId, conditionIds) {
 export async function assessFood(foodId, profile) {
   const conditionIds = profile.conditions || [];
   if (!conditionIds.length) return null;
-
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    assessFoodRaw(foodId, ids)
-  );
-
+  // A condition the key can't score is reported as an `unauthorized`
+  // perCondition row.
+  const result = await assessFoodRaw(foodId, conditionIds);
   if (!result) return null;
-  return { ...result, usedFallback };
+  return result;
 }
 
 /**
@@ -855,7 +855,7 @@ export async function assessFood(foodId, profile) {
 class GoodForEmptyResult extends Error {}
 
 /**
- * Unwrapped assessFood body — used by withConditionFallback for the retry.
+ * Unwrapped assessFood body.
  *
  * BUG FIX: `cachedFetch` persists whatever its fetcher resolves with, for
  * the full `ttlMs` it's given — including a null `/goodfor` result — so a
@@ -880,20 +880,30 @@ class GoodForEmptyResult extends Error {}
  * @returns {Promise<import('./types.js').Assessment|null>}
  */
 async function assessFoodRaw(foodId, conditionIds) {
-  const conditionIdStr = conditionIds.join(',');
-  let raw;
-  try {
-    raw = await cachedFetch(`goodfor:${conditionIdStr}:${foodId}`, GOODFOR_TTL_MS, async () => {
-      const result = await fetchGoodFor(foodId, conditionIdStr);
-      if (result == null) throw new GoodForEmptyResult();
-      return result;
-    });
-  } catch (err) {
-    if (err instanceof GoodForEmptyResult) return null;
-    throw err;
-  }
+  // One /goodfor per condition (works for a single condition, whose combined
+  // response has no conditions[] array, and isolates NOTAUTHORIZEDHEALTHID
+  // to just that condition's row).
+  const { rows, raws } = await fetchGoodForRows(foodId, conditionIds);
+  const okIds = rows.filter((r) => r.status === 'ok').map((r) => r.conditionId);
+  const anyUnscorable = rows.some((r) => r.status === 'unauthorized' || r.status === 'error');
+  if (!okIds.length && !anyUnscorable) return null;
 
-  if (!raw) return null;
+  // Overall verdict: the single scored condition's own response, or the
+  // combined /goodfor over just the scorable conditions.
+  let raw = null;
+  if (okIds.length === 1) {
+    raw = raws.get(okIds[0]);
+  } else if (okIds.length > 1) {
+    try {
+      raw = await cachedFetch(`goodfor:${okIds.join(',')}:${foodId}`, GOODFOR_TTL_MS, async () => {
+        const result = await fetchGoodFor(foodId, okIds.join(','));
+        if (result == null) throw new GoodForEmptyResult();
+        return result;
+      });
+    } catch (err) {
+      if (!(err instanceof GoodForEmptyResult)) throw err;
+    }
+  }
 
   const cache = await ensureFoodItems();
   const foodItem = cache.get(foodId);
@@ -901,55 +911,125 @@ async function assessFoodRaw(foodId, conditionIds) {
     ? normalizeFood(foodItem)
     : { id: foodId, name: `Food ${foodId}`, group: '', fineGroup: '' };
 
-  const tier = numericIdToTier(raw.descriptionNumericID);
+  const tier = raw ? numericIdToTier(raw.descriptionNumericID) : null;
 
-  // Per-condition reference fetches — see `fetchReferenceTotal` for why this
-  // goes through Promise.allSettled — each row below gets an honest
-  // referenceStatus from the same settlements.
-  const { refSettlements, referenceTotal } = await fetchReferenceTotal(foodId, conditionIds);
+  // /references only for scorable conditions (see fetchReferenceTotal for
+  // the allSettled/honest-null rationale).
+  const { refSettlements, referenceTotal } = await fetchReferenceTotal(foodId, okIds);
 
-  const perCondition = await Promise.all(
-    conditionIds.map(async (conditionId, index) => {
-      const condData = raw.conditions && raw.conditions[index];
-      const condTier = condData ? numericIdToTier(condData.descriptionNumericID) : null;
-      const conditionName = await getConditionName(conditionId);
-
-      const settled = refSettlements[index];
-      const referenceStatus = settled.status === 'fulfilled' ? 'ok' : 'error';
-      const citations = referenceStatus === 'ok' ? settled.value || [] : [];
-
+  const perCondition = rows.map((row) => {
+    if (row.status !== 'ok') {
       return {
-        conditionId,
-        conditionName,
-        tier: condTier,
-        // Raw descriptionNumericID for this condition (null if absent from the
-        // /goodfor response), kept ALONGSIDE tier so the UI can distinguish a
-        // real "Neutral / OK" (numericId 4) from missing data — numericIdToTier
-        // maps 4 to null, same as "no data", so tier alone can't tell them apart.
-        numericId: condData?.descriptionNumericID ?? null,
-        referenceCount: citations.length,
-        citations,
-        referenceStatus,
+        conditionId: row.conditionId,
+        conditionName: row.conditionName,
+        status: row.status,
+        tier: null,
+        numericId: null,
+        referenceCount: 0,
+        citations: [],
+        referenceStatus: 'skipped',
+        errorCode: row.errorCode,
       };
-    })
-  );
+    }
+    const settled = refSettlements[okIds.indexOf(row.conditionId)];
+    const referenceStatus = settled.status === 'fulfilled' ? 'ok' : 'error';
+    const citations = referenceStatus === 'ok' ? settled.value || [] : [];
+    return {
+      conditionId: row.conditionId,
+      conditionName: row.conditionName,
+      status: 'ok',
+      tier: row.tier,
+      // Kept alongside tier so the UI can tell a real neutral (4) from missing.
+      numericId: row.numericId,
+      referenceCount: citations.length,
+      citations,
+      referenceStatus,
+    };
+  });
 
   food.tier = tier;
-  // Null (unknown), not 0, when ANY per-condition reference fetch failed —
-  // a failed fetch is indistinguishable from "no studies" otherwise, and we
-  // never want to imply zero support when we simply couldn't check. Computed
-  // by `fetchReferenceTotal` from the same `refSettlements` `perCondition`
-  // above derives its citations/referenceStatus from.
+  // Null (unknown), not 0, when ANY reference fetch failed.
   food.referenceTotal = referenceTotal;
 
   return {
     food,
     tier,
     perCondition,
-    score: raw.value ?? null,
-    verdict: raw.description ?? null,
-    numericId: raw.descriptionNumericID ?? null,
+    score: raw?.value ?? null,
+    verdict: raw?.description ?? null,
+    numericId: raw?.descriptionNumericID ?? null,
   };
+}
+
+/**
+ * Shared per-condition /goodfor fetch (see getGoodForMe). Returns the
+ * normalized rows plus each scored condition's raw response.
+ */
+async function fetchGoodForRows(foodId, conditionIds) {
+  const raws = new Map();
+  const rows = await Promise.all(
+    conditionIds.map(async (conditionId) => {
+      const conditionName = await getConditionName(conditionId);
+      const base = { conditionId, conditionName, numericId: null, tier: null, label: null, notes: '' };
+      try {
+        const raw = await cachedFetch(`goodfor:${conditionId}:${foodId}`, GOODFOR_TTL_MS, async () => {
+          const result = await fetchGoodFor(foodId, String(conditionId));
+          if (result == null) throw new GoodForEmptyResult();
+          return result;
+        });
+        const numericId = raw?.descriptionNumericID ?? null;
+        if (numericId == null) return { ...base, status: 'nodata' };
+        raws.set(conditionId, raw);
+        return {
+          ...base,
+          status: 'ok',
+          numericId,
+          tier: numericIdToTier(numericId),
+          label: raw.description || null,
+          notes: typeof raw.notes === 'string' ? raw.notes.trim() : '',
+        };
+      } catch (err) {
+        if (err instanceof GoodForEmptyResult) return { ...base, status: 'nodata' };
+        const isAuthError = err instanceof NutridigmAuthError || err?.name === 'NutridigmAuthError';
+        if (isAuthError && err.code === 'NOTAUTHORIZEDHEALTHID') return { ...base, status: 'unauthorized' };
+        return { ...base, status: 'error', errorCode: err?.code };
+      }
+    })
+  );
+  return { rows, raws };
+}
+
+/**
+ * "Good for me?" lookup: ONE /goodfor request per profile condition (rather
+ * than the combined CSV `assessFood` sends), so each condition gets its own
+ * honest outcome — in particular a condition the API key isn't authorized
+ * for (NOTAUTHORIZEDHEALTHID) is reported as `unauthorized` for just that
+ * row instead of failing the whole lookup (`withAuthorized` is deliberately NOT used here). Also
+ * carries Nutridigm's per-condition `notes`, which `assessFood` drops, and
+ * works for single-condition profiles (the combined response has no
+ * `conditions[]` array then). Per-condition calls share the
+ * `goodfor:{id}:{foodId}` cache entry a single-condition `assessFood` writes
+ * (identical response shape), 8h TTL, null results never cached. Intended
+ * to be called only on an explicit user tap, never per keystroke.
+ *
+ * Row `status`: 'ok' (scored, incl. neutral numericId 4), 'nodata' (API
+ * returned nothing), 'unauthorized', 'error' (anything else; `errorCode`
+ * carries the API code when present). No tier is ever fabricated.
+ * @param {number} foodId
+ * @param {{conditions?: number[]}} profile
+ * @returns {Promise<{ foodId: number, foodName: string, rows: Array<{
+ *   conditionId: number, conditionName: string,
+ *   status: 'ok'|'nodata'|'unauthorized'|'error',
+ *   numericId: number|null, tier: import('./types.js').TierOrPoor,
+ *   label: string|null, notes: string, errorCode?: string }> }>}
+ */
+export async function getGoodForMe(foodId, profile) {
+  const conditionIds = (profile && profile.conditions) || [];
+  const cache = await ensureFoodItems();
+  const foodItem = cache.get(foodId);
+  const foodName = foodItem ? normalizeFood(foodItem).name : `Food ${foodId}`;
+  const { rows } = await fetchGoodForRows(foodId, conditionIds);
+  return { foodId, foodName, rows };
 }
 
 /**
@@ -991,11 +1071,13 @@ export async function getSuggestions(profile) {
   const conditionIds = profile.conditions || [];
   if (!conditionIds.length) return { categories: [] };
 
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    getSuggestionsRaw(ids, 'consume')
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    (ids) => getSuggestionsRaw(ids, 'consume'),
+    { categories: [] }
   );
 
-  return { ...result, usedFallback };
+  return { ...result, unscorableReason };
 }
 
 /**
@@ -1047,17 +1129,19 @@ async function getSuggestionsRaw(conditionIds, consumeOrAvoid) {
  *
  * @param {import('./types.js').Profile} profile
  * @param {'consume'|'avoid'} direction
- * @returns {Promise<{ items: import('./types.js').Food[], usedFallback: boolean }>}
+ * @returns {Promise<{ items: import('./types.js').Food[], unscorableReason: string|null }>}
  */
 export async function getTopDosAndDonts(profile, direction) {
   const conditionIds = profile?.conditions || [];
-  if (!conditionIds.length) return { items: [], usedFallback: false };
+  if (!conditionIds.length) return { items: [], unscorableReason: null };
 
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    getTopDosAndDontsRaw(ids, direction)
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    (ids) => getTopDosAndDontsRaw(ids, direction),
+    []
   );
 
-  return { items: result, usedFallback };
+  return { items: result, unscorableReason };
 }
 
 /**
@@ -1095,11 +1179,13 @@ export async function getWorstFoods(profile) {
   const conditionIds = profile.conditions || [];
   if (!conditionIds.length) return { categories: [] };
 
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    getSuggestionsRaw(ids, 'avoid')
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    (ids) => getSuggestionsRaw(ids, 'avoid'),
+    { categories: [] }
   );
 
-  return { ...result, usedFallback };
+  return { ...result, unscorableReason };
 }
 
 /**
@@ -1116,17 +1202,19 @@ export async function getWorstFoods(profile) {
  * @param {import('./types.js').Profile} profile
  * @param {string} coarseGroup - Coarse food group code (b,c,d,e,f,g,h,i,k)
  * @param {'helpful'|'neutral'|'harmful'} listType
- * @returns {Promise<{ items: import('./types.js').Food[], usedFallback: boolean }>}
+ * @returns {Promise<{ items: import('./types.js').Food[], unscorableReason: string|null }>}
  */
 export async function getCategoryDetail(profile, coarseGroup, listType) {
   const conditionIds = profile?.conditions || [];
-  if (!conditionIds.length || !coarseGroup) return { items: [], usedFallback: false };
+  if (!conditionIds.length || !coarseGroup) return { items: [], unscorableReason: null };
 
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    getCategoryDetailRaw(ids, coarseGroup, listType)
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    (ids) => getCategoryDetailRaw(ids, coarseGroup, listType),
+    []
   );
 
-  return { items: result, usedFallback };
+  return { items: result, unscorableReason };
 }
 
 /**
@@ -1170,17 +1258,18 @@ async function getCategoryDetailRaw(conditionIds, coarseGroup, listType) {
  * 'l' fine food group (Food Network recipes scored against the requested
  * health conditions). Cached 8h per conditionsCSV.
  * @param {import('./types.js').Profile} profile
- * @returns {Promise<{ recipes: import('./types.js').Recipe[], usedFallback: boolean }>}
+ * @returns {Promise<{ recipes: import('./types.js').Recipe[], unscorableReason: string|null }>}
  */
 export async function getRecipes(profile) {
   const conditionIds = profile?.conditions || [];
-  if (!conditionIds.length) return { recipes: [], usedFallback: false };
+  if (!conditionIds.length) return { recipes: [], unscorableReason: null };
 
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    getRecipesRaw(ids)
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    (ids) => getRecipesRaw(ids),
+    []
   );
-
-  return { recipes: result, usedFallback };
+  return { recipes: result, unscorableReason };
 }
 
 /**
@@ -1590,7 +1679,7 @@ function topUpLunchFromDefaultedDinnerRecipes(lunchCandidates, dinnerCandidates,
  *   candidates: Record<string, import('./types.js').PlanCandidate[]>,
  *   conditionIds: number[],
  *   conditionNames: string[],
- *   usedFallback: boolean
+ *   unscorableReason: string|null
  * }>}
  */
 export async function getMealPlanSuggestions(profile) {
@@ -1600,34 +1689,34 @@ export async function getMealPlanSuggestions(profile) {
       candidates: Object.fromEntries(PLAN_SLOT_KEYS.map((key) => [key, []])),
       conditionIds: [],
       conditionNames: [],
-      usedFallback: false,
+      unscorableReason: null,
     };
   }
 
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    getMealPlanSuggestionsRaw(ids)
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    (ids) => getMealPlanSuggestionsRaw(ids),
+    {
+      candidates: Object.fromEntries(PLAN_SLOT_KEYS.map((key) => [key, []])),
+      conditionIds: [],
+      conditionNames: [],
+    }
   );
 
-  return { ...result, usedFallback };
+  return { ...result, unscorableReason };
 }
 
 /**
  * Unwrapped getMealPlanSuggestions body. `conditionIds`/`conditionNames` on
  * the result are computed from the `ids` this was CALLED with (not the
- * profile's original ids), so a demo-fallback retry's resolved ids/names
- * propagate correctly onto the plan instead of claiming the wrong condition.
+ * profile's original ids), so only the scorable conditions land on the plan.
  *
  * Per-group /suggest failures (and getRecipesRaw failures) normally degrade
  * to an empty list rather than failing the whole plan — EXCEPT when a
  * rejection is a NutridigmAuthError with code NOTAUTHORIZEDHEALTHID (the
- * demo key can't score these conditions at all). That error is rethrown
- * instead of swallowed, so it propagates up to `withConditionFallback`
- * (which detects it the same way) and triggers its single retry with
- * DEFAULT_DEV_CONDITIONS — otherwise every group/recipes call would reject
- * for the same reason, the raw function would never throw, and the caller
- * would silently get empty slots with no "Demo data" chip.
- * APIDAILYLIMITREACHED and all other errors still degrade to [] per group,
- * since `withConditionFallback` deliberately doesn't retry quota errors.
+ * key can't score these conditions at all). That error is rethrown instead
+ * of swallowed, so `withAuthorized` can drop the unscorable conditions.
+ * APIDAILYLIMITREACHED and all other errors still degrade to [] per group.
  *
  * Total-vs-partial failure (binding project rule — an error must never be
  * presented to the user as "no results"): some groups failing while others
@@ -1792,8 +1881,7 @@ function scopingGroupsForItem(item) {
 }
 
 /**
- * Unwrapped getSlotSubstitutes body — used by withConditionFallback for the
- * retry. Mirrors `getMealPlanSuggestionsRaw`'s fan-out/failure shape (see
+ * Unwrapped getSlotSubstitutes body — used by withAuthorized. Mirrors `getMealPlanSuggestionsRaw`'s fan-out/failure shape (see
  * adapter.mealPlanOutage.test.js) but scoped to one slot's current items
  * instead of all of PLAN_SLOTS.
  * @param {number[]} conditionIds
@@ -1890,7 +1978,7 @@ async function getSlotSubstitutesRaw(conditionIds, slotItems) {
  *   current items (e.g. `day.slots[slotKey]`)
  * @returns {Promise<{
  *   bySourceItem: Array<{ sourceItem: import('../state/dailyPlan.js').PlanItem, substitutes: import('./types.js').PlanCandidate[] }>,
- *   usedFallback: boolean
+ *   unscorableReason: string|null
  * }>}
  */
 export async function getSlotSubstitutes(profile, slotItems) {
@@ -1900,20 +1988,21 @@ export async function getSlotSubstitutes(profile, slotItems) {
   if (!conditionIds.length || !items.length) {
     return {
       bySourceItem: items.map((item) => ({ sourceItem: item, substitutes: [] })),
-      usedFallback: false,
+      unscorableReason: null,
     };
   }
 
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    getSlotSubstitutesRaw(ids, items)
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    (ids) => getSlotSubstitutesRaw(ids, items),
+    { bySourceItem: items.map((item) => ({ sourceItem: item, substitutes: [] })) }
   );
 
-  return { ...result, usedFallback };
+  return { ...result, unscorableReason };
 }
 
 /**
- * Unwrapped getIngredientAlternatives body — used by withConditionFallback
- * for the retry. One /suggest call, scoped to the ingredient's own fine food
+ * Unwrapped getIngredientAlternatives body — used by withAuthorized. One /suggest call, scoped to the ingredient's own fine food
  * group, filtered through the same safety gate (`normalizePlanGroup`:
  * numericId 1-4 only, `isExcludedItem` applied) every other food-facing list
  * in this app goes through, and sorted best-verdict-first by /suggest itself.
@@ -1952,28 +2041,29 @@ async function getIngredientAlternativesRaw(conditionIds, suggestGroup, excludeF
  * @param {{name?: string, foodItemID?: number|null, suggestGroup?: string|null}} ingredient
  * @param {Object} [options]
  * @param {number} [options.limit] - max alternatives (default 6)
- * @returns {Promise<{alternatives: import('./types.js').PlanCandidate[], suggestGroup: string|null, usedFallback: boolean}>}
+ * @returns {Promise<{alternatives: import('./types.js').PlanCandidate[], suggestGroup: string|null, unscorableReason: string|null}>}
  */
 export async function getIngredientAlternatives(profile, ingredient, { limit = 6 } = {}) {
   const conditionIds = profile?.conditions || [];
   const suggestGroup = ingredient?.suggestGroup ?? null;
 
   if (!suggestGroup || !conditionIds.length) {
-    return { alternatives: [], suggestGroup, usedFallback: false };
+    return { alternatives: [], suggestGroup, unscorableReason: null };
   }
 
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    getIngredientAlternativesRaw(ids, suggestGroup, ingredient?.foodItemID ?? null, limit)
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    (ids) => getIngredientAlternativesRaw(ids, suggestGroup, ingredient?.foodItemID ?? null, limit),
+    []
   );
 
-  return { alternatives: result, suggestGroup, usedFallback };
+  return { alternatives: result, suggestGroup, unscorableReason };
 }
 
 // ── Fine-group browse (Suggest surface) ──────────────────────────────────────
 
 /**
- * Unwrapped getFineGroupSuggestions body — used by withConditionFallback for
- * the retry. One /suggest call via the SAME `cachedSuggest` the Plan screen
+ * Unwrapped getFineGroupSuggestions body — used by withAuthorized. One /suggest call via the SAME `cachedSuggest` the Plan screen
  * and Suggestions sheet already share (zero new network surface — the
  * Nutridigm API has a daily rate limit, so this browse feature must ride the
  * existing 8h cache rather than add its own fetch path).
@@ -2038,14 +2128,9 @@ async function getFineGroupSuggestionsRaw(conditionIds, fineGroupCode) {
  * Condition-ranked browse list for ONE fine food group — the Suggest
  * browse surface's data layer (see `getFineFoodGroups` for the 17-group
  * menu this is paired with). Mirrors `getCategoryDetail` (the coarse
- * `/detailed` equivalent) and `getSlotSubstitutes`'s envelope/fallback
- * shape, so the UI's shared `DataState` + `CoverageNotice` components work
- * against this unchanged: `usedFallback` flags a demo-conditions retry (see
- * `withConditionFallback`) and `requestedConditionIds` is always the
- * profile's ORIGINAL requested conditions (not the post-fallback ids), same
- * pairing `CoverageNotice` already reads elsewhere (e.g.
- * `SuggestionsScreen.jsx`) to compute how many requested conditions the
- * fallback couldn't actually score.
+ * `/detailed` equivalent) and `getSlotSubstitutes`'s envelope shape.
+ * `unscorableReason` names conditions the key can't score; `requestedConditionIds`
+ * is always the profile's ORIGINAL requested conditions.
  *
  * Goes through `cachedSuggest` — the exact same 8h cache key
  * (`suggest:{conditionsCSV}:{fineFoodGroup}`) the meal-planner's
@@ -2065,7 +2150,7 @@ async function getFineGroupSuggestionsRaw(conditionIds, fineGroupCode) {
  *     groupLabel: string, tier: import('./types.js').TierOrPoor, numericId: number,
  *     referenceTotal: number|null, matchedConditions: string[]
  *   }>,
- *   usedFallback: boolean,
+ *   unscorableReason: string|null,
  *   requestedConditionIds: number[]
  * }>}
  */
@@ -2073,14 +2158,16 @@ export async function getFineGroupSuggestions(profile, fineGroupCode) {
   const conditionIds = profile?.conditions || [];
 
   if (!conditionIds.length || !fineGroupCode) {
-    return { items: [], usedFallback: false, requestedConditionIds: conditionIds };
+    return { items: [], unscorableReason: null, requestedConditionIds: conditionIds };
   }
 
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    getFineGroupSuggestionsRaw(ids, fineGroupCode)
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    (ids) => getFineGroupSuggestionsRaw(ids, fineGroupCode),
+    []
   );
 
-  return { items: result, usedFallback, requestedConditionIds: conditionIds };
+  return { items: result, unscorableReason, requestedConditionIds: conditionIds };
 }
 
 /**
@@ -2092,13 +2179,15 @@ export async function getFineGroupSuggestions(profile, fineGroupCode) {
 export async function buildMealPlan(profile, libraryItems) {
   const conditionIds = profile.conditions || [];
 
-  if (!conditionIds.length) return { ...emptyMealPlan(), usedFallback: false };
+  if (!conditionIds.length) return { ...emptyMealPlan(), unscorableReason: null };
 
-  const { result, usedFallback } = await withConditionFallback(conditionIds, (ids) =>
-    buildMealPlanRaw(ids, libraryItems)
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    (ids) => buildMealPlanRaw(ids, libraryItems),
+    { ...emptyMealPlan(), conditionIds: [] }
   );
 
-  return { ...result, usedFallback };
+  return { ...result, unscorableReason };
 }
 
 /**
@@ -2131,7 +2220,7 @@ async function buildMealPlanRaw(conditionIds, libraryItems) {
   const today = new Date().toISOString().split('T')[0];
 
   const topFoods = await cachedTopDoOrDonts(conditionIdStr, 'consume', 40);
-  if (!topFoods || !topFoods.length) return emptyMealPlan();
+  if (!topFoods || !topFoods.length) return { ...emptyMealPlan(), conditionIds };
 
   const filtered = topFoods.filter((f) => !isExcludedItem(f));
 
@@ -2195,7 +2284,7 @@ async function buildMealPlanRaw(conditionIds, libraryItems) {
     calories: slotCalories[slot],
   }));
 
-  return { date: today, meals, totalCalories: DAILY_TARGET };
+  return { date: today, meals, totalCalories: DAILY_TARGET, conditionIds };
 }
 
 /**

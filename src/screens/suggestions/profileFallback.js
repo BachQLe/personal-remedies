@@ -2,10 +2,9 @@
  * resolveProfileWithConditions — shared profile resolution for the
  * Suggestions screens' data fetchers.
  *
- * Reproduces the client-side dev convenience these screens already applied
- * inline (pre-T5B): if the stored profile has no `conditions` (onboarding
- * skipped the health-conditions step), default to DEFAULT_DEV_CONDITIONS so
- * the demo still shows guidance instead of nothing.
+ * Normalizes the stored profile so `conditions` is always an array. No demo
+ * conditions are substituted: a profile without conditions stays empty and
+ * the adapter returns honest empty results.
  *
  * This is ORTHOGONAL to src/hooks/useAsyncData.js's `requiresProfile` gate,
  * which checks whether a profile object exists in storage AT ALL — the real
@@ -18,10 +17,9 @@
  * @returns {Promise<import('../../api/types.js').Profile>}
  */
 import { getProfile } from '../../api/api.js';
-import { DEFAULT_DEV_CONDITIONS } from '../../api/config.js';
 
 export async function resolveProfileWithConditions() {
   const p = await getProfile();
-  const conditions = p?.conditions?.length ? p.conditions : DEFAULT_DEV_CONDITIONS;
+  const conditions = p?.conditions ?? [];
   return { ...(p ?? {}), conditions };
 }

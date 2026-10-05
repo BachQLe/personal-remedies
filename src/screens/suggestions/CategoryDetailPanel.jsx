@@ -44,7 +44,6 @@ import { useAsyncData } from '../../hooks/useAsyncData.js';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
 import DataState from '../../components/shared/DataState.jsx';
-import CoverageNotice from './CoverageNotice.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
 
@@ -53,13 +52,13 @@ const LIST_TYPES = [
     key: 'helpful',
     label: 'Eat',
     tone: 'positive',
-    emptyBody: 'There are no common food items within this food group that are helpful to your health profile.',
+    emptyBody: 'There are no common food items within this food group that are ranked higher for your health profile.',
   },
   {
     key: 'harmful',
     label: 'Avoid',
     tone: 'negative',
-    emptyBody: 'There are no common food items within this food group that are harmful to your health profile.',
+    emptyBody: 'There are no common food items within this food group that are ranked lower for your health profile.',
   },
 ];
 
@@ -134,11 +133,10 @@ export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp,
           onRetry={retry}
           screenName={`${groupLabel || 'category'} — ${LIST_TYPES.find((t) => t.key === listType)?.label}`}
           emptyTitle={status === 'empty' ? null : undefined}
-          emptyBody={status === 'empty' ? LIST_TYPES.find((t) => t.key === listType)?.emptyBody : undefined}
+          emptyBody={status === 'empty' ? data?.unscorableReason || LIST_TYPES.find((t) => t.key === listType)?.emptyBody : undefined}
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
         >
           <div className="flex flex-col gap-2">
-            <CoverageNotice usedFallback={!!data?.usedFallback} requestedConditionIds={data?.requestedConditionIds} />
             {items.map((food) => (
               <RankedRow
                 key={food.id}

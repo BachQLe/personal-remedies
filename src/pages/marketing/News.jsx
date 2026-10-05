@@ -18,7 +18,7 @@ const news = [
   {
     date: "Apr 13, 2021",
     title: "Complex Health Solutions Partners with Personal Remedies",
-    desc: "Patients can now address root causes through dietary measures via this partnership.",
+    desc: "Ranks foods against a condition profile.",
   },
   {
     date: "Dec 22, 2020",

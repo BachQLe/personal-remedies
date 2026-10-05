@@ -14,6 +14,7 @@
  *   removeScheduled(dateKey, id)       → ScheduledItem|null (removed item, for Undo)
  *   setCooked(dateKey, id, cooked)     → void
  *   getItemsForDay(dateKey)            → ScheduledItem[]
+ *   clearSchedule()                    → void (wipe every day; profile-change purge)
  */
 
 import { storage } from '../api/storage.js';
@@ -133,6 +134,19 @@ export function subscribeSchedule(callback) {
  */
 export function reloadSchedule() {
   _schedule = _pruneOldDays(_readValid());
+  _notify();
+}
+
+/**
+ * Wipe every scheduled day. Called by the health-profile-change purge
+ * (`purgeMealPlanForProfileChange`, src/api/planBuilder.js): scheduled
+ * meals were chosen under the previous guidance and must not outlive it.
+ * No-op (writes nothing, notifies nobody) when already empty.
+ */
+export function clearSchedule() {
+  if (Object.keys(_schedule.days).length === 0) return;
+  _schedule = { version: 1, days: {} };
+  _persist();
   _notify();
 }
 

@@ -34,7 +34,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
 import { storage } from './storage.js';
 import { reloadLibrary } from '../state/library.js';
 import { reloadPlan } from '../state/dailyPlan.js';
-import { purgeDerivedDataForConditionsChange } from './planBuilder.js';
+import { purgeDerivedDataForConditionsChange, purgeMealPlanForProfileChange } from './planBuilder.js';
 
 const SYNC_META_KEY = 'syncMeta';
 const DEBOUNCE_MS = 2000;
@@ -146,6 +146,12 @@ export function schedulePush(user = _currentUser) {
     _pushTimer = null;
     pushNow(user);
   }, DEBOUNCE_MS);
+}
+
+/** Drop any pending debounced push (account deletion: must not re-create the row). */
+export function cancelPendingPush() {
+  if (_pushTimer) clearTimeout(_pushTimer);
+  _pushTimer = null;
 }
 
 /** Flush any pending debounced push immediately (best-effort, not awaited by callers). */
@@ -261,6 +267,27 @@ function reconcile(user) {
 }
 
 /**
+ * Stable string of every profile field that changes dietary guidance.
+ * Order-insensitive within each list. Null/undefined profile → null.
+ * @param {Object|null|undefined} profile
+ * @returns {string|null}
+ */
+function guidanceFingerprint(profile) {
+  if (!profile || typeof profile !== 'object') return null;
+  const list = (v) =>
+    (Array.isArray(v) ? v : []).map((x) => JSON.stringify(x)).sort();
+  return JSON.stringify({
+    conditions: (Array.isArray(profile.conditions) ? profile.conditions : [])
+      .filter((c) => typeof c === 'number')
+      .sort((a, b) => a - b),
+    allergies: list(profile.allergies),
+    medications: list(profile.medications),
+    dietaryPattern: profile.dietaryPattern ?? null,
+    religiousRestriction: profile.religiousRestriction ?? null,
+  });
+}
+
+/**
  * Call once at app level (see src/context/AuthContext.jsx). Subscribes to
  * Supabase auth state: on SIGNED_IN, pulls + reconciles the remote profile;
  * while signed in, local storage writes (profile/library/dailyPlan) schedule
@@ -285,9 +312,23 @@ export function initProfileSync() {
   // already enforces this invariant directly against the row's authoritative
   // pair (see `isDailyPlanConsistent`) — re-deriving it here from the write
   // it just caused would be redundant.
+  let lastFingerprint = guidanceFingerprint(storage.get('profile', null));
   const purgeUnsubscribe = storage.onWrite((key) => {
-    if (key !== 'profile' || _hydrating) return;
-    purgeDerivedDataForConditionsChange(storage.get('profile', null)?.conditions);
+    if (key !== 'profile') return;
+    const profile = storage.get('profile', null);
+    const next = guidanceFingerprint(profile);
+    const prev = lastFingerprint;
+    lastFingerprint = next;
+    if (_hydrating) return;
+    // Any guidance-relevant change (conditions, allergies, medications,
+    // dietary pattern, religious restriction) wipes picks, plan and
+    // schedule (storage-map.md §6 gap 5). With no prior profile to diff
+    // against, fall back to the conditions-key check against the plan.
+    if (prev !== null && next !== prev) {
+      purgeMealPlanForProfileChange();
+      return;
+    }
+    purgeDerivedDataForConditionsChange(profile?.conditions);
   });
 
   if (!isSupabaseConfigured || !supabase) return purgeUnsubscribe;

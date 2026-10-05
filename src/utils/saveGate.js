@@ -85,7 +85,7 @@ function isUnscored(item) {
 /** User-facing toast copy for each non-null getSaveBlockReason() value. */
 export const SAVE_BLOCK_MESSAGES = {
   ingredient: 'This item is not available for save because it is an ingredient.',
-  harmful: "Can't save — this one's skull-rated for your conditions.",
+  harmful: "Can't save — this one is ranked low for your conditions.",
   unscored: "Can't save yet — this recipe hasn't been rated for your conditions.",
 };
 

@@ -34,7 +34,7 @@ const sources = [
   {
     icon: "book-open",
     title: "Authoritative sources only",
-    body: "NIH, USDA, MedLine/PubMed, EU health agencies, and leading US universities and clinics. No supplement industry funding. No conflicts of interest.",
+    body: "NIH, USDA, MedLine/PubMed, EU health agencies, and leading US universities and clinics.",
   },
   {
     icon: "flask-conical",
@@ -51,7 +51,6 @@ const sources = [
 const footerBar = [
   { text: "Peer-reviewed sources", icon: "award" },
   { text: "US Patent No. 8504385", icon: "star" },
-  { text: "45,000+ patients served", icon: "user" },
   { text: "300+ conditions tracked", icon: "activity" },
   { text: "Independent from product manufacturers", icon: "shield" },
 ];

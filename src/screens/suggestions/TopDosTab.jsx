@@ -17,9 +17,7 @@
  * - RankedRow's `imageRight` image-card layout is enabled here (and only
  *   here — CategoryDetailPanel keeps the plain text row): each row shows
  *   the item's resolved photo over its right half, fading into the white
- *   row background via stacked bars (see RankedRow's header doc). This tab
- *   never surfaces a "showing demo/fallback condition data" notice either —
- *   CoverageNotice is intentionally not rendered here.
+ *   row background via stacked bars (see RankedRow's header doc).
  *
  * State-matrix (T5B): both directions are fetched together through a single
  * useAsyncData call (src/hooks/useAsyncData.js) so loading/error/offline/
@@ -107,7 +105,7 @@ export default function TopDosTab({ onSelectFood }) {
           onRetry={retry}
           screenName="Top Dos & Don'ts"
           emptyTitle="Nothing here yet"
-          emptyBody="We don't have dos & don'ts for your conditions right now."
+          emptyBody={data?.consume?.unscorableReason || "We don't have dos & don'ts for your conditions right now."}
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
         >
           <div className="flex flex-col gap-2">

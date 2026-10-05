@@ -78,8 +78,8 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
       </p>
       <p className="text-[11px] text-char-400 font-sans mt-1 mb-3 leading-snug">
         {derived
-          ? 'Read from the recipe name — tap one to see healthier swaps for your conditions.'
-          : 'From the source recipe — tap one to see healthier swaps for your conditions.'}
+          ? 'Read from the recipe name — tap one to see other swaps ranked for your conditions.'
+          : 'From the source recipe — tap one to see other swaps ranked for your conditions.'}
       </p>
 
       <ul className="flex flex-col divide-y divide-sand-100">
@@ -161,7 +161,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
 
                   {state?.status === 'success' && state.items.length === 0 && (
                     <p className="text-[11px] font-sans text-char-500 py-1">
-                      No better-rated alternatives in this food group for your conditions.
+                      No higher-ranked alternatives in this food group.
                     </p>
                   )}
 

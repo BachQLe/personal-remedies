@@ -10,11 +10,11 @@ import EmptyState from './shared/EmptyState.jsx';
 import { getLibrary, addToLibrary, removeFromLibrary } from '../state/library.js';
 import { getFoodFacts, assessFood, getFoodIdByName, getGroupLabel } from '../api/api.js';
 import { storage } from '../api/storage.js';
-import { DEFAULT_DEV_CONDITIONS, EXCLUDED_FINE_GROUPS } from '../api/config.js';
 import { getSaveBlockReason, SAVE_BLOCK_MESSAGES } from '../utils/saveGate.js';
 import {
   resolveIsRecipe,
   resolveRecipeLinkTarget,
+  resolveGroupLinkTarget,
   groupConditionsByVerdict,
   orderVerdictGroups,
   deriveAssessStatus,
@@ -22,8 +22,9 @@ import {
 import { getNonFoodIcon } from '../api/ingredientImages.js';
 import { resolveCardIngredients } from '../api/ingredientDerivation.js';
 import IngredientSwaps from './shared/IngredientSwaps.jsx';
+import NonFoodGuidance from './shared/NonFoodGuidance.jsx';
+import NutrientFactsPanel from './NutrientFactsPanel.jsx';
 import Snackbar from './shared/Snackbar.jsx';
-import RecipeLinkSheet from './RecipeLinkSheet.jsx';
 import { openUrl } from '../api/browser.js';
 
 const DISMISS_THRESHOLD = 100;
@@ -60,13 +61,10 @@ const ASSESS_TIMEOUT_MS = 15000;
 // The Nutridigm API exposes no nutrition-fact fields anywhere (fooditems/
 // goodfor/detailed all probed, July 2026) — no nutrition UI is shown.
 
-// Mirrors MealprepCarousel's profile-read pattern: prefer the
-// saved profile's real conditions, fall back to the demo-key conditions
-// this subscription can actually score.
+// The saved profile's real conditions only — no demo-condition fallback.
 function getProfile() {
   const saved = storage.get('profile', null);
-  if (saved?.conditions?.length) return saved;
-  return { conditions: DEFAULT_DEV_CONDITIONS };
+  return { ...(saved ?? {}), conditions: saved?.conditions ?? [] };
 }
 
 /**
@@ -85,8 +83,10 @@ function getProfile() {
  * card, unlike FoodRating's usual dark photo-overlay context.
  */
 function ConditionRow({ conditionAssessment, showReferences = true }) {
-  const { conditionName, numericId, referenceCount, citations, referenceStatus } = conditionAssessment;
+  const { conditionName, numericId, referenceCount, citations, referenceStatus, status } = conditionAssessment;
   const refsErrored = referenceStatus === 'error';
+  // Honest unscorable state (unauthorized / no data / error for this condition).
+  const unscorable = status != null && status !== 'ok';
 
   const formattedRefs = (citations || []).map((c) => (typeof c === 'string' ? { source: c } : c));
 
@@ -96,24 +96,30 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
         <span className="font-sans text-sm font-medium text-char-900">
           {conditionName}
         </span>
+        {unscorable ? (
+          <span data-testid="condition-unscorable" className="text-[11px] text-char-400 font-sans italic whitespace-nowrap">
+            Can&apos;t be scored yet
+          </span>
+        ) : (
         <div className="flex items-center gap-2">
           <FoodRating numericId={numericId} size={14} tone="light" />
           {showReferences && !refsErrored && referenceCount > 0 && (
             <span className="text-[11px] text-char-400 font-sans whitespace-nowrap">
-              {referenceCount} {referenceCount === 1 ? 'study' : 'studies'}
+              {referenceCount} {referenceCount === 1 ? 'reference' : 'references'}
             </span>
           )}
         </div>
+        )}
       </div>
 
       {/* Reference fetch failed — say so rather than implying zero studies */}
-      {showReferences && refsErrored && (
+      {showReferences && !unscorable && refsErrored && (
         <p className="mt-1 text-[11px] text-char-400 font-sans italic">
-          Couldn&apos;t load studies
+          Couldn&apos;t load references
         </p>
       )}
 
-      {showReferences && !refsErrored && formattedRefs.length > 0 && (
+      {showReferences && !unscorable && !refsErrored && formattedRefs.length > 0 && (
         <StudyReferences references={formattedRefs} />
       )}
     </div>
@@ -128,87 +134,6 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
 // Both trip eslint's react-refresh/only-export-components warning exactly
 // like that precedent already does; harmless (a lint warning, not a build
 // break) and consistent with it.
-
-/**
- * Resolve the plain-FOOD "other options" link target: this item's own fine
- * food group's Suggest page (`/app/suggestions/fine/:code`) when that code
- * resolves to something real and useful, else the coarse group's existing
- * page (`/app/suggestions/group/:code`), else no link at all.
- *
- * Fine wins over coarse UNLESS it's one of `EXCLUDED_FINE_GROUPS`
- * ('x'/'j1' lifestyle codes, plus every recipe's blanket 'l' — recipes
- * never reach this function at all, see `mealTypeToRecipesHref` below for
- * their own link, but 'l' is excluded here too for any plain-food item that
- * somehow carries it) — those codes are too generic to deep-link into, so
- * the coarse parent is used instead.
- *
- * `fineGroup`/`group` resolution mirrors the non-food icon lookup further
- * down this file EXACTLY: assessment's own Food (fresh off the /fooditems
- * dictionary) wins, then `facts` (getFoodFacts — which per that same
- * comment does NOT currently return these fields, so this layer is inert
- * until/unless that adapter export changes), then whatever the caller
- * already seeded on `item` (e.g. GroupDetailScreen passing through the
- * coarse group it's already browsing). Kept as its own function (duplicating
- * that lookup) rather than sharing one computation, because this one feeds
- * an effect that must be declared before this component's
- * `if (!open || !item) return null` early return, while the icon lookup is
- * a plain render-time expression after it.
- *
- * Deliberately independent of `topFoodsForConditions` (the rail rendered
- * just above this link) — that rail is gated on a DIFFERENT signal (the
- * /topdoordonts companions list) and can be empty while a perfectly good
- * group still resolves here, or vice versa. See the render site for why
- * this link is its own block rather than nested inside that rail's `&&`.
- *
- * @param {Object|null} item
- * @param {Object|null} facts
- * @param {Object|null} assessment
- * @returns {{ path: string, code: string, kind: 'fine'|'coarse' } | null}
- */
-export function resolveGroupLinkTarget(item, facts, assessment) {
-  const fineGroup = assessment?.food?.fineGroup ?? facts?.fineGroup ?? item?.fineGroup ?? null;
-  const group = assessment?.food?.group ?? facts?.group ?? item?.group ?? null;
-
-  if (fineGroup && !EXCLUDED_FINE_GROUPS.includes(fineGroup)) {
-    return { path: `/app/suggestions/fine/${fineGroup}`, code: fineGroup, kind: 'fine' };
-  }
-  if (group) {
-    return { path: `/app/suggestions/group/${group}`, code: group, kind: 'coarse' };
-  }
-  return null;
-}
-
-// Recipe meal-type labels this card can deep-link a recipe's "other
-// options" button into. Deliberately duplicated from RecipesScreen.jsx's
-// MEAL_TYPES labels + its matchesMealFilter docblock's Task C1 dessert→Snack
-// rule, rather than imported from there: RecipesScreen.jsx imports THIS
-// file (FoodDetailCard), so an import running the other way would be
-// circular. Keep this list and the dessert rule in sync with
-// RecipesScreen.jsx by hand if either changes.
-const RECIPE_MEAL_LABELS = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
-
-/**
- * Resolve a recipe's raw `mealType` (lowercase: breakfast/lunch/dinner/
- * snack/dessert/beverage — recipeIngestion.js's MEAL_TYPES) to the recipe
- * browser link its "other options" button should open: `/app/recipes`
- * pre-filtered to the matching tab via `?meal=`.
- *
- * `dessert` maps to the `Snack` tab, not a `Dessert` tab — there isn't one;
- * RecipesScreen's Snack tab deliberately shows snack AND dessert recipes
- * together (Task C1). `beverage` has no tab at all and, like a
- * missing/unrecognized mealType, falls back to a plain unfiltered
- * `/app/recipes` link rather than guessing one.
- *
- * @param {string|undefined|null} mealType
- * @returns {string}
- */
-export function mealTypeToRecipesHref(mealType) {
-  const lower = mealType?.toLowerCase?.();
-  if (!lower) return '/app/recipes';
-  if (lower === 'dessert') return '/app/recipes?meal=Snack';
-  const match = RECIPE_MEAL_LABELS.find((label) => label.toLowerCase() === lower);
-  return match ? `/app/recipes?meal=${match}` : '/app/recipes';
-}
 
 /**
  * @param {Object} props
@@ -306,19 +231,6 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
     undoFnRef.current?.();
     setSnackbar(null);
   }, []);
-
-  // The recipe-preview sheet (RecipeLinkSheet) — its own local `open` state
-  // persists across renders even while this component returns null below
-  // (React only resets state on unmount, not on a null render), so it's
-  // explicitly closed whenever the card itself closes rather than relying
-  // on that early return to do it. Guarded render-time state adjustment
-  // (same escape hatch MealPlannerPicker.jsx/SuggestionsSheet.jsx use)
-  // rather than an effect, since synchronous setState in an effect body
-  // trips react-hooks/set-state-in-effect.
-  const [recipeSheetOpen, setRecipeSheetOpen] = useState(false);
-  if (!open && recipeSheetOpen) {
-    setRecipeSheetOpen(false);
-  }
 
   const isRecipe = resolveIsRecipe(item);
   // Hoisted so both the save gate below AND handleSave's addToLibrary
@@ -587,10 +499,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
   // domain attribution required, embedded in the label — see
   // resolveRecipeLinkTarget); absent that, falls back to a new-tab web
   // search exactly as before. This CTA hands off to the OS browser in one
-  // tap via `openUrl` — no in-app interstitial. (RecipeLinkSheet, the
-  // "before you leave" preview that used to sit in between, is still
-  // mounted below and still owns its own `openUrl` hand-off for any caller
-  // that opens it; it's just no longer this button's first stop.)
+  // tap via `openUrl`.
   const linkTarget = resolveRecipeLinkTarget(item);
   const handleGetRecipe = () => openUrl(linkTarget.url);
 
@@ -731,6 +640,9 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
               <h2 className="font-display text-2xl font-semibold text-white leading-snug tracking-tightish pr-24">
                 {item?.name}
               </h2>
+              <p className="text-[11px] text-white/60 font-sans">
+                Ask your doctor before changing your diet, especially if you take medication.
+              </p>
 
               {/* Eyebrow + verdict-group condition chips — every entry in
                   perCondition is represented (grouped Helps/Neutral/Avoid
@@ -827,6 +739,15 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
             <div className="flex-1 overflow-y-auto px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex flex-col gap-3">
 
+                {!isRecipe && nonFoodIcon && (
+                  <NonFoodGuidance
+                    foodId={combinedFoodId}
+                    group={assessment?.food?.group ?? facts?.group ?? item?.group}
+                    fineGroup={assessment?.food?.fineGroup ?? facts?.fineGroup ?? item?.fineGroup}
+                    longDescription={description}
+                  />
+                )}
+
                 {/* Conditions in your profile — per-condition breakdown (tier
                     pills, and for foods only: study counts, expandable
                     citations, "couldn't load studies" state). Recipes show
@@ -842,7 +763,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                       show studies, so skip this line entirely for them. */}
                   {!isRecipe && assessment?.food?.referenceTotal > 0 && (
                     <p className="text-xs text-char-500 font-sans mb-2">
-                      {assessment.food.referenceTotal} total {assessment.food.referenceTotal === 1 ? 'study' : 'studies'} across your conditions
+                      {assessment.food.referenceTotal} total {assessment.food.referenceTotal === 1 ? 'reference' : 'references'} across your conditions
                     </p>
                   )}
 
@@ -887,10 +808,16 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                     <EmptyState
                       icon="info"
                       title="No data for this item"
-                      body="We don't have condition or study data for this pairing yet."
+                      body="We don't have condition or reference data for this pairing yet."
                     />
                   )}
                 </div>
+
+                {/* Real USDA nutrient panel — plain foods only (recipes carry
+                    their own source panel; non-food items have no nutrients). */}
+                {!isRecipe && !nonFoodIcon && combinedFoodId != null && (
+                  <NutrientFactsPanel key={combinedFoodId} foodId={combinedFoodId} />
+                )}
 
                 {/* Ingredients (+ per-ingredient healthy swaps) — recipes
                     only. Real C1-overlay ingredient facts win whenever the
@@ -914,7 +841,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                   />
                 )}
 
-                {/* Top foods for your conditions — a "see also" rail of
+                {/* Top-ranked foods for your conditions — a "see also" rail of
                     OTHER foods that help the same conditions (from
                     /topdoordonts), deliberately NOT presented as this
                     item's ingredients (that was the old, misleading
@@ -939,7 +866,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                   <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
                     {/* COPY-REVIEW: flagged for C2 health-claim audit */}
                     <p className="text-[11px] font-label tracking-[0.14em] uppercase text-char-400 mb-3">
-                      Top foods for your conditions
+                      Top-ranked foods for your conditions
                     </p>
                     <div className="flex gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
                       {item.topFoodsForConditions.map((food, i) => (
@@ -1054,30 +981,8 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
 
       {/* Mounted outside the (transformed) card wrapper — a `transform` on an
           ancestor creates a new containing block for `fixed` descendants,
-          which would break Snackbar's viewport-anchored positioning.
-          RecipeLinkSheet is also `fixed`, but being a sibling in the JSX
-          here isn't enough to get it above the TabBar: this whole
-          component's root is itself `fixed inset-0 z-30`, which is its own
-          stacking context, so a `zClass` passed to a normally-mounted child
-          only ever wins *inside* that z-30 context — the app's TabBar
-          (`z-40`, a sibling stacking context outside this component
-          entirely) would still render on top of it and intercept taps.
-          RecipeLinkSheet.jsx handles this itself by portaling its content
-          straight into `document.body` via `createPortal`, which escapes
-          this z-30 context so its `z-[70]` is compared at the document
-          root instead — there it correctly stacks above both the TabBar
-          (`z-40`) and MealPlannerPicker's full-screen overlay (`z-[60]`)
-          when this card is opened from within it, the established
-          convention for "above MealPlannerPicker". */}
+          which would break Snackbar's viewport-anchored positioning. */}
       <Snackbar snackbar={snackbar} onUndo={handleSnackbarUndo} onDismiss={() => setSnackbar(null)} />
-      {isRecipe && (
-        <RecipeLinkSheet
-          open={recipeSheetOpen}
-          onClose={() => setRecipeSheetOpen(false)}
-          item={item}
-          zClass="z-[70]"
-        />
-      )}
     </div>
   );
 }

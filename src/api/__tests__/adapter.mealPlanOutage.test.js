@@ -20,8 +20,8 @@
  *     `fetchSuggest` already coalesces to `[]` before adapter.js ever sees
  *     it) -> resolves to empty candidates WITHOUT throwing. A real
  *     zero-result response from a healthy API is not an error.
- *   - the auth-fallback retry (`withConditionFallback`, unchanged) still
- *     works and still sets `usedFallback`.
+ *   - partial / total authorization (`withAuthorized`): unscorable
+ *     conditions are dropped and named in `unscorableReason`.
  *   - the numericId 1-4 Plan safety pre-filter (`normalizePlanGroup`,
  *     unchanged) still holds.
  *
@@ -37,11 +37,9 @@
  * test that expects a rejection (or vice versa).
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_DEV_CONDITIONS, PLAN_SLOTS, PLAN_SLOT_KEYS } from '../config.js';
+import { PLAN_SLOTS, PLAN_SLOT_KEYS } from '../config.js';
 
 const CONDITIONS = [9001];
-const CONDITIONS_CSV = CONDITIONS.join(',');
-const FALLBACK_CSV = DEFAULT_DEV_CONDITIONS.join(',');
 
 /** Every unique fine food group getMealPlanSuggestionsRaw fans out to (10 groups, per PLAN_SLOTS). */
 const UNIQUE_GROUPS = [...new Set(PLAN_SLOTS.flatMap((s) => s.fineGroups))];
@@ -222,8 +220,8 @@ describe('getMealPlanSuggestions: every source succeeds but returns nothing (HTT
   });
 });
 
-describe('getMealPlanSuggestions: auth-fallback path (demo key cannot score these conditions)', () => {
-  it('retries with DEFAULT_DEV_CONDITIONS, sets usedFallback, and returns the fallback-resolved plan', async () => {
+describe('getMealPlanSuggestions: partial authorization (key cannot score some conditions)', () => {
+  async function setupAuth() {
     vi.doMock('../nutridigm.js', () => {
       class NutridigmAuthError extends Error {
         constructor(code, message) {
@@ -234,13 +232,12 @@ describe('getMealPlanSuggestions: auth-fallback path (demo key cannot score thes
       }
       return {
         fetchSuggest: vi.fn(async (csv, fineFoodGroup) => {
-          if (csv === CONDITIONS_CSV) {
-            throw new NutridigmAuthError('NOTAUTHORIZEDHEALTHID', 'demo key cannot score condition 9001');
+          if (csv.split(',').includes('9001')) {
+            throw new NutridigmAuthError('NOTAUTHORIZEDHEALTHID', 'key cannot score condition 9001');
           }
-          if (csv === FALLBACK_CSV && fineFoodGroup === 'h2') {
-            return [{ foodItemID: 501, foodItemDisplayAs: 'Green Tea', descriptionNumericID: 2 }];
-          }
-          return [];
+          return fineFoodGroup === 'h2'
+            ? [{ foodItemID: 501, foodItemDisplayAs: 'Green Tea', descriptionNumericID: 2 }]
+            : [];
         }),
         fetchGoodFor: vi.fn(),
         fetchTopDoOrDonts: vi.fn(),
@@ -252,20 +249,32 @@ describe('getMealPlanSuggestions: auth-fallback path (demo key cannot score thes
     vi.doMock('../localTables.js', () => ({
       getItemTable: vi.fn(() => [{ foodItemID: 501, isBeverage: true }]),
       getConditionTable: vi.fn(() => [
-        { healthConditionID: 203, description: 'Condition 203' },
-        { healthConditionID: 244, description: 'Condition 244' },
+        { healthConditionID: 203, description: 'Aging' },
+        { healthConditionID: 9001, description: 'Condition 9001' },
       ]),
       getGroupTable: vi.fn(() => []),
       getOverlayImageFile: vi.fn(() => undefined),
     }));
+    return import('../adapter.js');
+  }
 
-    const { getMealPlanSuggestions } = await import('../adapter.js');
+  it('drops the unauthorized condition and still returns results for the scorable one', async () => {
+    const { getMealPlanSuggestions } = await setupAuth();
+    const result = await getMealPlanSuggestions({ conditions: [203, 9001] });
+
+    expect(result.conditionIds).toEqual([203]);
+    expect(result.conditionNames).toEqual(['Aging']);
+    expect(result.unscorableReason).toBe("We can't score food for Condition 9001 yet.");
+    expect(result.candidates.beverages.some((c) => c.id === 501)).toBe(true);
+  });
+
+  it('returns empty candidates plus a reason when no condition is scorable', async () => {
+    const { getMealPlanSuggestions } = await setupAuth();
     const result = await getMealPlanSuggestions({ conditions: CONDITIONS });
 
-    expect(result.usedFallback).toBe(true);
-    expect(result.conditionIds).toEqual(DEFAULT_DEV_CONDITIONS);
-    expect(result.conditionNames).toEqual(['Condition 203', 'Condition 244']);
-    expect(result.candidates.beverages.some((c) => c.id === 501)).toBe(true);
+    expect(result.conditionIds).toEqual([]);
+    expect(result.unscorableReason).toBe("We can't score food for Condition 9001 yet.");
+    for (const key of PLAN_SLOT_KEYS) expect(result.candidates[key]).toEqual([]);
   });
 });
 

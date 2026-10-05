@@ -63,11 +63,6 @@ if (!IS_CONFIGURED) {
 }
 
 /**
- * Default dev profile conditions — the only two this demo key scores.
- */
-export const DEFAULT_DEV_CONDITIONS = [203, 244];
-
-/**
  * Max items shown per category/direction list on the Suggestions screens —
  * Top Dos & Don'ts (per direction) and Food Groups' category detail (per
  * Eat/Avoid list). A single named constant so every list-capping call site

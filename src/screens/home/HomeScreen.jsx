@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Icon from '../../components/shared/Icon.jsx';
+import calendarIcon from '../../assets/food-calendar-3d.png';
+import searchIcon from '../../assets/food-search-3d.png';
+import dishIcon from '../../assets/food-dish-simple-3d.png';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import MealprepCarousel from './MealprepCarousel.jsx';
 import { storage } from '../../api/storage.js';
@@ -10,23 +12,20 @@ const SHORTCUTS = [
   {
     to: '/app/plan',
     label: 'Meal planner',
-    icon: 'calendar',
+    icon: calendarIcon,
     tile: 'bg-forest-100',
-    chip: 'bg-forest-500/20 text-forest-700',
   },
   {
     to: '/app/suggestions',
     label: 'Food guide',
-    icon: 'leaf',
+    icon: dishIcon,
     tile: 'bg-lavender-100',
-    chip: 'bg-lavender-500/20 text-lavender-700',
   },
   {
     to: '/app/search',
     label: 'Food lookup',
-    icon: 'search',
+    icon: searchIcon,
     tile: 'bg-yellow-200',
-    chip: 'bg-yellow-500/20 text-yellow-950',
   },
 ];
 
@@ -48,12 +47,10 @@ export default function HomeScreen() {
       />
 
       <div className="home-screen__body">
-        <nav className="home-shortcuts" aria-label="Explore Remedi">
-          {SHORTCUTS.map(({ to, label, icon, tile, chip }) => (
+        <nav className="home-shortcuts" aria-label="Explore Personal Remedies">
+          {SHORTCUTS.map(({ to, label, icon, tile }) => (
             <Link key={to} to={to} className={`home-shortcut shadow-xs ${tile}`}>
-              <span className={`home-shortcut__icon w-11 h-11 rounded-lg ${chip}`}>
-                <Icon name={icon} size={23} aria-hidden="true" />
-              </span>
+              <img className="home-shortcut__icon" src={icon} alt="" aria-hidden="true" width="72" height="72" />
               <span className="home-shortcut__label font-display font-semibold text-base text-blue-950 leading-tight tracking-tight">
                 {label.replace(' ', '\n')}
               </span>

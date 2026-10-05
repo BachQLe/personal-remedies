@@ -18,6 +18,7 @@ import { PLAN_SLOTS, PLAN_SLOT_KEYS, MEAL_SLOT_MAP, MAX_SAVED_PLANS } from './co
 import { getPlan, setPlan, consumeLegacyQueue } from '../state/dailyPlan.js';
 import { nextSevenDays } from '../screens/plan/planDates.js';
 import { mealTypeForItem } from '../components/shared/mealTypeMeta.jsx';
+import { clearSchedule, getSchedule } from '../state/schedule.js';
 import { storage } from './storage.js';
 
 /**
@@ -35,17 +36,13 @@ let _loading = null;
 
 /**
  * Load (or reuse) the candidate pools for a profile's conditions. Single
- * internal entry point used by every export below — all condition-fallback
- * resolution and memoization live here so callers never talk to the adapter
+ * internal entry point used by every export below — all memoization lives here so callers never talk to the adapter
  * directly.
  * @param {import('./types.js').Profile} profile
  * @returns {Promise<Awaited<ReturnType<typeof getMealPlanSuggestions>>>}
  */
 async function loadCandidates(profile) {
-  // Memo key is the PROFILE's conditions CSV (the request) rather than the
-  // fallback-resolved one — the resolved csv is only knowable after the
-  // fetch, and a given request resolves deterministically, so keying by
-  // request is equivalent and lets a memo hit skip the await entirely.
+  // Memo key is the PROFILE's requested conditions CSV.
   const csv = (profile?.conditions || []).join(',');
   if (_candidatesMemo && _candidatesMemo.key === csv) return _candidatesMemo.data;
   if (_loading) return _loading;
@@ -387,7 +384,7 @@ function mergeLegacyQueue(slots) {
  * Picks-only default (Aug 2026, decision b): this function no longer builds
  * a plan from scratch. If no plan exists yet (`getPlan()` returns null — the
  * user has never run the recipe picker), it returns `{ plan: null,
- * usedFallback: false }` immediately, with zero network calls and zero
+ * }` immediately, with zero network calls and zero
  * writes. A plan only ever comes into existence via `generatePlanFromPicks`
  * (the "New meal plan" picker) — see that function's doc for why an
  * auto-filled, un-picked week is no longer the honest default. Every rule
@@ -399,7 +396,7 @@ function mergeLegacyQueue(slots) {
  * this wave): if the profile's resolved conditions no longer match the
  * existing plan's `conditionsKey`, the plan is DISCARDED outright — it is
  * never regenerated from the candidate pools — and this returns the exact
- * same `{ plan: null, usedFallback: false }` shape as the no-plan-yet case
+ * same `{ plan: null }` shape as the no-plan-yet case
  * above, so the caller lands on the same first-run empty state / picker CTA
  * either way. This used to rebuild every day from the candidate pools
  * (dropping `picksBySlot` in the process); that silently downgraded a
@@ -451,7 +448,7 @@ function mergeLegacyQueue(slots) {
  * from the pools, so an empty pool can't degrade them.
  *
  * @param {import('./types.js').Profile} profile
- * @returns {Promise<{ plan: import('../state/dailyPlan.js').WeeklyPlan|null, usedFallback: boolean }>}
+ * @returns {Promise<{ plan: import('../state/dailyPlan.js').WeeklyPlan|null }>}
  *   `plan` is null when no plan exists yet OR the profile's conditions
  *   changed since the existing plan was built (both share the no-plan
  *   contract, above) — every other path returns a real plan.
@@ -459,11 +456,11 @@ function mergeLegacyQueue(slots) {
 export async function ensurePlanForWeek(profile) {
   const existing = getPlan();
   if (!existing) {
-    return { plan: null, usedFallback: false };
+    return { plan: null };
   }
 
-  const { candidates, conditionIds, conditionNames, usedFallback } = await loadCandidates(profile);
-  const conditionsKey = conditionIds.join(',');
+  const { candidates, conditionNames } = await loadCandidates(profile);
+  const conditionsKey = (profile?.conditions || []).join(',');
 
   if (existing.conditionsKey !== conditionsKey) {
     // Conditions changed since this plan was built — discard it entirely
@@ -471,7 +468,7 @@ export async function ensurePlanForWeek(profile) {
     // the same no-plan shape a first-ever build returns. See the doc above.
     setPlan(null);
     clearActiveSavedPlan();
-    return { plan: null, usedFallback: false };
+    return { plan: null };
   }
 
   const picksBySlot = existing.picksBySlot;
@@ -486,11 +483,11 @@ export async function ensurePlanForWeek(profile) {
 
   const allEmpty = PLAN_SLOT_KEYS.every((key) => (candidates[key] || []).length === 0);
   if (allEmpty && !picksBySlot) {
-    return { plan: existing, usedFallback: existing.usedFallback };
+    return { plan: existing };
   }
 
   if (missingKeys.length === 0) {
-    return { plan: existing, usedFallback: existing.usedFallback };
+    return { plan: existing };
   }
 
   // Seed week-wide variety tracking from days we're keeping, so new trailing
@@ -521,14 +518,13 @@ export async function ensurePlanForWeek(profile) {
     version: 2,
     conditionsKey,
     conditionNames,
-    usedFallback,
     generation: existing.generation ?? 0,
     days: { ...keptDays, ...newDays },
     ...(picksBySlot ? { picksBySlot } : {}),
   };
 
   setPlan(plan);
-  return { plan, usedFallback };
+  return { plan };
 }
 
 /**
@@ -548,15 +544,8 @@ export async function ensurePlanForWeek(profile) {
  * profile's conditions (that would mean a network round-trip on every
  * profile save, racing the caller's own write). Instead it compares the RAW
  * `newConditions` (joined in the same order `ensurePlanForWeek` uses to
- * derive `conditionsKey` when no condition-fallback is in play) against the
- * existing plan's `conditionsKey`. The one case this can diverge from
- * `ensurePlanForWeek`'s fully fallback-resolved comparison is when the demo
- * condition-fallback (`withConditionFallback` in adapter.js) is active for
- * BOTH the old and new conditions — this may then purge a plan that would
- * have resolved to the identical fallback candidate set. That is the safe
- * direction to be wrong in: it never leaves a stale/mismatched plan in
- * place, it only occasionally asks for an extra re-pick in that narrow
- * fallback-collision case.
+ * derive `conditionsKey` (the profile's requested conditions) against the
+ * existing plan's `conditionsKey`.
  *
  * No-op (returns false, writes nothing) if there's no plan to purge, or the
  * conditions didn't actually change.
@@ -577,6 +566,28 @@ export function purgeDerivedDataForConditionsChange(newConditions) {
   setPlan(null);
   clearActiveSavedPlan();
   return true;
+}
+
+/**
+ * Wipe all meal-plan selections the instant the health profile changes in a
+ * way that changes guidance (conditions, allergies, medications, dietary
+ * pattern, religious restriction — see `guidanceFingerprint` in
+ * profileSync.js). Clears: the live plan (which carries `picksBySlot`, so
+ * picks go with it), the active-saved-plan pointer, and the `schedule`
+ * store. Deliberately KEEPS the saved-recipes `library` and the `savedPlans`
+ * list: those are user-authored collections, not condition-derived caches
+ * (a loaded saved plan is re-checked against the profile's conditions by
+ * `ensurePlanForWeek` on the next Plan mount anyway). Synchronous and
+ * network-free, same as `purgeDerivedDataForConditionsChange`.
+ * @returns {boolean} true if anything was cleared.
+ */
+export function purgeMealPlanForProfileChange() {
+  const hadPlan = !!getPlan();
+  const hadSchedule = Object.keys(getSchedule().days).length > 0;
+  setPlan(null);
+  clearActiveSavedPlan();
+  clearSchedule();
+  return hadPlan || hadSchedule;
 }
 
 /**
@@ -625,11 +636,11 @@ export function purgeDerivedDataForConditionsChange(newConditions) {
  * @param {import('./types.js').Profile} profile
  * @param {Array<Object>} pickedItems - user-selected candidate/food items
  *   (PlanCandidate shape, optionally carrying `fromSlot`); may be empty.
- * @returns {Promise<{ plan: import('../state/dailyPlan.js').WeeklyPlan, usedFallback: boolean }>}
+ * @returns {Promise<{ plan: import('../state/dailyPlan.js').WeeklyPlan }>}
  */
 export async function generatePlanFromPicks(profile, pickedItems) {
   const isFirstEverBuild = !getPlan();
-  const { candidates, conditionIds, conditionNames, usedFallback } = await loadCandidates(profile);
+  const { candidates, conditionNames } = await loadCandidates(profile);
   const dayKeys = nextSevenDays().map((d) => d.key);
 
   // Bucket picks by slot, preserving pick order so `pickWindow`'s rotation is
@@ -658,9 +669,8 @@ export async function generatePlanFromPicks(profile, pickedItems) {
 
   const plan = {
     version: 2,
-    conditionsKey: conditionIds.join(','),
+    conditionsKey: (profile?.conditions || []).join(','),
     conditionNames,
-    usedFallback,
     generation: 0,
     days,
     picksBySlot,
@@ -672,7 +682,7 @@ export async function generatePlanFromPicks(profile, pickedItems) {
   // active-saved-plan pointer so the "unsaved changes" indicator doesn't
   // compare this new plan against an unrelated old save.
   clearActiveSavedPlan();
-  return { plan, usedFallback };
+  return { plan };
 }
 
 /**
@@ -693,7 +703,7 @@ export async function generatePlanFromPicks(profile, pickedItems) {
 export async function regenerateDay(profile, dateKey) {
   const existing = getPlan();
   const day = existing?.days?.[dateKey];
-  const { candidates, conditionIds, conditionNames, usedFallback } = await loadCandidates(profile);
+  const { candidates, conditionNames } = await loadCandidates(profile);
 
   const generation = (day?.generation || 0) + 1;
   const offsets = slotOffsets(candidates, generation);
@@ -719,10 +729,9 @@ export async function regenerateDay(profile, dateKey) {
 
   const plan = {
     version: 2,
-    conditionsKey: existing?.conditionsKey ?? conditionIds.join(','),
+    conditionsKey: existing?.conditionsKey ?? (profile?.conditions || []).join(','),
     conditionNames: existing?.conditionNames ?? conditionNames,
-    usedFallback: existing?.usedFallback ?? usedFallback,
-    generation: existing?.generation ?? 0,
+        generation: existing?.generation ?? 0,
     days: { ...(existing?.days || {}), [dateKey]: newDay },
     ...(existing?.picksBySlot ? { picksBySlot: existing.picksBySlot } : {}),
   };
@@ -753,7 +762,7 @@ export async function regenerateWeek(profile) {
   const existing = getPlan();
   if (!existing) return null;
 
-  const { candidates, conditionIds, conditionNames, usedFallback } = await loadCandidates(profile);
+  const { candidates, conditionNames } = await loadCandidates(profile);
   const dayKeys = Object.keys(existing.days).sort();
   const generation = (existing.generation || 0) + 1;
   const picksBySlot = existing.picksBySlot;
@@ -789,10 +798,9 @@ export async function regenerateWeek(profile) {
 
   const plan = {
     version: 2,
-    conditionsKey: existing.conditionsKey ?? conditionIds.join(','),
+    conditionsKey: existing.conditionsKey ?? (profile?.conditions || []).join(','),
     conditionNames: existing.conditionNames ?? conditionNames,
-    usedFallback: existing.usedFallback ?? usedFallback,
-    generation,
+        generation,
     days: newDays,
     ...(picksBySlot ? { picksBySlot } : {}),
   };

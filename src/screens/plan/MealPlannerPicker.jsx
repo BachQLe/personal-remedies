@@ -39,6 +39,8 @@ import { estimatePlanDayCalories } from '../../api/calorieNeeds.js';
 import { todayKey, getWeekStartDay, setWeekStartDay } from './planDates.js';
 import CalorieGapSheet from './CalorieGapSheet.jsx';
 import SlotBrowseSheet from './SlotBrowseSheet.jsx';
+import DataState from '../../components/shared/DataState.jsx';
+import { useOnline, planLoadState } from './usePlanLoadState.js';
 
 const calmSpring = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
 
@@ -120,6 +122,10 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
   const [activeTab, setActiveTab] = useState('best');
   const [pools, setPools] = useState(emptySlotMap);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+  const [unscorableReason, setUnscorableReason] = useState(null);
+  const [retryKey, setRetryKey] = useState(0);
+  const online = useOnline();
   const [offset, setOffset] = useState(0);
   const [library, setLibrary] = useState(getLibrary);
   const [selected, setSelected] = useState(() => new Map());
@@ -161,6 +167,7 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
     setActiveTab('best');
     setSelectedRecipe(null);
     setLoading(true);
+    setLoadError(null);
     setGap(null);
     setBrowseSlot(null);
     // Re-read the stored week start each open so the row reflects whatever
@@ -181,11 +188,16 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
     let cancelled = false;
     getMealPlanSuggestions(profile)
       .then((res) => {
-        if (!cancelled) setPools(res?.candidates || emptySlotMap());
+        if (cancelled) return;
+        setPools(res?.candidates || emptySlotMap());
+        setUnscorableReason(res?.unscorableReason ?? null);
+        setLoadError(null);
       })
       .catch((err) => {
         console.error('MealPlannerPicker: getMealPlanSuggestions failed', err);
-        if (!cancelled) setPools(emptySlotMap());
+        if (cancelled) return;
+        setPools(emptySlotMap());
+        setLoadError(err || new Error('getMealPlanSuggestions failed'));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -193,7 +205,13 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
     return () => {
       cancelled = true;
     };
-  }, [open, profile]);
+  }, [open, profile, retryKey]);
+
+  const handleRetryLoad = useCallback(() => {
+    setLoadError(null);
+    setLoading(true);
+    setRetryKey((k) => k + 1);
+  }, []);
 
   // Each item is tagged with the rail (`fromSlot`) it's shown under, so a
   // pick round-trips back to the exact slot it was picked from in
@@ -227,6 +245,12 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
     if (activeTab === 'saved') return savedBySlot[browseSlot] || [];
     return (pools[browseSlot] || []).map((item) => ({ ...item, fromSlot: browseSlot }));
   }, [browseSlot, activeTab, pools, savedBySlot]);
+
+  const hasPoolData = useMemo(
+    () => PLAN_SLOT_KEYS.some((key) => (pools[key] || []).length > 0),
+    [pools],
+  );
+  const bestStatus = planLoadState({ loading, hasData: hasPoolData, error: loadError, online });
 
   const handleRefresh = useCallback(() => {
     setOffset((o) => o + WINDOW_SIZE);
@@ -391,11 +415,37 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
           {/* Rails */}
           <div className="flex-1 min-h-0 overflow-y-auto px-4 pt-2 pb-32">
             {activeTab === 'best' ? (
-              loading ? (
+              bestStatus === 'loading' ? (
                 <SkeletonRails />
               ) : (
+                <DataState
+                  status={bestStatus}
+                  onRetry={handleRetryLoad}
+                  screenName="recipes"
+                  emptyTitle="No recipes to suggest yet"
+                  emptyBody={unscorableReason || "We couldn't find recipe suggestions for your profile right now. Try again in a moment."}
+                >
+                  <BestRecipesRails
+                    candidatesBySlot={visibleCandidates}
+                    onSelectCard={handleSelectCard}
+                    selectedIds={selectedIds}
+                    onToggleSelect={handleToggleSelect}
+                    showAdd
+                    showScrollbar
+                    onSeeMore={setBrowseSlot}
+                    onSaveBlocked={showSnackbar}
+                  />
+                </DataState>
+              )
+            ) : (
+              <DataState
+                status={library.length === 0 ? 'empty' : 'success'}
+                screenName="saved recipes"
+                emptyTitle="No saved recipes yet"
+                emptyBody="Save recipes you like and they'll show up here to pick from."
+              >
                 <BestRecipesRails
-                  candidatesBySlot={visibleCandidates}
+                  candidatesBySlot={savedBySlot}
                   onSelectCard={handleSelectCard}
                   selectedIds={selectedIds}
                   onToggleSelect={handleToggleSelect}
@@ -404,18 +454,7 @@ export default function MealPlannerPicker({ open, profile, onClose, onGenerated 
                   onSeeMore={setBrowseSlot}
                   onSaveBlocked={showSnackbar}
                 />
-              )
-            ) : (
-              <BestRecipesRails
-                candidatesBySlot={savedBySlot}
-                onSelectCard={handleSelectCard}
-                selectedIds={selectedIds}
-                onToggleSelect={handleToggleSelect}
-                showAdd
-                showScrollbar
-                onSeeMore={setBrowseSlot}
-                onSaveBlocked={showSnackbar}
-              />
+              </DataState>
             )}
           </div>
 

@@ -47,8 +47,8 @@ const MODE_OPTIONS = [
 ];
 
 const SUBTITLE = {
-  basic: 'Ten broad categories — good for an everyday look.',
-  fine: 'Narrower groups — good for finding a swap for a food.',
+  basic: 'Ten broad categories, good for an everyday look.',
+  fine: 'Narrower groups, good for finding a swap for a food.',
 };
 
 // Exported for the mode-resolution/deep-link tests. ?tab=suggest is the

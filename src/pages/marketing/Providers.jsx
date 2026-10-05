@@ -6,7 +6,6 @@ import Icon from "../../components/shared/Icon";
 const stats = [
   { figure: "50%", label: "of US adults have at least one chronic condition" },
   { figure: "75%", label: "of total healthcare costs come from chronic care" },
-  { figure: "80%", label: "of chronic patients would benefit meaningfully from dietary changes" },
 ];
 
 const offerings = [
@@ -50,8 +49,8 @@ const differentiators = [
   },
   {
     icon: "shield",
-    title: "Patented, proven, proprietary",
-    body: "45,000+ patients have benefited from our algorithm. Backed by US Patent No. 8504385 — a legal moat you can't get anywhere else in nutrition.",
+    title: "Patented and proprietary",
+    body: "Ranks foods against a condition profile. Backed by US Patent No. 8504385 — a legal moat you can't get anywhere else in nutrition.",
   },
 ];
 

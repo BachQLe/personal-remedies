@@ -8,8 +8,10 @@ import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import Snackbar from '../../components/shared/Snackbar.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
+import DataState from '../../components/shared/DataState.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import MealTypeTag, { mealTypeForItem } from '../../components/shared/mealTypeMeta.jsx';
+import { useOnline, planLoadState } from './usePlanLoadState.js';
 import SlotSection from './SlotSection.jsx';
 import DayStrip from './DayStrip.jsx';
 import SchedulerView from './SchedulerView.jsx';
@@ -18,6 +20,7 @@ import HowToUseSheet from './HowToUseSheet.jsx';
 import MealPlannerPicker from './MealPlannerPicker.jsx';
 import SuggestionsSheet from './SuggestionsSheet.jsx';
 import SavedPlansSheet from './SavedPlansSheet.jsx';
+import RequireEntitlement from '../../components/shared/RequireEntitlement.jsx';
 import {
   nextSevenDays,
   todayKey,
@@ -50,7 +53,7 @@ import {
 import { estimatePlanDayCalories } from '../../api/calorieNeeds.js';
 import { formatWeekPlanText, buildPrintModel } from '../../api/planExport.js';
 import { printPage, share } from '../../api/browser.js';
-import { PLAN_SLOTS, DEFAULT_DEV_CONDITIONS, MAX_SAVED_PLANS } from '../../api/config.js';
+import { PLAN_SLOTS, MAX_SAVED_PLANS } from '../../api/config.js';
 import {
   getPlan,
   setPlan,
@@ -106,7 +109,7 @@ function cardImage(item) {
 
 function cardSubtitle(item) {
   if (!item.tier) return undefined;
-  return item.referenceTotal ? `${item.tier} · ${item.referenceTotal} studies` : item.tier;
+  return item.referenceTotal ? `${item.tier} · ${item.referenceTotal} references` : item.tier;
 }
 
 // ── "Build from saved recipes" (1.4) ────────────────────────────────────────
@@ -216,7 +219,7 @@ function CardGrid({ items, actionIcon, onAction, onSelect, onBlocked, emptyMessa
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="flex flex-wrap gap-3">
       <AnimatePresence mode="popLayout">
         {items.map((item) => {
           // A blocked item is a legacy harmful-recipe or ingredient sitting
@@ -228,6 +231,7 @@ function CardGrid({ items, actionIcon, onAction, onSelect, onBlocked, emptyMessa
           return (
             <motion.div
               key={item.id}
+              className="w-[calc(50%-0.375rem)] min-w-0"
               layout
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -269,6 +273,9 @@ export default function MealQueueScreen() {
   const [cookbookExpanded, setCookbookExpanded] = useState(false);
   const [cookbookSort, setCookbookSort] = useState('recent');
   const [building, setBuilding] = useState(() => getPlan() == null);
+  const [loadError, setLoadError] = useState(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const online = useOnline();
   const [profile, setProfile] = useState(null);
   const [selectedDay, setSelectedDay] = useState(todayKey());
   const [pagerDirection, setPagerDirection] = useState(1);
@@ -299,8 +306,7 @@ export default function MealQueueScreen() {
     return () => { unsubP(); unsubL(); };
   }, []);
 
-  // Load the profile (dev-condition fallback, same pattern as
-  // SuggestionsScreen) and ensure this week's plan exists. Failures leave
+  // Load the profile (real conditions only) and ensure this week's plan exists. Failures leave
   // the plan as-is (null on a first-ever failed build) — slots fall back to
   // their honest empty state rather than fabricating anything.
   useEffect(() => {
@@ -308,7 +314,7 @@ export default function MealQueueScreen() {
     (async () => {
       try {
         const p = await getProfile();
-        const conditions = p?.conditions?.length ? p.conditions : DEFAULT_DEV_CONDITIONS;
+        const conditions = p?.conditions ?? [];
         const fullProfile = { ...(p ?? {}), conditions };
         if (cancelled) return;
         profileRef.current = fullProfile;
@@ -322,11 +328,20 @@ export default function MealQueueScreen() {
         if (!cancelled) setActiveSavedPlanState(getActiveSavedPlan());
       } catch (err) {
         console.error('MealQueueScreen: failed to build plan', err);
+        if (!cancelled) setLoadError(err || new Error('failed to build plan'));
       } finally {
         if (!cancelled) setBuilding(false);
       }
     })();
     return () => { cancelled = true; };
+  }, [loadAttempt]);
+
+  // Retry after a failed profile-load/plan-ensure: back to the ghost state
+  // and re-run the effect above (event handler, so setState here is fine).
+  const handleRetryLoad = useCallback(() => {
+    setLoadError(null);
+    setBuilding(true);
+    setLoadAttempt((n) => n + 1);
   }, []);
 
   // The window rolls forward at local midnight; if the stored selection
@@ -656,7 +671,7 @@ export default function MealQueueScreen() {
   const handleShare = useCallback(async () => {
     if (!plan) return;
     const text = formatWeekPlanText(plan, { conditionNames });
-    const result = await share({ title: 'My Remedi meal plan', text });
+    const result = await share({ title: 'My Personal Remedies meal plan', text });
     if (!result.ok) {
       showSnackbar('Could not share — try again');
     } else if (result.method === 'clipboard') {
@@ -869,8 +884,18 @@ export default function MealQueueScreen() {
           )}
         </div>
 
+        {/* Offline with a plan on screen: the plan is local data and stays
+            fully usable, so show only the shared slim banner. */}
+        {!online && plan && <DataState status="offline-cached" />}
+
         {view === 'queue' ? (
-          firstRunEmpty ? (
+          firstRunEmpty && loadError ? (
+            <DataState
+              status={planLoadState({ loading: false, hasData: false, error: loadError, online })}
+              onRetry={handleRetryLoad}
+              screenName="meal plan"
+            />
+          ) : firstRunEmpty ? (
             <EmptyState
               icon="calendar"
               title="No meal plan yet"
@@ -1182,6 +1207,7 @@ export default function MealQueueScreen() {
 
       {/* ── Saved plans (Task 8) ────────────────────────────────────────── */}
       <div data-print-hide>
+        <RequireEntitlement feature="saved_plans" variant="sheet" open={savedPlansOpen} onClose={() => setSavedPlansOpen(false)}>
         <SavedPlansSheet
           open={savedPlansOpen}
           onClose={() => setSavedPlansOpen(false)}
@@ -1193,6 +1219,7 @@ export default function MealQueueScreen() {
           onLoad={handleLoadSavedPlan}
           onDelete={handleDeleteSavedPlan}
         />
+        </RequireEntitlement>
       </div>
 
       {/* ── Print view (T4C, REMEDI_MASTER_PLAN.md §1.9) ───────────────────
@@ -1207,7 +1234,7 @@ export default function MealQueueScreen() {
       <section className="plan-print-view" aria-hidden="true">
         {printModel && (
           <>
-            <h1 className="plan-print-title">My Remedi Meal Plan</h1>
+            <h1 className="plan-print-title">My Personal Remedies Meal Plan</h1>
             {printModel.rangeLabel && (
               <p className="plan-print-range">{printModel.rangeLabel}</p>
             )}
@@ -1231,7 +1258,7 @@ export default function MealQueueScreen() {
               </div>
             ))}
 
-            <p className="plan-print-footer">Generated by Remedi — not medical advice</p>
+            <p className="plan-print-footer">Generated by Personal Remedies — not medical advice</p>
           </>
         )}
       </section>

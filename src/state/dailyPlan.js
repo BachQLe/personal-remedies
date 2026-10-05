@@ -87,9 +87,8 @@ import { storage } from '../api/storage.js';
  * @typedef {Object} WeeklyPlan
  * @property {2} version
  * @property {string} conditionsKey - CSV of condition ids the plan was built
- *   for (fallback-resolved).
+ *   for (requested).
  * @property {string[]} conditionNames
- * @property {boolean} usedFallback
  * @property {number} generation - week-level counter, bumped only by
  *   `regenerateWeek` (each day also carries its own `generation`).
  * @property {Object<string, PlanDayState>} days - LOCAL 'YYYY-MM-DD' date key
@@ -126,7 +125,6 @@ function _migrateV1(v1) {
     version: 2,
     conditionsKey: v1.conditionsKey ?? '',
     conditionNames: Array.isArray(v1.conditionNames) ? v1.conditionNames : [],
-    usedFallback: !!v1.usedFallback,
     generation: 0,
     days: {
       [v1.date]: {

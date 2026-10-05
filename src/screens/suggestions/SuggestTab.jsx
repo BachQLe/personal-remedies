@@ -22,7 +22,7 @@
  *   - Same graceful-degrade philosophy: this tab carries no per-profile data
  *     (fine-group names aren't condition-scored — getFineFoodGroups() is
  *     cached and profile-independent, same as getGroupLabels()), so there's
- *     no profile fetch and no CoverageNotice here. A failure resolving the
+ *     no profile fetch here. A failure resolving the
  *     coarse-family HEADER label is cosmetic and falls back to the static
  *     COARSE_GROUP_LABELS map rather than routing through the shared
  *     error/Retry state-matrix — exactly GroupsTab's reasoning for its own
@@ -129,7 +129,7 @@ function FineGroupList({ fineGroups, coarseLabels, onOpen }) {
           {/* Single-fine-group families (d/e/f today) skip the header — see
               docblock above. */}
           {bucket.groups.length > 1 && (
-            <h2 className="text-xs font-sans font-semibold uppercase tracking-wide text-char-400 px-1">
+            <h2 className="text-xs font-sans font-semibold uppercase tracking-wide text-char-700 px-1">
               {coarseLabels[bucket.coarse] ?? COARSE_GROUP_LABELS[bucket.coarse] ?? bucket.coarse}
             </h2>
           )}
