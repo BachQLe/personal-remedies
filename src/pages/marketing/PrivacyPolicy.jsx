@@ -1,4 +1,6 @@
 import PageShell from "../../components/marketing/PageShell";
+import privacyFruit from "../../assets/fruit-pair-graphic.png";
+import FruitScene from "../../components/onboarding/FruitScene.jsx";
 
 export default function PrivacyPolicy() {
   return (
@@ -6,6 +8,13 @@ export default function PrivacyPolicy() {
       <div className="bg-paper-200 min-h-screen">
         <div className="mx-auto max-w-[60ch] px-6 py-16 lg:py-24">
           {/* Page header */}
+          <div className="h-[200px] md:h-[240px] mx-auto mb-8">
+            <FruitScene
+              scene="room"
+              src={privacyFruit}
+              alt="A contented apple beside a pear looking over with a gentle smile"
+            />
+          </div>
           <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-3">
             Legal
           </p>

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import calendarIcon from '../../assets/food-calendar-3d.png';
-import searchIcon from '../../assets/food-search-3d.png';
-import dishIcon from '../../assets/food-dish-simple-3d.png';
+import calendarIcon from '../../assets/home-calendar-graphic.png';
+import searchIcon from '../../assets/home-search-graphic.png';
+import dishIcon from '../../assets/home-guide-graphic.png';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import MealprepCarousel from './MealprepCarousel.jsx';
 import { storage } from '../../api/storage.js';

@@ -12,8 +12,8 @@ import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import { recipeToSaveItem } from '../../utils/saveGate.js';
 import GoodForMeSheet from './GoodForMeSheet.jsx';
-import TopSources, { NutrientPicker } from './NutrientSources.jsx';
-import { parseNutrientQuery, getNutrientMeta } from '../../api/nutrientFacts.js';
+import TopSources from './NutrientSources.jsx';
+import { parseNutrientQuery } from '../../api/nutrientFacts.js';
 import RequireEntitlement from '../../components/shared/RequireEntitlement.jsx';
 import { useEntitlement } from '../../components/shared/useEntitlement.js';
 import { nutrientDetail, sortForNutrientQuery } from './nutrientDetail.js';
@@ -188,8 +188,6 @@ export default function SearchScreen({ active, onClose }) {
   const [debouncePending, setDebouncePending] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [goodForFood, setGoodForFood] = useState(null);
-  // Nutrient whose top-sources ranking is open (null = none).
-  const [sourceNutrient, setSourceNutrient] = useState(null);
 
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
@@ -200,6 +198,8 @@ export default function SearchScreen({ active, onClose }) {
   const trimmedCommitted = committedQuery.trim();
 
   const parsedQuery = useMemo(() => parseNutrientQuery(trimmedCommitted), [trimmedCommitted]);
+  // A query that is only a nutrient name ("protein") is answered with that nutrient's top-sources ranking.
+  const bareNutrient = parsedQuery && !parsedQuery.food ? parsedQuery.nutrient : null;
 
   const fetcher = useCallback(async () => {
     if (!trimmedCommitted) return EMPTY_SECTIONS;
@@ -239,7 +239,6 @@ export default function SearchScreen({ active, onClose }) {
       setDebouncePending(false);
       setSelectedItem(null);
       setGoodForFood(null);
-      setSourceNutrient(null);
     };
   }, [active]);
 
@@ -247,7 +246,6 @@ export default function SearchScreen({ active, onClose }) {
 
   const handleChange = (val) => {
     setQuery(val);
-    setSourceNutrient(null);
     setSelectedItem(null);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     const trimmed = val.trim();
@@ -330,6 +328,43 @@ export default function SearchScreen({ active, onClose }) {
   const padTarget = PAD_CENTER;
   const searching = debouncePending || status === 'loading';
 
+  const sections = SECTIONS.map(({ key, label }) => {
+    const rows = results[key];
+    if (!rows || !rows.length) return null;
+    return (
+      <div key={key}>
+        <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
+          {label}
+        </p>
+        <div className="flex flex-col gap-2.5">
+          {rows.map((item) =>
+            item.kind === 'food' ? (
+              <ResultRow
+                key={item.key}
+                kind="food"
+                title={item.food.name}
+                subtitle={item.food.groupLabel || 'Ingredient'}
+                detail={nutrientDetail(parsedQuery?.nutrient, item.food)}
+                onClick={() => openFood(item.food)}
+                onGoodForMe={() => setGoodForFood({ id: item.food.id, name: item.food.name })}
+              />
+            ) : (
+              <ResultRow
+                key={item.key}
+                kind="recipe"
+                title={item.recipe.title}
+                subtitle={item.recipe.sourceName}
+                onClick={() => openRecipe(item.recipe)}
+                saveItem={recipeToSaveItem(item.recipe)}
+                onSaveBlocked={show}
+              />
+            ),
+          )}
+        </div>
+      </div>
+    );
+  });
+
   return (
     <>
       <div
@@ -395,22 +430,7 @@ export default function SearchScreen({ active, onClose }) {
               <div className="flex-1 min-h-0 mt-4 pointer-events-auto">
                 <div className="h-full p-3 flex flex-col rounded-t-[24px]" style={{ backgroundColor: 'rgba(255,255,255,0.62)', borderTop: '1px solid rgba(255,255,255,0.75)', borderLeft: '1px solid rgba(255,255,255,0.75)', borderRight: '1px solid rgba(255,255,255,0.75)' }}>
                   <AnimatePresence mode="wait">
-                    {sourceNutrient ? (
-                      <motion.div
-                        key="sources"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.18, ease: 'easeOut' }}
-                        className="h-full overflow-y-auto hide-scrollbar pb-1"
-                      >
-                        <TopSources
-                          nutrientKey={sourceNutrient}
-                          onBack={() => setSourceNutrient(null)}
-                          onOpenFood={(food) => setSelectedItem({ foodId: food.id, name: food.name })}
-                        />
-                      </motion.div>
-                    ) : hasQuery ? (
+                    {hasQuery ? (
                       <motion.div
                         key="results"
                         initial={{ opacity: 0, y: 8 }}
@@ -419,20 +439,12 @@ export default function SearchScreen({ active, onClose }) {
                         transition={{ duration: 0.18, ease: 'easeOut' }}
                         className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
                       >
-                        {parsedQuery && !parsedQuery.food && (
-                          <button
-                            type="button"
-                            onClick={() => setSourceNutrient(parsedQuery.nutrient)}
-                            className="flex-none w-full text-left px-4 py-4 rounded-sm bg-forest-50 border border-forest-400
-                              text-base font-semibold text-forest-700 font-sans"
-                          >
-                            See top food sources of {getNutrientMeta(parsedQuery.nutrient).label}
-                          </button>
-                        )}
+                        {bareNutrient && <TopSources nutrientKey={bareNutrient} onOpenFood={openFood} />}
                         {/* Idle-vs-no-results distinction (must survive): this
                             DataState only ever mounts once `hasQuery` is true —
                             the idle recents/hint view below is a completely
                             separate branch, never routed through 'empty'. */}
+                        {bareNutrient ? status === 'success' && sections : (
                         <DataState
                           status={status}
                           onRetry={retry}
@@ -440,43 +452,9 @@ export default function SearchScreen({ active, onClose }) {
                           emptyBody={`No matches for "${query.trim()}" — try a different term.`}
                           screenName="search results"
                         >
-                          {SECTIONS.map(({ key, label }) => {
-                            const rows = results[key];
-                            if (!rows || !rows.length) return null;
-                            return (
-                              <div key={key}>
-                                <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
-                                  {label}
-                                </p>
-                                <div className="flex flex-col gap-2.5">
-                                  {rows.map((item) =>
-                                    item.kind === 'food' ? (
-                                      <ResultRow
-                                        key={item.key}
-                                        kind="food"
-                                        title={item.food.name}
-                                        subtitle={item.food.groupLabel || 'Ingredient'}
-                                        detail={nutrientDetail(parsedQuery?.nutrient, item.food)}
-                                        onClick={() => openFood(item.food)}
-                                        onGoodForMe={() => setGoodForFood({ id: item.food.id, name: item.food.name })}
-                                      />
-                                    ) : (
-                                      <ResultRow
-                                        key={item.key}
-                                        kind="recipe"
-                                        title={item.recipe.title}
-                                        subtitle={item.recipe.sourceName}
-                                        onClick={() => openRecipe(item.recipe)}
-                                        saveItem={recipeToSaveItem(item.recipe)}
-                                        onSaveBlocked={show}
-                                      />
-                                    ),
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
+                          {sections}
                         </DataState>
+                        )}
                       </motion.div>
                     ) : (
                       <motion.div
@@ -487,7 +465,6 @@ export default function SearchScreen({ active, onClose }) {
                         transition={{ duration: 0.18, ease: 'easeOut' }}
                         className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
                       >
-                        <NutrientPicker onPick={setSourceNutrient} />
                         {recents.length > 0 && (
                           <>
                             <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
@@ -508,14 +485,6 @@ export default function SearchScreen({ active, onClose }) {
                             </div>
                           </>
                         )}
-
-                        {/* Fills the leftover space below the recents (or the whole
-                            area when there are none) with a quiet empty-state hint
-                            rather than leaving it blank. Not a DataState/empty
-                            status — this is the idle view, shown whenever there's
-                            no query at all, distinct from a completed search that
-                            found zero results (the DataState branch above). */}
-
                       </motion.div>
                     )}
                   </AnimatePresence>

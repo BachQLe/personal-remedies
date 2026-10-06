@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
-import fruitIllustration from '../../assets/food-fruit-simple-3d.png';
+import fruitIllustration from '../../assets/fruit-pear-graphic.png';
+import FruitScene from './FruitScene.jsx';
 import BackButton from '../shared/BackButton.jsx';
 
 const AGE_OPTIONS = [
@@ -59,7 +60,7 @@ function AgeSlider({ value, onChange }) {
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onKeyDown={handleKeyDown}
-      className="relative w-full max-w-[280px] h-[46px] p-[3px] rounded-pill border-[1.5px] border-blue-950/15 bg-white/40 shadow-sm touch-none select-none cursor-pointer"
+      className="relative w-full h-[46px] p-[3px] rounded-pill border-[1.5px] border-blue-950/15 bg-white/40 shadow-sm touch-none select-none cursor-pointer"
     >
       <motion.div
         aria-hidden="true"
@@ -102,23 +103,24 @@ export default function PersonalDetails({ profile, onChange, onNext, onBack }) {
         event.preventDefault();
         if (canContinue) onNext();
       }}
-      className="flex flex-col flex-1 px-7 pt-6 pb-7 text-blue-950"
+      className="flex flex-col flex-1 min-h-0 px-7 pt-6 text-blue-950"
+      style={{ paddingBottom: 'max(28px, env(safe-area-inset-bottom))' }}
     >
-      <div className="flex-none flex items-center justify-between">
+      <div className="flex-none flex items-center justify-between h-9">
         <BackButton onClick={onBack} />
         <span className="font-label text-xs tracking-widest uppercase text-blue-950/60">2 of 4</span>
       </div>
-      <div className="flex-none flex justify-center py-3" style={{ height: 'clamp(180px, calc(60dvh - 200px), 280px)', minHeight: 180 }}>
-        <img src={fruitIllustration} alt="A 3D-rendered bowl of colorful fresh fruit" className="w-full h-full object-contain" />
+      <div className="flex justify-center py-2 min-h-[150px]" style={{ flex: '0 1 calc(46dvh - 60px)' }}>
+        <FruitScene scene="kitchen" src={fruitIllustration} alt="A green pear with a playful wink and smile" />
       </div>
-      <div className="flex flex-col mt-auto pt-3 pb-6">
-        <h1 className="text-[30px] leading-tight font-semibold text-center" style={{ fontFamily: 'Chillax, sans-serif' }}>
+      <div className="flex flex-col pt-3 pb-6">
+        <h1 className="text-[32px] text-balance leading-[1.16] font-semibold tracking-tight text-center" style={{ fontFamily: 'Chillax, sans-serif' }}>
           A little about you
         </h1>
-        <p className="mt-2 mb-5 text-center font-sans text-base text-blue-950/75">
+        <p className="mt-4 mb-5 text-center font-sans text-base leading-relaxed text-blue-950/75">
           Let’s make this feel more like you.
         </p>
-        <div className="w-full max-w-[280px] mx-auto flex flex-col gap-3">
+        <div className="w-full flex flex-col gap-3">
           <label htmlFor="first-name" className="font-sans text-sm font-semibold">Your first name</label>
           <input
             id="first-name"
@@ -134,7 +136,7 @@ export default function PersonalDetails({ profile, onChange, onNext, onBack }) {
           <AgeSlider value={profile.ageBand} onChange={(ageBand) => onChange({ ...profile, ageBand })} />
         </div>
       </div>
-      <button type="submit" disabled={!canContinue} className="w-full py-4 rounded-pill bg-blue-950 text-white font-sans font-semibold flex-none min-h-[56px] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-950">
+      <button type="submit" disabled={!canContinue} className="mt-auto w-full py-4 rounded-pill bg-blue-950 text-white font-sans font-semibold flex-none min-h-[56px] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-950">
         Continue
       </button>
     </form>

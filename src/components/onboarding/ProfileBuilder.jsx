@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { conditionSynonyms } from '../../data/conditionSynonyms';
 import { getConditions } from '../../api/api.js';
 import { getConditionMeta } from '../../utils/conditionMeta.js';
-import mealIllustration from '../../assets/food-dish-simple-3d.png';
+import fruitIllustration from '../../assets/fruit-lemon-graphic.png';
+import FruitScene from './FruitScene.jsx';
 import BackButton from '../shared/BackButton.jsx';
 
 const chipSpring = { type: 'spring', stiffness: 500, damping: 30, mass: 0.8 };
@@ -116,8 +117,8 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden relative">
-      <div className="flex-none px-7 pt-6 pb-2 relative z-10 bg-[#BBCEFF]">
-        <div className="flex items-center justify-between">
+      <div className="flex-none px-7 pt-6 relative z-10 bg-[#BBCEFF]">
+        <div className="flex items-center justify-between h-9">
           {onBack && <BackButton onClick={onBack} />}
           <span className="font-label text-xs tracking-widest uppercase text-blue-950/60">4 of 4</span>
         </div>
@@ -128,7 +129,7 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
         className="flex-1 relative overflow-hidden hide-scrollbar"
         style={{ backgroundColor: '#BBCEFF' }}
       >
-        <div className="absolute inset-0 overflow-hidden px-7 pt-1 pb-2">
+        <div className="absolute inset-0 overflow-hidden px-7 pb-2">
           <ConditionsPanel
             conditions={conditions}
             conditionQuery={conditionQuery}
@@ -141,7 +142,7 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
         </div>
       </div>
 
-      <div className="flex-none px-7 pt-3 pb-7 bg-[#BBCEFF]">
+      <div className="flex-none px-7 pt-3 bg-[#BBCEFF]" style={{ paddingBottom: 'max(28px, env(safe-area-inset-bottom))' }}>
         <button
           type="button"
           onClick={onSubmit}
@@ -177,20 +178,20 @@ function ConditionsPanel({
     <section className="flex flex-col items-center h-full min-h-0">
       <div className="w-full max-w-[420px] flex flex-col flex-1 min-h-0 overflow-y-auto">
         {!open && (
-          <div className="flex-none flex justify-center py-2 h-[32dvh] min-h-[150px] [@media(max-height:700px)]:h-[24dvh]">
-            <img src={mealIllustration} alt="A 3D-rendered plate of vegetables and rice" className="w-full h-full object-contain" />
+          <div className="flex justify-center py-2 min-h-[150px]" style={{ flex: '0 1 calc(46dvh - 60px)' }}>
+            <FruitScene scene="garden" src={fruitIllustration} alt="A sunny yellow lemon laughing with delight" />
           </div>
         )}
         {/* Question — slides down from the top (snap) as the page opens */}
-        <motion.h3
+        <motion.h1
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ ...snappySpring, delay: 0.1 }}
-          className="flex-none font-semibold tracking-normal leading-tight text-[28px] text-center text-blue-950 mb-5 mt-4"
+          className="flex-none -mx-3 text-[32px] text-balance leading-[1.16] font-semibold tracking-tight text-center mt-3 mb-6"
           style={{ fontFamily: 'Chillax, sans-serif' }}
         >
           Select the health topics that matter most to you
-        </motion.h3>
+        </motion.h1>
 
         {/* Standalone search field */}
         <div className="relative group flex-none mb-3">
@@ -204,7 +205,8 @@ function ConditionsPanel({
             onChange={(e) => setConditionQuery(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            placeholder="Search conditions, diets, allergies..."
+            aria-label="Search conditions, diets, allergies"
+            placeholder="Search conditions, diets, allergies…"
             className="w-full pl-11 pr-4 py-[15px] rounded-full border-[1.5px] border-blue-950/10 bg-[#E0E7F5] text-[16px] text-blue-950 placeholder:text-blue-950/55 font-sans shadow-sm transition-all duration-fast ease-ds-out focus:outline-none focus:border-blue-950/40 focus:shadow-sm"
           />
         </div>
@@ -323,7 +325,7 @@ function ConditionsPanel({
               animate={{ y: 0 }}
               exit={{ opacity: 0, transition: { duration: 0 } }}
               transition={settleFast}
-              className="flex-none rounded-[18px] p-2 flex flex-col gap-1.5 mt-auto"
+              className="flex-none rounded-[18px] p-2 flex flex-col gap-1.5 mt-3"
               style={{
                 backgroundColor: '#CAD7F0',
                 borderTop: '1px solid rgba(255,255,255,0.45)',

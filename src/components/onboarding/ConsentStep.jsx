@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import BackButton from '../shared/BackButton.jsx';
+import privacyFruit from '../../assets/fruit-pair-graphic.png';
+import FruitScene from './FruitScene.jsx';
 
 const LINK = 'underline font-semibold';
 
@@ -12,17 +14,21 @@ export default function ConsentStep({ onNext, onBack }) {
         event.preventDefault();
         if (agreed) onNext();
       }}
-      className="flex flex-col flex-1 px-7 pt-6 pb-7 text-blue-950"
+      className="flex flex-col flex-1 min-h-0 px-7 pt-6 text-blue-950"
+      style={{ paddingBottom: 'max(28px, env(safe-area-inset-bottom))' }}
     >
-      <div className="flex-none flex items-center justify-between">
+      <div className="flex-none flex items-center justify-between h-9">
         <BackButton onClick={onBack} />
         <span className="font-label text-xs tracking-widest uppercase text-blue-950/60">3 of 4</span>
       </div>
-      <div className="flex flex-col mt-auto pt-3 pb-6">
-        <h1 className="text-[30px] leading-tight font-semibold text-center" style={{ fontFamily: 'Chillax, sans-serif' }}>
+      <div className="flex-none flex justify-center py-2 h-[clamp(120px,calc(45dvh-190px),200px)]">
+        <FruitScene scene="room" src={privacyFruit} alt="A contented apple beside a pear looking over with a gentle smile" />
+      </div>
+      <div className="flex flex-col my-auto py-6">
+        <h1 className="text-[32px] text-balance leading-[1.16] font-semibold tracking-tight text-center" style={{ fontFamily: 'Chillax, sans-serif' }}>
           Before you add health information
         </h1>
-        <div className="mt-4 mb-5 font-sans text-base text-blue-950/75 flex flex-col gap-3">
+        <div className="mt-4 mb-5 font-sans text-base leading-relaxed text-blue-950/75 flex flex-col gap-3">
           <p>
             Personal Remedies gives general food information. It is not medical advice and does not diagnose or treat any condition. Ask your doctor before changing your diet, especially if you take medication.
           </p>
