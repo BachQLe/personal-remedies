@@ -1,9 +1,4 @@
 .home-screen {
-  --home-sage: #D7DFCD;
-  --home-paper: #F7F3E9;
-  --home-clay: #EAD6C6;
-  --home-oat: #EFE3C9;
-  background: var(--home-sage);
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
@@ -25,12 +20,8 @@
   min-width: 0;
   padding: 1.25rem 1.25rem calc(7rem + env(safe-area-inset-bottom, 0px));
   border-radius: 2rem 2rem 0 0;
-  background: var(--home-paper);
+  background: var(--paper-100);
 }
-
-.home-shortcut--sage { background: var(--home-sage); }
-.home-shortcut--clay { background: var(--home-clay); }
-.home-shortcut--oat { background: var(--home-oat); }
 
 .home-shortcuts {
   display: flex;

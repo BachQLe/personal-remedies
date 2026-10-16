@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import calendarIcon from '../../assets/home-calendar-natural.png';
-import searchIcon from '../../assets/home-search-natural.png';
-import dishIcon from '../../assets/home-guide-natural.png';
+import calendarIcon from '../../assets/home-calendar-graphic.png';
+import searchIcon from '../../assets/home-search-graphic.png';
+import dishIcon from '../../assets/home-guide-graphic.png';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import MealprepCarousel from './MealprepCarousel.jsx';
 import HomeMail from './HomeMail.jsx';
@@ -15,19 +15,19 @@ const SHORTCUTS = [
     to: '/app/plan',
     label: 'Meal\nplanner',
     icon: calendarIcon,
-    tile: 'home-shortcut--sage',
+    tile: 'bg-forest-100',
   },
   {
     to: '/app/suggestions',
     label: "Top Do's\nand Don'ts",
     icon: dishIcon,
-    tile: 'home-shortcut--clay',
+    tile: 'bg-lavender-100',
   },
   {
     to: '/app/search',
     label: 'Food\nlookup',
     icon: searchIcon,
-    tile: 'home-shortcut--oat',
+    tile: 'bg-yellow-200',
   },
 ];
 
@@ -41,7 +41,7 @@ export default function HomeScreen() {
   }), []);
 
   return (
-    <div className="home-screen">
+    <div className="home-screen bg-forest-300">
       <PageHeader
         label="Home"
         title={firstName ? `Hey, ${firstName}` : 'Hey there'}
