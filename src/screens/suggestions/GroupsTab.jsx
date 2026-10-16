@@ -29,6 +29,7 @@ import { ChevronRight } from 'lucide-react';
 import { getGroupLabels, getFineGroupLabelsByCoarse } from '../../api/api.js';
 import { COARSE_GROUP_LABELS } from '../../api/config.js';
 import { COARSE_GROUP_IMAGES } from '../../assets/food-groups/index.js';
+import { SlowLoadingNote } from '../../components/shared/DataState.jsx';
 
 // ── CategoryGrid ─────────────────────────────────────────────────────────────
 // All 10 coarse food groups as a single-column list of rows — tapping a row
@@ -123,7 +124,10 @@ export default function GroupsTab() {
   return (
     <div className="flex flex-col gap-4">
       {loading ? (
-        <SkeletonGrid />
+        <>
+          <SkeletonGrid />
+          <SlowLoadingNote />
+        </>
       ) : (
         <CategoryGrid
           coarseLabels={coarseLabels}

@@ -8,12 +8,11 @@
  *
  * As of Task T3D, this file is no longer "replace me wholesale" — it's the
  * ESTIMATE tier (the last one before giving up) of the layered resolver in
- * src/api/nutrition.js (`resolveNutrition`/`resolveDayTotals`), which tries
- * real per-serving recipe-panel data, then the committed USDA tables, and
- * only falls through to these hand-picked numbers when neither has a hit.
- * `estimateNutrition`/`estimateDayTotals` below are unchanged and still used
- * directly by SchedulerView/CalorieGapSheet — this table still never
- * fabricates a number without a group to hang it on, and remains fully
+ * src/api/nutrition.js (`resolveNutrition`), which tries real per-serving
+ * recipe-panel data first and only falls through to these hand-picked numbers
+ * when there is none (USDA is cut). `estimateNutrition` below is that
+ * fall-through — this table still never fabricates a number without a group
+ * to hang it on, and remains fully
  * replaceable (feed better estimates into these tables, or add a new tier
  * ahead of it in nutrition.js) as real data sources come online.
  *
@@ -82,34 +81,4 @@ export function estimateNutrition(item, slotKey) {
   }
 
   return null;
-}
-
-/**
- * Sum estimated nutrition across a day's scheduled items.
- * @param {Array<{fineGroup?: string, group?: string, kind?: string, fromSlot?: string}>} items
- * @returns {{calories: number, protein: number, carbs: number, fat: number, estimated: true, itemCount: number, estimatedCount: number}|null}
- *   null if `items` is empty.
- */
-export function estimateDayTotals(items) {
-  if (!items || items.length === 0) return null;
-
-  const totals = { calories: 0, protein: 0, carbs: 0, fat: 0 };
-  let estimatedCount = 0;
-
-  for (const item of items) {
-    const estimate = estimateNutrition(item, item.fromSlot);
-    if (!estimate) continue;
-    totals.calories += estimate.calories;
-    totals.protein += estimate.protein;
-    totals.carbs += estimate.carbs;
-    totals.fat += estimate.fat;
-    estimatedCount += 1;
-  }
-
-  return {
-    ...totals,
-    estimated: true,
-    itemCount: items.length,
-    estimatedCount,
-  };
 }

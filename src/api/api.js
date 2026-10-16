@@ -36,7 +36,6 @@ import {
   getCachedRefCount,
   getFoodIdByName,
 } from './adapter.js';
-import { rankFoodsByNutrient } from './nutrientFacts.js';
 import { storage } from './storage.js';
 import { schedulePush } from './profileSync.js';
 
@@ -72,7 +71,8 @@ export {
   getFoodIdByName,
 };
 export { buildRecipeDetail } from './recipeDetail.js';
-export { ensurePlanForWeek, regenerateDay, regenerateWeek, shuffleSlot, inferSlotKey, generatePlanFromPicks, toPlanItem, getSavedPlans, saveCurrentPlan, updateSavedPlan, loadSavedPlan, deleteSavedPlan, restoreSavedPlan, getCandidatesForSlot, planFingerprint, getActiveSavedPlan, clearActiveSavedPlan, restoreActiveSavedPlan } from './planBuilder.js';
+export { ensurePlanForWeek, inferSlotKey, generateWeekFromFavorites, favoritesBySlot, toPlanItem, getSavedPlans, saveCurrentPlan, updateSavedPlan, loadSavedPlan, deleteSavedPlan, restoreSavedPlan, getSavedDays, saveDay, deleteSavedDay, restoreSavedDay, loadSavedDay, getCandidatesForSlot, planFingerprint, getActiveSavedPlan, clearActiveSavedPlan, restoreActiveSavedPlan } from './planBuilder.js';
+export { markFavoritesPrunePending, isFavoritesPrunePending, findRecipesToPrune, applyFavoritesPrune } from './favoritesPrune.js';
 
 // ── Unified search (foods + recipes) ─────────────────────────────────────────
 
@@ -246,21 +246,6 @@ export async function searchEverything(query, profile) {
   };
 }
 
-/**
- * Natural Sources ranking: the top foods for one nutrient, per serving
- * (per-100g carried as the secondary figure). Candidates are the food
- * dictionary minus non-food items (adapter `isExcludedItem` — lifestyle,
- * recipes — already applied by `getFoodDictionary`) and minus coarse group
- * 'k' supplements. Only foods with real USDA data can rank.
- * @param {string} nutrientKey - key from PICKABLE_NUTRIENTS (e.g. 'fiber')
- * @param {{limit?: number}} [opts]
- */
-export async function getTopNutrientSources(nutrientKey, opts = {}) {
-  const dictionary = await getFoodDictionary();
-  const foods = dictionary.filter((f) => f.group !== 'k');
-  return rankFoodsByNutrient(foods, nutrientKey, { limit: opts.limit ?? 20 });
-}
-
 // ── Profile / storage helpers ────────────────────────────────────────────────
 
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -301,6 +286,8 @@ async function migrateProfileConditions(profile) {
 
 export async function getProfile() {
   await delay(200);
+  // Re-read: profileSync's remote pull writes storage directly, bypassing _profile.
+  _profile = storage.get('profile', null);
   let migrated = await migrateProfileConditions(_profile);
   if (migrated && migrated.calorieTarget == null) {
     migrated = { ...migrated, calorieTarget: 2000 };

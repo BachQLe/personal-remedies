@@ -3,7 +3,7 @@
  * data-source note, legal links and publisher credit. Copy lives in
  * importantNotesContent.js.
  */
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import BackButton from '../../components/shared/BackButton.jsx';
 import {
   DISCLAIMER_TITLE,
@@ -28,11 +28,10 @@ function Section({ title, paragraphs }) {
 }
 
 export default function ImportantNotesScreen() {
-  const navigate = useNavigate();
   return (
     <div className="min-h-screen -mb-28 bg-forest-300 flex flex-col">
       <div className="px-5 pt-10 pb-6 flex flex-col gap-3">
-        <BackButton onClick={() => navigate('/app/profile')} />
+        <BackButton fallback="/app/profile" />
         <h1 className="font-display text-[32px] font-semibold text-blue-950 leading-tight">
           Important notes
         </h1>

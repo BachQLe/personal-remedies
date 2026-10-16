@@ -134,7 +134,7 @@ function showServiceWorkerNotice(message, opts = {}) {
     'color: #FAFAF8', // tailwind.config.js colors.paper.100 ("cream")
     'box-shadow: 0 8px 24px rgba(45, 36, 24, 0.18)',
     'font-family: "Switzer", ui-sans-serif, system-ui, sans-serif',
-    'font-size: 14px',
+    'font-size: 0.875rem',
     'font-weight: 500',
     'line-height: 1.4',
     `opacity: ${prefersReducedMotion ? '1' : '0'}`,
@@ -182,7 +182,7 @@ function showServiceWorkerNotice(message, opts = {}) {
     'border: none',
     'background: transparent',
     'color: #FAFAF8',
-    'font-size: 20px',
+    'font-size: 1.25rem',
     'line-height: 1',
     'cursor: pointer',
   ].join(';')

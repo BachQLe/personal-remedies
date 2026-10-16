@@ -9,7 +9,8 @@ import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import BestRecipesRails from '../../components/shared/BestRecipesRails.jsx';
-import DataState from '../../components/shared/DataState.jsx';
+import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
+import CoverageNote from '../../components/shared/CoverageNote.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
 import TopDosTab from './TopDosTab.jsx';
@@ -100,6 +101,7 @@ async function fetchBestRecipes() {
   return {
     candidates: res?.candidates ?? emptySlotMap(),
     unscorableReason: res?.unscorableReason ?? null,
+    coverage: res?.coverage,
   };
 }
 
@@ -155,7 +157,10 @@ function BestRecipesTab() {
   return (
     <div className="flex flex-col gap-4">
       {status === 'loading' ? (
-        <SkeletonRails />
+        <>
+          <SkeletonRails />
+          <SlowLoadingNote />
+        </>
       ) : (
         <DataState
           status={status}
@@ -166,6 +171,7 @@ function BestRecipesTab() {
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
         >
           <div className="flex flex-col gap-3">
+            <CoverageNote coverage={data?.coverage} />
             <BestRecipesRails
               candidatesBySlot={candidates}
               onSelectCard={openRecipe}
@@ -195,22 +201,16 @@ function BestRecipesTab() {
 // ── Main Screen ───────────────────────────────────────────────────────────────
 
 export default function SuggestionsScreen() {
-  const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState(() => resolveTab(searchParams));
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedFood, setSelectedFood] = useState(null);
 
-  // Re-resolve the active tab whenever the URL's search params change (e.g.
-  // another route linking in with a new ?tab=), so an in-page navigation
-  // switches tabs without requiring a full remount. Adjusted
-  // during render (React's documented escape hatch — see CategoryDetailPanel's
-  // resetFor) rather than in an effect, so a manual tab click (which never
-  // touches the URL) isn't clobbered by a redundant re-derivation.
-  const paramsKey = searchParams.toString();
-  const [resolvedFor, setResolvedFor] = useState(paramsKey);
-  if (paramsKey !== resolvedFor) {
-    setResolvedFor(paramsKey);
-    setActiveTab(resolveTab(searchParams));
-  }
+  // The active tab lives in the URL (checklist 4.10): a tab switch REPLACES the
+  // current history entry (no new entry per tab), so Back from a group detail
+  // screen returns to the exact tab the user was on.
+  const activeTab = resolveTab(searchParams);
+  const setActiveTab = (tab) => {
+    if (tab !== activeTab) setSearchParams({ tab }, { replace: true });
+  };
 
   // Back to 3 pills: the Wave 2 "Suggest" pill (the 17 fine food groups) now
   // lives as an inner mode toggle inside Food Groups (FoodGroupsTab) rather

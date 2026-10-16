@@ -7,9 +7,8 @@
  * Product rules honored here:
  * - NO tier badges: /topdoordonts carries no tier data — list membership +
  *   rank IS the verdict.
- * - "N studies" is cache-only (getCachedRefCount) — this tab NEVER warms
- *   /references (rate-limit safety); counts appear opportunistically when
- *   some other surface (FoodDetailCard, Food Groups) already cached them.
+ * - No reference counts on the rows (checklist 4.13) — users get the count
+ *   by tapping the food; FoodDetailCard keeps its own.
  * - Lifestyle items (Exercise, Smoking, …) stay inline in rank order,
  *   structurally identical to ordinary food rows — no chip, no icon, no
  *   separate notes/description text; nothing visually marks a row as
@@ -27,12 +26,13 @@
  * data, not a new fetch.
  */
 import { useState } from 'react';
-import { getTopDosAndDonts, getCachedRefCount } from '../../api/api.js';
+import { getTopDosAndDonts } from '../../api/api.js';
 import { MAX_RECOMMENDATIONS_PER_CATEGORY } from '../../api/config.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
-import DataState from '../../components/shared/DataState.jsx';
+import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
+import CoverageNote from '../../components/shared/CoverageNote.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
 
@@ -60,7 +60,7 @@ async function fetchBothDirections() {
     getTopDosAndDonts(profile, 'consume'),
     getTopDosAndDonts(profile, 'avoid'),
   ]);
-  return { consume, avoid, requestedConditionIds: profile.conditions };
+  return { consume, avoid };
 }
 
 // Genuinely empty only when BOTH directions came back with nothing — a
@@ -83,7 +83,6 @@ export default function TopDosTab({ onSelectFood }) {
   const activeResult = data?.[direction];
   const items = activeResult?.items ?? [];
   const visibleItems = items.slice(0, MAX_RECOMMENDATIONS_PER_CATEGORY);
-  const firstConditionId = data?.requestedConditionIds?.[0] ?? null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -98,7 +97,10 @@ export default function TopDosTab({ onSelectFood }) {
       />
 
       {status === 'loading' ? (
-        <SkeletonRows />
+        <>
+          <SkeletonRows />
+          <SlowLoadingNote />
+        </>
       ) : (
         <DataState
           status={status}
@@ -109,6 +111,7 @@ export default function TopDosTab({ onSelectFood }) {
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
         >
           <div className="flex flex-col gap-2">
+            <CoverageNote coverage={data?.consume?.coverage} />
             {visibleItems.length === 0 ? (
               <p className="text-sm text-char-500 font-sans text-center py-6">
                 {direction === 'consume'
@@ -120,11 +123,6 @@ export default function TopDosTab({ onSelectFood }) {
                 <RankedRow
                   key={food.id}
                   food={food}
-                  studyCount={
-                    firstConditionId != null
-                      ? getCachedRefCount(food.id, [firstConditionId])
-                      : null
-                  }
                   onSelect={onSelectFood}
                   imageRight
                 />

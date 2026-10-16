@@ -50,6 +50,9 @@ export default function Snackbar({ snackbar, onUndo, onDismiss, actionLabel = 'U
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 40, opacity: 0 }}
           transition={calmSpring}
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
           className="fixed bottom-[88px] left-0 right-0 mx-auto z-50
             max-w-[360px] w-[calc(100%-40px)]
             flex items-center justify-between gap-3

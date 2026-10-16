@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigate, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { storage } from "./api/storage.js";
 import { prefetchAppData } from "./api/prefetch.js";
+import { useGoBack } from "./hooks/useGoBack.js";
 // Marketing site is hidden — see the routes block below. The pages themselves
 // (Home, Survey, Providers, Developers, Science, About, News, Contact) are kept
 // in src/pages/marketing; only their routes are gone, so restoring the site is
@@ -24,6 +25,8 @@ import ProfileScreen from "./screens/profile/ProfileScreen";
 import ImportantNotesScreen from "./screens/profile/ImportantNotesScreen";
 import MealQueueScreen from "./screens/plan/MealQueueScreen";
 import RecipesScreen from "./screens/recipes/RecipesScreen";
+import FavoritesScreen from "./screens/favorites/FavoritesScreen";
+import FavoritesPruneNotice from "./screens/favorites/FavoritesPruneNotice";
 import PaywallScreen from "./screens/paywall/PaywallScreen";
 import RequireEntitlement from "./components/shared/RequireEntitlement.jsx";
 // App chrome
@@ -120,6 +123,7 @@ function AppLayout() {
             <Outlet />
           </RouteErrorBoundary>
         </AppShell>
+        <FavoritesPruneNotice />
       </SnackbarProvider>
     </RequireOnboarding>
   );
@@ -139,7 +143,8 @@ const SEARCH_CLOSE_MS = 260;
 // `?mode=natural` still floating around in a bookmark/history entry is
 // simply ignored, never crashes.
 function SearchRouteScreen() {
-  const navigate = useNavigate();
+  // Closing returns to wherever search was opened from (4.10), not always Home.
+  const goBack = useGoBack('/app/home');
   const [active, setActive] = useState(true);
   const closingRef = useRef(false);
   const timerRef = useRef(null);
@@ -152,7 +157,7 @@ function SearchRouteScreen() {
     if (closingRef.current) return;
     closingRef.current = true;
     setActive(false);
-    timerRef.current = setTimeout(() => navigate('/app/home'), SEARCH_CLOSE_MS);
+    timerRef.current = setTimeout(goBack, SEARCH_CLOSE_MS);
   };
 
   return <SearchScreen active={active} onClose={handleClose} />;
@@ -197,6 +202,7 @@ function App() {
               <Route path="/app/suggestions/group/:groupId" element={<RequireEntitlement feature="food_group_detail"><GroupDetailScreen /></RequireEntitlement>} />
               <Route path="/app/suggestions/fine/:fineGroupId" element={<RequireEntitlement feature="suggest"><FineGroupDetailScreen /></RequireEntitlement>} />
               <Route path="/app/recipes" element={<RecipesScreen />} />
+              <Route path="/app/favorites" element={<FavoritesScreen />} />
               <Route path="/app/plan" element={<RequireEntitlement feature="plan"><MealQueueScreen /></RequireEntitlement>} />
               <Route path="/app/profile" element={<ProfileScreen />} />
               <Route path="/app/profile/important-notes" element={<ImportantNotesScreen />} />

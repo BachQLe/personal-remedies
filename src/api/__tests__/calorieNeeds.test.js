@@ -12,14 +12,29 @@
  *      item with only a coarse group resolves via the 'h' fallback, and a
  *      recipe resolves via RECIPE_SLOT_ESTIMATES.beverages.
  *
- * Runs against the real committed USDA tables (src/data/usda/fdcMap.json /
- * nutrients.json), which are now populated — fixture ids here are chosen
- * outside that map's id range (900000+) so every item still resolves via
- * the tier-3 estimate table, same numbers `estimateNutrition` would have
- * produced pre-T3D. See nutrition.test.js for the same convention.
+ * Items here resolve via the estimate table (no recipe panel), same numbers
+ * `estimateNutrition` produces. Also pins `formatCalories` (the plain "N"
+ * display format: no minus sign, no "~").
  */
 import { describe, expect, it } from 'vitest';
-import { estimatePlanDayCalories } from '../calorieNeeds.js';
+import { estimatePlanDayCalories, formatCalories } from '../calorieNeeds.js';
+
+describe('formatCalories', () => {
+  it('returns the rounded number with no minus sign or "~" prefix', () => {
+    expect(formatCalories(450)).toBe('450');
+    expect(formatCalories(449.6)).toBe('450');
+  });
+
+  it('locale-formats thousands', () => {
+    expect(formatCalories(1850.4)).toBe((1850).toLocaleString());
+  });
+
+  it('returns null (never "NaN") for a missing number', () => {
+    expect(formatCalories(null)).toBeNull();
+    expect(formatCalories(undefined)).toBeNull();
+    expect(formatCalories(NaN)).toBeNull();
+  });
+});
 
 describe('estimatePlanDayCalories', () => {
   it('returns {total:0, counted:0, uncounted:0} for a missing/invalid slots object', () => {

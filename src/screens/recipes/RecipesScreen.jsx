@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { getProfile, getRecipes, buildRecipeDetail } from '../../api/api.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import DataState from '../../components/shared/DataState.jsx';
@@ -12,6 +13,7 @@ import { PLAN_SLOT_KEYS } from '../../api/config.js';
 import { GHOST_RECIPES } from '../../api/ghostData.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
+import { COPY } from '../plan/plannerCopy.js';
 
 // No demo conditions here: a missing profile means no condition-scored recipes
 // (getRecipes returns an empty list for an empty conditions array), never a
@@ -293,6 +295,18 @@ export default function RecipesScreen() {
         <p className="text-[12px] text-blue-950/60 font-label tracking-[0.14em] uppercase">Personal Remedies</p>
         <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">Recipes</h1>
         <p className="text-sm text-blue-950/60 mt-0.5 font-sans">Matched to your profile</p>
+        {/* Step label + the way on: bookmarked recipes land in My Favorites. */}
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <p className="font-label text-xs tracking-widest uppercase text-blue-950/70">{COPY.stepPick}</p>
+          <Link
+            to="/app/favorites"
+            className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-semibold text-blue-950/80
+              transition-colors duration-fast hover:text-blue-950"
+          >
+            {COPY.favoritesLink}
+            <ArrowRight size={14} aria-hidden="true" />
+          </Link>
+        </div>
       </div>
 
       {/* Content shell — full-bleed white container with rounded top corners */}

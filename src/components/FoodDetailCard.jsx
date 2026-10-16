@@ -23,7 +23,6 @@ import { getNonFoodIcon } from '../api/ingredientImages.js';
 import { resolveCardIngredients } from '../api/ingredientDerivation.js';
 import IngredientSwaps from './shared/IngredientSwaps.jsx';
 import NonFoodGuidance from './shared/NonFoodGuidance.jsx';
-import NutrientFactsPanel from './NutrientFactsPanel.jsx';
 import Snackbar from './shared/Snackbar.jsx';
 import { openUrl } from '../api/browser.js';
 
@@ -78,8 +77,7 @@ function getProfile() {
  * component rather than a hand-rolled tier pill — this row already has a
  * real per-condition `numericId` (raw.conditions[i].descriptionNumericID),
  * so it uses the app's canonical numericId-driven rating system instead of
- * the text-only tier pill (src/utils/tierConfig.js) that surfaces without a
- * numericId fall back to. `tone="light"` since this row sits on a white
+ * a text-only tier pill. `tone="light"` since this row sits on a white
  * card, unlike FoodRating's usual dark photo-overlay context.
  */
 function ConditionRow({ conditionAssessment, showReferences = true }) {
@@ -588,7 +586,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
               className={`absolute top-4 left-4 z-20 w-11 h-11 rounded-full flex items-center justify-center
                 shadow-md transition-all duration-fast backdrop-blur-sm
                 ${saved ? 'bg-white text-forest-700' : 'bg-white/90 text-char-500 hover:text-char-900'}`}
-              aria-label={saved ? 'Remove from saved recipes' : (blockReason ? SAVE_BLOCK_MESSAGES[blockReason] : 'Save recipe')}
+              aria-label={saved ? 'Remove from My Favorites' : (blockReason ? SAVE_BLOCK_MESSAGES[blockReason] : 'Add to My Favorites')}
             >
               {!saved && blockReason ? (
                 <span className="relative inline-flex items-center justify-center" style={{ width: 20, height: 20 }}>
@@ -812,12 +810,6 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                     />
                   )}
                 </div>
-
-                {/* Real USDA nutrient panel — plain foods only (recipes carry
-                    their own source panel; non-food items have no nutrients). */}
-                {!isRecipe && !nonFoodIcon && combinedFoodId != null && (
-                  <NutrientFactsPanel key={combinedFoodId} foodId={combinedFoodId} />
-                )}
 
                 {/* Ingredients (+ per-ingredient healthy swaps) — recipes
                     only. Real C1-overlay ingredient facts win whenever the

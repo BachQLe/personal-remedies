@@ -6,7 +6,7 @@ import Skeleton from '../../components/shared/Skeleton.jsx';
 import { getGoodForMe } from '../../api/api.js';
 import { summarizeGoodForMe, unscoredRowText } from './goodForMe.js';
 
-// Verdict panel colors, from the shared signal tokens (see tierConfig.js).
+// Verdict panel colors, from the shared signal tokens (benefit-/avoid- in tailwind.config.js).
 const VERDICT_STYLE = {
   good: 'bg-benefit-100 text-benefit-600',
   mixed: 'bg-paper-200 text-char-700',

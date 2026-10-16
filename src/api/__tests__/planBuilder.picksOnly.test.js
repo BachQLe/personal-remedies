@@ -1,67 +1,44 @@
 // @vitest-environment jsdom
 /**
- * planBuilder.picksOnly.test.js — Guard tests for T2A ("make picks-only the
- * default plan path", decision b).
+ * planBuilder.picksOnly.test.js — "no pool path survives" guard (checklist
+ * 1.3): `ensurePlanForWeek` never consults the suggestion candidate pools.
  *
- * Covers:
- *  - `ensurePlanForWeek`'s NO-PLAN CONTRACT: with no existing plan, it
- *    returns `{ plan: null }` synchronously-ish (zero
- *    network calls — `getMealPlanSuggestions` is never touched) and writes
- *    nothing to storage. This is the contract the next wave's Plan-screen
- *    UI task builds its empty state against.
- *  - `generatePlanFromPicks` called with an EMPTY pick list produces
- *    honestly empty days for every slot on every day (no pool-fill
- *    fallback removed per decision b) and still attaches `picksBySlot`
- *    (every bucket empty) so the resulting plan is unambiguously
- *    picks-only from the moment it exists.
- *  - `regenerateDay`/`regenerateWeek` on a picks-only plan (picksBySlot
- *    present) draw exclusively from `picksBySlot` — an id that exists ONLY
- *    in the mocked candidate pool never appears in the regenerated output.
+ *  - With no stored plan it returns `{ plan: null }` and writes nothing.
+ *  - A legacy plan with no `picksBySlot` is returned as-is — missing trailing
+ *    days are NOT auto-filled from the pools.
+ *  - With `picksBySlot`, missing days come from the picks only.
+ *  - In every case `getMealPlanSuggestions` is never called.
  *
- * jsdom needed for the same reason as the sibling guard tests:
- * src/state/dailyPlan.js persists through src/api/storage.js, a real
- * localStorage wrapper.
- *
- * Each test/describe block uses its OWN fake condition id so
- * `planBuilder.js`'s internal `loadCandidates` session memo (keyed by
- * conditions CSV, module-scoped) never serves one test's mocked pool to
- * another within this file.
+ * jsdom: src/state/dailyPlan.js persists through src/api/storage.js.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../adapter.js', () => ({
+vi.mock('../adapter.js', async (importOriginal) => ({
+  ...(await importOriginal()),
   getMealPlanSuggestions: vi.fn(),
 }));
 
 import { getMealPlanSuggestions } from '../adapter.js';
-import { ensurePlanForWeek, generatePlanFromPicks, regenerateDay, regenerateWeek } from '../planBuilder.js';
+import { ensurePlanForWeek } from '../planBuilder.js';
 import { setPlan, reloadPlan, getPlan } from '../../state/dailyPlan.js';
 import { storage } from '../storage.js';
-import { todayKey } from '../../screens/plan/planDates.js';
+import { todayKey, nextSevenDays } from '../../screens/plan/planDates.js';
 
-/** Minimal PlanItem shape (src/state/dailyPlan.js PlanItem typedef). */
-const PICKED_BREAKFAST = {
-  id: 1,
-  name: 'Picked Oatmeal',
-  image: '',
-  group: 'f',
-  fineGroup: 'f',
-  tier: 'Top',
-  numericId: 1,
-  kind: 'food',
-};
+const PICKED_BREAKFAST = { id: 1, name: 'Picked Oatmeal', image: '', group: 'f', fineGroup: 'f', tier: 'Top', numericId: 1, kind: 'food' };
 
-/** Exists ONLY in the mocked candidate pool — must never leak into a picks-only plan's output. */
-const POOL_ONLY_BREAKFAST = {
-  id: 999,
-  name: 'Pool-only Pancakes',
-  image: '',
-  group: 'f',
-  fineGroup: 'f',
-  tier: 'Top',
-  numericId: 1,
-  kind: 'food',
-};
+const emptySlots = () => ({ breakfast: [], lunch: [], dinner: [], snacks: [], beverages: [] });
+
+function seedPlan(extra = {}) {
+  const key = todayKey();
+  setPlan({
+    version: 2,
+    conditionsKey: '502',
+    conditionNames: ['Test Condition'],
+    days: { [key]: { slots: { ...emptySlots(), breakfast: [PICKED_BREAKFAST] }, eaten: [] } },
+    ...extra,
+  });
+  return key;
+}
 
 beforeEach(() => {
   storage.clear();
@@ -74,115 +51,39 @@ afterEach(() => {
   reloadPlan();
 });
 
-describe('ensurePlanForWeek: no-plan contract (picks-only default, decision b)', () => {
-  it('returns a null plan and makes zero network calls when no plan exists yet', async () => {
+describe('ensurePlanForWeek: never touches the suggestion pools', () => {
+  it('returns a null plan and writes nothing when no plan exists yet', async () => {
     expect(getPlan()).toBeNull();
 
     const result = await ensurePlanForWeek({ conditions: [244] });
 
     expect(result).toEqual({ plan: null });
     expect(getMealPlanSuggestions).not.toHaveBeenCalled();
-    expect(getPlan()).toBeNull(); // nothing was written to storage either
-  });
-});
-
-describe('generatePlanFromPicks: zero picks -> honestly empty (no pool-fill fallback)', () => {
-  it('produces empty slots for every day and every slot, even though the candidate pool has items', async () => {
-    getMealPlanSuggestions.mockResolvedValue({
-      candidates: {
-        breakfast: [POOL_ONLY_BREAKFAST],
-        lunch: [],
-        dinner: [],
-        snacks: [],
-        beverages: [],
-      },
-      conditionIds: [501],
-      conditionNames: ['Condition 501'],
-      usedFallback: false,
-    });
-
-    const { plan } = await generatePlanFromPicks({ conditions: [501] }, []);
-
-    expect(Object.keys(plan.days).length).toBe(7);
-    for (const day of Object.values(plan.days)) {
-      for (const items of Object.values(day.slots)) {
-        expect(items).toEqual([]);
-      }
-    }
-
-    // picksBySlot is ALWAYS attached now (decision b), even with every
-    // bucket empty, marking the plan picks-only from the moment it exists.
-    expect(plan.picksBySlot).toBeDefined();
-    for (const bucket of Object.values(plan.picksBySlot)) {
-      expect(bucket).toEqual([]);
-    }
-  });
-});
-
-describe('regenerateDay / regenerateWeek on a picks-only plan: picksBySlot only, pool never consulted', () => {
-  function seedPicksOnlyPlan(conditionsKey) {
-    const key = todayKey();
-    const day = {
-      generation: 0,
-      offsets: {},
-      slots: { breakfast: [PICKED_BREAKFAST], lunch: [], dinner: [], snacks: [], beverages: [] },
-      eaten: [],
-      pinned: [],
-    };
-    setPlan({
-      version: 2,
-      conditionsKey,
-      conditionNames: ['Test Condition'],
-      usedFallback: false,
-      generation: 0,
-      days: { [key]: day },
-      picksBySlot: { breakfast: [PICKED_BREAKFAST], lunch: [], dinner: [], snacks: [], beverages: [] },
-    });
-    return key;
-  }
-
-  it('regenerateDay never introduces the pool-only id', async () => {
-    getMealPlanSuggestions.mockResolvedValue({
-      candidates: {
-        breakfast: [POOL_ONLY_BREAKFAST],
-        lunch: [],
-        dinner: [],
-        snacks: [],
-        beverages: [],
-      },
-      conditionIds: [502],
-      conditionNames: ['Condition 502'],
-      usedFallback: false,
-    });
-    const key = seedPicksOnlyPlan('502');
-
-    const plan = await regenerateDay({ conditions: [502] }, key);
-
-    const allIds = Object.values(plan.days[key].slots).flatMap((items) => items.map((i) => i.id));
-    expect(allIds).not.toContain(POOL_ONLY_BREAKFAST.id);
-    expect(allIds.every((id) => id === PICKED_BREAKFAST.id)).toBe(true);
+    expect(getPlan()).toBeNull();
   });
 
-  it('regenerateWeek never introduces the pool-only id across any day', async () => {
-    getMealPlanSuggestions.mockResolvedValue({
-      candidates: {
-        breakfast: [POOL_ONLY_BREAKFAST],
-        lunch: [],
-        dinner: [],
-        snacks: [],
-        beverages: [],
-      },
-      conditionIds: [503],
-      conditionNames: ['Condition 503'],
-      usedFallback: false,
-    });
-    seedPicksOnlyPlan('503');
+  it('returns a legacy plan with no picksBySlot unchanged — trailing days are not pool-filled', async () => {
+    seedPlan(); // no picksBySlot
+    const before = getPlan();
 
-    const plan = await regenerateWeek({ conditions: [503] });
+    const { plan } = await ensurePlanForWeek({ conditions: [502] });
 
-    for (const day of Object.values(plan.days)) {
-      const allIds = Object.values(day.slots).flatMap((items) => items.map((i) => i.id));
-      expect(allIds).not.toContain(POOL_ONLY_BREAKFAST.id);
+    expect(plan).toBe(before);
+    expect(Object.keys(plan.days)).toHaveLength(1);
+    expect(getMealPlanSuggestions).not.toHaveBeenCalled();
+  });
+
+  it('fills missing days from picksBySlot only, without calling the pools', async () => {
+    const key = seedPlan({ picksBySlot: { ...emptySlots(), breakfast: [PICKED_BREAKFAST] } });
+
+    const { plan } = await ensurePlanForWeek({ conditions: [502] });
+
+    const others = nextSevenDays().map((d) => d.key).filter((k) => k !== key);
+    expect(others).toHaveLength(6);
+    for (const k of others) {
+      const ids = Object.values(plan.days[k].slots).flatMap((items) => items.map((i) => i.id));
+      expect(ids).toEqual([PICKED_BREAKFAST.id]);
     }
+    expect(getMealPlanSuggestions).not.toHaveBeenCalled();
   });
 });

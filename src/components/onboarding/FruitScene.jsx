@@ -1,16 +1,15 @@
 // Two inks and a few large shapes keep the scenery quieter than the fruit.
 // The shared viewBox keeps each setting and character aligned at any size.
 const INKS = {
-  orchard: ['#DDE8D0', '#8DAA91'],
-  kitchen: ['#E4E9E4', '#91AAA6'],
-  room: ['#E4E9E4', '#91AAA6'],
-  garden: ['#DDE8D0', '#8DAA91'],
+  orchard: ['#C4CFAB', '#77855E'],
+  kitchen: ['#E0D9C9', '#8F947A'],
+  room: ['#E0D9C9', '#8F947A'],
+  garden: ['#C4CFAB', '#77855E'],
 };
 
 function Orchard({ light, dark }) {
   return (
     <>
-      <circle cx="300" cy="49" r="22" fill={light} />
       <path d="M7 235C66 192 117 210 177 225S290 199 393 222V252H7Z" fill={light} />
       <path d="M31 246C116 231 249 264 382 237" fill="none" stroke={dark} strokeWidth="3" strokeLinecap="round" />
       <path d="M40 154C14 149 10 128 21 111C4 84 27 65 45 66C49 33 94 29 106 57C137 55 146 88 125 103C144 128 119 153 95 147C82 166 57 166 40 154Z" fill={light} />
@@ -51,7 +50,6 @@ function Kitchen({ light, dark, quiet = false }) {
 function Garden({ light, dark }) {
   return (
     <>
-      <circle cx="88" cy="56" r="21" fill={light} />
       <path d="M14 239C73 211 112 233 165 232C251 227 299 209 387 237V252H14Z" fill={light} />
       <path d="M38 243C123 252 270 234 367 244" stroke={dark} strokeWidth="3" strokeLinecap="round" fill="none" />
       <path d="M64 236V129M64 184L43 169M64 157L85 142M330 235V106M330 174L350 155M330 204L309 187" fill="none" stroke={dark} strokeWidth="4" strokeLinecap="round" />

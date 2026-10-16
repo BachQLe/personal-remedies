@@ -98,6 +98,12 @@ function EditList({ title, value, placeholder, onChange, onClose }) {
   );
 }
 
+// Placeholder quick-picks (checklist 4.21) — they only fill the field; no sex is asked or stored.
+const CALORIE_PRESETS = [
+  { label: 'Men', kcal: 2250 },
+  { label: 'Women', kcal: 1800 },
+];
+
 /**
  * EditCalorieTarget — single-field editor for `Profile.calorieTarget`, the
  * fixed, user-editable daily calorie baseline that replaced the removed
@@ -124,6 +130,21 @@ function EditCalorieTarget({ profile, onChange, onClose }) {
         <p className="text-xs text-char-400 font-sans -mt-1">
           Used to gauge whether my plan has enough — change it any time.
         </p>
+
+        <div className="flex gap-2">
+          {CALORIE_PRESETS.map(({ label, kcal }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => setValue(String(kcal))}
+              aria-pressed={parsed === kcal}
+              className="flex-1 py-3 rounded-lg border border-sand-200 bg-paper-100 text-sm font-semibold font-sans text-char-900 aria-pressed:bg-forest-700 aria-pressed:text-white aria-pressed:border-forest-700 transition-colors duration-fast"
+              style={{ minHeight: 44 }}
+            >
+              {label} · {kcal.toLocaleString('en-US')}
+            </button>
+          ))}
+        </div>
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="calorie-target-input" className="text-xs font-semibold font-sans text-char-500">Calories per day</label>

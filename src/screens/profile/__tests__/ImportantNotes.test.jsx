@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, createElement as h } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import ImportantNotesScreen from '../ImportantNotesScreen.jsx';
 import { buildSupportMailto } from '../supportMailto.js';
@@ -26,6 +26,33 @@ describe('ImportantNotesScreen', () => {
     expect(el.querySelector('a[href="/terms"]')).not.toBeNull();
     expect(el.querySelector('button[aria-label="Go back"]')).not.toBeNull();
     await act(async () => root.unmount());
+  });
+});
+
+describe('ImportantNotesScreen Back', () => {
+  const Where = () => h('p', { 'data-testid': 'where' }, useLocation().pathname);
+  async function backFrom(entries) {
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    const root = createRoot(el);
+    await act(async () => {
+      root.render(h(MemoryRouter, { initialEntries: entries, initialIndex: entries.length - 1 },
+        h(Routes, null,
+          h(Route, { path: '/app/profile/important-notes', element: h(ImportantNotesScreen) }),
+          h(Route, { path: '*', element: h(Where) }))));
+    });
+    await act(async () => el.querySelector('button[aria-label="Go back"]').click());
+    const where = el.querySelector('[data-testid="where"]').textContent;
+    await act(async () => root.unmount());
+    return where;
+  }
+
+  it('returns to the screen that opened it', async () => {
+    expect(await backFrom(['/app/home', '/app/profile/important-notes'])).toBe('/app/home');
+  });
+
+  it('falls back to Profile on a deep link', async () => {
+    expect(await backFrom(['/app/profile/important-notes'])).toBe('/app/profile');
   });
 });
 

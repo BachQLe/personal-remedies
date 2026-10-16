@@ -8,8 +8,8 @@ import ProfileBuilder from './ProfileBuilder';
 import { saveProfile } from '../../api/api.js';
 import { prefetchAppData } from '../../api/prefetch.js';
 
-const ONBOARDING_BG = '#BBCEFF';
-const DAILY_PICKS_BG = '#111E58';
+const ONBOARDING_BG = '#F3F0E7';
+const DAILY_PICKS_BG = '#384C37';
 const STRIPE_COUNT = 5;
 const STRIPE_H = 28;
 
@@ -18,9 +18,9 @@ function GradientStripes() {
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column' }}>
       {Array.from({ length: STRIPE_COUNT }).map((_, i) => {
         const t = (i + 1) / (STRIPE_COUNT + 1);
-        const r = Math.round(187 * (1 - t) + 17 * t);
-        const g = Math.round(206 * (1 - t) + 30 * t);
-        const b = Math.round(255 * (1 - t) + 88 * t);
+        const r = Math.round(243 * (1 - t) + 56 * t);
+        const g = Math.round(240 * (1 - t) + 76 * t);
+        const b = Math.round(231 * (1 - t) + 55 * t);
         return (
           <div
             key={i}
@@ -154,7 +154,7 @@ export default function OnboardingPage() {
   return (
     <div
       className="min-h-screen flex flex-col overflow-hidden"
-      style={{ backgroundColor: DAILY_PICKS_BG }}
+      style={{ backgroundColor: DAILY_PICKS_BG, '--onboarding-bg': ONBOARDING_BG }}
     >
       <div
         className="max-w-[430px] mx-auto w-full relative"

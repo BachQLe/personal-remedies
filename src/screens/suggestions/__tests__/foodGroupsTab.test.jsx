@@ -12,7 +12,7 @@
  */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { vi } from 'vitest';
 
@@ -55,11 +55,23 @@ describe('resolveMode', () => {
 let container;
 let root;
 
-function mount(initialEntry) {
+function Probe() {
+  const { pathname, search } = useLocation();
+  const navigate = useNavigate();
+  return (
+    <>
+      <output data-testid="loc">{pathname + search}</output>
+      <button type="button" onClick={() => navigate(-1)}>history back</button>
+    </>
+  );
+}
+
+function mount(initialEntry, entries = [initialEntry]) {
   return act(async () => {
     root.render(
-      <MemoryRouter initialEntries={[initialEntry]}>
+      <MemoryRouter initialEntries={entries} initialIndex={entries.length - 1}>
         <FoodGroupsTab />
+        <Probe />
       </MemoryRouter>
     );
   });
@@ -127,5 +139,33 @@ describe('FoodGroupsTab', () => {
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="suggest-tab"]')).toBeNull();
     expect(container.textContent).toContain('Ten broad categories, good for an everyday look.');
+  });
+});
+
+describe('FoodGroupsTab mode lives in the URL (checklist 4.10)', () => {
+  it('a toggle tap writes ?tab=groups&mode= and replaces the history entry', async () => {
+    await mount('/app/suggestions?tab=groups', ['/home', '/app/suggestions?tab=groups']);
+
+    await clickPillByLabel('Fine groups');
+    expect(container.querySelector('[data-testid="loc"]').textContent).toBe('/app/suggestions?tab=groups&mode=fine');
+
+    await clickPillByLabel('Basic groups');
+    expect(container.querySelector('[data-testid="loc"]').textContent).toBe('/app/suggestions?tab=groups&mode=basic');
+
+    await clickPillByLabel('history back');
+    expect(container.querySelector('[data-testid="loc"]').textContent).toBe('/home');
+  });
+
+  it('tapping the already-active mode changes nothing', async () => {
+    await mount('/app/suggestions?tab=groups&mode=fine');
+    await clickPillByLabel('Fine groups');
+    expect(container.querySelector('[data-testid="loc"]').textContent).toBe('/app/suggestions?tab=groups&mode=fine');
+  });
+
+  it('the retired ?tab=suggest alias drops off once a mode is chosen', async () => {
+    await mount('/app/suggestions?tab=suggest');
+    await clickPillByLabel('Basic groups');
+    expect(container.querySelector('[data-testid="loc"]').textContent).toBe('/app/suggestions?tab=groups&mode=basic');
+    expect(container.querySelector('[data-testid="groups-tab"]')).toBeTruthy();
   });
 });

@@ -21,8 +21,13 @@ Playwright is installed globally (resolve via `createRequire(execSync('npm root 
 - API rank lists look alphabetical for single-condition profiles — that's genuine server-side tie-breaking of equal values, NOT a client sort bug (verified against the raw API July 2026).
 - Transient `Failed to fetch` on first-ever goodfor can happen on cold start; retry before calling it a bug.
 
-## Plan screen: picks-only first-run contract (Aug 2026)
-- `ensurePlanForWeek` no longer auto-fills a week from the candidate pools on a first-ever run — with no plan in storage yet it returns `{ plan: null }` immediately (zero network, zero writes). Seeding a profile alone (the `remedi.v1` snippet above) and going straight to `/app/plan` now lands on the **Day view empty state** ("No meal plan yet" — `src/screens/plan/MealQueueScreen.jsx`), NOT an auto-filled week. This is expected, not a regression.
-- The empty state's secondary action is conditional: "Build from saved recipes" (skips the picker, builds straight from `getLibrary()`) only appears when the library is non-empty; otherwise it reads "Save recipes you like, then build a plan from them" with a link to `/app/recipes`.
-- **Quickest scripted path to a filled plan**: open the picker (FAB, or the empty state's "Build your meal plan" CTA) → on the "Best recipes" tab, click any card's "+"/check toggle to pick at least 1 item → "Create meal plan" (disabled at zero picks, with a "Pick at least 1 to continue" helper line in place of the selected-count). Confirming lands back on Day view with a "Meal plan created" toast and only the picked items in their slots.
-- 5 slots render in order: Breakfast, Lunch, Dinner, Snacks & Desserts, Beverages (`V` / cup-soda icon). The Beverages rail in the picker is item-led (few/no beverage recipes exist yet) — cards there should still render name/image/tier sanely, just without a `sourceName` subtitle.
+## Observe: request filter gotcha
+- When counting Nutridigm calls with a regex like `/suggest|detailed/`, exclude `localhost` first — the dev server serves `/src/screens/suggestions/*.jsx`, which matches `suggest` and looks like 10 phantom API calls per page load.
+
+## Plan screen: My Favorites flow (Oct 2026)
+- A plan only ever comes from the user's favorites (the `library` store) or a saved week. Seeding a profile alone and opening `/app/plan` lands on the **"No meal plan yet"** empty state — expected.
+- **Quickest scripted path to a filled plan**: `/app/recipes` → click several bookmark buttons (adds to My Favorites) → `/app/plan` → "Build my meal plan" (first run) or the "New meal plan" FAB → "Randomize from my favorites". Lands on today with a "Meal plan created" toast; each meal has at most 3 recipes, none repeated within a day.
+- Day view has no shuffle / regenerate / pin / meal tags. Each meal ends with an "Add from favorites" tile; cards have an X (Undo in the toast). "Save day" / "Load day" sit under Beverages; "Save week" and a My Favorites link sit under the day strip.
+- `/app/favorites` (My Favorites): favorite recipes (grouping `<select>`), saved days, saved weeks (tap = read-only peek with Delete).
+- Condition-change pruning: set `favoritesPrunePending: true` inside the `remedi.v1` object and reload — generation and Load day/week are blocked until `FavoritesPruneNotice` re-scores and clears the flag. With conditions 203/244 nothing is ranked low, so it clears silently; exercising the notice itself needs stubbed scoring.
+- 5 slots render in order: Breakfast, Lunch, Dinner, Snacks & Desserts, Beverages. Calories render as a plain `N cal` — no minus, no "~" (see `formatCalories`).

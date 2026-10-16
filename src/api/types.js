@@ -362,10 +362,8 @@
  *
  * A July-2026 probe of the live Nutridigm API (/fooditems, /goodfor,
  * /detailed) found no nutrition-fact fields anywhere in the payloads, so
- * `getNutritionFacts(foodId)` in adapter.js is a typed stub that always
- * resolves to `null`, and consumers (FoodDetailCard's Food Facts section) must
- * render NOTHING nutritional on null — no placeholder tables, per the
- * never-fabricate-data rule. If Nutridigm ever exposes nutrient data,
+ * nothing produces this shape and nothing may render placeholder values for
+ * it (never-fabricate-data rule). If Nutridigm ever exposes nutrient data,
  * implement against this shape.
  * @property {Array<{ label: string, value: string }>} facts - Ordered
  *   label/value pairs (e.g. { label: 'Fiber', value: '3 g' }) — display

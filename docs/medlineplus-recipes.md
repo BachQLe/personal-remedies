@@ -141,3 +141,30 @@ I could not verify whether Food Hero has a separate, more permissive open licens
 - [Food Hero: Recipe Criteria](https://foodhero.org/recipe-criteria) (linked from MedlinePlus; returned 403 to automated fetch, so criteria content itself is unverified)
 - [Oregon State University Library: Getting Permission (copyright/fair use guide)](https://guides.library.oregonstate.edu/copyright/permission)
 - [SNAP-Ed Connection: Food Hero program listing](https://snaped.fns.usda.gov/library/intervention/food-hero)
+
+---
+
+## In-app viewer spike (1.7b) — 2026-10-09
+
+**Question:** can a `medlineplus.gov` recipe page be shown in an in-app iframe (checklist 1.7b / Open Question #10)?
+
+**Method:** `curl -sI -L` (headers only, 3 redirects allowed, 30s cap) against three `sourceUrl` values from `src/data/recipeOverlay.json` (first / middle / last of the 70 medlineplus.gov entries). All three returned `HTTP/2 200` with no redirect and identical framing headers:
+
+- `https://medlineplus.gov/recipes/apple-sandwiches/`
+- `https://medlineplus.gov/recipes/indian-lentils-and-pasta/`
+- `https://medlineplus.gov/recipes/zucchini-pizza-boats/`
+
+**Framing headers, verbatim (same on all three):**
+
+```
+x-frame-options: SAMEORIGIN
+content-security-policy: default-src 'none'; ... frame-ancestors 'self' https://guides.nnlm.gov https://medlineplus.gov; ... object-src 'none'; upgrade-insecure-requests; report-uri https://nlmoccs.report-uri.com/r/d/csp/reportOnly;
+```
+
+(The CSP is sent as an enforcing `content-security-policy` header; only its `report-uri` target is named "reportOnly". Other CSP directives elided here; they do not affect framing.)
+
+**Conclusion: framing is BLOCKED.** `X-Frame-Options: SAMEORIGIN` and `frame-ancestors` both limit embedding to medlineplus.gov itself plus `guides.nnlm.gov`. The Personal Remedies origin is in neither list, so a browser will refuse to render these pages inside an iframe of ours. When both headers are present, modern browsers apply `frame-ancestors`; the result is the same either way. This is a server-side allowlist, so no iframe attribute on our side changes the outcome.
+
+**Limits of this spike:** headers only. It did not load the page in a real browser iframe, so the "blocked" result is read from the headers, not observed. Three pages of one site; the 46 `foodnetwork.com` sourceUrls in the overlay were not checked.
+
+**Outcome:** no viewer built. The existing external link-out stays as the fallback (per 1.7b). Next step belongs to the controller.

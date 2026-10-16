@@ -48,15 +48,24 @@
 }
 
 /**
- * .rail-scrollbar — opts a horizontal rail BACK IN to a visible scrollbar,
- * overriding the global `*::-webkit-scrollbar { display: none }` above. Used
- * on desktop, where there's no touch swipe, so an overflowing rail has a
- * grabbable affordance instead of looking like a truncated row.
+ * .rail-scrollbar — opts a horizontal rail BACK IN to a visible, draggable
+ * native scrollbar, overriding the global `*::-webkit-scrollbar { display:
+ * none }` above. It doubles as the position indicator for pointer users, who
+ * have no touch swipe.
+ *
+ * WebKit/Blink get the always-visible styled bar. `scrollbar-width` /
+ * `scrollbar-color` are set ONLY where `::-webkit-scrollbar` is unsupported
+ * (Firefox): in Chrome 121+ setting either one disables the `::-webkit-`
+ * styling and falls back to the OS overlay bar, which auto-hides on macOS.
  */
 .rail-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(23, 37, 84, 0.3) rgba(255, 255, 255, 0.35);
   -ms-overflow-style: auto;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .rail-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(23, 37, 84, 0.3) rgba(255, 255, 255, 0.35);
+  }
 }
 .rail-scrollbar::-webkit-scrollbar {
   display: block;
@@ -73,6 +82,19 @@
 }
 .rail-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(23, 37, 84, 0.5);
+}
+
+/* "Nutri is thinking…" (DataState's SlowLoadingNote): hidden, then fades in
+   only once a load has run ~2.5 s. Pure CSS, so no timers in the component.
+   `both` holds the hidden `from` frame during the delay (visibility keeps it
+   out of the accessibility tree too). Under prefers-reduced-motion the global
+   rule below shrinks the duration, not the delay, so it just appears. */
+.slow-loading-note {
+  animation: slow-loading-note-in 300ms ease-out 2.5s both;
+}
+@keyframes slow-loading-note-in {
+  from { opacity: 0; visibility: hidden; }
+  to   { opacity: 1; visibility: visible; }
 }
 
 @keyframes plan-blur-in {
@@ -207,8 +229,12 @@
   [class*="animate-"],
   [class*="transition-transform"],
   [class*="hover:scale"],
+  [class*="hover:-translate"],
+  [class*="hover:translate"],
   [class*="active:scale"],
-  [class*="active:translate"] {
+  [class*="active:translate"],
+  .pill-btn,
+  .ds-card {
     transition-duration: 0.01ms !important;
   }
 }

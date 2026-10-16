@@ -1,31 +1,33 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import calendarIcon from '../../assets/home-calendar-graphic.png';
-import searchIcon from '../../assets/home-search-graphic.png';
-import dishIcon from '../../assets/home-guide-graphic.png';
+import calendarIcon from '../../assets/home-calendar-natural.png';
+import searchIcon from '../../assets/home-search-natural.png';
+import dishIcon from '../../assets/home-guide-natural.png';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import MealprepCarousel from './MealprepCarousel.jsx';
+import HomeMail from './HomeMail.jsx';
 import { storage } from '../../api/storage.js';
 import './HomeScreen.css';
 
+// Labels carry their own line break (rendered via pre-line) so the three tiles balance.
 const SHORTCUTS = [
   {
     to: '/app/plan',
-    label: 'Meal planner',
+    label: 'Meal\nplanner',
     icon: calendarIcon,
-    tile: 'bg-forest-100',
+    tile: 'home-shortcut--sage',
   },
   {
     to: '/app/suggestions',
-    label: 'Food guide',
+    label: "Top Do's\nand Don'ts",
     icon: dishIcon,
-    tile: 'bg-lavender-100',
+    tile: 'home-shortcut--clay',
   },
   {
     to: '/app/search',
-    label: 'Food lookup',
+    label: 'Food\nlookup',
     icon: searchIcon,
-    tile: 'bg-yellow-200',
+    tile: 'home-shortcut--oat',
   },
 ];
 
@@ -39,11 +41,12 @@ export default function HomeScreen() {
   }), []);
 
   return (
-    <div className="home-screen bg-forest-300">
+    <div className="home-screen">
       <PageHeader
         label="Home"
         title={firstName ? `Hey, ${firstName}` : 'Hey there'}
         className="home-screen__header pb-7"
+        right={<HomeMail />}
       />
 
       <div className="home-screen__body">
@@ -51,8 +54,8 @@ export default function HomeScreen() {
           {SHORTCUTS.map(({ to, label, icon, tile }) => (
             <Link key={to} to={to} className={`home-shortcut shadow-xs ${tile}`}>
               <img className="home-shortcut__icon" src={icon} alt="" aria-hidden="true" width="72" height="72" />
-              <span className="home-shortcut__label font-display font-semibold text-base text-blue-950 leading-tight tracking-tight">
-                {label.replace(' ', '\n')}
+              <span className="home-shortcut__label font-display font-semibold text-blue-950 leading-tight tracking-tight">
+                {label}
               </span>
             </Link>
           ))}

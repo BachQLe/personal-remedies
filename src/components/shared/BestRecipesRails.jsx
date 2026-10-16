@@ -3,35 +3,33 @@
  *
  * Stacked sections (Breakfast → Beverages, `PLAN_SLOTS` order), each a
  * `<MealTypeTag>` + label header over a horizontal snap rail of
- * `FoodImageCard`s. Reused by `MealPlannerPicker.jsx` (the "New meal plan"
- * recipe picker, selectable) and `SuggestionsScreen.jsx`'s Recommendations tab
- * (read-only) — one carousel implementation, not two hand-rolled ones.
+ * `FoodImageCard`s. Reused by `SuggestionsScreen.jsx`'s Recommendations tab
+ * and `RecipesScreen.jsx` — one carousel implementation, not two hand-rolled ones.
  *
  * Honesty rule: a slot with an empty pool renders a small muted "No options
  * yet" line under its header — never a fabricated/placeholder card.
+ *
+ * Scrolling: every rail is a plain native `overflow-x: auto` scroller, so touch
+ * swipe and trackpad work as-is; mouse click-and-drag comes from
+ * `dragScrollProps`, and the draggable scrollbar from `showScrollbar` below.
  */
 
-import { Plus, Check, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import FoodImageCard from './FoodImageCard.jsx';
 import SaveButton from './SaveButton.jsx';
 import MealTypeTag, { displayTagForItem } from './mealTypeMeta.jsx';
 import { PLAN_SLOTS } from '../../api/config.js';
+import { dragScrollProps } from './dragScroll.js';
 
 /**
  * @param {Object} props
  * @param {Record<string, import('../../api/types.js').PlanCandidate[]>} props.candidatesBySlot -
  *   slot key → ranked candidate pool (may be empty per slot).
- * @param {(item: Object) => void} [props.onSelectCard] - tapping a card body
- *   (not the "+" toggle).
- * @param {Set<number|string>} [props.selectedIds] - ids currently picked;
- *   only consulted when `showAdd` is true.
- * @param {(item: Object) => void} [props.onToggleSelect] - toggles a card's
- *   picked state; only wired when `showAdd` is true.
- * @param {boolean} [props.showAdd] - render the selectable "+"/check toggle.
- * @param {boolean} [props.showScrollbar] - render a visible scrollbar beneath
- *   each rail (see `.rail-scrollbar` in index.css). Off by default — the rails
- *   read as touch-swipe carousels on mobile — but on a pointer device that bar
- *   is the only obvious way to get through a 12-card pool.
+ * @param {(item: Object) => void} [props.onSelectCard] - tapping a card body.
+ * @param {boolean} [props.showScrollbar] - render a visible, draggable native
+ *   scrollbar beneath each rail (see `.rail-scrollbar` in index.css). Off by
+ *   default — the rails read as touch-swipe carousels on mobile — but on a
+ *   pointer device that bar shows position in a 12-card pool.
  * @param {(slotKey: string) => void} [props.onSeeMore] - shows a "See more"
  *   link in a slot's header (only when its pool is non-empty) that opens a
  *   full browse view for that slot.
@@ -45,17 +43,13 @@ import { PLAN_SLOTS } from '../../api/config.js';
  *   (source name / tier) under its title. On by default.
  * @param {boolean} [props.saveAtTop] - put the save bookmark in the card's
  *   top-right instead of bottom-right, leaving the bottom to the title (the
- *   home screen's card layout). Ignore when `showAdd` is on — the "+" toggle
- *   already owns that corner.
+ *   home screen's card layout).
  * @param {boolean} [props.dimImages] - darken card photos so overlaid white
  *   text stays legible (home-screen brightness).
  */
 export default function BestRecipesRails({
   candidatesBySlot,
   onSelectCard,
-  selectedIds,
-  onToggleSelect,
-  showAdd = false,
   showScrollbar = false,
   onSeeMore,
   onSaveBlocked,
@@ -92,6 +86,7 @@ export default function BestRecipesRails({
               <p className="text-xs font-sans text-char-500">No options yet</p>
             ) : (
               <div
+                {...dragScrollProps}
                 className={`flex gap-3 overflow-x-auto snap-x ${
                   showScrollbar
                     // `snap-proximity`, not `-mandatory`: mandatory snapping
@@ -102,8 +97,6 @@ export default function BestRecipesRails({
                 }`}
               >
                 {pool.map((item) => {
-                  const isSelected = showAdd && selectedIds?.has(item.id);
-
                   return (
                     <div key={item.id} className={`snap-start shrink-0 ${cardWidthClass}`} style={{ aspectRatio: '4/5' }}>
                       <FoodImageCard
@@ -116,32 +109,8 @@ export default function BestRecipesRails({
                         onClick={() => onSelectCard?.(item)}
                         className="w-full h-full"
                         saveAction={() => <SaveButton item={item} onBlocked={onSaveBlocked} />}
-                        saveActionPosition={saveAtTop && !showAdd ? 'top' : 'bottom'}
+                        saveActionPosition={saveAtTop ? 'top' : 'bottom'}
                         dimImage={dimImages}
-                        action={
-                          showAdd
-                            ? () => (
-                                <span
-                                  role="button"
-                                  tabIndex={0}
-                                  onClick={(e) => { e.stopPropagation(); onToggleSelect?.(item); }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      onToggleSelect?.(item);
-                                    }
-                                  }}
-                                  aria-label={isSelected ? 'Remove from picks' : 'Add to picks'}
-                                  className={`tap-target w-8 h-8 rounded-full flex items-center justify-center shadow-sm
-                                    transition-all duration-fast active:scale-95 cursor-pointer
-                                    ${isSelected ? 'bg-forest-600 text-white' : 'bg-white/90 text-char-500 hover:bg-white hover:shadow-md'}`}
-                                >
-                                  {isSelected ? <Check size={16} aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}
-                                </span>
-                              )
-                            : undefined
-                        }
                       />
                     </div>
                   );

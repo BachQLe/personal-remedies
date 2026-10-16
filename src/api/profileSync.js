@@ -35,6 +35,7 @@ import { storage } from './storage.js';
 import { reloadLibrary } from '../state/library.js';
 import { reloadPlan } from '../state/dailyPlan.js';
 import { purgeDerivedDataForConditionsChange, purgeMealPlanForProfileChange } from './planBuilder.js';
+import { markFavoritesPrunePending } from './favoritesPrune.js';
 
 const SYNC_META_KEY = 'syncMeta';
 const DEBOUNCE_MS = 2000;
@@ -322,10 +323,14 @@ export function initProfileSync() {
     if (_hydrating) return;
     // Any guidance-relevant change (conditions, allergies, medications,
     // dietary pattern, religious restriction) wipes picks, plan and
-    // schedule (storage-map.md §6 gap 5). With no prior profile to diff
-    // against, fall back to the conditions-key check against the plan.
+    // schedule (storage-map.md §6 gap 5) and flags favorites / saved days /
+    // saved weeks for pruning of newly low-ranked recipes (favoritesPrune.js —
+    // the UI resolves the flag; those collections are NOT wiped here). With no
+    // prior profile to diff against, fall back to the conditions-key check
+    // against the plan.
     if (prev !== null && next !== prev) {
       purgeMealPlanForProfileChange();
+      markFavoritesPrunePending();
       return;
     }
     purgeDerivedDataForConditionsChange(profile?.conditions);

@@ -116,6 +116,9 @@ export const MEAL_SLOT_MAP = {
   h1: 'Snack',
 };
 
+/** Recipes per meal per day — the ONE place the "3 per meal" rule lives. */
+export const RECIPES_PER_MEAL = 3;
+
 /**
  * Slot-based meal plan configuration (Plan screen — /app/plan).
  *
@@ -144,7 +147,7 @@ export const MEAL_SLOT_MAP = {
  *   (adapter.js). `null` for lunch/dinner — those slots are recipes-only by
  *   design, so raw meat/fish cuts and other non-recipe items never surface
  *   there.
- * - `size` — number of items auto-filled into this slot per generation.
+ * - `size` — max recipes placed into this slot per day (`RECIPES_PER_MEAL`).
  *
  * The `beverages` slot was removed July 2026 (user-approved) and restored
  * August 2026 (user-approved) — 5 slots total again. Stale `beverages` keys
@@ -157,15 +160,21 @@ export const MEAL_SLOT_MAP = {
  * assume the key exists.
  */
 export const PLAN_SLOTS = [
-  { key: 'breakfast', label: 'Breakfast', fineGroups: ['f', 'd', 'g1'], recipeMealType: 'breakfast', recipeLead: false, itemFlagKey: 'isBreakfast', size: 3 },
-  { key: 'lunch',     label: 'Lunch',     fineGroups: ['c2', 'e', 'b1'], recipeMealType: 'lunch',   recipeLead: true,  itemFlagKey: null,          size: 3 },
-  { key: 'dinner',    label: 'Dinner',    fineGroups: ['b3', 'b1', 'e'], recipeMealType: 'dinner',  recipeLead: true,  itemFlagKey: null,          size: 3 },
-  { key: 'snacks',    label: 'Snacks & Desserts', fineGroups: ['h1', 'c3'], recipeMealType: ['snack', 'dessert'], recipeLead: false, itemFlagKey: 'isSnack',    size: 2 },
-  { key: 'beverages', label: 'Beverages', fineGroups: ['h2'],           recipeMealType: 'beverage', recipeLead: false, itemFlagKey: 'isBeverage', size: 1 },
-];
+  { key: 'breakfast', label: 'Breakfast', fineGroups: ['f', 'd', 'g1'], recipeMealType: 'breakfast', recipeLead: false, itemFlagKey: 'isBreakfast' },
+  { key: 'lunch',     label: 'Lunch',     fineGroups: ['c2', 'e', 'b1'], recipeMealType: 'lunch',   recipeLead: true,  itemFlagKey: null },
+  { key: 'dinner',    label: 'Dinner',    fineGroups: ['b3', 'b1', 'e'], recipeMealType: 'dinner',  recipeLead: true,  itemFlagKey: null },
+  { key: 'snacks',    label: 'Snacks & Desserts', fineGroups: ['h1', 'c3'], recipeMealType: ['snack', 'dessert'], recipeLead: false, itemFlagKey: 'isSnack' },
+  { key: 'beverages', label: 'Beverages', fineGroups: ['h2'],           recipeMealType: 'beverage', recipeLead: false, itemFlagKey: 'isBeverage' },
+  // `size` is stamped on after the literal (not written inline) because
+  // scripts/audit-overlay.mjs evaluates this array literal standalone.
+].map((slot) => ({ ...slot, size: RECIPES_PER_MEAL }));
 
 /** Slot keys in render order — `PLAN_SLOTS.map((s) => s.key)`. */
 export const PLAN_SLOT_KEYS = PLAN_SLOTS.map((s) => s.key);
+
+/** storage.js keys for saved weeks / saved days (planBuilder.js, favoritesPrune.js). */
+export const SAVED_PLANS_KEY = 'savedPlans';
+export const SAVED_DAYS_KEY = 'savedDays';
 
 /**
  * Max number of named plan snapshots a user can keep under storage.js's
@@ -174,3 +183,6 @@ export const PLAN_SLOT_KEYS = PLAN_SLOTS.map((s) => s.key);
  * silently evicting the oldest save, never fabricating extra capacity.
  */
 export const MAX_SAVED_PLANS = 4;
+
+/** Same block-at-cap policy for saved days (`saveDay`, planBuilder.js). */
+export const MAX_SAVED_DAYS = 14;

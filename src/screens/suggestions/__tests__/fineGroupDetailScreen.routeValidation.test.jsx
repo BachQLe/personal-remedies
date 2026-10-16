@@ -49,7 +49,7 @@ vi.mock('../../../components/shared/GlassPanel.jsx', () => ({
 vi.mock('../../../components/shared/BackButton.jsx', () => ({
   default: () => <button aria-label="Go back" />,
 }));
-vi.mock('../../../components/shared/DataState.jsx', () => ({ default: () => null }));
+vi.mock('../../../components/shared/DataState.jsx', () => ({ default: () => null, SlowLoadingNote: () => null }));
 vi.mock('../ProfileSetupAction.jsx', () => ({ default: () => null }));
 
 import FineGroupDetailScreen from '../FineGroupDetailScreen.jsx';

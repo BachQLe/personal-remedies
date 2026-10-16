@@ -23,19 +23,13 @@
  * decides which of the two mounts and owns the chrome (toggle + subtitle)
  * that used to be duplicated at each tab's own top.
  *
- * Mode resolution mirrors SuggestionsScreen's own activeTab pattern: the
- * initial mode comes from the URL (?mode=fine / ?mode=basic, defaulting to
- * 'basic'; the retired ?tab=suggest aliases to 'fine' so old links from the
- * short-lived 4th-pill era keep landing on the right list), and is
- * re-derived during render — React's documented escape hatch — whenever the
- * URL's search params change, rather than in an effect. That matters for the
- * same reason it matters in SuggestionsScreen: an effect would re-run after
- * a manual slider tap re-renders this component for an unrelated reason
- * (e.g. a parent re-render) and could clobber that tap back to whatever the
- * URL still says. Re-deriving only when paramsKey itself actually changes
- * means a manual tap is never fought by a stale URL.
+ * Mode lives in the URL, like SuggestionsScreen's tab (checklist 4.10): it is
+ * read from ?mode=fine / ?mode=basic (default 'basic'; the retired
+ * ?tab=suggest aliases to 'fine' so old links from the short-lived 4th-pill
+ * era keep landing on the right list), and a toggle tap REPLACES the current
+ * history entry, so Back from a group detail screen returns to the mode the
+ * user was in.
  */
-import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import GroupsTab from './GroupsTab.jsx';
@@ -63,16 +57,11 @@ export function resolveMode(searchParams) {
 }
 
 export default function FoodGroupsTab() {
-  const [searchParams] = useSearchParams();
-  const [mode, setMode] = useState(() => resolveMode(searchParams));
-
-  // Re-derive during render (see docblock) rather than in an effect.
-  const paramsKey = searchParams.toString();
-  const [resolvedFor, setResolvedFor] = useState(paramsKey);
-  if (paramsKey !== resolvedFor) {
-    setResolvedFor(paramsKey);
-    setMode(resolveMode(searchParams));
-  }
+  const [searchParams, setSearchParams] = useSearchParams();
+  const mode = resolveMode(searchParams);
+  const setMode = (next) => {
+    if (next !== mode) setSearchParams({ tab: 'groups', mode: next }, { replace: true });
+  };
 
   return (
     <div className="flex flex-col gap-4">

@@ -47,6 +47,7 @@ import { ChevronRight } from 'lucide-react';
 import { getGroupLabels, getFineFoodGroups } from '../../api/api.js';
 import { COARSE_GROUP_LABELS } from '../../api/config.js';
 import { FINE_GROUP_IMAGES } from '../../assets/food-groups/index.js';
+import { SlowLoadingNote } from '../../components/shared/DataState.jsx';
 
 // ── Bucketing ────────────────────────────────────────────────────────────────
 
@@ -192,7 +193,10 @@ export default function SuggestTab() {
   return (
     <div className="flex flex-col gap-4">
       {loading ? (
-        <SkeletonGrid />
+        <>
+          <SkeletonGrid />
+          <SlowLoadingNote />
+        </>
       ) : (
         <FineGroupList
           fineGroups={fineGroups}

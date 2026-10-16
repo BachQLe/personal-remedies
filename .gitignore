@@ -31,3 +31,6 @@ dist-ssr
 
 # Local agent config (contains plaintext API key)
 .codex/
+
+# Local screenshots / design scratch
+output/

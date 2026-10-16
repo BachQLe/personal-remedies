@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check } from 'lucide-react';
-import { nextSevenDays } from './planDates.js';
-import { resolveDayTotals } from '../../api/nutrition.js';
+import { estimatePlanDayCalories, formatCalories } from '../../api/calorieNeeds.js';
 import { markEaten, unmarkEaten } from '../../state/dailyPlan.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import { getOverlayImageFile } from '../../api/localTables.js';
@@ -16,41 +15,47 @@ function cardImage(item) {
 }
 
 /**
- * SchedulerView — "List view" tab of the Plan screen: a 7-day accordion that
- * mirrors the REAL weekly plan (`planDays`, from `src/state/dailyPlan.js`),
- * not a separate manually-scheduled list. One day expanded at a time; each
- * expanded day groups its items by `PLAN_SLOTS` order, each row tagged with
- * its meal type, plus an estimated-calories header and a Nutrition Facts
- * button when it has items.
+ * SchedulerView - the "list view": an accordion of days, each expanding to its
+ * meals (grouped by `PLAN_SLOTS` order, each row tagged with its meal type)
+ * and a calorie line. Hidden from the plan screen; it renders the peeks of a
+ * saved day / saved week in My Favorites.
+ *
+ * The day total is the same `estimatePlanDayCalories` call the plan's day view
+ * uses, so the two never disagree. A lone day starts expanded.
+ *
+ * @param {Object} props
+ * @param {Array<{key: string, label: string, sublabel?: string, slots: Object, eaten?: Array}>} props.days
+ * @param {(item: Object) => void} props.onSelectItem
+ * @param {boolean} [props.showEaten] - render the mark-as-eaten check on each row (live plan days only)
  */
-export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
-  const [expandedKey, setExpandedKey] = useState(null);
-  const days = nextSevenDays();
+export default function SchedulerView({ days, onSelectItem, showEaten = false }) {
+  const [expandedKey, setExpandedKey] = useState(days.length === 1 ? days[0].key : null);
 
   return (
     <div className="flex flex-col gap-2">
       {days.map((day) => {
-        const dayState = planDays?.[day.key] ?? null;
-        const slots = dayState?.slots ?? {};
-        const eaten = dayState?.eaten ?? [];
+        const slots = day.slots ?? {};
+        const eaten = day.eaten ?? [];
         const allItems = PLAN_SLOTS.flatMap((slot) => slots[slot.key] ?? []);
         const expanded = expandedKey === day.key;
-        const totals = resolveDayTotals(allItems);
+        const { total } = estimatePlanDayCalories(slots);
 
         return (
           <div key={day.key}>
             <button
+              type="button"
               onClick={() => setExpandedKey(expanded ? null : day.key)}
-              className={`w-full bg-white rounded-xl px-4 py-3 flex items-center justify-between
+              aria-expanded={expanded}
+              className={`flex min-h-[48px] w-full items-center justify-between rounded-xl bg-white px-4 py-3
                 ${expanded ? 'rounded-b-none' : ''}`}
             >
               <div className="flex items-baseline gap-2">
                 <span className="font-semibold text-blue-950">{day.label}</span>
-                <span className="text-xs text-blue-950/50">{day.sublabel}</span>
+                {day.sublabel && <span className="text-xs text-blue-950/50">{day.sublabel}</span>}
               </div>
               <div className="flex items-center gap-2">
                 {allItems.length > 0 && (
-                  <span className="text-[11px] bg-sand-200 rounded-full px-2 py-0.5 text-blue-950/60">
+                  <span className="rounded-full bg-sand-200 px-2 py-0.5 text-xs text-blue-950/60">
                     {allItems.length} item{allItems.length === 1 ? '' : 's'}
                   </span>
                 )}
@@ -72,26 +77,17 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
                   transition={calmSpring}
                   className="overflow-hidden"
                 >
-                  <div className="bg-white rounded-xl rounded-t-none p-4">
+                  <div className="rounded-xl rounded-t-none bg-white p-4">
                     {allItems.length === 0 ? (
-                      <div className="border border-dashed border-blue-950/30 rounded-xl px-4 py-4 text-sm text-blue-950/60">
+                      <div className="rounded-xl border border-dashed border-blue-950/30 px-4 py-4 text-sm text-blue-950/60">
                         Nothing planned for this day yet.
                       </div>
                     ) : (
                       <>
-                        {totals && (
-                          <div className="flex items-center justify-between mb-3">
-                            <p className="font-label text-[11px] tracking-widest uppercase text-blue-950/50">
-                              Planned
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold text-blue-950 text-sm">
-                                ~{totals.calories} kcal
-                              </span>
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sand-200 text-char-500">
-                                Estimated
-                              </span>
-                            </div>
+                        {total > 0 && (
+                          <div className="mb-3 flex items-center justify-between">
+                            <p className="font-label text-xs uppercase tracking-widest text-blue-950/50">Planned</p>
+                            <span className="text-sm font-semibold text-blue-950">{`${formatCalories(total)} cal`}</span>
                           </div>
                         )}
 
@@ -101,51 +97,43 @@ export default function SchedulerView({ planDays, onSelectItem, onOpenFacts }) {
                             if (slotItems.length === 0) return null;
                             return (
                               <div key={slot.key} className="flex flex-col gap-2">
-                                {slotItems.map((item) => (
-                                  <div key={item.id} className="flex items-center gap-3">
-                                    <button
-                                      onClick={() => onSelectItem(item)}
-                                      aria-label={`View ${item.name}`}
-                                      className="tap-target w-8 h-8 rounded-lg overflow-hidden shrink-0"
-                                    >
-                                      <img
-                                        src={cardImage(item)}
-                                        alt=""
-                                        className="w-full h-full object-cover"
-                                      />
-                                    </button>
-                                    <MealTypeTag mealKey={slot.key} />
-                                    <span
-                                      className={`flex-1 text-sm text-blue-950 truncate ${eaten.includes(item.id) ? 'line-through opacity-60' : ''}`}
-                                    >
-                                      {item.name}
-                                    </span>
-                                    <button
-                                      onClick={() => (
-                                        eaten.includes(item.id)
-                                          ? unmarkEaten(day.key, item.id)
-                                          : markEaten(day.key, item.id)
+                                {slotItems.map((item) => {
+                                  const isEaten = eaten.includes(item.id);
+                                  return (
+                                    <div key={item.id} className="flex items-center gap-3">
+                                      <button
+                                        type="button"
+                                        onClick={() => onSelectItem(item)}
+                                        aria-label={`View ${item.name}`}
+                                        className="tap-target h-8 w-8 shrink-0 overflow-hidden rounded-lg"
+                                      >
+                                        <img src={cardImage(item)} alt="" width={32} height={32} loading="lazy" className="h-full w-full object-cover" />
+                                      </button>
+                                      <MealTypeTag mealKey={slot.key} />
+                                      <span
+                                        className={`flex-1 truncate text-sm text-blue-950 ${isEaten ? 'line-through opacity-60' : ''}`}
+                                      >
+                                        {item.name}
+                                      </span>
+                                      {showEaten && (
+                                        <button
+                                          type="button"
+                                          onClick={() => (isEaten ? unmarkEaten(day.key, item.id) : markEaten(day.key, item.id))}
+                                          aria-label={isEaten ? 'Mark as not eaten' : 'Mark as eaten'}
+                                          className={`tap-target flex h-7 w-7 shrink-0 items-center justify-center rounded-full
+                                            transition duration-fast active:scale-95
+                                            ${isEaten ? 'bg-forest-600 text-white' : 'bg-sand-200 text-blue-950/40'}`}
+                                        >
+                                          <Check size={14} aria-hidden="true" />
+                                        </button>
                                       )}
-                                      aria-label={eaten.includes(item.id) ? 'Mark as not eaten' : 'Mark as eaten'}
-                                      className={`tap-target w-7 h-7 rounded-full flex items-center justify-center shrink-0
-                                        transition-all duration-fast active:scale-95
-                                        ${eaten.includes(item.id) ? 'bg-forest-600 text-white' : 'bg-sand-200 text-blue-950/40'}`}
-                                    >
-                                      <Check size={14} aria-hidden="true" />
-                                    </button>
-                                  </div>
-                                ))}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             );
                           })}
                         </div>
-
-                        <button
-                          onClick={() => onOpenFacts({ day, items: allItems })}
-                          className="mt-3 w-full bg-blue-950 text-white rounded-pill py-2.5 text-xs font-semibold"
-                        >
-                          Nutrition Facts
-                        </button>
                       </>
                     )}
                   </div>

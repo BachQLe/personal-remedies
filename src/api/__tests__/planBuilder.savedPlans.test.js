@@ -16,11 +16,11 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../adapter.js', () => ({
-  getMealPlanSuggestions: vi.fn(),
+vi.mock('../adapter.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  getConditionNames: vi.fn(async (ids) => ids.map((id) => `Condition ${id}`)),
 }));
 
-import { getMealPlanSuggestions } from '../adapter.js';
 import {
   saveCurrentPlan,
   updateSavedPlan,
@@ -30,7 +30,7 @@ import {
   planFingerprint,
   getActiveSavedPlan,
   clearActiveSavedPlan,
-  generatePlanFromPicks,
+  generateWeekFromFavorites,
   ensurePlanForWeek,
   purgeDerivedDataForConditionsChange,
 } from '../planBuilder.js';
@@ -48,15 +48,13 @@ function emptySlots() {
 }
 
 /** A minimal but shape-valid WeeklyPlan (version 2), one day. */
-function makePlan({ conditionsKey = '1', dateKey, slots, eaten = [], pinned = [] }) {
+function makePlan({ conditionsKey = '1', dateKey, slots, eaten = [], ...dayExtra }) {
   return {
     version: 2,
     conditionsKey,
     conditionNames: [],
-    usedFallback: false,
-    generation: 0,
     days: {
-      [dateKey]: { generation: 0, offsets: {}, slots: { ...emptySlots(), ...slots }, eaten, pinned },
+      [dateKey]: { slots: { ...emptySlots(), ...slots }, eaten, ...dayExtra },
     },
   };
 }
@@ -64,7 +62,6 @@ function makePlan({ conditionsKey = '1', dateKey, slots, eaten = [], pinned = []
 beforeEach(() => {
   storage.clear();
   reloadPlan();
-  getMealPlanSuggestions.mockReset();
 });
 
 afterEach(() => {
@@ -85,10 +82,19 @@ describe('planFingerprint', () => {
     expect(planFingerprint(planA)).toBe(planFingerprint(planB));
   });
 
-  it('is order-independent for `pinned` (membership, not toggle order, matters)', () => {
-    const planA = makePlan({ dateKey: '2020-01-01', slots: { breakfast: [ITEM_A, ITEM_B] }, pinned: [ITEM_A.id, ITEM_B.id] });
-    const planB = makePlan({ dateKey: '2020-01-01', slots: { breakfast: [ITEM_A, ITEM_B] }, pinned: [ITEM_B.id, ITEM_A.id] });
-    expect(planFingerprint(planA)).toBe(planFingerprint(planB));
+  it('ignores legacy `pinned` arrays left on old persisted days', () => {
+    const plain = makePlan({ dateKey: '2020-01-01', slots: { breakfast: [ITEM_A, ITEM_B] } });
+    const legacy = makePlan({ dateKey: '2020-01-01', slots: { breakfast: [ITEM_A, ITEM_B] }, pinned: [ITEM_B.id], offsets: { breakfast: 4 }, generation: 2 });
+    expect(planFingerprint(legacy)).toBe(planFingerprint(plain));
+  });
+
+  it('keeps the exact pre-pin-removal string for a plan without pins (existing active pointers stay clean)', () => {
+    const plan = makePlan({ dateKey: '2020-01-01', slots: { breakfast: [ITEM_A] } });
+    const legacyString = JSON.stringify({
+      picksBySlot: null,
+      days: [{ slots: { breakfast: [1], lunch: [], dinner: [], snacks: [], beverages: [] }, pinned: [] }],
+    });
+    expect(planFingerprint(plan)).toBe(legacyString);
   });
 
   it('changes when a slot item is added/removed/reordered', () => {
@@ -97,12 +103,6 @@ describe('planFingerprint', () => {
     const reordered = makePlan({ dateKey: '2020-01-01', slots: { breakfast: [ITEM_B, ITEM_A] } });
     expect(planFingerprint(base)).not.toBe(planFingerprint(added));
     expect(planFingerprint(added)).not.toBe(planFingerprint(reordered));
-  });
-
-  it('changes when pinned membership changes', () => {
-    const unpinned = makePlan({ dateKey: '2020-01-01', slots: { breakfast: [ITEM_A] }, pinned: [] });
-    const pinned = makePlan({ dateKey: '2020-01-01', slots: { breakfast: [ITEM_A] }, pinned: [ITEM_A.id] });
-    expect(planFingerprint(unpinned)).not.toBe(planFingerprint(pinned));
   });
 
   it('is fingerprinted by picksBySlot ids when present, independent of which day currently shows them', () => {
@@ -179,8 +179,8 @@ describe('updateSavedPlan', () => {
 
 describe('loadSavedPlan: refit onto the current window by day POSITION', () => {
   it('remaps a single-day snapshot with an unrelated real date key onto the CURRENT window\'s first day', () => {
-    const snapshotDay = { generation: 0, offsets: {}, slots: { ...emptySlots(), breakfast: [ITEM_A] }, eaten: [999], pinned: [ITEM_A.id] };
-    const snapshotPlan = { version: 2, conditionsKey: '1', conditionNames: [], usedFallback: false, generation: 0, days: { '2020-01-01': snapshotDay } };
+    const snapshotDay = { generation: 0, offsets: {}, slots: { ...emptySlots(), breakfast: [ITEM_A] }, eaten: [999], pinned: [ITEM_A.id] }; // legacy-shaped day
+    const snapshotPlan = { version: 2, conditionsKey: '1', conditionNames: [], days: { '2020-01-01': snapshotDay } };
     storage.set('savedPlans', [{ id: 'entry-1', name: 'Old Week', savedAt: '2020-01-01T00:00:00.000Z', plan: snapshotPlan }]);
 
     const ok = loadSavedPlan('entry-1');
@@ -195,13 +195,11 @@ describe('loadSavedPlan: refit onto the current window by day POSITION', () => {
   });
 
   it('remaps multiple days by SORTED (chronological) position, regardless of insertion order', () => {
-    const dayFor = (id) => ({ generation: 0, offsets: {}, slots: { ...emptySlots(), breakfast: [{ ...ITEM_A, id }] }, eaten: [], pinned: [] });
+    const dayFor = (id) => ({ slots: { ...emptySlots(), breakfast: [{ ...ITEM_A, id }] }, eaten: [], pinned: [] });
     const snapshotPlan = {
       version: 2,
       conditionsKey: '1',
       conditionNames: [],
-      usedFallback: false,
-      generation: 0,
       // Inserted out of chronological order on purpose.
       days: {
         '2020-01-03': dayFor('third'),
@@ -221,8 +219,8 @@ describe('loadSavedPlan: refit onto the current window by day POSITION', () => {
   });
 
   it('does not dirty the loaded plan against itself (fingerprint survives the re-key)', () => {
-    const snapshotDay = { generation: 0, offsets: {}, slots: { ...emptySlots(), breakfast: [ITEM_A] }, eaten: [], pinned: [] };
-    const snapshotPlan = { version: 2, conditionsKey: '1', conditionNames: [], usedFallback: false, generation: 0, days: { '2020-01-01': snapshotDay } };
+    const snapshotDay = { slots: { ...emptySlots(), breakfast: [ITEM_A] }, eaten: [] };
+    const snapshotPlan = { version: 2, conditionsKey: '1', conditionNames: [], days: { '2020-01-01': snapshotDay } };
     storage.set('savedPlans', [{ id: 'entry-3', name: 'Old Week', savedAt: '2020-01-01T00:00:00.000Z', plan: snapshotPlan }]);
 
     loadSavedPlan('entry-3');
@@ -249,19 +247,15 @@ describe('active-saved-plan pointer: set/clear lifecycle', () => {
     expect(getActiveSavedPlan()).toEqual({ id: entry.id, fingerprint: planFingerprint(getPlan()) });
   });
 
-  it('generatePlanFromPicks clears it — a freshly-picked week is not an edit of the old active save', async () => {
-    getMealPlanSuggestions.mockResolvedValue({
-      candidates: { breakfast: [], lunch: [], dinner: [], snacks: [], beverages: [] },
-      conditionIds: [777],
-      conditionNames: ['Condition 777'],
-      usedFallback: false,
-    });
+  it('generateWeekFromFavorites clears it — a freshly-generated week is not an edit of the old active save', async () => {
     setPlan(makePlan({ dateKey: '2020-01-01', slots: { breakfast: [ITEM_A] } }));
     saveCurrentPlan('My Week');
     expect(getActiveSavedPlan()).not.toBeNull();
 
-    await generatePlanFromPicks({ conditions: [777] }, []);
+    const favorite = { id: 5, name: 'Oatmeal Bowl', image: null, group: null, fineGroup: null, tier: 'Top', numericId: 1, kind: 'recipe' };
+    const result = await generateWeekFromFavorites({ conditions: [777] }, [favorite]);
 
+    expect(result.ok).toBe(true);
     expect(getActiveSavedPlan()).toBeNull();
   });
 
@@ -280,12 +274,6 @@ describe('active-saved-plan pointer: set/clear lifecycle', () => {
   });
 
   it('ensurePlanForWeek clears the pointer when it discards the plan for a conditions change', async () => {
-    getMealPlanSuggestions.mockResolvedValue({
-      candidates: { breakfast: [], lunch: [], dinner: [], snacks: [], beverages: [] },
-      conditionIds: [888],
-      conditionNames: ['Condition 888'],
-      usedFallback: false,
-    });
     setPlan(makePlan({ conditionsKey: 'stale', dateKey: '2020-01-01', slots: { breakfast: [ITEM_A] } }));
     saveCurrentPlan('My Week');
     expect(getActiveSavedPlan()).not.toBeNull();

@@ -5,13 +5,13 @@
  * can reuse the same white bordered row on a plain glass background.
  *
  * Generalized just enough for that second use:
- *   - `food.tier` (Top/Strong/Good) renders an optional compact tier pill,
- *     for callers that have tier data (Top Dos & Don'ts explicitly carries
- *     no tier data, so this stays invisible there).
+ *   - `food.numericId` (descriptionNumericID) renders the app-wide FoodRating
+ *     stars/skulls, for callers that have it (the Suggest fine-group list;
+ *     Top Dos & Don'ts and Food Groups rows carry none, so nothing shows).
  *
  * Props:
- *   food          — { id, name, group?, fineGroup?, groupLabel?, isLifestyle?, tier?, image? }
- *   studyCount    — number | null/undefined — rendered as "N studies" when a real number,
+ *   food          — { id, name, group?, fineGroup?, groupLabel?, isLifestyle?, numericId?, image? }
+ *   studyCount    — number | null/undefined — rendered as "N references" when a real number,
  *                   with a small info affordance explaining what the count means.
  *   onSelect      — callback(food)
  *   saveAction    — optional save-button element (renders at the row's
@@ -65,7 +65,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Info } from 'lucide-react';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import { getOverlayImageFile } from '../../api/localTables.js';
-import { TIER_CONFIG } from '../../utils/tierConfig.js';
+import FoodRating from './FoodRating.jsx';
 
 // ── Study count + info tooltip ──────────────────────────────────────────────
 
@@ -148,7 +148,6 @@ function ImageFadeEdge() {
 }
 
 export default function RankedRow({ food, studyCount, onSelect, saveAction, imageRight = false }) {
-  const tierCfg = food.tier ? TIER_CONFIG[food.tier] : null;
   const image = imageRight
     ? food.image || getIngredientImage(food.name, food.group, getOverlayImageFile(food.id))
     : null;
@@ -184,18 +183,13 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, imag
         </>
       )}
 
-      {/* Name + tier chip + group */}
+      {/* Name + rating + group */}
       <span className={`flex-1 min-w-0 ${imageRight ? 'relative z-10' : ''}`}>
         <span className="flex items-center gap-2 flex-wrap">
           <span className="font-sans text-sm font-semibold text-char-900">
             {food.name}
           </span>
-          {tierCfg && (
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-pill text-[11px] font-semibold ${tierCfg.bg} ${tierCfg.fg}`}>
-              <span className={`w-[6px] h-[6px] rounded-full ${tierCfg.dot}`} />
-              {tierCfg.label}
-            </span>
-          )}
+          <FoodRating numericId={food.numericId} tone="light" size={13} />
         </span>
         {/* Skip 'x' — Nutridigm's catch-all fine group has no real label, so
             getGroupLabel echoes the raw code back (see adapter.js). */}

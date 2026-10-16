@@ -1,9 +1,14 @@
 .home-screen {
+  --home-sage: #D7DFCD;
+  --home-paper: #F7F3E9;
+  --home-clay: #EAD6C6;
+  --home-oat: #EFE3C9;
+  background: var(--home-sage);
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
   /* AppShell already reserves 7rem for the tabs. Paint that reserve here so
-     the blue-gray surface continues behind them, with one document scroll. */
+     the paper surface continues behind them, with one document scroll. */
   margin-bottom: -7rem;
   overflow-x: clip;
 }
@@ -20,8 +25,12 @@
   min-width: 0;
   padding: 1.25rem 1.25rem calc(7rem + env(safe-area-inset-bottom, 0px));
   border-radius: 2rem 2rem 0 0;
-  background: var(--paper-100);
+  background: var(--home-paper);
 }
+
+.home-shortcut--sage { background: var(--home-sage); }
+.home-shortcut--clay { background: var(--home-clay); }
+.home-shortcut--oat { background: var(--home-oat); }
 
 .home-shortcuts {
   display: flex;
@@ -42,7 +51,7 @@
   gap: 0.625rem;
   min-width: 0;
   min-height: 6.25rem;
-  padding: 0.875rem 0.8125rem;
+  padding: 0.875rem 0.5rem;
   border-radius: 1.25rem;
   text-decoration: none;
   transition: transform 180ms ease, border-color 180ms ease;
@@ -60,6 +69,10 @@
 
 .home-shortcut__label {
   max-width: 100%;
+  /* Shrinks a touch on narrow phones so "and Don'ts" stays on one line; rem
+     floor/cap keep it following the system text size. */
+  font-size: clamp(0.875rem, 4vw, 1rem);
+  text-wrap: balance;
   text-align: center;
   white-space: pre-line;
   overflow-wrap: anywhere;

@@ -40,7 +40,7 @@
  * that simply hasn't been checked yet.
  */
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Navigate } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { getFineFoodGroups, getFineGroupSuggestions, getGroupLabel } from '../../api/api.js';
 import { MAX_RECOMMENDATIONS_PER_CATEGORY } from '../../api/config.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
@@ -49,7 +49,8 @@ import PageHeader from '../../components/shared/PageHeader.jsx';
 import GlassPanel from '../../components/shared/GlassPanel.jsx';
 import BackButton from '../../components/shared/BackButton.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
-import DataState from '../../components/shared/DataState.jsx';
+import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
+import CoverageNote from '../../components/shared/CoverageNote.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
 
@@ -69,9 +70,15 @@ async function fetchFineGroupDetail(fineGroupCode) {
   return { ...res, requestedConditionIds: profile.conditions };
 }
 
+// Remounted per fine group (see the `key`) so moving group → group shows the
+// loading state instead of the previous group's rows — useAsyncData keeps old
+// data across dep changes.
 export default function FineGroupDetailScreen() {
   const { fineGroupId } = useParams();
-  const navigate = useNavigate();
+  return <FineGroupDetail key={fineGroupId} fineGroupId={fineGroupId} />;
+}
+
+function FineGroupDetail({ fineGroupId }) {
   const [selectedFood, setSelectedFood] = useState(null);
   const [selectedListType, setSelectedListType] = useState(undefined);
   const [groupLabel, setGroupLabel] = useState(fineGroupId);
@@ -137,10 +144,9 @@ export default function FineGroupDetailScreen() {
     <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
       <PageHeader label="Best & Worst Choices" className="pb-3">
         <div className="flex items-center gap-3 mt-3">
-          {/* Canonical URL, same as the invalid-param redirect above — the
-              retired ?tab=suggest still aliases here, but nothing new should
-              be written against it. */}
-          <BackButton onClick={() => navigate('/app/suggestions?tab=groups&mode=fine')} />
+          {/* Real history back (4.10); the fallback is the canonical URL,
+              same as the invalid-param redirect above, for deep links. */}
+          <BackButton fallback="/app/suggestions?tab=groups&mode=fine" />
           <h1 className="font-display text-[24px] font-semibold text-blue-950 leading-tight truncate">
             {groupLabel}
           </h1>
@@ -151,9 +157,12 @@ export default function FineGroupDetailScreen() {
       <GlassPanel>
         <div className="flex flex-col gap-3">
           {status === 'loading' ? (
-            <div className="flex flex-col gap-2">
-              {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonRow key={i} />)}
-            </div>
+            <>
+              <div className="flex flex-col gap-2">
+                {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonRow key={i} />)}
+              </div>
+              <SlowLoadingNote />
+            </>
           ) : (
             <DataState
               status={status}
@@ -168,6 +177,7 @@ export default function FineGroupDetailScreen() {
               emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
             >
               <div className="flex flex-col gap-2">
+                <CoverageNote coverage={data?.coverage} />
                 {items.map((food) => (
                   <RankedRow
                     key={food.id}

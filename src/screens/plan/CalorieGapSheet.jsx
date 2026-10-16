@@ -1,90 +1,58 @@
-/**
- * CalorieGapSheet — shown after "Create meal plan" when the resulting week
- * lands well under the user's estimated daily need.
- *
- * A picks-only plan caps each slot at what the user actually chose, so picking
- * lightly produces a genuinely thin day (see `pickWindow` in
- * src/api/planBuilder.js). That's allowed — this sheet just makes it visible
- * and offers two explicit next steps. Dismissing it and living with the
- * shortfall is a valid outcome.
- *
- * Task 9 (2026-09): this used to render an inline, uncapped-feeling grid of
- * quick-add `FoodImageCard`s below the summary (a second picker stacked on
- * top of the picker) plus a plain "Back" button. That's replaced with two
- * explicit choices matching this sheet's real job — accept the shortfall, or
- * go get more choices from the full Recipes catalog:
- *   - "Continue anyway" (`onContinue`) — unchanged, accepts the shortfall.
- *   - "Choose more recipes" (`onChooseMore`) — navigates to /app/recipes
- *     (RecipesScreen) instead of returning to the picker's own rails.
- * Tapping the sheet's own X/backdrop (`onClose`) just dismisses it and
- * returns to the picker with every selection intact — the old "Back"
- * button's behavior, now implicit rather than a labeled footer action.
- *
- * Still the SAME single trigger point as before (`MealPlannerPicker`'s
- * `handleCreatePlan`, once, right after plan creation) — only this sheet's
- * body changed, not when/how often it fires. See the project rule: the gap
- * sheet fires ONCE at plan creation only, never a running/continuous tally.
- *
- * Rendered from inside MealPlannerPicker so `onClose` returns to the picker
- * with every selection intact.
- */
-
+import { Link } from 'react-router-dom';
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
+import { formatCalories } from '../../api/calorieNeeds.js';
+import { COPY, SHEET_Z } from './plannerCopy.js';
 
 /**
+ * CalorieGapSheet - shown ONCE, right after "Randomize from my favorites"
+ * builds a week whose today lands well under the calorie target. It only makes
+ * the shortfall visible and offers two ways on: accept it, or add more
+ * favorites. Dismissing it is the same as continuing. Never a running tally.
+ *
  * @param {Object} props
- * @param {boolean} props.open
- * @param {number} props.need - estimated daily need (kcal); never null here
- * @param {number} props.total - current estimated total for today's plan day
- * @param {() => void} props.onClose - dismiss the sheet, stay in the picker
- * @param {() => void} props.onContinue - accept the shortfall and finish
- * @param {() => void} props.onChooseMore - go pick more recipes (navigates to /app/recipes)
+ * @param {number} props.need - calorie target (profile target, else the default)
+ * @param {number} props.total - today's planned total
+ * @param {() => void} props.onClose - dismiss (same as Continue)
+ * @param {() => void} props.onAddMore - called as the user follows the link to My Favorites
  */
-export default function CalorieGapSheet({
-  open,
-  need,
-  total,
-  onClose,
-  onContinue,
-  onChooseMore,
-}) {
+export default function CalorieGapSheet({ need, total, onClose, onAddMore }) {
   const shortfall = Math.max(0, Math.round(need - total));
-  const stillShort = shortfall > 0;
 
   return (
-    <BottomSheet open={open} onClose={onClose} zClass="z-[70]">
-      <div className="flex flex-col gap-1 mb-4">
-        <h2 className="font-display text-lg font-semibold text-blue-950 tracking-tightish leading-snug">
-          My meal plan doesn't reach enough calories
+    <BottomSheet open onClose={onClose} zClass={SHEET_Z}>
+      <div className="mb-4 flex flex-col gap-1">
+        <h2 className="font-display text-lg font-semibold leading-snug tracking-tightish text-blue-950">
+          {COPY.gapTitle}
         </h2>
-        <p className="font-sans text-sm text-char-500">What would you like to do?</p>
+        <p className="font-sans text-sm text-char-500">{COPY.gapQuestion}</p>
       </div>
 
       <div className="mb-2 rounded-xl bg-paper-200 px-4 py-3">
         <p className="font-sans text-sm text-blue-950">
-          {`~${Math.round(total).toLocaleString()} of ~${need.toLocaleString()} cal planned`}
+          {total > 0
+            ? COPY.gapPlanned(formatCalories(total), need.toLocaleString())
+            : COPY.gapNone(need.toLocaleString())}
         </p>
-        <p className="font-sans text-xs text-char-500 mt-0.5">
-          {stillShort
-            ? `About ${shortfall.toLocaleString()} short — all values are estimates.`
-            : 'You’ve reached your estimated need — all values are estimates.'}
-        </p>
+        {total > 0 && shortfall > 0 && (
+          <p className="mt-0.5 font-sans text-xs text-char-500">{COPY.gapShort(shortfall.toLocaleString())}</p>
+        )}
       </div>
 
-      <div className="sticky bottom-0 -mx-5 mt-4 flex items-center gap-3 bg-white px-5 pt-3 pb-1">
-        <button
-          onClick={onChooseMore}
-          className="flex-1 rounded-pill border border-sand-200 bg-white py-3 font-sans text-sm font-semibold
-            text-blue-950 transition-all duration-fast hover:bg-paper-200 active:scale-[0.99]"
+      <div className="sticky bottom-0 -mx-5 mt-4 flex items-center gap-3 bg-white px-5 pb-1 pt-3">
+        <Link
+          to="/app/favorites"
+          onClick={onAddMore}
+          className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-pill border border-sand-200 bg-white py-3
+            font-sans text-sm font-semibold text-blue-950 transition duration-fast hover:bg-paper-200 active:scale-[0.99]"
         >
-          Choose more recipes
-        </button>
+          {COPY.gapAddMore}
+        </Link>
         <button
-          onClick={onContinue}
-          className="flex-1 rounded-pill bg-blue-950 py-3 font-sans text-sm font-semibold text-white
-            transition-all duration-fast hover:bg-blue-900 active:scale-[0.99]"
+          onClick={onClose}
+          className="min-h-[44px] flex-1 rounded-pill bg-blue-950 py-3 font-sans text-sm font-semibold text-white
+            transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
         >
-          Continue anyway
+          {COPY.gapContinue}
         </button>
       </div>
     </BottomSheet>

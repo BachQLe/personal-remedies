@@ -10,7 +10,7 @@
  * back button + the group's own title.
  */
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Navigate } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { getGroupLabel } from '../../api/api.js';
 import { COARSE_GROUP_LABELS } from '../../api/config.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
@@ -22,7 +22,6 @@ import { CATEGORY_GRID_GROUPS } from './GroupsTab.jsx';
 
 export default function GroupDetailScreen() {
   const { groupId } = useParams();
-  const navigate = useNavigate();
   const [selectedFood, setSelectedFood] = useState(null);
   const [selectedListType, setSelectedListType] = useState(undefined);
   const [groupLabel, setGroupLabel] = useState(() => COARSE_GROUP_LABELS[groupId] ?? groupId);
@@ -59,7 +58,8 @@ export default function GroupDetailScreen() {
     <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
       <PageHeader label="Best & Worst Choices" className="pb-3">
         <div className="flex items-center gap-3 mt-3">
-          <BackButton onClick={() => navigate('/app/suggestions?tab=groups')} />
+          {/* Real history back (4.10); fallback only for a deep link. */}
+          <BackButton fallback="/app/suggestions?tab=groups" />
           <h1 className="font-display text-[24px] font-semibold text-blue-950 leading-tight truncate">
             {groupLabel}
           </h1>

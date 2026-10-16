@@ -129,13 +129,15 @@ function isUnauthorized(err) {
  * Calls `fn(conditionIds)`. On NOTAUTHORIZEDHEALTHID, probes each condition
  * alone, drops the unauthorized ones and re-runs with the rest. If none are
  * scorable returns `empty`. Always returns `unscorableReason` (string|null)
- * naming the dropped conditions. Other errors (quota, network) rethrow.
+ * naming the dropped conditions. When SOME (not all) were dropped it also
+ * returns `coverage` — the display names scored vs. dropped (checklist 4.2);
+ * the key is absent otherwise. Other errors (quota, network) rethrow.
  *
  * @template T
  * @param {number[]} conditionIds
  * @param {(ids: number[]) => Promise<T>} fn
  * @param {T} empty - result when no condition is scorable
- * @returns {Promise<{ result: T, unscorableReason: string|null }>}
+ * @returns {Promise<{ result: T, unscorableReason: string|null, coverage?: { scored: string[], unscored: string[] } }>}
  */
 async function withAuthorized(conditionIds, fn, empty) {
   try {
@@ -152,7 +154,8 @@ async function withAuthorized(conditionIds, fn, empty) {
   const unscorableReason = cantScoreMessage(names);
   if (!okIdx.length) return { result: empty, unscorableReason };
   const result = okIdx.length === 1 ? probes[okIdx[0]].value : await fn(okIdx.map((i) => conditionIds[i]));
-  return { result, unscorableReason };
+  const scored = await getConditionNames(okIdx.map((i) => conditionIds[i])).catch(() => []);
+  return { result, unscorableReason, coverage: { scored, unscored: names } };
 }
 
 // ── Tier mapping ─────────────────────────────────────────────────────────────
@@ -1129,19 +1132,19 @@ async function getSuggestionsRaw(conditionIds, consumeOrAvoid) {
  *
  * @param {import('./types.js').Profile} profile
  * @param {'consume'|'avoid'} direction
- * @returns {Promise<{ items: import('./types.js').Food[], unscorableReason: string|null }>}
+ * @returns {Promise<{ items: import('./types.js').Food[], unscorableReason: string|null, coverage?: { scored: string[], unscored: string[] } }>}
  */
 export async function getTopDosAndDonts(profile, direction) {
   const conditionIds = profile?.conditions || [];
   if (!conditionIds.length) return { items: [], unscorableReason: null };
 
-  const { result, unscorableReason } = await withAuthorized(
+  const { result, unscorableReason, coverage } = await withAuthorized(
     conditionIds,
     (ids) => getTopDosAndDontsRaw(ids, direction),
     []
   );
 
-  return { items: result, unscorableReason };
+  return { items: result, unscorableReason, coverage };
 }
 
 /**
@@ -1202,19 +1205,19 @@ export async function getWorstFoods(profile) {
  * @param {import('./types.js').Profile} profile
  * @param {string} coarseGroup - Coarse food group code (b,c,d,e,f,g,h,i,k)
  * @param {'helpful'|'neutral'|'harmful'} listType
- * @returns {Promise<{ items: import('./types.js').Food[], unscorableReason: string|null }>}
+ * @returns {Promise<{ items: import('./types.js').Food[], unscorableReason: string|null, coverage?: { scored: string[], unscored: string[] } }>}
  */
 export async function getCategoryDetail(profile, coarseGroup, listType) {
   const conditionIds = profile?.conditions || [];
   if (!conditionIds.length || !coarseGroup) return { items: [], unscorableReason: null };
 
-  const { result, unscorableReason } = await withAuthorized(
+  const { result, unscorableReason, coverage } = await withAuthorized(
     conditionIds,
     (ids) => getCategoryDetailRaw(ids, coarseGroup, listType),
     []
   );
 
-  return { items: result, unscorableReason };
+  return { items: result, unscorableReason, coverage };
 }
 
 /**
@@ -1679,7 +1682,8 @@ function topUpLunchFromDefaultedDinnerRecipes(lunchCandidates, dinnerCandidates,
  *   candidates: Record<string, import('./types.js').PlanCandidate[]>,
  *   conditionIds: number[],
  *   conditionNames: string[],
- *   unscorableReason: string|null
+ *   unscorableReason: string|null,
+ *   coverage?: { scored: string[], unscored: string[] }
  * }>}
  */
 export async function getMealPlanSuggestions(profile) {
@@ -1693,7 +1697,7 @@ export async function getMealPlanSuggestions(profile) {
     };
   }
 
-  const { result, unscorableReason } = await withAuthorized(
+  const { result, unscorableReason, coverage } = await withAuthorized(
     conditionIds,
     (ids) => getMealPlanSuggestionsRaw(ids),
     {
@@ -1703,7 +1707,7 @@ export async function getMealPlanSuggestions(profile) {
     }
   );
 
-  return { ...result, unscorableReason };
+  return { ...result, unscorableReason, coverage };
 }
 
 /**
@@ -2151,6 +2155,7 @@ async function getFineGroupSuggestionsRaw(conditionIds, fineGroupCode) {
  *     referenceTotal: number|null, matchedConditions: string[]
  *   }>,
  *   unscorableReason: string|null,
+ *   coverage?: { scored: string[], unscored: string[] },
  *   requestedConditionIds: number[]
  * }>}
  */
@@ -2161,13 +2166,13 @@ export async function getFineGroupSuggestions(profile, fineGroupCode) {
     return { items: [], unscorableReason: null, requestedConditionIds: conditionIds };
   }
 
-  const { result, unscorableReason } = await withAuthorized(
+  const { result, unscorableReason, coverage } = await withAuthorized(
     conditionIds,
     (ids) => getFineGroupSuggestionsRaw(ids, fineGroupCode),
     []
   );
 
-  return { items: result, unscorableReason, requestedConditionIds: conditionIds };
+  return { items: result, unscorableReason, coverage, requestedConditionIds: conditionIds };
 }
 
 /**

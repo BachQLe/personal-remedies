@@ -3,14 +3,15 @@
  * (REMEDI_MASTER_PLAN.md §4.1; see src/api/loadState.js for how `status` is
  * derived and src/hooks/useAsyncData.js for the hook that produces it).
  *
- * Pure rendering, no fetching/timers/subscriptions of its own — a screen
+ * Pure rendering, no fetching/timers/subscriptions of its own (the slow-load
+ * note below is a CSS animation delay, not a timer) — a screen
  * hands it a `status` string plus the copy it wants for the empty/error
  * cases, and gets back the right branch:
  *   - 'success' / 'offline-cached'  → renders `children` (offline-cached
  *     ALSO shows a slim "Offline — showing saved data" banner above them,
  *     non-blocking — the data underneath is still real and interactive).
  *   - 'loading'                     → a neutral Skeleton/SkeletonGroup
- *     block. Screens with their own bespoke ghost/skeleton UI (the
+ *     block plus a SlowLoadingNote that fades in after ~2.5 s. Screens with their own bespoke ghost/skeleton UI (the
  *     `.rm-ghost` system, local skeletons) should keep using it and simply
  *     never pass 'loading' through this component — this is the fallback
  *     for screens that don't have one, not a replacement for those that do.
@@ -79,6 +80,20 @@ const RETRY_BTN_CLS =
 
 const ERROR_STATUSES = ['error-network', 'error-api', 'offline-no-cache'];
 
+/**
+ * "Nutri is thinking…" — shown only when a load runs long. Invisible until
+ * the `.slow-loading-note` CSS animation-delay (src/index.css) elapses, so
+ * there are no timers or state here; fast loads never see it. Drop it under
+ * any bespoke skeleton/ghost, as a sibling of that loading region.
+ */
+export function SlowLoadingNote({ className = '' }) {
+  return (
+    <p role="status" className={`slow-loading-note text-center text-xs font-sans text-char-500 ${className}`}>
+      Nutri is thinking…
+    </p>
+  );
+}
+
 export default function DataState({
   status,
   onRetry,
@@ -107,14 +122,17 @@ export default function DataState({
 
   if (status === 'loading') {
     return (
-      <div
-        className="px-5 py-6"
-        role="status"
-        aria-label={screenName ? `Loading ${screenName}` : 'Loading'}
-      >
-        <SkeletonGroup rows={4} />
-        <Skeleton shape="card" className="h-24 w-full mt-4" />
-      </div>
+      <>
+        <div
+          className="px-5 py-6"
+          role="status"
+          aria-label={screenName ? `Loading ${screenName}` : 'Loading'}
+        >
+          <SkeletonGroup rows={4} />
+          <Skeleton shape="card" className="h-24 w-full mt-4" />
+        </div>
+        <SlowLoadingNote className="px-5 pb-6" />
+      </>
     );
   }
 

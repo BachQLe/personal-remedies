@@ -117,17 +117,17 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden relative">
-      <div className="flex-none px-7 pt-6 relative z-10 bg-[#BBCEFF]">
+      <div className="flex-none px-7 pt-6 relative z-10 bg-[var(--onboarding-bg)]">
         <div className="flex items-center justify-between h-9">
           {onBack && <BackButton onClick={onBack} />}
           <span className="font-label text-xs tracking-widest uppercase text-blue-950/60">4 of 4</span>
         </div>
       </div>
 
-      {/* ── Form area (blue): single integrated-search page ───────────────── */}
+      {/* Single integrated-search page */}
       <div
         className="flex-1 relative overflow-hidden hide-scrollbar"
-        style={{ backgroundColor: '#BBCEFF' }}
+        style={{ backgroundColor: 'var(--onboarding-bg)' }}
       >
         <div className="absolute inset-0 overflow-hidden px-7 pb-2">
           <ConditionsPanel
@@ -142,7 +142,7 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
         </div>
       </div>
 
-      <div className="flex-none px-7 pt-3 bg-[#BBCEFF]" style={{ paddingBottom: 'max(28px, env(safe-area-inset-bottom))' }}>
+      <div className="flex-none px-7 pt-3 bg-[var(--onboarding-bg)]" style={{ paddingBottom: 'max(28px, env(safe-area-inset-bottom))' }}>
         <button
           type="button"
           onClick={onSubmit}
@@ -207,7 +207,7 @@ function ConditionsPanel({
             onBlur={() => setFocused(false)}
             aria-label="Search conditions, diets, allergies"
             placeholder="Search conditions, diets, allergies…"
-            className="w-full pl-11 pr-4 py-[15px] rounded-full border-[1.5px] border-blue-950/10 bg-[#E0E7F5] text-[16px] text-blue-950 placeholder:text-blue-950/55 font-sans shadow-sm transition-all duration-fast ease-ds-out focus:outline-none focus:border-blue-950/40 focus:shadow-sm"
+            className="w-full pl-11 pr-4 py-[15px] rounded-full border-[1.5px] border-blue-950/10 bg-[#E6E8DD] text-[16px] text-blue-950 placeholder:text-blue-950/55 font-sans shadow-sm transition-all duration-fast ease-ds-out focus:outline-none focus:border-blue-950/40 focus:shadow-sm"
           />
         </div>
 
@@ -220,7 +220,7 @@ function ConditionsPanel({
             transition={{ type: 'tween', duration: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
             className="flex flex-col rounded-t-[24px] p-3 flex-1 min-h-0 mt-3"
             style={{
-              backgroundColor: '#CAD7F0',
+              backgroundColor: '#DDE2D2',
               borderTop: '1px solid rgba(255,255,255,0.45)',
               borderLeft: '1px solid rgba(255,255,255,0.45)',
               borderRight: '1px solid rgba(255,255,255,0.45)',
@@ -252,7 +252,7 @@ function ConditionsPanel({
 
             {/* Synonym hint */}
             {synonymMatch && conditionQuery.trim() && (
-              <p className="flex-none text-[13px] mt-3 font-sans font-semibold tracking-wide" style={{ color: '#4c599aff' }}>
+              <p className="flex-none text-[13px] mt-3 font-sans font-semibold tracking-wide" style={{ color: '#59694C' }}>
                 Showing results for "{synonymMatch}"
               </p>
             )}
@@ -271,7 +271,7 @@ function ConditionsPanel({
                     toggleInList('conditions', c.healthConditionID);
                     setConditionQuery('');
                   }}
-                  className="flex-none w-full text-left px-4 py-4 rounded-sm text-sm font-medium bg-[#E0E7F5] text-blue-950 border border-blue-950/10 hover:border-blue-950/40 shadow-sm hover:shadow-md transition-all duration-fast min-h-[52px] font-sans flex items-center gap-2.5"
+                  className="flex-none w-full text-left px-4 py-4 rounded-sm text-sm font-medium bg-[#E6E8DD] text-blue-950 border border-blue-950/10 hover:border-blue-950/40 shadow-sm hover:shadow-md transition-all duration-fast min-h-[52px] font-sans flex items-center gap-2.5"
                 >
                   {(() => {
                     const meta = getConditionMeta(c.description);
@@ -327,7 +327,7 @@ function ConditionsPanel({
               transition={settleFast}
               className="flex-none rounded-[18px] p-2 flex flex-col gap-1.5 mt-3"
               style={{
-                backgroundColor: '#CAD7F0',
+                backgroundColor: '#DDE2D2',
                 borderTop: '1px solid rgba(255,255,255,0.45)',
                 borderLeft: '1px solid rgba(255,255,255,0.45)',
                 borderRight: '1px solid rgba(255,255,255,0.45)',
@@ -349,10 +349,10 @@ function ConditionsPanel({
                       className="min-h-[100px] rounded-xl flex flex-col transition-all duration-fast font-sans relative overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-950"
                       style={
                         c
-                          ? { backgroundColor: '#E0E7F5' }
+                          ? { backgroundColor: '#E6E8DD' }
                           : {
-                            backgroundColor: '#ADC3EC',
-                            border: '1.5px solid #8BA8DA',
+                            backgroundColor: '#CED7BD',
+                            border: '1.5px solid #AAB89A',
                           }
                       }
                     >
@@ -381,8 +381,8 @@ function ConditionsPanel({
                       ) : (
                         <div className="flex-1 flex flex-col items-center justify-center gap-2 px-1.5">
                           <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <line x1="18" y1="6" x2="18" y2="30" stroke="#314F87" strokeWidth="4.5" strokeLinecap="round" />
-                            <line x1="6" y1="18" x2="30" y2="18" stroke="#314F87" strokeWidth="4.5" strokeLinecap="round" />
+                            <line x1="18" y1="6" x2="18" y2="30" stroke="#536A43" strokeWidth="4.5" strokeLinecap="round" />
+                            <line x1="6" y1="18" x2="30" y2="18" stroke="#536A43" strokeWidth="4.5" strokeLinecap="round" />
                           </svg>
                         </div>
                       )}

@@ -18,14 +18,38 @@
  * `profile`/`library`/`dailyPlan`, not HTTP cache bookkeeping.
  *
  * An in-memory Map sits on top of localStorage so repeat calls within the
- * same session (e.g. multiple components asking for the food dictionary)
+ * same session (e.g. multiple components asking for the same response)
  * don't even pay the JSON.parse cost.
+ *
+ * ALLOWLIST (checklist 3.3): only the key families in PERSISTED_KEY_PREFIXES
+ * ever reach localStorage; any other key is cached in memory for the session
+ * and never written to disk. The three reference tables (items, conditions,
+ * groups) are NOT here at all — they are bundled JSON (src/data/cache/, see
+ * localTables.js), read synchronously with no fetch and no storage write.
+ * Everything below is a short-TTL response cache (8h; refs 7d; messages 15m).
+ * Enforced by src/data/__tests__/cacheAllowlist.test.js (part iv) and
+ * src/api/cache.test.js.
  */
 
 const NS = 'remedi.cache.v1.';
 
 /** Bump this when the shape of any cached payload changes, to invalidate old entries. */
 export const SCHEMA_VERSION = 1;
+
+/**
+ * The only key families persisted to localStorage. Adding a family here is a
+ * deliberate 3.3 decision — cacheAllowlist.test.js pins this list and fails
+ * when adapter.js builds a key family that isn't on it.
+ */
+export const PERSISTED_KEY_PREFIXES = [
+  'topdoordonts:',
+  'suggest:',
+  'recipes:',
+  'detailed:',
+  'goodfor:',
+  'refs:',
+  'messages.json',
+];
 
 /** @type {Map<string, { v: number, ts: number, data: any }>} */
 const _memory = new Map();
@@ -53,6 +77,7 @@ function readEntry(key) {
 function writeEntry(key, entry) {
   _memory.set(key, entry);
   if (typeof window === 'undefined') return;
+  if (!PERSISTED_KEY_PREFIXES.some((prefix) => key.startsWith(prefix))) return;
   try {
     window.localStorage.setItem(NS + key, JSON.stringify(entry));
   } catch {

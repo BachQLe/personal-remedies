@@ -1,6 +1,7 @@
 import { BackArrow } from './Icon.jsx';
+import { useGoBack } from '../../hooks/useGoBack.js';
 
-export default function BackButton({ onClick, 'aria-label': ariaLabel = 'Go back' }) {
+function Button({ onClick, ariaLabel }) {
   return (
     <button
       type="button"
@@ -11,4 +12,17 @@ export default function BackButton({ onClick, 'aria-label': ariaLabel = 'Go back
       <BackArrow aria-hidden="true" />
     </button>
   );
+}
+
+// Split out so only the no-`onClick` form needs a Router above it.
+function HistoryBackButton({ fallback, ariaLabel }) {
+  return <Button onClick={useGoBack(fallback)} ariaLabel={ariaLabel} />;
+}
+
+// No `onClick` → real history back (see useGoBack); `fallback` is where a
+// deep-linked screen with nothing behind it lands instead.
+export default function BackButton({ onClick, fallback, 'aria-label': ariaLabel = 'Go back' }) {
+  return onClick
+    ? <Button onClick={onClick} ariaLabel={ariaLabel} />
+    : <HistoryBackButton fallback={fallback} ariaLabel={ariaLabel} />;
 }

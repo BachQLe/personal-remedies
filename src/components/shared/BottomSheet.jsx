@@ -149,7 +149,7 @@ export default function BottomSheet({
             </button>
           </div>
         )}
-        <div className="overflow-y-auto flex-1 px-5 py-4">{children}</div>
+        <div className="overflow-y-auto overscroll-contain flex-1 px-5 py-4">{children}</div>
       </div>
     </div>
   );

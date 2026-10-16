@@ -47,9 +47,10 @@ async function loadFresh() {
   const { storage } = await import('../storage.js');
   const dailyPlan = await import('../../state/dailyPlan.js');
   const profileSync = await import('../profileSync.js');
+  const { isFavoritesPrunePending } = await import('../favoritesPrune.js');
   storage.clear();
   dailyPlan.reloadPlan();
-  return { storage, ...dailyPlan, ...profileSync };
+  return { storage, isFavoritesPrunePending, ...dailyPlan, ...profileSync };
 }
 
 /** Minimal WeeklyPlan fixture, distinguishing conditionsKey only (days/picksBySlot unused by these tests). */
@@ -123,6 +124,22 @@ describe('initProfileSync: conditions-change purge guard (gap 1)', () => {
     storage.set('profile', { conditions: [999] });
 
     expect(getPlan()).toBeNull();
+
+    teardown();
+  });
+
+  it('flags favorites for pruning on a guidance change (not on unrelated profile edits)', async () => {
+    vi.doMock(SUPABASE_MODULE, () => ({ supabase: null, isSupabaseConfigured: false }));
+    const { storage, isFavoritesPrunePending, initProfileSync } = await loadFresh();
+
+    storage.set('profile', { firstName: 'Amy', conditions: [203] });
+    const teardown = initProfileSync();
+
+    storage.set('profile', { firstName: 'Amelia', conditions: [203] });
+    expect(isFavoritesPrunePending()).toBe(false);
+
+    storage.set('profile', { firstName: 'Amelia', conditions: [203, 244] });
+    expect(isFavoritesPrunePending()).toBe(true);
 
     teardown();
   });

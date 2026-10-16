@@ -2,19 +2,12 @@
  * nutrition.test.js — Guard tests for the layered nutrition resolver
  * (src/api/nutrition.js, Task T3D).
  *
- * Runs against the REAL committed USDA tables (src/data/usda/fdcMap.json /
- * nutrients.json), which are now populated with real foodItemID -> fdcId
- * matches. Fixture ids in the tier-3/tier-4 sections below are deliberately
- * chosen outside that map's id range (900000+) so tier 2 (USDA) still can't
- * hit and `resolveNutrition` falls through to tier 3, matching
- * `estimateNutrition` byte-for-byte (plus the added `source` field).
- *
- * Tier-2 (USDA) matching WITH data present is covered separately in
- * nutrition.usda.test.js, which mocks the two JSON tables — kept in its own
- * file so `vi.mock`'s file-level hoisting doesn't affect these tests.
+ * Tiers: recipe panel, then the estimate seam, then null. USDA is cut
+ * (checklist 2.1/2.2), so a plain food only ever resolves via the estimate
+ * table.
  */
 import { describe, expect, it } from 'vitest';
-import { resolveNutrition, resolveDayTotals } from '../nutrition.js';
+import { resolveNutrition } from '../nutrition.js';
 import { estimateNutrition } from '../../data/nutritionEstimates.js';
 
 // ── Tier 1 — recipe source panel (real, per-serving) ────────────────────────
@@ -109,10 +102,10 @@ describe('resolveNutrition — tier 1: recipe panel', () => {
   });
 });
 
-// ── Tier 2 absent (empty tables) → falls through to tier 3 ─────────────────
+// ── No panel → falls through to the estimate tier ───────────────────────────
 
-describe('resolveNutrition — tier 2 (USDA) absent for an id with no map entry', () => {
-  it('a plain food item with no panel and no USDA match falls through to the estimate tier', () => {
+describe('resolveNutrition — no panel', () => {
+  it('a plain food item with no panel falls through to the estimate tier', () => {
     const item = { id: 999999, fineGroup: 'b1', kind: 'food' };
     const result = resolveNutrition(item);
     expect(result.source).toBe('estimate');
@@ -120,9 +113,9 @@ describe('resolveNutrition — tier 2 (USDA) absent for an id with no map entry'
   });
 });
 
-// ── Tier 3 — hand-labeled estimate ──────────────────────────────────────────
+// ── Tier 2 — hand-labeled estimate ──────────────────────────────────────────
 
-describe('resolveNutrition — tier 3: estimate fallback', () => {
+describe('resolveNutrition — tier 2: estimate fallback', () => {
   it('resolves via fine food group', () => {
     const item = { id: 900001, fineGroup: 'b1' };
     const result = resolveNutrition(item);
@@ -148,9 +141,9 @@ describe('resolveNutrition — tier 3: estimate fallback', () => {
   });
 });
 
-// ── Tier 4 — nothing resolves anywhere ──────────────────────────────────────
+// ── Tier 3 — nothing resolves anywhere ──────────────────────────────────────
 
-describe('resolveNutrition — tier 4: null (never guess)', () => {
+describe('resolveNutrition — tier 3: null (never guess)', () => {
   it('returns null for a falsy item', () => {
     expect(resolveNutrition(null)).toBeNull();
     expect(resolveNutrition(undefined)).toBeNull();
@@ -174,7 +167,7 @@ describe('resolveNutrition — tier 4: null (never guess)', () => {
 
 // ── Empty-tables equivalence proof ──────────────────────────────────────────
 
-describe('resolveNutrition === estimateNutrition today (both USDA tables empty, no panel data)', () => {
+describe('resolveNutrition === estimateNutrition when there is no panel data', () => {
   const sample = [
     ['fine group match', { id: 10, fineGroup: 'b1' }, undefined],
     ['fine group match (beverages)', { id: 11, fineGroup: 'h2' }, 'beverages'],
@@ -195,63 +188,5 @@ describe('resolveNutrition === estimateNutrition today (both USDA tables empty, 
       expect(resolved).toEqual({ ...legacy, source: 'estimate' });
       expect(resolved.estimated).toBe(true);
     }
-  });
-});
-
-// ── resolveDayTotals ─────────────────────────────────────────────────────────
-// NOTE: ids below use 9000xxx so they never collide with real foodItemIDs in the committed USDA tables.
-
-describe('resolveDayTotals', () => {
-  it('returns null for empty/missing items', () => {
-    expect(resolveDayTotals([])).toBeNull();
-    expect(resolveDayTotals(undefined)).toBeNull();
-  });
-
-  it('sums calories/protein/carbs/fat and reports real vs estimated vs none counts', () => {
-    const items = [
-      // real (panel)
-      { id: 9000100, kind: 'recipe', name: 'Panel recipe', nutritionPerServing: { calories: 400, protein: 20, carbs: 30, fat: 10 } },
-      // estimated (fine group)
-      { id: 9000101, name: 'Fish', fineGroup: 'b1' }, // {calories:180, protein:25, carbs:0, fat:8}
-      // estimated (recipe slot, via item.fromSlot)
-      { id: 9000102, kind: 'recipe', name: 'Slot recipe', fromSlot: 'snacks' }, // {calories:200, protein:5, carbs:25, fat:8}
-      // none (unresolvable)
-      { id: 9000103, name: 'Mystery', group: 'zz' },
-    ];
-
-    const totals = resolveDayTotals(items);
-    expect(totals).toEqual({
-      calories: 400 + 180 + 200,
-      protein: 20 + 25 + 5,
-      carbs: 30 + 0 + 25,
-      fat: 10 + 8 + 8,
-      itemCount: 4,
-      realCount: 1,
-      estimatedCount: 2,
-      noneCount: 1,
-    });
-  });
-
-  it('uses item.fromSlot as the slot key, mirroring estimateDayTotals', () => {
-    const items = [{ id: 9000200, kind: 'recipe', fromSlot: 'dinner' }];
-    const totals = resolveDayTotals(items);
-    // RECIPE_SLOT_ESTIMATES.dinner = {calories: 550, ...}
-    expect(totals.calories).toBe(550);
-    expect(totals.estimatedCount).toBe(1);
-  });
-
-  it('a day of entirely unresolvable items still sums to zero with noneCount === itemCount', () => {
-    const items = [{ id: 9000300, group: 'zz' }, { id: 301, group: 'zz' }];
-    const totals = resolveDayTotals(items);
-    expect(totals).toEqual({
-      calories: 0,
-      protein: 0,
-      carbs: 0,
-      fat: 0,
-      itemCount: 2,
-      realCount: 0,
-      estimatedCount: 0,
-      noneCount: 2,
-    });
   });
 });

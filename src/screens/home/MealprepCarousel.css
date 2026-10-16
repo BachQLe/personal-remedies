@@ -12,7 +12,6 @@
   gap: 4px;
   padding: 3px 2px 13px;
 }
-.home-meals__rail::-webkit-scrollbar { display: none; }
 
 .home-meals__tab {
   flex: 1 1 0;
@@ -23,7 +22,7 @@
   border-radius: 999px;
   background: rgb(255 255 255 / 32%);
   color: var(--meal-muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   line-height: 1.3;
   text-align: center;
@@ -45,8 +44,11 @@
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
-  scrollbar-width: none;
   border-radius: 26px 26px 0 0;
+}
+/* Visible scrollbar (.rail-scrollbar): mandatory snap fights a thumb drag. */
+@media (pointer: fine) {
+  .home-meals__rail { scroll-snap-type: x proximity; }
 }
 .home-meals__slide {
   flex: 0 0 100%;
@@ -102,7 +104,7 @@
   border-radius: 999px;
   background: rgb(24 36 32 / 78%);
   color: #fff;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: 0.02em;
@@ -121,7 +123,7 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font-size: clamp(20px, 5vw, 25px);
+  font-size: clamp(1.25rem, 5vw, 1.5625rem);
   line-height: 1.17;
   letter-spacing: -0.025em;
   text-wrap: balance;
@@ -133,7 +135,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: #e0e6e0;
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.35;
 }
 .home-meals__save {
@@ -155,7 +157,7 @@
 .home-meals__save:hover { background: #f0f5ef; }
 .home-meals__save:active { background: #e0eadd; }
 .home-meals__navigation { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 0; color: var(--meal-muted); }
-.home-meals__navigation > span { min-width: 42px; text-align: center; font-size: 11px; font-variant-numeric: tabular-nums; }
+.home-meals__navigation > span { min-width: 42px; text-align: center; font-size: 0.6875rem; font-variant-numeric: tabular-nums; }
 .home-meals__navigation button { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; transition: background 160ms ease; }
 .home-meals__navigation button:hover:enabled { background: rgb(255 255 255 / 40%); }
 .home-meals__navigation button:disabled { opacity: 0.28; cursor: default; }
@@ -168,9 +170,9 @@
 }
 @media (max-width: 360px) {
   .home-meals__tabs { gap: 3px; }
-  .home-meals__tab { padding-inline: 2px; font-size: 10.5px; }
+  .home-meals__tab { padding-inline: 2px; font-size: 0.65625rem; }
   .home-meals__caption { left: 17px; right: 64px; bottom: 18px; }
-  .home-meals__name { font-size: 20px; }
+  .home-meals__name { font-size: 1.25rem; }
   .home-meals__save { width: 36px; height: 36px; right: 12px; bottom: 15px; }
 }
 @media (prefers-reduced-motion: reduce) {

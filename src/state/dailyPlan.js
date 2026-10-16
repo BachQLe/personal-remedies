@@ -18,7 +18,8 @@
  * transparently migrates it into a one-day v2 shape on read (see
  * `_migrateV1`); the remaining 6 days get filled in by the next
  * `ensurePlanForWeek()` call (src/api/planBuilder.js), same as any other
- * "missing trailing day" in the rolling window.
+ * "missing trailing day" in the rolling window. Old persisted plans may still
+ * carry `pinned`/`offsets`/`generation` (pre-Oct-2026); nothing reads them.
  *
  * API:
  *   getPlan()                                → WeeklyPlan|null
@@ -26,11 +27,9 @@
  *   subscribePlan(cb)                        → unsubscribe function
  *   reloadPlan()                             → void (re-read from storage; profileSync pull path)
  *   markEaten(dateKey, id) / unmarkEaten(dateKey, id) → void
- *   togglePinned(dateKey, id)                → void (lock/unlock a card in place for regenerate/shuffle)
  *   removeFromSlot(dateKey, slotKey, id)     → number (removed index, or -1)
  *   insertIntoSlot(dateKey, slotKey, item, index) → void (Undo restore)
  *   addToSlot(dateKey, slotKey, item)        → boolean (false if id already in ANY slot that day)
- *   consumeLegacyQueue()                     → PlanItem[] (reads legacy 'queue' key, non-destructive)
  */
 
 import { storage } from '../api/storage.js';
@@ -73,14 +72,8 @@ import { storage } from '../api/storage.js';
 
 /**
  * @typedef {Object} PlanDayState
- * @property {number} generation - per-day regeneration counter, used by
- *   regenerateDay/shuffleSlot to advance offsets deterministically. Distinct
- *   from `WeeklyPlan.generation` (the week-level counter).
- * @property {Object<string, number>} offsets - slotKey → cursor
  * @property {Object<string, PlanItem[]>} slots - slotKey → items
  * @property {Array<number|string>} eaten - ids marked eaten this day
- * @property {Array<number|string>} pinned - ids locked in place this day;
- *   survive shuffleSlot/regenerateDay/regenerateWeek.
  */
 
 /**
@@ -89,18 +82,16 @@ import { storage } from '../api/storage.js';
  * @property {string} conditionsKey - CSV of condition ids the plan was built
  *   for (requested).
  * @property {string[]} conditionNames
- * @property {number} generation - week-level counter, bumped only by
- *   `regenerateWeek` (each day also carries its own `generation`).
  * @property {Object<string, PlanDayState>} days - LOCAL 'YYYY-MM-DD' date key
  *   (produced via `toLocaleDateString('en-CA')` — NEVER `toISOString`) →
  *   PlanDayState. A rolling 7-day window: see `ensurePlanForWeek` in
  *   src/api/planBuilder.js for how days enter/leave this map.
- * @property {Object<string, PlanItem[]>} [picksBySlot] - slotKey → the items the
- *   user hand-picked in MealPlannerPicker. Present only on picks-built plans, and
- *   its presence is what puts the whole plan into picks-only mode: every day's
- *   slots are drawn from here and NEVER backfilled from the suggestion pools
- *   (see `pickWindow` in src/api/planBuilder.js). Absent on auto-built plans,
- *   including every plan persisted before this field existed.
+ * @property {Object<string, PlanItem[]>} [picksBySlot] - slotKey → the favorites
+ *   that fit that slot (`favoritesBySlot`, src/api/planBuilder.js). Every day's
+ *   slots are drawn from here, and `ensurePlanForWeek` fills the trailing day
+ *   from it as the window rolls — never from the suggestion pools. Absent on
+ *   plans persisted before this field existed; those never get trailing days
+ *   filled.
  */
 
 const STORAGE_KEY = 'dailyPlan';
@@ -113,8 +104,7 @@ const _listeners = new Set();
 
 /**
  * Migrate a v1 single-day `DailyPlan` into the v2 `WeeklyPlan` shape: its
- * slots/offsets/eaten become the entry for its own `date`, with an empty
- * `pinned` list (pinning didn't exist in v1). The remaining 6 days of the
+ * slots/eaten become the entry for its own `date`. The remaining 6 days of the
  * window are intentionally left ungenerated — `ensurePlanForWeek` treats
  * that exactly like any other "missing trailing day" and fills them in.
  * @param {Object} v1
@@ -125,14 +115,10 @@ function _migrateV1(v1) {
     version: 2,
     conditionsKey: v1.conditionsKey ?? '',
     conditionNames: Array.isArray(v1.conditionNames) ? v1.conditionNames : [],
-    generation: 0,
     days: {
       [v1.date]: {
-        generation: v1.generation ?? 0,
-        offsets: v1.offsets && typeof v1.offsets === 'object' ? v1.offsets : {},
         slots: v1.slots,
         eaten: Array.isArray(v1.eaten) ? v1.eaten : [],
-        pinned: [],
       },
     },
   };
@@ -244,29 +230,8 @@ export function unmarkEaten(dateKey, id) {
 }
 
 /**
- * Toggle whether an id is pinned (locked in place) for a given day. Pinned
- * ids are excluded from that slot's/day's next shuffle or regenerate — see
- * `regenerateDay`/`shuffleSlot`/`regenerateWeek` in src/api/planBuilder.js.
- * No-op if there's no plan/day.
- * @param {string} dateKey
- * @param {number|string} id
- */
-export function togglePinned(dateKey, id) {
-  const day = _plan?.days?.[dateKey];
-  if (!day) return;
-  const pinned = day.pinned.includes(id)
-    ? day.pinned.filter((p) => p !== id)
-    : [...day.pinned, id];
-  _plan = { ..._plan, days: { ..._plan.days, [dateKey]: { ...day, pinned } } };
-  _persist();
-  _notify();
-}
-
-/**
  * Remove an item from a day's slot by id — used by Undo (record the
- * returned index, then `insertIntoSlot` to restore). Also drops the id from
- * that day's `pinned` list, if present — a removed card can't stay locked to
- * a position it no longer occupies.
+ * returned index, then `insertIntoSlot` to restore).
  * @param {string} dateKey
  * @param {string} slotKey
  * @param {number|string} id
@@ -280,13 +245,9 @@ export function removeFromSlot(dateKey, slotKey, id) {
   if (index === -1) return -1;
   const nextItems = items.slice();
   nextItems.splice(index, 1);
-  const nextPinned = day.pinned.includes(id) ? day.pinned.filter((p) => p !== id) : day.pinned;
   _plan = {
     ..._plan,
-    days: {
-      ..._plan.days,
-      [dateKey]: { ...day, slots: { ...day.slots, [slotKey]: nextItems }, pinned: nextPinned },
-    },
+    days: { ..._plan.days, [dateKey]: { ...day, slots: { ...day.slots, [slotKey]: nextItems } } },
   };
   _persist();
   _notify();
@@ -295,8 +256,7 @@ export function removeFromSlot(dateKey, slotKey, id) {
 
 /**
  * Insert an item at a specific index within a day's slot — used by Undo to
- * restore a removed card. Dedupes by id within the slot. Restoring a card
- * never re-pins it (pin state is intentionally lost on remove).
+ * restore a removed card. Dedupes by id within the slot.
  * @param {string} dateKey
  * @param {string} slotKey
  * @param {PlanItem} item
@@ -338,25 +298,4 @@ export function addToSlot(dateKey, slotKey, item) {
   _persist();
   _notify();
   return true;
-}
-
-/**
- * Read the legacy `'queue'` key (pre-slot-based-plan) and map its items into
- * PlanItem shape, for one-time migration into a freshly built plan. Does NOT
- * delete the `'queue'` key — src/state/queue.js stays in place as dead code.
- * @returns {PlanItem[]}
- */
-export function consumeLegacyQueue() {
-  const queue = storage.get('queue', []);
-  if (!Array.isArray(queue)) return [];
-  return queue.map((item) => ({
-    id: item.id,
-    name: item.name,
-    image: item.image,
-    group: item.group,
-    fineGroup: item.fineGroup || '',
-    tier: item.tier,
-    numericId: null,
-    kind: 'food',
-  }));
 }

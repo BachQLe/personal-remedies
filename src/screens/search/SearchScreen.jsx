@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Loader2, X } from 'lucide-react';
 import { searchEverything, buildRecipeDetail, getGroupLabel } from '../../api/api.js';
@@ -7,16 +7,14 @@ import { getRecentSearches, addRecentSearch } from '../../state/recentSearches.j
 import Icon from '../../components/shared/Icon.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
+import BackButton from '../../components/shared/BackButton.jsx';
 import DataState from '../../components/shared/DataState.jsx';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import { recipeToSaveItem } from '../../utils/saveGate.js';
 import GoodForMeSheet from './GoodForMeSheet.jsx';
-import TopSources from './NutrientSources.jsx';
-import { parseNutrientQuery } from '../../api/nutrientFacts.js';
 import RequireEntitlement from '../../components/shared/RequireEntitlement.jsx';
 import { useEntitlement } from '../../components/shared/useEntitlement.js';
-import { nutrientDetail, sortForNutrientQuery } from './nutrientDetail.js';
 
 // Single "Food & Nutrient Lookup" search surface — no mode switcher. One
 // query fans out to `searchEverything` (foods, recipes, and the nutrients/
@@ -86,7 +84,7 @@ async function attachFoodGroupLabels(sections) {
   return sections;
 }
 
-function ResultRow({ kind, title, subtitle, detail, onClick, saveItem, onSaveBlocked, onGoodForMe }) {
+function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked, onGoodForMe }) {
   // `saveItem` is opt-in — only recipe rows carry one (they're the only
   // saveable kind here; a plain food/nutrient/herbal result has nothing to
   // save, so passing a SaveButton for it would always render as blocked).
@@ -107,11 +105,6 @@ function ResultRow({ kind, title, subtitle, detail, onClick, saveItem, onSaveBlo
           <span className="flex-1 min-w-0">
             <span className="block font-semibold text-sm text-char-900 truncate leading-tight">{title}</span>
             {subtitle && <span className="block text-xs text-char-500 mt-0.5 truncate">{subtitle}</span>}
-            {detail && (
-              <span className="block text-base font-semibold text-forest-700 mt-1 leading-snug" data-testid="nutrient-answer">
-                {detail}
-              </span>
-            )}
           </span>
         </button>
         {goodForMeUnlocked ? (
@@ -197,22 +190,12 @@ export default function SearchScreen({ active, onClose }) {
   const hasQuery = query.trim().length > 0;
   const trimmedCommitted = committedQuery.trim();
 
-  const parsedQuery = useMemo(() => parseNutrientQuery(trimmedCommitted), [trimmedCommitted]);
-  // A query that is only a nutrient name ("protein") is answered with that nutrient's top-sources ranking.
-  const bareNutrient = parsedQuery && !parsedQuery.food ? parsedQuery.nutrient : null;
-
-  const fetcher = useCallback(async () => {
-    if (!trimmedCommitted) return EMPTY_SECTIONS;
-    // "calcium in milk" -> search the food part, then answer with the nutrient.
-    let sections = null;
-    if (parsedQuery?.food) {
-      sections = await searchEverything(parsedQuery.food, profile.current);
-      if (isSectionsEmpty(sections)) sections = null; // food part found nothing: fall back to the raw text
-    }
-    if (!sections) sections = await searchEverything(trimmedCommitted, profile.current);
-    if (parsedQuery?.food) sections = { ...sections, foods: sortForNutrientQuery(sections.foods, parsedQuery) };
-    return attachFoodGroupLabels(sections);
-  }, [trimmedCommitted, parsedQuery]);
+  const fetcher = useCallback(
+    async () => (trimmedCommitted
+      ? attachFoodGroupLabels(await searchEverything(trimmedCommitted, profile.current))
+      : EMPTY_SECTIONS),
+    [trimmedCommitted],
+  );
 
   const { status, data, retry } = useAsyncData(fetcher, [trimmedCommitted], {
     isEmpty: isSectionsEmpty,
@@ -344,7 +327,6 @@ export default function SearchScreen({ active, onClose }) {
                 kind="food"
                 title={item.food.name}
                 subtitle={item.food.groupLabel || 'Ingredient'}
-                detail={nutrientDetail(parsedQuery?.nutrient, item.food)}
                 onClick={() => openFood(item.food)}
                 onGoodForMe={() => setGoodForFood({ id: item.food.id, name: item.food.name })}
               />
@@ -390,9 +372,13 @@ export default function SearchScreen({ active, onClose }) {
               exit={{ paddingTop: PAD_IDLE, opacity: 0 }}
               transition={{ default: calmSpring, opacity: { duration: 0.25, ease: 'easeOut' } }}
             >
-              <p className="font-label text-xs tracking-widest uppercase text-blue-950/60 flex-none">
-                Search
-              </p>
+              {/* The only visible way out of the results list (4.10). */}
+              <div className="flex items-center gap-3 flex-none pointer-events-auto">
+                <BackButton onClick={onClose} />
+                <p className="font-label text-xs tracking-widest uppercase text-blue-950/60">
+                  Search
+                </p>
+              </div>
               <h1 className="font-display text-[32px] font-semibold text-blue-950 leading-tight mt-2 flex-none">
                 {HEADING}
               </h1>
@@ -439,12 +425,10 @@ export default function SearchScreen({ active, onClose }) {
                         transition={{ duration: 0.18, ease: 'easeOut' }}
                         className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
                       >
-                        {bareNutrient && <TopSources nutrientKey={bareNutrient} onOpenFood={openFood} />}
                         {/* Idle-vs-no-results distinction (must survive): this
                             DataState only ever mounts once `hasQuery` is true —
                             the idle recents/hint view below is a completely
                             separate branch, never routed through 'empty'. */}
-                        {bareNutrient ? status === 'success' && sections : (
                         <DataState
                           status={status}
                           onRetry={retry}
@@ -454,7 +438,6 @@ export default function SearchScreen({ active, onClose }) {
                         >
                           {sections}
                         </DataState>
-                        )}
                       </motion.div>
                     ) : (
                       <motion.div

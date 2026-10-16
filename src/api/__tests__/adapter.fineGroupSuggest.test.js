@@ -340,6 +340,16 @@ describe('getFineGroupSuggestions: partial authorization (key cannot score some 
     expect(result.items.map((i) => i.id)).toEqual([501]);
     expect(result.unscorableReason).toBe("We can't score food for Condition 9001 yet.");
     expect(result.requestedConditionIds).toEqual([203, 9001]);
+    // 4.2: which requested conditions were scored vs. not, by display name.
+    expect(result.coverage).toEqual({ scored: ['Aging'], unscored: ['Condition 9001'] });
+  });
+
+  it('has no coverage when every requested condition was scored', async () => {
+    const { getFineGroupSuggestions } = await setupAuth();
+    const result = await getFineGroupSuggestions({ conditions: [203] }, 'b1');
+
+    expect(result.unscorableReason).toBeNull();
+    expect(result.coverage).toBeUndefined();
   });
 
   it('returns an empty list plus a reason when no condition is scorable', async () => {
@@ -348,5 +358,6 @@ describe('getFineGroupSuggestions: partial authorization (key cannot score some 
 
     expect(result.items).toEqual([]);
     expect(result.unscorableReason).toBe("We can't score food for Condition 9001 yet.");
+    expect(result.coverage).toBeUndefined(); // nothing scored: the empty-state reason says it all
   });
 });

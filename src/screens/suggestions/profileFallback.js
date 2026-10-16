@@ -2,24 +2,29 @@
  * resolveProfileWithConditions — shared profile resolution for the
  * Suggestions screens' data fetchers.
  *
- * Normalizes the stored profile so `conditions` is always an array. No demo
- * conditions are substituted: a profile without conditions stays empty and
- * the adapter returns honest empty results.
+ * Reads the profile from storage — the same source useAsyncData's
+ * `requiresProfile` gate checks — synchronously, rather than awaiting api.js's
+ * getProfile(). (getProfile() now re-reads storage on every call, so it no
+ * longer goes stale after profileSync.pullProfile() writes the profile
+ * straight to storage on sign-in; it was a load-time snapshot when checklist
+ * 4.11 was fixed, which left `conditions: []` until a full reload.)
+ * A legacy profile with name-string conditions still goes through getProfile()
+ * for its one-time migration to numeric IDs.
  *
- * This is ORTHOGONAL to src/hooks/useAsyncData.js's `requiresProfile` gate,
- * which checks whether a profile object exists in storage AT ALL — the real
- * "no profile" signal, surfaced as the 'empty-no-profile' state. This helper
- * only fills in conditions on an existing-but-conditions-less profile, which
- * `requiresProfile` has no opinion on (and still correctly returns
- * 'empty-no-profile' for the rare/edge case where storage has no profile at
- * all — e.g. cleared mid-session — since it reads storage directly rather
- * than trusting this helper's always-non-empty output).
+ * Normalizes `conditions` to always be an array. No demo conditions are
+ * substituted: a profile without conditions stays empty and the adapter
+ * returns honest empty results.
+ *
+ * This is ORTHOGONAL to useAsyncData's `requiresProfile` gate, which checks
+ * whether a profile object exists in storage AT ALL — the real "no profile"
+ * signal, surfaced as the 'empty-no-profile' state.
  * @returns {Promise<import('../../api/types.js').Profile>}
  */
 import { getProfile } from '../../api/api.js';
+import { storage } from '../../api/storage.js';
 
 export async function resolveProfileWithConditions() {
-  const p = await getProfile();
-  const conditions = p?.conditions ?? [];
-  return { ...(p ?? {}), conditions };
+  const stored = storage.get('profile', null);
+  const p = stored?.conditions?.some((c) => typeof c !== 'number') ? await getProfile() : stored;
+  return { ...(p ?? {}), conditions: p?.conditions ?? [] };
 }

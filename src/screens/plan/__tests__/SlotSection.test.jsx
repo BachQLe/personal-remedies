@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 /**
- * SlotSection.test.jsx — Wave 4 guard test for the renamed suggestions
- * trigger ("Suggestions" -> "See other suggestions") and its
- * restored visibility (SHOW_SUGGESTIONS flipped back to `true`).
+ * SlotSection.test.jsx - one meal of the day view: X removes, the + tile adds
+ * from favorites (also the only thing in an empty meal), and the retired
+ * shuffle / pin / meal-tag / suggestions controls are gone.
  */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -27,13 +27,11 @@ async function mount(props) {
       <SlotSection
         slot={SLOT}
         items={[{ id: 1, name: 'Oats', kind: 'food', numericId: 2 }]}
-        pinnedIds={[]}
-        onShuffle={vi.fn()}
         onSelect={vi.fn()}
         onRemove={vi.fn()}
+        onAdd={vi.fn()}
         onOpenSuggestions={vi.fn()}
         ghost={false}
-        shuffling={false}
         onSaveBlocked={vi.fn()}
         {...props}
       />
@@ -53,31 +51,42 @@ afterEach(() => {
   container.remove();
 });
 
-describe('SlotSection suggestions trigger (Wave 4 rename)', () => {
-  it('renders "See other suggestions", not the old "Suggestions" label', async () => {
-    await mount();
-    expect(container.textContent).toContain('See other suggestions');
-    expect(Array.from(container.querySelectorAll('button')).some((b) => b.textContent.trim() === 'Suggestions')).toBe(false);
+const labels = () => Array.from(container.querySelectorAll('button, [role="button"]')).map((b) => b.getAttribute('aria-label') || b.textContent.trim());
+
+describe('SlotSection', () => {
+  it('removes a card with its X, naming the recipe', async () => {
+    const onRemove = vi.fn();
+    const item = { id: 1, name: 'Oats', kind: 'food', numericId: 2 };
+    await mount({ items: [item], onRemove });
+    const x = container.querySelector('[aria-label="Remove Oats from plan"]');
+    expect(x).toBeTruthy();
+    await act(async () => { x.click(); });
+    expect(onRemove).toHaveBeenCalledWith('breakfast', item);
   });
 
-  it('calls onOpenSuggestions with the slot key when tapped', async () => {
-    const onOpenSuggestions = vi.fn();
-    await mount({ onOpenSuggestions });
-    const trigger = Array.from(container.querySelectorAll('button')).find((b) => b.textContent.includes('See other suggestions'));
-    expect(trigger).toBeTruthy();
-    await act(async () => { trigger.click(); });
-    expect(onOpenSuggestions).toHaveBeenCalledWith('breakfast');
+  it('shows the + tile after the cards and calls onAdd with the slot key', async () => {
+    const onAdd = vi.fn();
+    await mount({ onAdd });
+    const tile = container.querySelector('[aria-label="Add from favorites to Breakfast"]');
+    expect(tile).toBeTruthy();
+    await act(async () => { tile.click(); });
+    expect(onAdd).toHaveBeenCalledWith('breakfast');
   });
 
-  it('disables the trigger in ghost mode only', async () => {
-    await mount({ ghost: true });
-    const trigger = Array.from(container.querySelectorAll('button')).find((b) => b.textContent.includes('See other suggestions'));
-    expect(trigger.disabled).toBe(true);
-  });
-
-  it('keeps the trigger enabled for an empty slot (Task 13 behavior preserved)', async () => {
+  it('shows the + tile as the only thing in an empty meal', async () => {
     await mount({ items: [] });
-    const trigger = Array.from(container.querySelectorAll('button')).find((b) => b.textContent.includes('See other suggestions'));
-    expect(trigger.disabled).toBe(false);
+    expect(container.querySelectorAll('[aria-label^="Remove"]')).toHaveLength(0);
+    expect(container.querySelector('[aria-label="Add from favorites to Breakfast"]')).toBeTruthy();
+  });
+
+  it('has no shuffle, pin or suggestions control (SHOW_SUGGESTIONS is off)', async () => {
+    await mount();
+    const text = labels().join('|');
+    expect(text).not.toMatch(/shuffle|pin|suggestions/i);
+  });
+
+  it('disables the + tile in ghost mode', async () => {
+    await mount({ ghost: true });
+    expect(container.querySelector('[aria-label="Add from favorites to Breakfast"]').disabled).toBe(true);
   });
 });

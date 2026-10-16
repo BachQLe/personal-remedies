@@ -6,9 +6,21 @@
 
 html { -webkit-text-size-adjust: 100%; }
 
+/* iOS Dynamic Type: web content only follows the system text-size setting when
+   the root opts in via `-apple-system-body`. That shorthand also resets the
+   family, so restore ours — only the SIZE follows the system. Everything sized
+   in rem/em scales with it; px font sizes do not. iOS-only (touch-callout guard):
+   desktop Safari also parses the keyword but resolves it to a small macOS size. */
+@supports (font: -apple-system-body) and (-webkit-touch-callout: none) {
+  html {
+    font: -apple-system-body;
+    font-family: var(--font-sans);
+  }
+}
+
 body {
   font-family: var(--font-sans);
-  font-size: var(--fs-body);
+  font-size: 1rem; /* = var(--fs-body), but relative so it follows the root size */
   line-height: var(--lh-normal);
   color: var(--text-primary);
   background: var(--surface-page);

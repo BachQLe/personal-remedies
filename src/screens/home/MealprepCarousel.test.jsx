@@ -38,16 +38,28 @@ vi.mock('../../components/FoodDetailCard.jsx', () => ({
 }));
 
 import MealprepCarousel from './MealprepCarousel.jsx';
+import { storage } from '../../api/storage.js';
 
 let container;
 let root;
+let randomSpy;
 const oats = { id: 1, name: 'Oats', image: '/oats.jpg', kind: 'recipe', tier: 'Good', numericId: 3 };
 const eggs = { id: 2, name: 'Eggs', image: '/eggs.jpg', kind: 'recipe', tier: 'Good', numericId: 3 };
 const tea = { id: 3, name: 'Green tea', image: '/tea.jpg', kind: 'food', tier: 'Top', numericId: 1 };
+const stew = { id: 4, name: 'Harsh stew', image: '/stew.jpg', kind: 'recipe', tier: 'poor', numericId: 6 };
 
-function result(breakfast = [oats, eggs]) {
-  return { candidates: { breakfast, lunch: [], dinner: [], snacks: [], beverages: [tea] }, conditionNames: ['Aging'], usedFallback: false };
+function result(breakfast = [oats, eggs], extra = {}) {
+  return { candidates: { breakfast, lunch: [], dinner: [], snacks: [], beverages: [tea], ...extra }, conditionNames: ['Aging'], usedFallback: false };
 }
+
+// Small LCG so a "different roll" is deterministic.
+function roll(seed) {
+  let n = seed;
+  return () => (n = (n * 9301 + 49297) % 233280) / 233280;
+}
+
+const shown = () => [...container.querySelectorAll('[aria-label^="View "]')].map((button) => button.getAttribute('aria-label'));
+const manyRecipes = Array.from({ length: 14 }, (_, i) => ({ id: 100 + i, name: `Recipe ${i}`, kind: 'recipe', tier: 'Good', numericId: (i % 4) + 1 }));
 
 function defer() {
   let resolve;
@@ -71,6 +83,8 @@ beforeEach(() => {
   saved.items = [];
   saved.listeners.clear();
   vi.resetAllMocks();
+  // Constant roll + equal weights keeps the pick order stable (input order).
+  randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
   api.getMealPlanSuggestions.mockResolvedValue(result());
   api.getRecipes.mockResolvedValue({ recipes: [{ id: 1, ingredients: [{ name: 'Rolled oats' }], sourceUrl: 'https://example.com/oats' }] });
   api.buildRecipeDetail.mockImplementation((card) => Promise.resolve({ name: card.name }));
@@ -80,6 +94,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  randomSpy.mockRestore();
   act(() => root.unmount());
   container.remove();
 });
@@ -101,14 +116,62 @@ describe('home meal carousel', () => {
     expect(container.querySelector('[aria-label="Unsave Oats"]')).toBeTruthy();
   });
 
-  it('shows beverage foods in their category with a view action and no misleading save', async () => {
+  it('shows recipes only: non-recipe items and harmful recipes never appear, empty categories are hidden', async () => {
+    api.getMealPlanSuggestions.mockResolvedValue(result([oats, stew], { lunch: [{ ...tea, id: 9 }] }));
     await mount();
-    await click('Beverages');
-    expect(container.querySelector('[aria-label="Save Green tea"]')).toBeNull();
-    expect(container.querySelector('[aria-label="View details for Green tea"]')).toBeTruthy();
-    await click('View details for Green tea');
-    expect(container.querySelector('[role="dialog"]').getAttribute('data-recipe')).toBe('false');
-    expect(saved.items).toEqual([]);
+    expect(shown()).toEqual(['View Oats']);
+    const tabs = [...container.querySelectorAll('[role="tab"]')].map((tab) => tab.textContent);
+    expect(tabs).toEqual(['Breakfast']);
+    expect(container.textContent).not.toContain('Green tea');
+    expect(container.textContent).not.toContain('Harsh stew');
+  });
+
+  it('weights the pick, saves it with a timestamp, and shows the same set on revisit within a day', async () => {
+    api.getMealPlanSuggestions.mockResolvedValue(result(manyRecipes));
+    randomSpy.mockImplementation(roll(1));
+    await mount();
+    const first = shown();
+    expect(first).toHaveLength(6);
+    const saved1 = storage.get('homeRecipePicks');
+    expect(saved1.picks.breakfast).toHaveLength(6);
+    expect(Date.now() - saved1.at).toBeLessThan(5000);
+
+    // Revisit with different luck: the saved set wins, nothing is re-saved.
+    await act(async () => root.unmount());
+    root = createRoot(container);
+    randomSpy.mockImplementation(roll(2));
+    await mount();
+    expect(shown()).toEqual(first);
+    expect(storage.get('homeRecipePicks')).toEqual(saved1);
+
+    // Past a day the set rotates.
+    storage.set('homeRecipePicks', { ...saved1, at: Date.now() - 25 * 60 * 60 * 1000 });
+    await act(async () => root.unmount());
+    root = createRoot(container);
+    await mount();
+    expect(shown()).not.toEqual(first);
+    expect(Date.now() - storage.get('homeRecipePicks').at).toBeLessThan(5000);
+  });
+
+  it('re-picks when the profile conditions change', async () => {
+    api.getMealPlanSuggestions.mockResolvedValue(result(manyRecipes));
+    storage.set('profile', { conditions: [2, 1] });
+    randomSpy.mockImplementation(roll(1));
+    await mount();
+    const first = shown();
+    expect(storage.get('homeRecipePicks').stamp).toBe('1,2');
+
+    randomSpy.mockImplementation(roll(2));
+    await act(async () => storage.set('profile', { conditions: [3] }));
+    expect(storage.get('homeRecipePicks').stamp).toBe('3');
+    expect(shown()).not.toEqual(first);
+  });
+
+  it('shows the "Nutri is thinking" note while the first load is pending', async () => {
+    api.getMealPlanSuggestions.mockReturnValue(new Promise(() => {}));
+    await mount();
+    const note = [...container.querySelectorAll('[role="status"]')].find((node) => node.textContent === 'Nutri is thinking…');
+    expect(note).toBeTruthy();
   });
 
   it('preserves real recipe ingredients and does not reopen a dismissed async detail', async () => {

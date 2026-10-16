@@ -1,9 +1,10 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import Icon from '../shared/Icon.jsx';
 
 const TABS = [
-  { to: '/app/plan', label: 'Plan', icon: 'clipboard-list' },
+  // `alsoActive`: a sibling route that belongs to this tab's flow (My Favorites is part of Plan).
+  { to: '/app/plan', label: 'Plan', icon: 'clipboard-list', alsoActive: '/app/favorites' },
   { to: '/app/search', label: 'Search', icon: 'search' },
   { to: '/app/home', label: 'Home', icon: 'home' },
   { to: '/app/suggestions', label: 'Choices', icon: 'list' },
@@ -13,6 +14,7 @@ const TABS = [
 const PILL_SPRING = { type: 'spring', stiffness: 420, damping: 34 };
 
 export default function TabBar() {
+  const { pathname } = useLocation();
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none safe-area-bottom">
       <div className="flex justify-center px-3 pb-4">
@@ -27,7 +29,9 @@ export default function TabBar() {
                 aria-label={tab.label}
                 className="relative flex items-center justify-center h-11 min-w-[44px] px-2.5 rounded-md"
               >
-                {({ isActive }) => (
+                {({ isActive: routeActive }) => {
+                  const isActive = routeActive || pathname === tab.alsoActive;
+                  return (
                   <>
                     {isActive && (
                       <motion.span
@@ -59,7 +63,8 @@ export default function TabBar() {
                       </AnimatePresence>
                     </span>
                   </>
-                )}
+                  );
+                }}
               </NavLink>
             );
           })}

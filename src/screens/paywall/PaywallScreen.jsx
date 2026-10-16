@@ -20,7 +20,7 @@
  * before this screen can ship for real; the yellow banner below is the
  * visible-in-UI draft indicator required alongside this file-header note.
  */
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { ENTITLEMENT_CONFIG, listFeatures } from '../../api/entitlements.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import Icon from '../../components/shared/Icon.jsx';
@@ -28,7 +28,6 @@ import PageHeader from '../../components/shared/PageHeader.jsx';
 import BackButton from '../../components/shared/BackButton.jsx';
 
 export default function PaywallScreen() {
-  const navigate = useNavigate();
   const { show } = useSnackbar();
   const features = listFeatures();
   const [searchParams] = useSearchParams();
@@ -46,7 +45,7 @@ export default function PaywallScreen() {
     <div className="min-h-screen -mb-28 bg-forest-300 flex flex-col">
       <PageHeader label="Personal Remedies Plus" className="pb-4">
         <div className="flex items-center gap-3 mt-3">
-          <BackButton onClick={() => navigate('/app/profile')} />
+          <BackButton fallback="/app/profile" />
           <h1 className="font-display text-[24px] font-semibold text-blue-950 leading-tight">
             Personal Remedies Plus
           </h1>

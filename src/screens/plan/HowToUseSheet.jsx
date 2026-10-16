@@ -1,72 +1,42 @@
-import { Plus, Bookmark, Shuffle, RefreshCw, Printer } from 'lucide-react';
+import { Plus, X, CalendarPlus, CalendarDays, CalendarRange, Bookmark, Printer } from 'lucide-react';
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
+import { HELP_ITEMS, SHEET_Z } from './plannerCopy.js';
 
 /**
- * HowToUseSheet — short "what does this button do" reference for the Meal
- * Queue screen, opened from the header's help icon (next to Print/Share).
- *
- * Plain BottomSheet content, no fetched data — a static, scannable list
- * (icon + one-line description each), matching this screen's existing
- * short-copy tone (see EmptyState/NutritionFactsSheet captions) rather than
- * paragraphs of explanation.
+ * HowToUseSheet - short "what does this button do" reference for the plan
+ * screen, opened from the header's help icon. Copy lives in plannerCopy.js;
+ * this only maps each entry to its icon.
  */
-const HELP_ITEMS = [
-  {
-    icon: Plus,
-    title: 'Add (+)',
-    body: "Adds a saved recipe from your Cookbook into today's plan, in its matching meal slot.",
-  },
-  {
-    icon: Bookmark,
-    title: 'Save recipe',
-    body: 'Bookmarks a recipe to your Saved recipes tab so you can add it to a plan later.',
-  },
-  {
-    icon: Bookmark,
-    title: 'Saved plans',
-    body: 'The bookmark icon in the top-right opens your saved plans — save your current week under a name, then load or delete it later. A dot on the icon means the loaded plan has unsaved changes.',
-  },
-  {
-    icon: Bookmark,
-    title: 'Save meal plan',
-    body: 'The button next to "New meal plan" saves your current week. If you loaded a saved plan, it updates that save in place; otherwise it opens the naming flow to save a new one.',
-  },
-  {
-    icon: Shuffle,
-    title: 'Shuffle',
-    body: 'Swaps just that one slot for another option — the rest of the day stays put.',
-  },
-  {
-    icon: RefreshCw,
-    title: 'Regenerate',
-    body: '"Regenerate day" rebuilds one day; "Regenerate whole week" rebuilds all seven. Pinned items always stay.',
-  },
-  {
-    icon: Printer,
-    title: 'Print & Share',
-    body: 'The icons in the top-right corner print or share a plain, ink-friendly summary of your week.',
-  },
-];
+const ICONS = {
+  add: Plus,
+  remove: X,
+  day: CalendarDays,
+  week: CalendarRange,
+  new: CalendarPlus,
+  favorites: Bookmark,
+  print: Printer,
+};
 
 export default function HowToUseSheet({ open, onClose }) {
   return (
-    <BottomSheet open={open} onClose={onClose} title="How to Use">
-      <p className="text-xs text-char-500 mb-4">
-        What each control on this screen does.
-      </p>
+    <BottomSheet open={open} onClose={onClose} title="How to Use" zClass={SHEET_Z}>
+      <p className="mb-4 text-xs text-char-500">What each control on this screen does.</p>
 
       <div className="flex flex-col gap-4">
-        {HELP_ITEMS.map(({ icon: Icon, title, body }) => (
-          <div key={title} className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 text-blue-950/70">
-              <Icon size={16} aria-hidden="true" />
+        {HELP_ITEMS.map(({ key, title, body }) => {
+          const Icon = ICONS[key];
+          return (
+            <div key={key} className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-blue-950/70">
+                <Icon size={16} aria-hidden="true" />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="font-sans text-sm font-semibold text-blue-950">{title}</span>
+                <span className="font-sans text-xs leading-snug text-char-500">{body}</span>
+              </div>
             </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-semibold font-sans text-blue-950">{title}</span>
-              <span className="text-xs font-sans text-char-500 leading-snug">{body}</span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </BottomSheet>
   );

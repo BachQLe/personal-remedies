@@ -16,12 +16,12 @@
  * keys are the simplest way to keep tests independent within one file.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cachedFetch, cachedFetchWithMeta, peekCache, SCHEMA_VERSION } from './cache.js';
+import { cachedFetch, cachedFetchWithMeta, peekCache, SCHEMA_VERSION, PERSISTED_KEY_PREFIXES } from './cache.js';
 
 let keyCounter = 0;
 function uniqueKey(label) {
   keyCounter += 1;
-  return `test:${label}:${keyCounter}`;
+  return `detailed:test:${label}:${keyCounter}`; // `detailed:` is on PERSISTED_KEY_PREFIXES
 }
 
 beforeEach(() => {
@@ -171,5 +171,32 @@ describe('peekCache — unaffected by the cachedFetchWithMeta refactor', () => {
     await cachedFetchWithMeta(key, 10_000, async () => ({ peeked: true }));
 
     expect(peekCache(key)).toEqual({ peeked: true });
+  });
+});
+
+describe('PERSISTED_KEY_PREFIXES — the 3.3 allowlist is enforced at the one write path', () => {
+  it('pins the allowlist: the six scored-response families plus the static messages file', () => {
+    expect([...PERSISTED_KEY_PREFIXES].sort()).toEqual(
+      ['detailed:', 'goodfor:', 'messages.json', 'recipes:', 'refs:', 'suggest:', 'topdoordonts:'],
+    );
+  });
+
+  it.each(PERSISTED_KEY_PREFIXES)('persists keys under %s', async (prefix) => {
+    const key = `${prefix}allowed:${(keyCounter += 1)}`;
+    await cachedFetch(key, 10_000, async () => ({ ok: true }));
+    expect(window.localStorage.getItem(`remedi.cache.v1.${key}`)).not.toBeNull();
+  });
+
+  it('a key outside the allowlist (e.g. a fourth "table") is cached in memory but never written to localStorage', async () => {
+    const key = `fooditems:${(keyCounter += 1)}`;
+    const fetcher = vi.fn().mockResolvedValue([{ id: 1 }]);
+
+    await cachedFetch(key, 10_000, fetcher);
+    await cachedFetch(key, 10_000, fetcher);
+
+    expect(window.localStorage.getItem(`remedi.cache.v1.${key}`)).toBeNull();
+    expect(Object.keys(window.localStorage).filter((k) => k.startsWith('remedi.cache.v1.fooditems'))).toEqual([]);
+    expect(fetcher).toHaveBeenCalledTimes(1); // still de-duped for the session
+    expect(peekCache(key)).toEqual([{ id: 1 }]);
   });
 });

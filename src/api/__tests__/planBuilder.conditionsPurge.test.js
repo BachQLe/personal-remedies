@@ -35,15 +35,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // planBuilder.js's only Nutridigm-network touchpoint is getMealPlanSuggestions
-// (via its internal loadCandidates helper) — mock exactly that so this test
-// makes zero real network/cache calls and controls the candidate pools.
-vi.mock('../adapter.js', () => ({
-  getMealPlanSuggestions: vi.fn(async () => ({
-    candidates: { breakfast: [], lunch: [], dinner: [], snacks: [] },
-    conditionIds: [244],
-    conditionNames: ['Condition 244'],
-    usedFallback: false,
-  })),
+// (via loadCandidates, used by getCandidatesForSlot only) — mock it so this
+// test can prove ensurePlanForWeek never calls it.
+vi.mock('../adapter.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  getMealPlanSuggestions: vi.fn(),
 }));
 
 import { getMealPlanSuggestions } from '../adapter.js';
@@ -83,14 +79,10 @@ describe('ensurePlanForWeek: conditions-change contract (storage-map.md §6, gap
       conditionsKey: '203',
       conditionNames: ['Condition 203'],
       usedFallback: false,
-      generation: 0,
       days: {
         [key]: {
-          generation: 0,
-          offsets: {},
           slots: { breakfast: [SEED_ITEM], lunch: [], dinner: [], snacks: [] },
           eaten: [],
-          pinned: [],
         },
       },
       picksBySlot: { breakfast: [SEED_ITEM], lunch: [], dinner: [], snacks: [] },
@@ -126,7 +118,7 @@ describe('ensurePlanForWeek: conditions UNCHANGED — existing plan/picks surviv
     // within this file), so reusing an id another test already resolved
     // would silently serve THAT test's cached (empty) candidates instead of
     // the pool-only item this test needs to prove never leaks in.
-    getMealPlanSuggestions.mockResolvedValueOnce({
+    getMealPlanSuggestions.mockResolvedValue({
       candidates: { breakfast: [{ ...SEED_ITEM, id: 999, name: 'Pool-only Pancakes' }], lunch: [], dinner: [], snacks: [] },
       conditionIds: [700],
       conditionNames: ['Condition 700'],
@@ -135,19 +127,14 @@ describe('ensurePlanForWeek: conditions UNCHANGED — existing plan/picks surviv
 
     const key = todayKey();
     const todayDay = {
-      generation: 0,
-      offsets: {},
       slots: { breakfast: [SEED_ITEM], lunch: [], dinner: [], snacks: [] },
       eaten: ['already-eaten-marker'],
-      pinned: [SEED_ITEM.id],
     };
     const picksBySlot = { breakfast: [SEED_ITEM], lunch: [], dinner: [], snacks: [] };
     setPlan({
       version: 2,
       conditionsKey: '700',
       conditionNames: ['Condition 700'],
-      usedFallback: false,
-      generation: 0,
       days: { [key]: todayDay },
       picksBySlot,
     });
@@ -176,6 +163,7 @@ describe('ensurePlanForWeek: conditions UNCHANGED — existing plan/picks surviv
       expect(allIds).not.toContain(999);
     }
 
+    expect(getMealPlanSuggestions).not.toHaveBeenCalled();
     expect(storage.get('dailyPlan')).toEqual(plan);
   });
 });
@@ -186,8 +174,6 @@ describe('purgeDerivedDataForConditionsChange (storage-map.md §6, gap 1)', () =
       version: 2,
       conditionsKey: '203',
       conditionNames: ['Condition 203'],
-      usedFallback: false,
-      generation: 0,
       days: {},
       picksBySlot: { breakfast: [], lunch: [], dinner: [], snacks: [] },
     });
@@ -204,8 +190,6 @@ describe('purgeDerivedDataForConditionsChange (storage-map.md §6, gap 1)', () =
       version: 2,
       conditionsKey: '203',
       conditionNames: ['Condition 203'],
-      usedFallback: false,
-      generation: 0,
       days: {},
       picksBySlot: { breakfast: [], lunch: [], dinner: [], snacks: [] },
     };
@@ -231,8 +215,6 @@ describe('purgeDerivedDataForConditionsChange (storage-map.md §6, gap 1)', () =
       version: 2,
       conditionsKey: '203',
       conditionNames: ['Condition 203'],
-      usedFallback: false,
-      generation: 0,
       days: {},
     };
     setPlan(seededPlan);
@@ -249,8 +231,6 @@ describe('purgeDerivedDataForConditionsChange (storage-map.md §6, gap 1)', () =
       version: 2,
       conditionsKey: '203',
       conditionNames: ['Condition 203'],
-      usedFallback: false,
-      generation: 0,
       days: {},
     });
 

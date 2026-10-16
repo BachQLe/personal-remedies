@@ -87,10 +87,10 @@ export default function SaveButton({ item, size = 18, onBlocked, className = '' 
   };
 
   const ariaLabel = saved
-    ? 'Remove from saved recipes'
+    ? 'Remove from My Favorites'
     : blockReason
       ? SAVE_BLOCK_MESSAGES[blockReason]
-      : 'Save recipe';
+      : 'Add to My Favorites';
 
   return (
     <span

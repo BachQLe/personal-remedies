@@ -43,7 +43,8 @@ import { MAX_RECOMMENDATIONS_PER_CATEGORY } from '../../api/config.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
-import DataState from '../../components/shared/DataState.jsx';
+import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
+import CoverageNote from '../../components/shared/CoverageNote.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
 import { resolveProfileWithConditions } from './profileFallback.js';
 
@@ -70,6 +71,57 @@ function SkeletonRow() {
 
 function isItemsEmpty(data) {
   return !(data?.items?.length);
+}
+
+// The data half, remounted per {group, listType} (see the `key` below) so a
+// tab/group switch shows the loading skeleton instead of the previous list
+// under the new tab's label — useAsyncData keeps old data across dep changes.
+function DetailList({ group, listType, groupLabel, onSelectFood }) {
+  async function fetchDetail() {
+    const profile = await resolveProfileWithConditions();
+    return getCategoryDetail(profile, group, listType);
+  }
+
+  const { status, data, retry } = useAsyncData(fetchDetail, [group, listType], {
+    isEmpty: isItemsEmpty,
+    requiresProfile: true,
+  });
+
+  const items = (data?.items ?? []).slice(0, MAX_RECOMMENDATIONS_PER_CATEGORY);
+
+  if (status === 'loading') {
+    return (
+      <>
+        <div className="flex flex-col gap-2">
+          {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonRow key={i} />)}
+        </div>
+        <SlowLoadingNote />
+      </>
+    );
+  }
+
+  return (
+    <DataState
+      status={status}
+      onRetry={retry}
+      screenName={`${groupLabel || 'category'} — ${LIST_TYPES.find((t) => t.key === listType)?.label}`}
+      emptyTitle={status === 'empty' ? null : undefined}
+      emptyBody={status === 'empty' ? data?.unscorableReason || LIST_TYPES.find((t) => t.key === listType)?.emptyBody : undefined}
+      emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
+    >
+      <div className="flex flex-col gap-2">
+        <CoverageNote coverage={data?.coverage} />
+        {items.map((food) => (
+          <RankedRow
+            key={food.id}
+            food={food}
+            studyCount={food.referenceTotal}
+            onSelect={(selected) => onSelectFood(selected, listType)}
+          />
+        ))}
+      </div>
+    </DataState>
+  );
 }
 
 export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp, hideTitle = false, onSelectFood }) {
@@ -99,19 +151,6 @@ export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp,
     return () => { cancelled = true; };
   }, [group, groupLabelProp]);
 
-  async function fetchDetail() {
-    const profile = await resolveProfileWithConditions();
-    const res = await getCategoryDetail(profile, group, listType);
-    return { ...res, requestedConditionIds: profile.conditions };
-  }
-
-  const { status, data, retry } = useAsyncData(fetchDetail, [group, listType], {
-    isEmpty: isItemsEmpty,
-    requiresProfile: true,
-  });
-
-  const items = (data?.items ?? []).slice(0, MAX_RECOMMENDATIONS_PER_CATEGORY);
-
   return (
     <div className="flex flex-col gap-3">
       {!hideTitle && (
@@ -123,31 +162,13 @@ export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp,
       {/* Eat / Avoid pill switcher */}
       <PillSwitcher options={LIST_TYPES} value={listType} onChange={setListType} />
 
-      {status === 'loading' ? (
-        <div className="flex flex-col gap-2">
-          {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonRow key={i} />)}
-        </div>
-      ) : (
-        <DataState
-          status={status}
-          onRetry={retry}
-          screenName={`${groupLabel || 'category'} — ${LIST_TYPES.find((t) => t.key === listType)?.label}`}
-          emptyTitle={status === 'empty' ? null : undefined}
-          emptyBody={status === 'empty' ? data?.unscorableReason || LIST_TYPES.find((t) => t.key === listType)?.emptyBody : undefined}
-          emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
-        >
-          <div className="flex flex-col gap-2">
-            {items.map((food) => (
-              <RankedRow
-                key={food.id}
-                food={food}
-                studyCount={food.referenceTotal}
-                onSelect={(selected) => onSelectFood(selected, listType)}
-              />
-            ))}
-          </div>
-        </DataState>
-      )}
+      <DetailList
+        key={`${group}:${listType}`}
+        group={group}
+        listType={listType}
+        groupLabel={groupLabel}
+        onSelectFood={onSelectFood}
+      />
     </div>
   );
 }

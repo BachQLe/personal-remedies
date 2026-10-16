@@ -12,17 +12,27 @@
  *
  * @typedef {import('./types.js').Profile} Profile
  *
- * T3D UPDATE: internally now consults `resolveNutrition` (src/api/nutrition.js)
- * instead of calling `estimateNutrition` directly, so a plan day's total
- * automatically incorporates real per-serving data (recipe panel / USDA)
- * once it exists, without any call-site or timing change here. With both the
- * USDA tables and the C1 nutrition overlay empty (today), `resolveNutrition`
- * falls through to the same `estimateNutrition` result on every item, so
- * this swap is behavior-identical right now — see the equivalence test in
- * src/api/__tests__/nutrition.test.js.
+ * Internally consults `resolveNutrition` (src/api/nutrition.js) instead of
+ * calling `estimateNutrition` directly, so a plan day's total incorporates a
+ * recipe's own panel calories (USDA is cut — checklist 2.1/2.2) without any
+ * call-site or timing change here.
  */
 
 import { resolveNutrition } from './nutrition.js';
+
+// ── Display format ───────────────────────────────────────────────────────────
+
+/**
+ * The ONE place a calorie number becomes display text: the rounded,
+ * locale-formatted number with no sign or "~" prefix. Change the format here
+ * and every calorie render site follows. Returns null for a non-finite input
+ * so a missing value is never rendered as "NaN".
+ * @param {number|null|undefined} n
+ * @returns {string|null} e.g. "1,850"
+ */
+export function formatCalories(n) {
+  return Number.isFinite(n) ? Math.round(n).toLocaleString() : null;
+}
 
 // ── Plan-day calorie total ───────────────────────────────────────────────────
 
@@ -30,10 +40,9 @@ import { resolveNutrition } from './nutrition.js';
  * Sum estimated calories across a day's slot-based plan.
  *
  * Foods resolve through `resolveNutrition` (src/api/nutrition.js), which
- * tries real per-serving data first (recipe panel, then USDA) before
- * falling back to the same food-group estimate table used elsewhere in the
- * app (NutritionFactsSheet), so a food's calorie contribution is consistent
- * everywhere it's shown.
+ * tries real per-serving data first (recipe panel) before falling back to
+ * the same food-group estimate table used elsewhere in the app, so a food's
+ * calorie contribution is consistent everywhere it's shown.
  *
  * Recipes ARE counted, via `nutritionEstimates.js`'s per-slot stand-in table
  * (`RECIPE_SLOT_ESTIMATES`). This reverses the original decision to leave them
@@ -45,7 +54,7 @@ import { resolveNutrition } from './nutrition.js';
  * hand-picked recipe plan otherwise totals ~0 kcal, which made the number
  * useless on exactly the plans users care most about and would fire the
  * calorie-gap prompt against perfectly good weeks. Every surface renders the
- * result as "~N (estimated)". Replace this the moment real per-recipe
+ * result through `formatCalories`. Replace this the moment real per-recipe
  * nutrition data exists — that is the intended seam.
  *
  * @param {Object<string, import('../state/dailyPlan.js').PlanItem[]>} slotsObject -
@@ -54,7 +63,7 @@ import { resolveNutrition } from './nutrition.js';
  *   the sum of every resolvable item's estimated calories; `counted` /
  *   `uncounted` are item counts. `uncounted > 0` now means only that some item
  *   had no resolvable food group at all — callers should still render `total`
- *   as "~<total>" and never imply it is measured.
+ *   via `formatCalories` and never imply it is measured.
  */
 export function estimatePlanDayCalories(slotsObject) {
   let total = 0;
@@ -77,11 +86,11 @@ export function estimatePlanDayCalories(slotsObject) {
         continue;
       }
 
-      // Same 0-contribution-not-fabrication handling as resolveDayTotals: a
-      // resolved item's OWN calories field is never invented, but a missing
-      // one (only possible from a per100g USDA hit lacking Energy — never
-      // happens via the estimate tier, which always has calories) doesn't
-      // block the rest of the day's items from contributing to the total.
+      // 0-contribution-not-fabrication: a resolved item's OWN calories field
+      // is never invented, but a missing one (a recipe panel with macros but
+      // no calorie figure — never the estimate tier, which always has
+      // calories) doesn't block the rest of the day's items from contributing
+      // to the total.
       total += resolved.calories ?? 0;
       counted += 1;
     }
