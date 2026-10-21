@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { getProfile, getRecipes, buildRecipeDetail } from '../../api/api.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import BackButton from '../../components/shared/BackButton.jsx';
@@ -357,7 +357,6 @@ export function RecipesBrowser() {
 }
 
 export default function RecipesScreen() {
-  const navigate = useNavigate();
   return (
     // Green page + white paper shell — the same two-layer background every
     // other screen uses (see HomeScreen/SuggestionsScreen). `-mb-28` cancels
@@ -366,10 +365,12 @@ export default function RecipesScreen() {
     // TabBar (appshell-cream-fix pattern).
     <div className="bg-forest-300 flex flex-col min-h-screen -mb-28">
       {/* Header zone — on the green page background, above the shell. Back
-          always returns to My Favorites. Each rail below is its own meal-type
-          filter, so there's no search or filter UI here. */}
+          returns to wherever the user came from (My Favorites, or a food
+          card's "other options" link); My Favorites is only the deep-link
+          fallback. Each rail below is its own meal-type filter, so there's no
+          search or filter UI here. */}
       <div className="px-5 pt-10 pb-6 flex flex-col gap-3">
-        <BackButton onClick={() => navigate('/app/favorites')} aria-label="Back to My Favorites" />
+        <BackButton fallback="/app/favorites" />
         <div>
           <h1 className="font-display text-[32px] font-semibold leading-tight text-blue-950">Recipes</h1>
           <p className="mt-1 font-sans text-sm text-blue-950/70">Pick your favorite recipes from our suggestions!</p>
