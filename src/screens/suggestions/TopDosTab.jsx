@@ -94,6 +94,7 @@ export default function TopDosTab({ onSelectFood }) {
         value={direction}
         onChange={setDirection}
         size="sm"
+        variant="outline"
       />
 
       {status === 'loading' ? (

@@ -65,7 +65,7 @@ export default function FoodGroupsTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PillSwitcher options={MODE_OPTIONS} value={mode} onChange={setMode} size="sm" />
+      <PillSwitcher options={MODE_OPTIONS} value={mode} onChange={setMode} size="sm" variant="outline" />
 
       <p className="text-sm text-blue-950/70 font-sans">{SUBTITLE[mode]}</p>
 

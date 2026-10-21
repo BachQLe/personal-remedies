@@ -1,32 +1,31 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import calendarIcon from '../../assets/home-calendar-graphic.png';
-import searchIcon from '../../assets/home-search-graphic.png';
-import dishIcon from '../../assets/home-guide-graphic.png';
+import { CalendarDays, ListChecks, Search } from 'lucide-react';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import MealprepCarousel from './MealprepCarousel.jsx';
 import HomeMail from './HomeMail.jsx';
 import { storage } from '../../api/storage.js';
 import './HomeScreen.css';
 
-// Labels carry their own line break (rendered via pre-line) so the three tiles balance.
+// The two half-width tiles carry their own line break (rendered via pre-line) so they balance;
+// the full-width Meal planner stays on one line.
 const SHORTCUTS = [
   {
     to: '/app/plan',
-    label: 'Meal\nplanner',
-    icon: calendarIcon,
+    label: 'Meal planner',
+    icon: CalendarDays,
     tile: 'bg-forest-100',
   },
   {
     to: '/app/suggestions',
     label: "Top Do's\nand Don'ts",
-    icon: dishIcon,
+    icon: ListChecks,
     tile: 'bg-lavender-100',
   },
   {
     to: '/app/search',
     label: 'Food\nlookup',
-    icon: searchIcon,
+    icon: Search,
     tile: 'bg-yellow-200',
   },
 ];
@@ -51,9 +50,9 @@ export default function HomeScreen() {
 
       <div className="home-screen__body">
         <nav className="home-shortcuts" aria-label="Explore Personal Remedies">
-          {SHORTCUTS.map(({ to, label, icon, tile }) => (
+          {SHORTCUTS.map(({ to, label, icon: Icon, tile }) => (
             <Link key={to} to={to} className={`home-shortcut shadow-xs ${tile}`}>
-              <img className="home-shortcut__icon" src={icon} alt="" aria-hidden="true" width="72" height="72" />
+              <Icon className="home-shortcut__icon text-blue-950" size={40} strokeWidth={1.75} aria-hidden="true" />
               <span className="home-shortcut__label font-display font-semibold text-blue-950 leading-tight tracking-tight">
                 {label}
               </span>

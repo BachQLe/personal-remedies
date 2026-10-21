@@ -1,13 +1,14 @@
 /**
  * MealQueueScreen - "Your week": the plan's day view. Pick favorites once
- * (My Favorites), then New meal plan builds a week from them in one tap, or
- * loads a saved week. Each day lists its meals with + (add a favorite) and X
- * (remove); Save day / Load day sit under the meals, Save week under the day
- * strip. No calendars, no shuffling, no regenerating.
+ * (My Favorites), then New meal plan builds a week from them in one tap. The
+ * week card holds the day strip plus New meal plan, Save week and Load week.
+ * Each day lists its meals with + (add a favorite) and X (remove); Save day /
+ * Load day sit next to the day's calories at the top of the day. My Meal Plan /
+ * My Favorites tabs on top. No calendars, no shuffling, no regenerating.
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Printer, Share2, HelpCircle, CalendarPlus, Bookmark, ArrowRight } from 'lucide-react';
+import { Printer, Share2, HelpCircle, CalendarPlus, Bookmark, ArrowRight, FolderOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
@@ -20,12 +21,13 @@ import { useRecipeDetail } from '../favorites/useRecipeDetail.js';
 import { useOnline, planLoadState } from './usePlanLoadState.js';
 import SlotSection from './SlotSection.jsx';
 import DayStrip from './DayStrip.jsx';
+import PlanTabs from './PlanTabs.jsx';
 import HowToUseSheet from './HowToUseSheet.jsx';
 import SuggestionsSheet from './SuggestionsSheet.jsx';
 import CalorieGapSheet from './CalorieGapSheet.jsx';
 import NewPlanSheet from './NewPlanSheet.jsx';
 import NameSheet from './NameSheet.jsx';
-import LoadDaySheet from './LoadDaySheet.jsx';
+import LoadSavedSheet from './LoadSavedSheet.jsx';
 import AddFavoriteSheet from './AddFavoriteSheet.jsx';
 import { COPY } from './plannerCopy.js';
 import { nextSevenDays, todayKey } from './planDates.js';
@@ -73,17 +75,15 @@ const ICON_BTN =
   'inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/40 hover:bg-white/60 ' +
   'text-blue-950/70 shadow-sm transition duration-fast active:scale-95';
 
-/** The plan-day calorie line: one quiet number, hidden when nothing is countable. */
+/** The plan-day calorie total (sits in the day action card), hidden when nothing is countable. */
 function CalorieLine({ slots }) {
   const { total } = estimatePlanDayCalories(slots);
   if (total <= 0) return null;
 
   return (
-    <div className="shrink-0 self-start rounded-xl border border-blue-950/[0.06] bg-white/70 px-3 py-1.5">
-      <p className="whitespace-nowrap font-sans text-xs leading-relaxed text-blue-950/60">
-        {`${formatCalories(total)} cal`}
-      </p>
-    </div>
+    <p className="whitespace-nowrap pl-4 font-sans text-sm font-semibold text-blue-950/70">
+      {`${formatCalories(total)} cal`}
+    </p>
   );
 }
 
@@ -106,6 +106,7 @@ export default function MealQueueScreen() {
   const [saveWeekOpen, setSaveWeekOpen] = useState(false);
   const [saveDayOpen, setSaveDayOpen] = useState(false);
   const [loadDayOpen, setLoadDayOpen] = useState(false);
+  const [loadWeekOpen, setLoadWeekOpen] = useState(false);
   const [addSlotKey, setAddSlotKey] = useState(null);
   const [suggestionsSlot, setSuggestionsSlot] = useState(null);
 
@@ -180,6 +181,7 @@ export default function MealQueueScreen() {
 
   // No plan once the profile has loaded: first-run empty state.
   const firstRunEmpty = !building && !plan;
+  const noFavorites = library.length === 0;
 
   // Print view model from the REAL plan only, never ghost data.
   const printModel = plan ? buildPrintModel(plan, { conditionNames }) : null;
@@ -270,6 +272,7 @@ export default function MealQueueScreen() {
 
     const ok = loadSavedPlan(id);
     setNewPlanOpen(false);
+    setLoadWeekOpen(false);
     if (!ok) {
       // loadSavedPlan also returns false while a profile-change prune is pending.
       showSnackbar(isFavoritesPrunePending() ? COPY.prunePending : COPY.couldNotLoad);
@@ -375,7 +378,7 @@ export default function MealQueueScreen() {
       {/* Header zone. `rm-print-hide` hides it under @media print; only
           `.plan-print-view` (bottom of this file) renders on paper. */}
       <PageHeader
-        label={COPY.stepWeek}
+        label={COPY.planLabel}
         title="My Meal Plan"
         className="bg-forest-300 rm-print-hide"
         right={
@@ -405,29 +408,45 @@ export default function MealQueueScreen() {
       {/* White paper panel: full-bleed, rounded top corners; its pb-28 clears
           the floating TabBar and paints paper behind it. */}
       <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-8 mt-4 rm-print-hide">
+        <PlanTabs value="/app/plan" />
+
         {!firstRunEmpty && (
-          <div className="flex flex-col gap-3">
-            <DayStrip days={days} selected={activeDay} onSelect={handleSelectDay} bgClassName="bg-paper-100" />
-            <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-2 rounded-2xl bg-white p-2">
+            <DayStrip days={days} selected={activeDay} onSelect={handleSelectDay} bgClassName="bg-white" />
+            <div className="flex flex-col gap-2 border-t border-blue-950/[0.06] pt-2">
               <button
                 type="button"
-                onClick={() => setSaveWeekOpen(true)}
-                disabled={showGhost}
-                className={`inline-flex min-h-[44px] items-center gap-2 rounded-pill bg-white px-4 font-sans text-sm
-                  font-semibold text-blue-950 transition duration-fast active:scale-95
-                  ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
+                onClick={() => setNewPlanOpen(true)}
+                className="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-pill bg-blue-950 px-4
+                  font-sans text-sm font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
               >
-                <Bookmark size={16} aria-hidden="true" />
-                {COPY.saveWeek}
+                <CalendarPlus size={16} aria-hidden="true" />
+                {COPY.newPlan}
               </button>
-              <Link
-                to="/app/favorites"
-                className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-semibold text-blue-950/80
-                  transition-colors duration-fast hover:text-blue-950"
-              >
-                {COPY.favoritesLink}
-                <ArrowRight size={14} aria-hidden="true" />
-              </Link>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSaveWeekOpen(true)}
+                  disabled={showGhost}
+                  className={`inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-pill bg-paper-100 px-4 font-sans text-sm
+                    font-semibold text-blue-950 transition duration-fast active:scale-95
+                    ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
+                >
+                  <Bookmark size={16} aria-hidden="true" />
+                  {COPY.saveWeek}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoadWeekOpen(true)}
+                  disabled={showGhost}
+                  className={`inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-pill bg-paper-100 px-4 font-sans text-sm
+                    font-semibold text-blue-950 transition duration-fast active:scale-95
+                    ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
+                >
+                  <FolderOpen size={16} aria-hidden="true" />
+                  {COPY.loadWeekButton}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -451,27 +470,52 @@ export default function MealQueueScreen() {
             iconClassName="text-blue-950"
             action={
               <div className="flex flex-col items-center gap-1">
-                <button
-                  onClick={() => setNewPlanOpen(true)}
-                  className="inline-flex min-h-[48px] items-center gap-2 rounded-pill bg-blue-950 px-7 py-3.5 font-sans text-base
+                {noFavorites ? (
+                  <>
+                    <Link
+                      to="/app/favorites"
+                      className="inline-flex min-h-[48px] items-center gap-2 rounded-pill bg-blue-950 px-7 py-3.5 font-sans text-base
                     font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
-                >
-                  <CalendarPlus size={19} aria-hidden="true" />
-                  {COPY.firstRunCta}
-                </button>
-                <Link
-                  to="/app/favorites"
-                  className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-semibold text-blue-950/70
+                    >
+                      <Bookmark size={19} aria-hidden="true" />
+                      {COPY.pickFavoritesCta}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setNewPlanOpen(true)}
+                      className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-semibold text-blue-950/70
                     transition-colors duration-fast hover:text-blue-950"
-                >
-                  {COPY.stepPick}
-                  <ArrowRight size={14} aria-hidden="true" />
-                </Link>
+                    >
+                      {COPY.firstRunCta}
+                      <ArrowRight size={14} aria-hidden="true" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setNewPlanOpen(true)}
+                      className="inline-flex min-h-[48px] items-center gap-2 rounded-pill bg-blue-950 px-7 py-3.5 font-sans text-base
+                    font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+                    >
+                      <CalendarPlus size={19} aria-hidden="true" />
+                      {COPY.firstRunCta}
+                    </button>
+                    <Link
+                      to="/app/favorites"
+                      className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-semibold text-blue-950/70
+                    transition-colors duration-fast hover:text-blue-950"
+                    >
+                      {COPY.stepPick}
+                      <ArrowRight size={14} aria-hidden="true" />
+                    </Link>
+                  </>
+                )}
               </div>
             }
           />
         ) : (
-          <div className="flex flex-col gap-4 pb-16">
+          <div className="flex flex-col gap-4">
             {/* Unsaved-changes banner: shown once the live week has drifted from the saved week it came from. */}
             {dirty && (
               <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3">
@@ -497,7 +541,33 @@ export default function MealQueueScreen() {
               </div>
             )}
 
-            <CalorieLine slots={daySlots} />
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-white p-2">
+              <CalorieLine slots={daySlots} />
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSaveDayOpen(true)}
+                  disabled={showGhost}
+                  className={`tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-pill bg-paper-100 px-3 font-sans text-xs
+                    font-semibold text-blue-950 transition duration-fast active:scale-95
+                    ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
+                >
+                  <Bookmark size={14} aria-hidden="true" />
+                  {COPY.saveDay}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoadDayOpen(true)}
+                  disabled={showGhost}
+                  className={`tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-pill bg-paper-100 px-3 font-sans text-xs
+                    font-semibold text-blue-950 transition duration-fast active:scale-95
+                    ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
+                >
+                  <FolderOpen size={14} aria-hidden="true" />
+                  {COPY.loadDay}
+                </button>
+              </div>
+            </div>
 
             <AnimatePresence mode="popLayout" custom={pagerDirection} initial={false}>
               <motion.div
@@ -527,28 +597,6 @@ export default function MealQueueScreen() {
                     onSaveBlocked={showSnackbar}
                   />
                 ))}
-
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setSaveDayOpen(true)}
-                    disabled={showGhost}
-                    className={`min-h-[48px] flex-1 rounded-pill bg-blue-950 px-4 py-3 font-sans text-sm font-semibold text-white
-                      transition duration-fast active:scale-[0.99] ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-blue-900'}`}
-                  >
-                    {COPY.saveDay}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLoadDayOpen(true)}
-                    disabled={showGhost}
-                    className={`min-h-[48px] flex-1 rounded-pill border border-blue-950/20 bg-white px-4 py-3 font-sans text-sm
-                      font-semibold text-blue-950 transition duration-fast active:scale-[0.99]
-                      ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
-                  >
-                    {COPY.loadDay}
-                  </button>
-                </div>
               </motion.div>
             </AnimatePresence>
 
@@ -556,22 +604,6 @@ export default function MealQueueScreen() {
           </div>
         )}
       </div>
-
-      {/* New meal plan FAB. Hidden on first run, where the empty state's own
-          button is the only CTA. Bottom offset mirrors the Snackbar's so it
-          clears the navbar. */}
-      {!firstRunEmpty && (
-        <div className="fixed right-5 bottom-[88px] z-50 flex flex-col items-end gap-2" data-print-hide>
-          <button
-            onClick={() => setNewPlanOpen(true)}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-pill bg-blue-950 px-4 py-3 font-sans text-sm
-              font-semibold text-white shadow-lg transition duration-fast hover:bg-blue-900 active:scale-95"
-          >
-            <CalendarPlus size={16} aria-hidden="true" />
-            {COPY.newPlan}
-          </button>
-        </div>
-      )}
 
       <div data-print-hide>
         <FoodDetailCard item={detail} open={!!detail} onClose={closeRecipe} />
@@ -619,7 +651,16 @@ export default function MealQueueScreen() {
         )}
 
         {loadDayOpen && (
-          <LoadDaySheet entries={savedDays} onPick={handleLoadDay} onClose={() => setLoadDayOpen(false)} />
+          <LoadSavedSheet kind="day" entries={savedDays} onPick={handleLoadDay} onClose={() => setLoadDayOpen(false)} />
+        )}
+
+        {loadWeekOpen && (
+          <LoadSavedSheet
+            kind="week"
+            entries={savedWeeks}
+            onPick={(entry) => handleLoadWeek(entry.id)}
+            onClose={() => setLoadWeekOpen(false)}
+          />
         )}
 
         {saveWeekOpen && (

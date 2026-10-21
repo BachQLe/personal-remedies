@@ -20,7 +20,7 @@ export default function TabBar() {
       <div className="flex justify-center px-3 pb-4">
         <LayoutGroup id="tabbar">
           <div className="pointer-events-auto inline-flex items-center justify-center gap-2 px-2 h-14
-            bg-char-900/95 backdrop-blur-md rounded-md border border-char-700 shadow-lg">
+            bg-[#1A1F2B]/95 backdrop-blur-md rounded-md border border-[#363C4A] shadow-lg">
           {TABS.map((tab) => {
             return (
               <NavLink
@@ -43,7 +43,7 @@ export default function TabBar() {
                     )}
                     <span
                       className={`relative flex items-center gap-1.5 transition-colors duration-fast ${
-                        isActive ? 'text-char-900' : 'text-char-300'
+                        isActive ? 'text-[#1A1F2B]' : 'text-[#A3ABBD]'
                       }`}
                     >
                       <Icon name={tab.icon} size={21} aria-hidden="true" />

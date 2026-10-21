@@ -4,6 +4,7 @@ import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import { getOverlayImageFile } from '../../api/localTables.js';
+import { MEAL_TYPE_META } from '../../components/shared/mealTypeMeta.jsx';
 import { COPY } from './plannerCopy.js';
 
 const calmSpring = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
@@ -35,10 +36,14 @@ export default function SlotSection({
   ghost,
   onSaveBlocked,
 }) {
+  const SlotIcon = MEAL_TYPE_META[slot.key]?.Icon;
   return (
     <section className={ghost ? 'rm-ghost' : ''}>
       <div className="mb-4 flex flex-col gap-2">
-        <p className="font-label text-xs uppercase tracking-widest text-blue-950/70">{slot.label}</p>
+        <p className="flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-blue-950/70">
+          {SlotIcon && <SlotIcon size={14} strokeWidth={2} aria-hidden="true" />}
+          {slot.label}
+        </p>
 
         {SHOW_SUGGESTIONS && (
           <div className="flex justify-end">

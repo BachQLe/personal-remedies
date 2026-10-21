@@ -24,13 +24,18 @@
 }
 
 .home-shortcuts {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.625rem;
 }
 
 .home-shortcuts > * {
-  flex: 1 1 0;
   min-width: 0;
+}
+
+.home-shortcuts > :first-child {
+  grid-column: 1 / -1;
+  min-height: 8.5rem;
 }
 
 .home-shortcut {
@@ -51,10 +56,6 @@
 
 .home-shortcut__icon {
   display: block;
-  width: 72px;
-  height: 72px;
-  max-width: 100%;
-  object-fit: contain;
   flex-shrink: 0;
 }
 

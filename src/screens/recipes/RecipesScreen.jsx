@@ -1,19 +1,18 @@
 import { useState, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getProfile, getRecipes, buildRecipeDetail } from '../../api/api.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
+import BackButton from '../../components/shared/BackButton.jsx';
 import DataState from '../../components/shared/DataState.jsx';
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
 import BestRecipesRails from '../../components/shared/BestRecipesRails.jsx';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
-import { MEAL_TYPE_META, displayTagForItem } from '../../components/shared/mealTypeMeta.jsx';
+import { MEAL_TYPE_META } from '../../components/shared/mealTypeMeta.jsx';
 import { PLAN_SLOT_KEYS } from '../../api/config.js';
 import { GHOST_RECIPES } from '../../api/ghostData.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
-import { COPY } from '../plan/plannerCopy.js';
 
 // No demo conditions here: a missing profile means no condition-scored recipes
 // (getRecipes returns an empty list for an empty conditions array), never a
@@ -128,8 +127,8 @@ export function matchesMealFilter(recipeMealType, filterLabel, alsoFits) {
  * `kind: 'recipe'`) — the same rename `recipeToSaveItem` (saveGate.js) does,
  * but keeping every other Recipe field (title/photo included) so
  * `handleViewRecipe` below can still read them. `fromSlot` records which
- * rail the card is rendered under, for its corner meal-type tag
- * (`displayTagForItem`) — same convention the Plan screen's own cards use.
+ * rail the card is rendered under (kept for save/favorites grouping; cards on
+ * this screen show no meal-type chip).
  * @param {import('../../api/types.js').Recipe} recipe
  * @param {string} slotKey
  */
@@ -167,6 +166,7 @@ function bucketRecipesBySlot(recipes) {
 }
 
 export default function RecipesScreen() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   // Lazy initializer — read the `?meal=` deep link once on mount only (see
@@ -285,27 +285,14 @@ export default function RecipesScreen() {
       className={`bg-forest-300 flex flex-col min-h-screen -mb-28${ghost ? ' rm-ghost' : ''}`}
       aria-busy={ghost}
     >
-      {/* Header zone — on the green page background, above the shell. No
-          search box, filter pills, or recipe count here (2026-10 redesign) —
-          this screen is now the Meal Planner's own "Best recipes" rails,
-          minus the planner-only controls (Week starts / tabs / Refresh), so
-          there's nothing to filter against: each rail IS its own meal-type
-          filter. */}
-      <div className="px-5 pt-6 pb-6">
-        <p className="text-[12px] text-blue-950/60 font-label tracking-[0.14em] uppercase">Personal Remedies</p>
-        <h1 className="font-display text-2xl font-semibold text-blue-950 tracking-tightish">Recipes</h1>
-        <p className="text-sm text-blue-950/60 mt-0.5 font-sans">Matched to your profile</p>
-        {/* Step label + the way on: bookmarked recipes land in My Favorites. */}
-        <div className="mt-3 flex items-center justify-between gap-3">
-          <p className="font-label text-xs tracking-widest uppercase text-blue-950/70">{COPY.stepPick}</p>
-          <Link
-            to="/app/favorites"
-            className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-semibold text-blue-950/80
-              transition-colors duration-fast hover:text-blue-950"
-          >
-            {COPY.favoritesLink}
-            <ArrowRight size={14} aria-hidden="true" />
-          </Link>
+      {/* Header zone — on the green page background, above the shell. Back
+          always returns to My Favorites. Each rail below is its own meal-type
+          filter, so there's no search or filter UI here. */}
+      <div className="px-5 pt-10 pb-6 flex flex-col gap-3">
+        <BackButton onClick={() => navigate('/app/favorites')} aria-label="Back to My Favorites" />
+        <div>
+          <h1 className="font-display text-[32px] font-semibold leading-tight text-blue-950">Recipes</h1>
+          <p className="mt-1 font-sans text-sm text-blue-950/70">Pick your favorite recipes from our suggestions!</p>
         </div>
       </div>
 
@@ -318,6 +305,9 @@ export default function RecipesScreen() {
             onSeeMore={setBrowseSlot}
             onSaveBlocked={show}
             showScrollbar
+            showSubtitle={false}
+            showMealTag={false}
+            saveAtTop
           />
         ) : (
           <DataState
@@ -333,6 +323,9 @@ export default function RecipesScreen() {
               onSeeMore={setBrowseSlot}
               onSaveBlocked={show}
               showScrollbar
+              showSubtitle={false}
+              showMealTag={false}
+              saveAtTop
             />
           </DataState>
         )}
@@ -356,10 +349,9 @@ export default function RecipesScreen() {
               <div key={item.id} className="min-w-0" style={{ aspectRatio: '4/5', width: 'calc(50% - 6px)' }}>
                 <FoodImageCard
                   id={item.id}
-                  mealTag={displayTagForItem(item, item.fromSlot ?? browseSlot)}
                   image={item.image}
                   title={item.name}
-                  subtitle={item.sourceName || item.tier || undefined}
+                  saveActionPosition="top"
                   numericId={item.numericId}
                   onClick={() => handleViewRecipe(item)}
                   className="w-full h-full"

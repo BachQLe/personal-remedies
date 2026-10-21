@@ -41,6 +41,8 @@ import { dragScrollProps } from './dragScroll.js';
  *   since it's a browse surface, not a compact picker.
  * @param {boolean} [props.showSubtitle] - render the card's secondary line
  *   (source name / tier) under its title. On by default.
+ * @param {boolean} [props.showMealTag] - render the card's corner meal-type
+ *   chip. On by default.
  * @param {boolean} [props.saveAtTop] - put the save bookmark in the card's
  *   top-right instead of bottom-right, leaving the bottom to the title (the
  *   home screen's card layout).
@@ -55,6 +57,7 @@ export default function BestRecipesRails({
   onSaveBlocked,
   cardWidthClass = 'w-[150px]',
   showSubtitle = true,
+  showMealTag = true,
   saveAtTop = false,
   dimImages = false,
 }) {
@@ -101,7 +104,7 @@ export default function BestRecipesRails({
                     <div key={item.id} className={`snap-start shrink-0 ${cardWidthClass}`} style={{ aspectRatio: '4/5' }}>
                       <FoodImageCard
                         id={item.id}
-                        mealTag={displayTagForItem(item, slot.key)}
+                        mealTag={showMealTag ? displayTagForItem(item, slot.key) : undefined}
                         image={item.image}
                         title={item.name}
                         subtitle={showSubtitle ? (item.sourceName || item.tier || undefined) : undefined}

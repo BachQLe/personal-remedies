@@ -14,8 +14,9 @@
  * @param {string} [className] - Extra classes on the container
  * @param {'sm'|'md'} [size] - Button vertical padding; 'md' (default, py-3) or 'sm' (py-2)
  * @param {string} [trackClassName] - Background class for the unselected track (default 'bg-white')
+ * @param {'solid'|'outline'} [variant] - Neutral-tone thumb style; 'solid' (default, navy fill) or 'outline' (navy ring, for secondary toggles)
  */
-export default function PillSwitcher({ options, value, onChange, className = '', size = 'md', trackClassName = 'bg-white' }) {
+export default function PillSwitcher({ options, value, onChange, className = '', size = 'md', trackClassName = 'bg-white', variant = 'solid' }) {
   const count = options.length;
   const padY = size === 'sm' ? 'py-2' : 'py-3';
   let selectedIndex = options.findIndex((o) => o.key === value);
@@ -26,11 +27,15 @@ export default function PillSwitcher({ options, value, onChange, className = '',
   // day strip's selected chip and every primary pill, so a selected segment
   // reads as selected on paper instead of as a faint white-on-sand card.
   // Positive/negative keep green/red: there the color IS the Eat/Avoid signal.
+  // variant="outline" swaps the neutral fill for a navy ring on secondary toggles.
+  const outline = variant === 'outline' && selectedTone !== 'positive' && selectedTone !== 'negative';
   const thumbClasses =
     selectedTone === 'positive'
       ? 'bg-forest-700'
       : selectedTone === 'negative'
       ? 'bg-red-600'
+      : outline
+      ? 'border-[1.5px] border-blue-950'
       : 'bg-blue-950 shadow-xs';
 
   return (
@@ -57,7 +62,7 @@ export default function PillSwitcher({ options, value, onChange, className = '',
             aria-pressed={isSelected}
             onClick={() => onChange(key)}
             className={`relative z-10 flex-1 ${padY} rounded-pill text-base font-sans font-semibold transition-colors duration-fast active:scale-[0.99]
-              ${isSelected ? 'text-white' : 'text-char-500 hover:text-char-700'}`}
+              ${isSelected ? (outline ? 'text-blue-950' : 'text-white') : 'text-char-500 hover:text-char-700'}`}
           >
             {label}
           </button>

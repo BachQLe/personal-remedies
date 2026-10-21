@@ -54,9 +54,9 @@ afterEach(() => {
 });
 
 describe('FavoritesScreen', () => {
-  it('shows the step label and, with no favorites, an empty state that links to Browse recipes', async () => {
+  it('shows the Plan header eyebrow and, with no favorites, an empty state that links to Browse recipes', async () => {
     await mount();
-    expect(container.textContent).toContain('Pick your favorites');
+    expect(container.querySelector('p.font-label').textContent).toBe('Plan');
     expect(container.textContent).toContain('No favorites yet');
     expect(container.querySelector('a[href="/app/recipes"]').textContent).toContain('Browse recipes');
     expect(container.querySelector('select')).toBeNull();
@@ -67,6 +67,7 @@ describe('FavoritesScreen', () => {
     await mount();
     const titles = () => [...container.querySelectorAll('button span.font-display')].map((s) => s.textContent);
     expect(titles()).toEqual(['Salmon roast', 'Oatmeal bowl']);
+    expect(container.querySelector('a[href="/app/recipes"]').textContent).toContain('Browse more recipes');
 
     const select = container.querySelector('select');
     expect([...select.options].map((o) => o.textContent)).toEqual(['Most recent', 'By meal type']);
