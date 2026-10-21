@@ -1,21 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getMealPlanSuggestions, buildRecipeDetail } from '../../api/api.js';
-import { PLAN_SLOT_KEYS } from '../../api/config.js';
-import { useAsyncData } from '../../hooks/useAsyncData.js';
-import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
-import BestRecipesRails from '../../components/shared/BestRecipesRails.jsx';
-import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
-import CoverageNote from '../../components/shared/CoverageNote.jsx';
-import ProfileSetupAction from './ProfileSetupAction.jsx';
-import { resolveProfileWithConditions } from './profileFallback.js';
 import TopDosTab from './TopDosTab.jsx';
 import RequireEntitlement from '../../components/shared/RequireEntitlement.jsx';
 import FoodGroupsTab from './FoodGroupsTab.jsx';
+import { RecipesBrowser } from '../recipes/RecipesScreen.jsx';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -40,7 +32,7 @@ const TAB_META = {
     title: 'Food Groups',
   },
   recipes: {
-    title: 'Recommendations',
+    title: 'Recipes',
   },
 };
 
@@ -55,147 +47,6 @@ function resolveTab(searchParams) {
   if (tab === 'groups') return 'groups';
   if (tab === 'suggest') return 'groups';
   return 'top';
-}
-
-// ── Skeletons ────────────────────────────────────────────────────────────────
-
-// One skeleton "rail" per meal-type slot, mirroring BestRecipesRails' own
-// section layout (header line + a row of card placeholders) so the loading
-// state doesn't jump when the real rails mount.
-function SkeletonRails() {
-  return (
-    <div className="flex flex-col gap-6">
-      {PLAN_SLOT_KEYS.map((key) => (
-        <div key={key} className="flex flex-col gap-3">
-          <div className="h-4 w-24 rounded bg-sand-200 animate-pulse" />
-          <div className="flex gap-3">
-            {[0, 1, 2].map((i) => (
-              <div
-                key={i}
-                className="w-[225px] shrink-0 rounded-xl bg-sand-200 animate-pulse"
-                style={{ aspectRatio: '4/5' }}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ── BestRecipesTab ────────────────────────────────────────────────────────────
-// "Best Recipes" — always shows top, condition-ranked options for all five
-// meal types (breakfast/lunch/dinner/snacks/beverages) via the same
-// getMealPlanSuggestions pool the Plan screen's picker uses, rendered
-// through the shared BestRecipesRails (read-only here — no "+" picker).
-// Tapping a card opens FoodDetailCard seeded via the same buildRecipeDetail
-// enrichment flow the old picker used.
-
-function emptySlotMap() {
-  return Object.fromEntries(PLAN_SLOT_KEYS.map((key) => [key, []]));
-}
-
-async function fetchBestRecipes() {
-  const profile = await resolveProfileWithConditions();
-  const res = await getMealPlanSuggestions(profile);
-  return {
-    candidates: res?.candidates ?? emptySlotMap(),
-    unscorableReason: res?.unscorableReason ?? null,
-    coverage: res?.coverage,
-  };
-}
-
-function isCandidatesEmpty(data) {
-  const candidates = data?.candidates ?? emptySlotMap();
-  return PLAN_SLOT_KEYS.every((key) => (candidates[key]?.length ?? 0) === 0);
-}
-
-function BestRecipesTab() {
-  const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const { show } = useSnackbar();
-
-  const { status, data, retry } = useAsyncData(fetchBestRecipes, [], {
-    isEmpty: isCandidatesEmpty,
-    requiresProfile: true,
-  });
-
-  const candidates = data?.candidates ?? emptySlotMap();
-
-  // PlanCandidates use name/image/sourceName/id instead of the FoodDetailCard
-  // item shape's name/image — seed the card immediately with the mapped
-  // shape, then enrich in place via the same buildRecipeDetail flow the old
-  // picker used (real per-condition tiers + complementary ingredients;
-  // assessFood keys on foodId).
-  const openRecipe = useCallback((item) => {
-    const card = {
-      foodId: item.foodId ?? item.id ?? null,
-      name: item.name,
-      image: item.image,
-      sourceName: item.sourceName ?? null,
-      matchedConditions: item.matchedConditions ?? [],
-    };
-    // PlanCandidates carry these when their source Recipe had a C1 overlay
-    // match (see adapter.js's recipeToPlanCandidate) — forward when present
-    // so buildRecipeDetail can read them through onto the card payload.
-    if (item.sourceUrl) card.sourceUrl = item.sourceUrl;
-    if (item.attribution) card.attribution = item.attribution;
-    if (item.nutritionPerServing) card.nutritionPerServing = item.nutritionPerServing;
-    setSelectedRecipe({
-      foodId: card.foodId,
-      name: card.name,
-      image: card.image,
-      sourceName: card.sourceName,
-      conditions: card.matchedConditions,
-      ingredients: [],
-      isRecipe: true,
-    });
-    buildRecipeDetail(card)
-      .then((detail) => setSelectedRecipe({ ...detail, isRecipe: true }))
-      .catch(() => { });
-  }, []);
-
-  return (
-    <div className="flex flex-col gap-4">
-      {status === 'loading' ? (
-        <>
-          <SkeletonRails />
-          <SlowLoadingNote />
-        </>
-      ) : (
-        <DataState
-          status={status}
-          onRetry={retry}
-          screenName="Recommendations"
-          emptyTitle="No recipes yet"
-          emptyBody={data?.unscorableReason || "We don't have recipes ranked for your conditions right now."}
-          emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
-        >
-          <div className="flex flex-col gap-3">
-            <CoverageNote coverage={data?.coverage} />
-            <BestRecipesRails
-              candidatesBySlot={candidates}
-              onSelectCard={openRecipe}
-              onSaveBlocked={show}
-              // Browse surface, not a picker: cards run 50% wider than the
-              // planner's, carry no source/tier subline, keep the bookmark
-              // top-right and the title alone at the bottom, and dim the
-              // photo so that white title reads (home-screen card layout).
-              cardWidthClass="w-[225px]"
-              showSubtitle={false}
-              saveAtTop
-              dimImages
-            />
-          </div>
-        </DataState>
-      )}
-
-      <FoodDetailCard
-        item={selectedRecipe}
-        open={!!selectedRecipe}
-        onClose={() => setSelectedRecipe(null)}
-      />
-    </div>
-  );
 }
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
@@ -287,7 +138,8 @@ export default function SuggestionsScreen() {
             ) : activeTab === 'groups' ? (
               <FoodGroupsTab />
             ) : (
-              <BestRecipesTab />
+              // Same recipe browser as /app/recipes — one recipes page, two entry points.
+              <RecipesBrowser />
             )}
           </motion.div>
         </AnimatePresence>

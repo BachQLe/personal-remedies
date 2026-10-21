@@ -3,8 +3,8 @@
  *
  * Stacked sections (Breakfast → Beverages, `PLAN_SLOTS` order), each a
  * `<MealTypeTag>` + label header over a horizontal snap rail of
- * `FoodImageCard`s. Reused by `SuggestionsScreen.jsx`'s Recommendations tab
- * and `RecipesScreen.jsx` — one carousel implementation, not two hand-rolled ones.
+ * `FoodImageCard`s. Rendered by `RecipesScreen.jsx`'s `RecipesBrowser`, which
+ * both `/app/recipes` and the Choices screen's Recipes tab show.
  *
  * Honesty rule: a slot with an empty pool renders a small muted "No options
  * yet" line under its header — never a fabricated/placeholder card.
@@ -36,9 +36,6 @@ import { dragScrollProps } from './dragScroll.js';
  * @param {(message: string) => void} [props.onSaveBlocked] - forwarded to
  *   every card's `SaveButton`; the consuming screen routes this into its own
  *   snackbar.
- * @param {string} [props.cardWidthClass] - Tailwind width for each card in
- *   the rail (default `w-[150px]`). The Recommendations tab runs wider cards
- *   since it's a browse surface, not a compact picker.
  * @param {boolean} [props.showSubtitle] - render the card's secondary line
  *   (source name / tier) under its title. On by default.
  * @param {boolean} [props.showMealTag] - render the card's corner meal-type
@@ -46,8 +43,6 @@ import { dragScrollProps } from './dragScroll.js';
  * @param {boolean} [props.saveAtTop] - put the save bookmark in the card's
  *   top-right instead of bottom-right, leaving the bottom to the title (the
  *   home screen's card layout).
- * @param {boolean} [props.dimImages] - darken card photos so overlaid white
- *   text stays legible (home-screen brightness).
  */
 export default function BestRecipesRails({
   candidatesBySlot,
@@ -55,11 +50,9 @@ export default function BestRecipesRails({
   showScrollbar = false,
   onSeeMore,
   onSaveBlocked,
-  cardWidthClass = 'w-[150px]',
   showSubtitle = true,
   showMealTag = true,
   saveAtTop = false,
-  dimImages = false,
 }) {
   return (
     <div className="flex flex-col gap-6">
@@ -101,7 +94,7 @@ export default function BestRecipesRails({
               >
                 {pool.map((item) => {
                   return (
-                    <div key={item.id} className={`snap-start shrink-0 ${cardWidthClass}`} style={{ aspectRatio: '4/5' }}>
+                    <div key={item.id} className="snap-start shrink-0 w-[150px]" style={{ aspectRatio: '4/5' }}>
                       <FoodImageCard
                         id={item.id}
                         mealTag={showMealTag ? displayTagForItem(item, slot.key) : undefined}
@@ -113,7 +106,6 @@ export default function BestRecipesRails({
                         className="w-full h-full"
                         saveAction={() => <SaveButton item={item} onBlocked={onSaveBlocked} />}
                         saveActionPosition={saveAtTop ? 'top' : 'bottom'}
-                        dimImage={dimImages}
                       />
                     </div>
                   );

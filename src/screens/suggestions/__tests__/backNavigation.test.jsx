@@ -14,7 +14,7 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigate } from 'react-rou
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../../api/api.js', () => ({
-  getMealPlanSuggestions: vi.fn(() => new Promise(() => {})),
+  getRecipes: vi.fn(() => new Promise(() => {})),
   buildRecipeDetail: vi.fn(),
   getGroupLabel: vi.fn(async (c) => c),
   getFineFoodGroups: vi.fn(async () => [{ code: 'b1', label: 'Fish & Seafood', coarse: 'b' }]),

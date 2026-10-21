@@ -165,8 +165,13 @@ function bucketRecipesBySlot(recipes) {
   return out;
 }
 
-export default function RecipesScreen() {
-  const navigate = useNavigate();
+/**
+ * The recipe browser body — rails, "See more" sheet and detail card — with no
+ * page chrome. The one recipe surface in the app: rendered by RecipesScreen
+ * below (`/app/recipes`, from My Favorites) and by SuggestionsScreen's Recipes
+ * tab, so both entry points show the same recipes.
+ */
+export function RecipesBrowser() {
   const [searchParams] = useSearchParams();
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   // Lazy initializer — read the `?meal=` deep link once on mount only (see
@@ -276,29 +281,26 @@ export default function RecipesScreen() {
   }
 
   return (
-    // Green page + white paper shell — the same two-layer background every
-    // other screen uses (see HomeScreen/SuggestionsScreen). `-mb-28` cancels
-    // the AppShell main's pb-28 navbar reserve so the shell's own pb-28
-    // becomes the navbar clearance and paints paper behind the floating
-    // TabBar (appshell-cream-fix pattern).
-    <div
-      className={`bg-forest-300 flex flex-col min-h-screen -mb-28${ghost ? ' rm-ghost' : ''}`}
-      aria-busy={ghost}
-    >
-      {/* Header zone — on the green page background, above the shell. Back
-          always returns to My Favorites. Each rail below is its own meal-type
-          filter, so there's no search or filter UI here. */}
-      <div className="px-5 pt-10 pb-6 flex flex-col gap-3">
-        <BackButton onClick={() => navigate('/app/favorites')} aria-label="Back to My Favorites" />
-        <div>
-          <h1 className="font-display text-[32px] font-semibold leading-tight text-blue-950">Recipes</h1>
-          <p className="mt-1 font-sans text-sm text-blue-950/70">Pick your favorite recipes from our suggestions!</p>
-        </div>
-      </div>
-
-      {/* Content shell — full-bleed white container with rounded top corners */}
-      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-5">
-        {ghost ? (
+    <div className={`flex flex-col gap-5${ghost ? ' rm-ghost' : ''}`} aria-busy={ghost}>
+      {ghost ? (
+        <BestRecipesRails
+          candidatesBySlot={candidatesBySlot}
+          onSelectCard={handleViewRecipe}
+          onSeeMore={setBrowseSlot}
+          onSaveBlocked={show}
+          showScrollbar
+          showSubtitle={false}
+          showMealTag={false}
+          saveAtTop
+        />
+      ) : (
+        <DataState
+          status={status}
+          onRetry={retry}
+          emptyTitle="No recipes yet"
+          emptyBody={data?.unscorableReason || "Set up your health profile to get condition-matched recipes."}
+          screenName="recipes"
+        >
           <BestRecipesRails
             candidatesBySlot={candidatesBySlot}
             onSelectCard={handleViewRecipe}
@@ -309,27 +311,8 @@ export default function RecipesScreen() {
             showMealTag={false}
             saveAtTop
           />
-        ) : (
-          <DataState
-            status={status}
-            onRetry={retry}
-            emptyTitle="No recipes yet"
-            emptyBody={data?.unscorableReason || "Set up your health profile to get condition-matched recipes."}
-            screenName="recipes"
-          >
-            <BestRecipesRails
-              candidatesBySlot={candidatesBySlot}
-              onSelectCard={handleViewRecipe}
-              onSeeMore={setBrowseSlot}
-              onSaveBlocked={show}
-              showScrollbar
-              showSubtitle={false}
-              showMealTag={false}
-              saveAtTop
-            />
-          </DataState>
-        )}
-      </div>
+        </DataState>
+      )}
 
       {/* "See more" — full pool for whichever rail's link was tapped (or the
           `?meal=` deep link opened straight into). Mirrors
@@ -369,6 +352,34 @@ export default function RecipesScreen() {
         open={!!selectedRecipe}
         onClose={() => setSelectedRecipe(null)}
       />
+    </div>
+  );
+}
+
+export default function RecipesScreen() {
+  const navigate = useNavigate();
+  return (
+    // Green page + white paper shell — the same two-layer background every
+    // other screen uses (see HomeScreen/SuggestionsScreen). `-mb-28` cancels
+    // the AppShell main's pb-28 navbar reserve so the shell's own pb-28
+    // becomes the navbar clearance and paints paper behind the floating
+    // TabBar (appshell-cream-fix pattern).
+    <div className="bg-forest-300 flex flex-col min-h-screen -mb-28">
+      {/* Header zone — on the green page background, above the shell. Back
+          always returns to My Favorites. Each rail below is its own meal-type
+          filter, so there's no search or filter UI here. */}
+      <div className="px-5 pt-10 pb-6 flex flex-col gap-3">
+        <BackButton onClick={() => navigate('/app/favorites')} aria-label="Back to My Favorites" />
+        <div>
+          <h1 className="font-display text-[32px] font-semibold leading-tight text-blue-950">Recipes</h1>
+          <p className="mt-1 font-sans text-sm text-blue-950/70">Pick your favorite recipes from our suggestions!</p>
+        </div>
+      </div>
+
+      {/* Content shell — full-bleed white container with rounded top corners */}
+      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col">
+        <RecipesBrowser />
+      </div>
     </div>
   );
 }
