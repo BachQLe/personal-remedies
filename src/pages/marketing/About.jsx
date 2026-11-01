@@ -41,7 +41,7 @@ export default function About() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500">About us</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-[2rem] leading-[1.08] sm:text-[2.875rem] sm:leading-[1.08] lg:text-[3.375rem] lg:leading-[1.08] max-w-[24ch] mx-auto text-blue-950">
+            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-title leading-[1.08] sm:text-[2.875rem] sm:leading-[1.08] lg:text-[3.375rem] lg:leading-[1.08] max-w-[24ch] mx-auto text-blue-950">
               Built by people who believe food is the{" "}
               <em className="font-display italic font-normal text-forest-700">most underused medicine in the world.</em>
             </h1>

@@ -167,7 +167,7 @@ export default function Developers() {
       <section className="py-24 lg:py-32 bg-forest-900">
         <div className="mx-auto max-w-3xl container-px text-center">
           <Reveal>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[2rem] leading-[1.08] sm:text-[2.875rem] sm:leading-[1.04] text-[#F3EFE6]">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-title leading-[1.08] sm:text-[2.875rem] sm:leading-[1.04] text-[#F3EFE6]">
               Start with a{" "}
               <em className="font-display italic font-normal text-yellow-400">free account.</em>
             </h2>

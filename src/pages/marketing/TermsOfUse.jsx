@@ -23,7 +23,7 @@ export default function TermsOfUse() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Agreement
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Terms of use agreement
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -52,7 +52,7 @@ export default function TermsOfUse() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Disclaimer
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Medical disclaimer
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -90,7 +90,7 @@ export default function TermsOfUse() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Content
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Use of the content of our website
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -119,7 +119,7 @@ export default function TermsOfUse() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Restrictions
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Limitations of use and prohibited activities
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -155,7 +155,7 @@ export default function TermsOfUse() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Liability
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Use of our website and its content is at your own risk
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -181,7 +181,7 @@ export default function TermsOfUse() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               General
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               General provisions
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">

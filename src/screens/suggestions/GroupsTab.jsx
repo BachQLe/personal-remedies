@@ -81,7 +81,7 @@ function CategoryGrid({ coarseLabels, fineLabelsByGroup, onOpen }) {
             <div className="min-w-0 flex-1">
               <p className="font-sans text-base font-semibold text-char-900 leading-snug">{label}</p>
               {fineLine && (
-                <p className="text-xs font-sans font-semibold uppercase tracking-wide text-char-700 mt-0.5 line-clamp-2">{fineLine}</p>
+                <p className="text-xs font-sans font-semibold uppercase tracking-wide text-char-700 mt-0.5">{fineLine}</p>
               )}
             </div>
             <ChevronRight size={16} className="text-char-400 shrink-0" aria-hidden="true" />

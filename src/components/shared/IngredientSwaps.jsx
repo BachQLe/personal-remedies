@@ -94,7 +94,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
             <li key={key} className="py-2 first:pt-0 last:pb-0">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-sm font-sans text-char-700 leading-snug break-words">
+                  <p className="text-sm font-sans text-char-700 leading-snug">
                     {swap ? swap.name : ing.name}
                   </p>
                   {swap && (
@@ -108,7 +108,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
                       className="mt-0.5 inline-flex items-center gap-1 text-[0.875rem] font-sans text-char-400 hover:text-char-700 transition-colors duration-fast"
                     >
                       <RotateCcw size={11} aria-hidden="true" />
-                      <span className="break-words">instead of {ing.name} — undo</span>
+                      <span className="min-w-0">instead of {ing.name} — undo</span>
                     </button>
                   )}
                 </div>
@@ -184,7 +184,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
                                 className="w-9 h-9 rounded-lg object-cover object-center flex-shrink-0"
                                 loading="lazy"
                               />
-                              <span className="flex-1 min-w-0 text-[0.875rem] font-sans text-char-700 break-words">
+                              <span className="flex-1 min-w-0 text-[0.875rem] font-sans text-char-700">
                                 {alt.name}
                               </span>
                               <FoodRating numericId={alt.numericId} size={12} tone="light" className="flex-shrink-0" />

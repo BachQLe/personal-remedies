@@ -31,7 +31,7 @@ function FavoriteGrid({ items, onSelect, onBlocked }) {
   return (
     <div className="flex flex-wrap gap-3">
       {items.map((item) => (
-        <div key={item.id} className="w-[calc(50%-0.375rem)] min-w-0">
+        <div key={item.id} className="w-[calc(50%-0.375rem)] min-w-[min(9rem,100%)]">
           <FoodImageCard
             id={item.id}
             image={item.image || getIngredientImage(item.name, item.group, getOverlayImageFile(item.id))}
@@ -100,7 +100,7 @@ export default function FavoritesScreen() {
       <PageHeader className="bg-forest-300">
         <div className="flex items-center gap-3">
           <BackButton fallback="/app/plan" />
-          <h1 className="min-w-0 font-display text-[2rem] font-semibold text-blue-950 leading-tight">
+          <h1 className="min-w-0 font-display text-title font-semibold text-blue-950 leading-tight">
             {COPY.favoritesTitle}
           </h1>
         </div>
@@ -119,16 +119,16 @@ export default function FavoritesScreen() {
               <ArrowRight size={16} aria-hidden="true" />
             </Link>
           )}
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 id="fav-recipes" className={LABEL}>{COPY.sectionRecipes}</h2>
             {library.length > 0 && (
-              <div className="relative">
+              <div className="relative max-w-full">
                 <label htmlFor="fav-group" className="sr-only">{COPY.groupLabel}</label>
                 <select
                   id="fav-group"
                   value={group}
                   onChange={(e) => setGroup(e.target.value)}
-                  className="min-h-[44px] appearance-none rounded-pill border border-sand-200 bg-white pl-4 pr-9 font-sans
+                  className="min-h-[44px] max-w-full appearance-none rounded-pill border border-sand-200 bg-white pl-4 pr-9 font-sans
                     text-sm font-semibold text-blue-950"
                 >
                   <option value="recent">{COPY.groupRecent}</option>

@@ -142,9 +142,32 @@ export default {
           info: { DEFAULT: "#3F6E86", tint: "#DDE8ED" },
         },
       },
+      // Text scales without limit with the iPhone text-size setting; spacing and
+      // fixed chrome stop at a share of the screen width, so at the largest sizes
+      // the room goes to the text. At a normal text size the rem value always wins.
+      spacing: {
+        2: "min(0.5rem, 3vw)",
+        3: "min(0.75rem, 4vw)",
+        4: "min(1rem, 5vw)",
+        5: "min(1.25rem, 6vw)",
+        6: "min(1.5rem, 7vw)",
+        8: "min(2rem, 9vw)",
+        9: "min(2.25rem, 12vw)",
+        10: "min(2.5rem, 13vw)",
+        11: "min(2.75rem, 14vw)",
+        12: "min(3rem, 15vw)",
+        14: "min(3.5rem, 18vw)",
+        16: "min(4rem, 20vw)",
+        28: "min(7rem, 30vw)",
+      },
       fontSize: {
         // The caption size is the floor for user-facing text (Mory's 30 Oct review).
         xs: ["0.875rem", { lineHeight: "1.25rem" }],
+        // Titles keep their size until the text outgrows the screen, then settle
+        // at body size, as iOS's own large titles do at accessibility sizes.
+        title: ["max(1rem, min(2rem, 12vw))", { lineHeight: "1.15" }],
+        "2xl": ["max(1rem, min(1.5rem, 12vw))", { lineHeight: "1.25" }],
+        xl: ["max(1rem, min(1.25rem, 12vw))", { lineHeight: "1.3" }],
       },
       fontFamily: {
         display: ['"Chillax"', "ui-sans-serif", "system-ui", "sans-serif"],

@@ -78,7 +78,7 @@ export default function Contact() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500">Contact us</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-[2rem] leading-[1.1] sm:text-[2.875rem] sm:leading-[1.05] lg:text-[3.375rem] lg:leading-[1.03] max-w-[24ch] mx-auto text-blue-950">
+            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-title leading-[1.1] sm:text-[2.875rem] sm:leading-[1.05] lg:text-[3.375rem] lg:leading-[1.03] max-w-[24ch] mx-auto text-blue-950">
               Get in touch with our team
             </h1>
           </Reveal>

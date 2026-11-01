@@ -334,7 +334,7 @@ export function RecipesBrowser() {
         ) : (
           <div className="flex flex-wrap gap-3">
             {browsePool.map((item) => (
-              <div key={item.id} className="min-w-0" style={{ aspectRatio: '4/5', width: 'calc(50% - 6px)' }}>
+              <div key={item.id} className="w-[calc(50%-0.375rem)] min-w-[min(9rem,100%)]">
                 <FoodImageCard
                   id={item.id}
                   image={item.image}
@@ -342,7 +342,7 @@ export function RecipesBrowser() {
                   saveActionPosition="top"
                   numericId={item.numericId}
                   onClick={() => handleViewRecipe(item)}
-                  className="w-full h-full"
+                  className="w-full"
                   saveAction={() => <SaveButton item={item} onBlocked={show} />}
                 />
               </div>
@@ -378,7 +378,7 @@ export default function RecipesScreen() {
       <div className="px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex flex-col gap-1">
         <div className="flex items-center gap-3">
           <BackButton fallback="/app/favorites" />
-          <h1 className="min-w-0 font-display text-[2rem] font-semibold leading-tight text-blue-950">Choose recipes</h1>
+          <h1 className="min-w-0 font-display text-title font-semibold leading-tight text-blue-950">Choose recipes</h1>
         </div>
         <p className="font-sans text-sm text-blue-950/70">Pick your favorite recipes from our suggestions!</p>
       </div>

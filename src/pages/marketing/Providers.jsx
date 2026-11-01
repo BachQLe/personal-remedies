@@ -184,7 +184,7 @@ export default function Providers() {
       <section className="py-24 lg:py-32 bg-paper-200">
         <div className="mx-auto max-w-3xl container-px text-center">
           <Reveal>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[2rem] leading-[1.08] sm:text-[2.875rem] sm:leading-[1.04] text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-title leading-[1.08] sm:text-[2.875rem] sm:leading-[1.04] text-blue-950">
               Let's talk about your{" "}
               <em className="font-display italic font-normal text-lavender-700">patient population.</em>
             </h2>

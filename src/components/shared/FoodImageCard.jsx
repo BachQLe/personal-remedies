@@ -122,6 +122,7 @@ export default function FoodImageCard({
   loading = 'lazy',
   nonFoodIcon = null,
 }) {
+  const [aspectW, aspectH] = aspectRatio.split('/').map(Number);
   const badgeLabel = typeof badge === 'string' ? badge : badge?.label;
   const badgeVariant = badge && typeof badge === 'object' ? badge.variant : 'primary';
 
@@ -148,13 +149,16 @@ export default function FoodImageCard({
   return (
     <button
       onClick={handleCardClick}
-      className={`relative overflow-hidden rounded-xl text-left
+      className={`relative overflow-hidden rounded-xl text-left flex items-end
         transition-all duration-base ease-ds-out
         hover:-translate-y-[2px] hover:shadow-lg
         active:translate-y-[1px] active:scale-[0.99]
         ${className}`}
-      style={{ aspectRatio: aspectRatio }}
     >
+      {/* Holds the card's shape as a minimum height (percent padding resolves
+          against the width), so text too tall for it grows the card, not clips. */}
+      <span aria-hidden="true" className="w-0 flex-none" style={{ paddingBottom: `${aspectH / aspectW * 100}%` }} />
+
       {/* Image background — `nonFoodIcon` (non-food rendering rule, master
           plan 1.10) always wins over `image`: a category icon tile instead
           of a photo for coarse group 'k' / fine group 'x'/'j1' items. */}
@@ -242,8 +246,9 @@ export default function FoodImageCard({
         </div>
       )}
 
-      {/* Content at bottom */}
-      <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col gap-1">
+      {/* Content at bottom. In flow, with room for the top corner buttons, so at
+          large text sizes the card grows to fit it rather than clipping it. */}
+      <div className="relative min-w-0 flex-1 p-4 pt-14 flex flex-col gap-1">
         <FoodRating numericId={numericId} size={14} className="mb-1" />
         <span className="font-display text-base font-semibold text-white leading-snug">
           {title}

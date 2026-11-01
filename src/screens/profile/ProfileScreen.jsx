@@ -228,9 +228,9 @@ function ConditionsEditor({ value, onChange }) {
               </span>
             </button>
             {(cond?.longDescription || cond?.ICD10) && (
-              <div className="flex items-baseline gap-2 px-3">
+              <div className="flex flex-wrap items-baseline gap-2 px-3">
                 {cond?.longDescription && (
-                  <span className="text-[0.875rem] text-char-400 font-sans break-words">
+                  <span className="text-[0.875rem] text-char-400 font-sans">
                     {cond.longDescription}
                   </span>
                 )}
@@ -326,7 +326,7 @@ function ConditionDropdown({ value, onChange }) {
         className="w-full flex items-center justify-between gap-2 pl-4 pr-3 py-[15px] rounded-full border-[1.5px] bg-white text-[1rem] text-char-500 font-sans shadow-sm outline-none transition-all duration-fast ease-ds-out disabled:opacity-60"
         style={{ borderColor: open ? '#111E58' : '#FFFFFF' }}
       >
-        <span className="break-words">
+        <span className="min-w-0">
           {loading ? 'Loading conditions…' : 'Select your conditions'}
         </span>
         <span
@@ -379,9 +379,9 @@ function ConditionDropdown({ value, onChange }) {
                     {isSelected ? 'check' : meta.icon}
                   </span>
                   <span className="flex-1 min-w-0 flex flex-col gap-0.5">
-                    <span className="break-words text-char-900">{c.description}</span>
+                    <span className="text-char-900">{c.description}</span>
                     {c.longDescription && (
-                      <span className="block text-[0.875rem] font-normal text-char-400 break-words">
+                      <span className="block text-[0.875rem] font-normal text-char-400">
                         {c.longDescription.length > 70
                           ? c.longDescription.trim().slice(0, 69).trimEnd() + '…'
                           : c.longDescription.trim()}
@@ -702,7 +702,7 @@ export default function ProfileScreen() {
         <p className="font-label text-xs tracking-widest uppercase text-blue-950/60">Profile</p>
 
         {/* Display name — same size as HomeScreen's "Hi there, [name]" greeting */}
-        <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight">
+        <h1 className="font-display text-title font-semibold text-blue-950 leading-tight">
           {displayName}
         </h1>
 
@@ -810,7 +810,7 @@ export default function ProfileScreen() {
                   <span className="text-char-500">
                     <Icon name="mail" size={20} aria-hidden="true" />
                   </span>
-                  <span className="flex-1 text-sm font-medium font-sans text-char-900 break-words">
+                  <span className="flex-1 text-sm font-medium font-sans text-char-900">
                     {user.email}
                   </span>
                 </span>

@@ -73,7 +73,7 @@ const EMPTY_CONDITION_NAMES = [];
 const CALORIE_GAP_RATIO = 0.8;
 
 const ICON_BTN =
-  'inline-flex items-center justify-center w-11 h-11 rounded-full bg-white/40 hover:bg-white/60 ' +
+  'tap-target inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/40 hover:bg-white/60 ' +
   'text-blue-950/70 shadow-sm transition duration-fast active:scale-95';
 
 /** The plan-day calorie total (sits in the day action card), hidden when nothing is countable. */
@@ -424,12 +424,12 @@ export default function MealQueueScreen() {
                 <CalendarPlus size={16} aria-hidden="true" />
                 {COPY.newPlan}
               </button>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => setSaveWeekOpen(true)}
                   disabled={showGhost}
-                  className={`inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-pill bg-paper-100 px-4 font-sans text-sm
+                  className={`inline-flex min-h-[44px] flex-[1_1_9rem] items-center justify-center gap-2 rounded-pill bg-paper-100 px-4 font-sans text-sm
                     font-semibold text-blue-950 transition duration-fast active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
@@ -440,7 +440,7 @@ export default function MealQueueScreen() {
                   type="button"
                   onClick={() => setLoadWeekOpen(true)}
                   disabled={showGhost}
-                  className={`inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-pill bg-paper-100 px-4 font-sans text-sm
+                  className={`inline-flex min-h-[44px] flex-[1_1_9rem] items-center justify-center gap-2 rounded-pill bg-paper-100 px-4 font-sans text-sm
                     font-semibold text-blue-950 transition duration-fast active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
@@ -546,7 +546,7 @@ export default function MealQueueScreen() {
 
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-white p-2">
               <CalorieLine slots={daySlots} />
-              <div className="ml-auto flex items-center gap-2">
+              <div className="ml-auto flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setSaveDayOpen(true)}

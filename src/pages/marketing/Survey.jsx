@@ -207,7 +207,7 @@ export default function Survey() {
                   <div className="mx-auto mb-5 w-14 h-14 flex items-center justify-center">
                     <div className="w-10 h-10 rounded-full border-[3px] border-forest-700 border-t-transparent animate-spin" />
                   </div>
-                  <h2 className="font-display font-semibold tracking-tightish text-[1.5rem] text-blue-950 leading-snug">
+                  <h2 className="font-display font-semibold tracking-tightish text-2xl text-blue-950 leading-snug">
                     Building your personalized plan
                   </h2>
                   <p className="text-sm text-char-500 mt-2 font-sans">
@@ -225,7 +225,7 @@ export default function Survey() {
                     A fact while you wait
                   </p>
                   <div className="bg-white rounded-[28px] border border-sand-200 shadow-card px-8 py-5 text-left">
-                    <p className="font-display font-semibold text-[1.5rem] text-forest-700 leading-none mb-3">
+                    <p className="font-display font-semibold text-2xl text-forest-700 leading-none mb-3">
                       {fact.stat}
                     </p>
                     <p className="text-[1.125rem] leading-[1.6] text-char-900 font-sans mb-2">

@@ -12,12 +12,11 @@ export default function FavoritesNudge({ bySlot }) {
   const shortMeals = mealsShortOnFavorites(bySlot);
   if (shortMeals.length === 0) return null;
   return (
-    <div className="flex flex-col items-start gap-1.5 rounded-xl bg-paper-200 px-4 py-3">
-      <p className="font-sans text-sm text-blue-950">{COPY.nudge}</p>
-      <p className="font-sans text-xs text-char-500">{COPY.nudgeShort(shortMeals)}</p>
-      <Link to="/app/favorites" className="inline-flex min-h-[44px] items-center font-sans text-sm font-semibold text-blue-950 underline underline-offset-2">
+    <p className="rounded-xl bg-paper-200 px-4 py-3 font-sans text-sm text-blue-950">
+      {COPY.nudge}. {COPY.nudgeShort(shortMeals)}.{' '}
+      <Link to="/app/favorites" className="font-semibold underline underline-offset-2">
         {COPY.goToFavorites}
       </Link>
-    </div>
+    </p>
   );
 }

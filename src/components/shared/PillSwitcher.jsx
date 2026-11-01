@@ -61,7 +61,7 @@ export default function PillSwitcher({ options, value, onChange, className = '',
             type="button"
             aria-pressed={isSelected}
             onClick={() => onChange(key)}
-            className={`relative z-10 flex-1 ${padY} rounded-pill text-base font-sans font-semibold transition-colors duration-fast active:scale-[0.99]
+            className={`relative z-10 flex-1 min-w-0 px-1 ${padY} rounded-pill text-base font-sans font-semibold transition-colors duration-fast active:scale-[0.99]
               ${isSelected ? (outline ? 'text-blue-950' : 'text-white') : 'text-char-500 hover:text-char-700'}`}
           >
             {label}

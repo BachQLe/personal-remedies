@@ -9,12 +9,13 @@
 
 .home-meals__tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   padding: 3px 2px 13px;
 }
 
 .home-meals__tab {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 40px;
   padding: 7px 3px;
@@ -26,9 +27,6 @@
   font-weight: 500;
   line-height: 1.3;
   text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   transition: color 160ms ease, background 160ms ease;
 }
 .home-meals__tab[aria-selected='true'] {
@@ -57,34 +55,44 @@
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
+/* The ::before holds the card's shape as a minimum height, so text too tall for
+   it grows the card at large text sizes rather than being clipped. */
 .home-meals__photo {
   position: relative;
+  display: flex;
   width: 100%;
-  aspect-ratio: 1.35;
-  max-height: 320px;
   border-radius: 26px;
   overflow: hidden;
   isolation: isolate;
   background: var(--meal-photo-fallback);
 }
+.home-meals__photo::before {
+  content: "";
+  flex: none;
+  width: 0;
+  padding-bottom: 74%;
+}
 .home-meals__open {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: flex-end;
   text-align: left;
   color: #fff;
 }
 .home-meals__open img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 250ms ease;
 }
 .home-meals__photo-fallback {
+  position: absolute;
+  inset: 0;
   display: flex;
-  height: 100%;
   align-items: center;
   justify-content: center;
   color: #c8d6c6;
@@ -110,19 +118,15 @@
   letter-spacing: 0.02em;
 }
 .home-meals__caption {
-  position: absolute;
-  bottom: 22px;
-  left: 21px;
-  right: 68px;
+  position: relative;
+  min-width: 0;
+  margin: 2.75rem 68px 22px 21px;
 }
 .home-meals__rating {
   margin-bottom: 6px;
 }
 .home-meals__name {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  display: block;
   font-size: clamp(1.25rem, 5vw, 1.5625rem);
   line-height: 1.17;
   letter-spacing: -0.025em;
@@ -131,9 +135,6 @@
 .home-meals__subtitle {
   display: block;
   margin-top: 7px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   color: #e0e6e0;
   font-size: 0.875rem;
   line-height: 1.35;

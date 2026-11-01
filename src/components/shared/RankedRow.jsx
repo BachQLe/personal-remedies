@@ -133,7 +133,7 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, imag
         {/* Skip 'x' — Nutridigm's catch-all fine group has no real label, so
             getGroupLabel echoes the raw code back (see adapter.js). */}
         {showGroup && food.groupLabel && food.groupLabel !== 'x' && (
-          <span className="block text-[0.875rem] text-char-400 font-sans mt-0.5 break-words">
+          <span className="block text-[0.875rem] text-char-400 font-sans mt-0.5">
             {food.groupLabel}
           </span>
         )}

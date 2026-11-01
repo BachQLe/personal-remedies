@@ -641,24 +641,23 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 that when the verdict-group chips below wrap onto several
                 lines — see conditionGroups/groupConditionsByVerdict. */}
             <div
-              className="absolute bottom-0 left-0 right-0 z-20 bg-neutral-900/70 backdrop-blur-sm rounded-t-2xl px-5 pt-4 pb-5 flex flex-col gap-2 min-h-[250px] max-h-full overflow-y-auto touch-pan-y hide-scrollbar"
+              className="absolute bottom-0 left-0 right-0 z-20 bg-neutral-900/70 backdrop-blur-sm rounded-t-2xl px-5 pt-4 pb-5 flex flex-col gap-2 min-h-[250px] max-h-[calc(100%-4.25rem)] overflow-y-auto touch-pan-y hide-scrollbar"
               onPointerDown={(e) => e.stopPropagation()}
             >
-              {/* Verdict rating — pinned to top-right of the info panel.
+              {/* Verdict rating — top-right of the info panel, beside the name.
                   Renders nothing once loading settles into 'error' (rather
                   than a stale spinner or a fabricated rating) — `assessment`
                   is null in that state, so `numericId != null` is already
                   false and this naturally falls through to "render nothing". */}
-              {(detailLoading || assessment?.numericId != null) && (
-                <div className="absolute top-3 right-4">
-                  <FoodRating numericId={assessment?.numericId} size={18} loading={detailLoading} />
-                </div>
-              )}
-
-              {/* Food name */}
-              <h2 className="font-display text-2xl font-semibold text-white leading-snug tracking-tightish pr-24">
-                {item?.name}
-              </h2>
+              <div className="flex flex-wrap items-start justify-between gap-x-3">
+                {/* Food name */}
+                <h2 className="min-w-0 flex-[1_1_60%] font-display text-2xl font-semibold text-white leading-snug tracking-tightish">
+                  {item?.name}
+                </h2>
+                {(detailLoading || assessment?.numericId != null) && (
+                  <FoodRating numericId={assessment?.numericId} size={18} loading={detailLoading} className="mt-1" />
+                )}
+              </div>
               {servingSize && (
                 <p className="text-[0.875rem] text-white font-sans">Serving size: {servingSize}</p>
               )}
@@ -727,9 +726,9 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
             }}
           >
             {/* Back header */}
-            <div className="flex-shrink-0 flex items-center justify-between px-5 pt-5 pb-3">
-              <div className="min-w-0">
-                <h3 className="font-display text-xl font-semibold text-blue-950 leading-snug tracking-tightish break-words">
+            <div className="flex-shrink-0 flex flex-wrap items-center justify-between gap-2 px-5 pt-5 pb-3">
+              <div className="min-w-0 flex-[1_1_50%]">
+                <h3 className="font-display text-xl font-semibold text-blue-950 leading-snug tracking-tightish">
                   {item?.name}
                 </h3>
                 {servingSize && (
@@ -737,13 +736,13 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 )}
                 {isRecipe ? (
                   item?.sourceName && (
-                    <p className="text-xs text-char-500 font-sans mt-0.5 break-words">
+                    <p className="text-xs text-char-500 font-sans mt-0.5">
                       {item.sourceName}
                     </p>
                   )
                 ) : (
                   facts?.groupLabel && facts.groupLabel !== 'x' && (
-                    <p className="text-xs text-char-500 font-sans mt-0.5 break-words">
+                    <p className="text-xs text-char-500 font-sans mt-0.5">
                       {facts.groupLabel}
                     </p>
                   )
@@ -751,7 +750,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
               </div>
               <button
                 onClick={() => setFlipped(false)}
-                className="tap-target flex-shrink-0 ml-3 h-9 px-3.5 rounded-full bg-white border border-neutral-200
+                className="tap-target min-w-0 min-h-9 px-3.5 rounded-full bg-white border border-neutral-200
                   flex items-center gap-1 text-char-600 text-sm font-sans
                   hover:bg-sand-100 transition-all duration-fast shadow-xs"
                 aria-label="Back to overview"
@@ -996,7 +995,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                     active:translate-y-[1px] active:scale-[0.99]"
                 >
                   <ExternalLink size={17} className="flex-shrink-0" aria-hidden="true" />
-                  <span className="break-words">{linkTarget.label}</span>
+                  <span className="min-w-0">{linkTarget.label}</span>
                 </button>
               </div>
             )}

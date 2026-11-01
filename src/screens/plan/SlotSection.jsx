@@ -66,7 +66,7 @@ export default function SlotSection({
             {items.map((item) => (
               <motion.div
                 key={item.id}
-                className="w-[calc(50%-0.375rem)] min-w-0"
+                className="w-[calc(50%-0.375rem)] min-w-[min(9rem,100%)]"
                 layout
                 initial={{ opacity: 0, scale: 0.92 }}
                 animate={{ opacity: 1, scale: 1 }}

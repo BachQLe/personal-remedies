@@ -105,8 +105,8 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
             <Icon name="leaf" size={18} aria-hidden="true" />
           </span>
           <span className="flex-1 min-w-0">
-            <span className="block font-semibold text-sm text-char-900 break-words leading-tight">{title}</span>
-            {subtitle && <span className="block text-xs text-char-500 mt-0.5 break-words">{subtitle}</span>}
+            <span className="block font-semibold text-sm text-char-900 leading-tight">{title}</span>
+            {subtitle && <span className="block text-xs text-char-500 mt-0.5">{subtitle}</span>}
             {servingSize && <span className="block text-xs text-char-500 mt-0.5">Serving size: {servingSize}</span>}
           </span>
         </button>
@@ -142,8 +142,8 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
       </span>
 
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-char-900 break-words leading-tight">{title}</p>
-        {subtitle && <p className="text-xs text-char-500 mt-0.5 break-words">{subtitle}</p>}
+        <p className="font-semibold text-sm text-char-900 leading-tight">{title}</p>
+        {subtitle && <p className="text-xs text-char-500 mt-0.5">{subtitle}</p>}
       </div>
 
       {saveItem && (
@@ -394,15 +394,15 @@ export default function SearchScreen({ active, onClose }) {
             />,
             <motion.div
               key="group"
-              className="absolute inset-0 max-w-[430px] mx-auto px-5 flex flex-col pointer-events-none"
+              className="absolute inset-0 max-w-[430px] mx-auto px-5 flex flex-col pointer-events-none overflow-y-auto hide-scrollbar"
               initial={{ paddingTop: PAD_IDLE, opacity: 0 }}
               animate={{ paddingTop: padTarget, opacity: 1 }}
               exit={{ paddingTop: PAD_IDLE, opacity: 0 }}
               transition={{ default: calmSpring, opacity: { duration: 0.25, ease: 'easeOut' } }}
             >
-              <div className="flex items-center gap-3 flex-none pointer-events-auto">
+              <div className="flex items-start gap-3 flex-none pointer-events-auto">
                 <BackButton onClick={handleBack} />
-                <h1 className="min-w-0 font-display text-[2rem] font-semibold text-blue-950 leading-tight">
+                <h1 className="min-w-0 font-display text-title font-semibold text-blue-950 leading-tight">
                   {HEADING}
                 </h1>
               </div>
@@ -429,7 +429,7 @@ export default function SearchScreen({ active, onClose }) {
                 )}
               </div>
 
-              <div className="flex-1 min-h-0 mt-4 pointer-events-auto">
+              <div className="flex-1 min-h-[60dvh] mt-4 pointer-events-auto">
                 <div className="h-full p-3 flex flex-col rounded-t-[24px]" style={{ backgroundColor: 'rgba(255,255,255,0.62)', borderTop: '1px solid rgba(255,255,255,0.75)', borderLeft: '1px solid rgba(255,255,255,0.75)', borderRight: '1px solid rgba(255,255,255,0.75)' }}>
                   <AnimatePresence mode="wait">
                     {showResults ? (
@@ -439,7 +439,7 @@ export default function SearchScreen({ active, onClose }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.18, ease: 'easeOut' }}
-                        className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
+                        className="h-full overflow-y-auto hide-scrollbar pb-28 flex flex-col gap-5"
                       >
                         {/* Idle-vs-no-results distinction (must survive): this
                             DataState only ever mounts once `showResults` is true —

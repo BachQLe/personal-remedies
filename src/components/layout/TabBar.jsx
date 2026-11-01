@@ -17,9 +17,9 @@ export default function TabBar() {
   const { pathname } = useLocation();
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 pointer-events-none safe-area-bottom">
-      <div className="flex justify-center px-3 pb-4">
+      <div className="tabbar flex justify-center px-3 pb-4">
         <LayoutGroup id="tabbar">
-          <div className="pointer-events-auto inline-flex items-center justify-center gap-2 px-2 h-14
+          <div className="tabbar-bar pointer-events-auto inline-flex items-center justify-center
             bg-[#1A1F2B]/95 backdrop-blur-md rounded-md border border-[#363C4A] shadow-lg">
           {TABS.map((tab) => {
             return (
@@ -27,7 +27,7 @@ export default function TabBar() {
                 key={tab.to}
                 to={tab.to}
                 aria-label={tab.label}
-                className="relative flex items-center justify-center h-11 min-w-[44px] px-2.5 rounded-md"
+                className="tabbar-link relative flex items-center justify-center rounded-md"
               >
                 {({ isActive: routeActive }) => {
                   const isActive = routeActive || pathname === tab.alsoActive;
@@ -46,7 +46,7 @@ export default function TabBar() {
                         isActive ? 'text-[#1A1F2B]' : 'text-[#A3ABBD]'
                       }`}
                     >
-                      <Icon name={tab.icon} size={21} aria-hidden="true" />
+                      <Icon name={tab.icon} size={21} className="tabbar-icon" aria-hidden="true" />
                       <AnimatePresence initial={false}>
                         {isActive && (
                           <motion.span
@@ -55,7 +55,7 @@ export default function TabBar() {
                             animate={{ opacity: 1, width: 'auto' }}
                             exit={{ opacity: 0, width: 0 }}
                             transition={{ duration: 0.18, ease: 'easeOut' }}
-                            className="overflow-hidden whitespace-nowrap text-[0.875rem] font-semibold font-sans"
+                            className="tabbar-label overflow-hidden whitespace-nowrap text-[0.875rem] font-semibold font-sans"
                           >
                             {tab.label}
                           </motion.span>

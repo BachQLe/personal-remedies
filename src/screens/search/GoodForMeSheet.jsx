@@ -58,7 +58,7 @@ export default function GoodForMeSheet({ food, profile, onClose }) {
           <BackButton onClick={onClose} aria-label="Close" />
           <div className="min-w-0">
             <p className="font-label text-[0.875rem] tracking-[0.14em] uppercase text-char-500">Check against my profile</p>
-            <h2 className="font-display text-xl font-semibold text-char-900 leading-tight break-words">{food?.name}</h2>
+            <h2 className="font-display text-xl font-semibold text-char-900 leading-tight">{food?.name}</h2>
             {servingSize && <p className="text-xs text-char-500 mt-0.5">Serving size: {servingSize}</p>}
           </div>
         </div>

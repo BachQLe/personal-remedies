@@ -46,7 +46,7 @@ export default function PaywallScreen() {
       <PageHeader label="Personal Remedies Plus" className="pb-4">
         <div className="flex items-center gap-3 mt-3">
           <BackButton fallback="/app/profile" />
-          <h1 className="font-display text-[1.5rem] font-semibold text-blue-950 leading-tight">
+          <h1 className="font-display text-2xl font-semibold text-blue-950 leading-tight">
             Personal Remedies Plus
           </h1>
         </div>
@@ -75,7 +75,7 @@ export default function PaywallScreen() {
           <p className="font-label text-xs uppercase tracking-eyebrow text-char-400">
             Personal Remedies Plus
           </p>
-          <p className="font-display text-[2rem] font-semibold text-blue-950 leading-tight mt-1">
+          <p className="font-display text-title font-semibold text-blue-950 leading-tight mt-1">
             $X.XX
             <span className="text-base font-sans font-normal text-char-400"> / month (placeholder)</span>
           </p>

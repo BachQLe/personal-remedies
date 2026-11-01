@@ -100,7 +100,7 @@ export default function SuggestionsScreen() {
               animate={{ opacity: 1, transition: { duration: 0.2, ease: 'easeOut' } }}
               exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeOut' } }}
             >
-              <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight">
+              <h1 className="font-display text-title font-semibold text-blue-950 leading-tight">
                 {TAB_META[activeTab].title}
               </h1>
             </motion.div>

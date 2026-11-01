@@ -145,7 +145,7 @@ export default function News() {
         <div className="mx-auto max-w-5xl container-px">
           <Reveal>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-              <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.625rem] sm:text-[2rem] leading-[1.08] text-[#F3EFE6]">
+              <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.625rem] sm:text-title leading-[1.08] text-[#F3EFE6]">
                 Press inquiry or{" "}
                 <em className="font-display italic font-normal text-yellow-400">partnership?</em>
               </h2>

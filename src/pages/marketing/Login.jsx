@@ -76,7 +76,7 @@ export default function Login() {
             <img src={remedyMark} alt="Personal Remedies" className="h-10 w-auto" />
           </Link>
 
-          <h1 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-char-900 text-center mb-1">
+          <h1 className="font-display font-semibold tracking-[-0.02em] text-2xl text-char-900 text-center mb-1">
             Welcome back
           </h1>
           <p className="font-sans text-[1rem] text-char-500 text-center mb-8">

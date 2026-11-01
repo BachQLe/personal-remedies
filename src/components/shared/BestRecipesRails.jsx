@@ -94,7 +94,7 @@ export default function BestRecipesRails({
               >
                 {pool.map((item) => {
                   return (
-                    <div key={item.id} className="snap-start shrink-0 w-[150px]" style={{ aspectRatio: '4/5' }}>
+                    <div key={item.id} className="snap-start shrink-0 w-[min(9.375rem,75vw)]">
                       <FoodImageCard
                         id={item.id}
                         mealTag={showMealTag ? displayTagForItem(item, slot.key) : undefined}
@@ -103,7 +103,7 @@ export default function BestRecipesRails({
                         subtitle={showSubtitle ? (item.sourceName || item.tier || undefined) : undefined}
                         numericId={item.numericId}
                         onClick={() => onSelectCard?.(item)}
-                        className="w-full h-full"
+                        className="w-full"
                         saveAction={() => <SaveButton item={item} onBlocked={onSaveBlocked} />}
                         saveActionPosition={saveAtTop ? 'top' : 'bottom'}
                       />

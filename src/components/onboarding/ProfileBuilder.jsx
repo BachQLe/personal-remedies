@@ -187,7 +187,7 @@ function ConditionsPanel({
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ ...snappySpring, delay: 0.1 }}
-          className="flex-none -mx-3 text-[2rem] text-balance leading-[1.16] font-semibold tracking-tight text-center mt-3 mb-6"
+          className="flex-none -mx-3 text-title text-balance leading-[1.16] font-semibold tracking-tight text-center mt-3 mb-6"
           style={{ fontFamily: 'Chillax, sans-serif' }}
         >
           Select the health topics that matter most to you
@@ -285,9 +285,9 @@ function ConditionsPanel({
                     );
                   })()}
                   <span className="flex-1 min-w-0 flex flex-col gap-0.5">
-                    <span className="break-words">{c.description}</span>
+                    <span className="min-w-0">{c.description}</span>
                     {c.longDescription && (
-                      <span className="block text-[0.875rem] font-normal text-char-400 break-words">
+                      <span className="block text-[0.875rem] font-normal text-char-400">
                         {truncate(c.longDescription)}
                       </span>
                     )}

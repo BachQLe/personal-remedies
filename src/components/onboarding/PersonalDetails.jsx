@@ -114,7 +114,7 @@ export default function PersonalDetails({ profile, onChange, onNext, onBack }) {
         <FruitScene scene="kitchen" src={fruitIllustration} alt="A green pear with a playful wink and smile" />
       </div>
       <div className="flex flex-col pt-3 pb-6">
-        <h1 className="text-[2rem] text-balance leading-[1.16] font-semibold tracking-tight text-center" style={{ fontFamily: 'Chillax, sans-serif' }}>
+        <h1 className="text-title text-balance leading-[1.16] font-semibold tracking-tight text-center" style={{ fontFamily: 'Chillax, sans-serif' }}>
           A little about you
         </h1>
         <p className="mt-4 mb-5 text-center font-sans text-base leading-relaxed text-blue-950/75">

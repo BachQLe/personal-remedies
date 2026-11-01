@@ -57,10 +57,10 @@ export default function GroupDetailScreen() {
     // pattern); GlassPanel's own pb-28 keeps the last row clear of the bar.
     <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
       <PageHeader className="pb-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-start gap-3">
           {/* Real history back (4.10); fallback only for a deep link. */}
           <BackButton fallback="/app/suggestions?tab=groups" />
-          <h1 className="font-display text-[1.5rem] font-semibold text-blue-950 leading-tight min-w-0 break-words">
+          <h1 className="font-display text-2xl font-semibold text-blue-950 leading-tight min-w-0">
             {groupLabel}
           </h1>
         </div>

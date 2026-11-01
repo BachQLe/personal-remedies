@@ -31,7 +31,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Overview
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Introduction
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -47,7 +47,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Data collection
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               What we collect
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -66,7 +66,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Storage
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Where it is stored
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -85,7 +85,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Health
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Your health information
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -104,7 +104,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Retention
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Keeping and deleting your data
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -123,7 +123,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Third parties
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Who else is involved
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -142,7 +142,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Commitments
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               What we do not do
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -158,7 +158,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Children
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Children
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -174,7 +174,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Your choices
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Your choices and contact
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -190,7 +190,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Security
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Security
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
@@ -206,7 +206,7 @@ export default function PrivacyPolicy() {
             <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Updates
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 mb-4">
               Changes to this policy
             </h2>
             <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
