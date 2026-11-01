@@ -1,5 +1,5 @@
 /**
- * FavoritesScreen - /app/favorites, the My Favorites tab of the Plan page: the user's favorite
+ * FavoritesScreen - /app/favorites, reached from the Plan page: the user's favorite
  * recipes (grouped by recency or meal type), plus their saved days and saved
  * weeks. Saved days / weeks open a read-only peek; loading happens on the plan.
  * Bookmarking a recipe anywhere in the app adds it here.
@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import PageHeader from '../../components/shared/PageHeader.jsx';
+import BackButton from '../../components/shared/BackButton.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
@@ -19,7 +20,6 @@ import { getOverlayImageFile } from '../../api/localTables.js';
 import { PLAN_SLOTS } from '../../api/config.js';
 import { getLibrary, subscribeLibrary } from '../../state/library.js';
 import { COPY } from '../plan/plannerCopy.js';
-import PlanTabs from '../plan/PlanTabs.jsx';
 import SavedList from './SavedList.jsx';
 import SavedPeekSheet from './SavedPeekSheet.jsx';
 import { useSavedLists } from './useSavedLists.js';
@@ -97,17 +97,17 @@ export default function FavoritesScreen() {
 
   return (
     <div className="bg-forest-300 flex flex-col min-h-screen -mb-28">
-      {/* Same height as the plan tab's icon row (h-11, -mt-3) so the title and
-          panel sit at the same y on both tabs - no jump when switching. */}
-      <PageHeader
-        label={COPY.planLabel}
-        title={COPY.favoritesTitle}
-        className="bg-forest-300"
-        right={<div aria-hidden="true" className="-mt-3 h-11 shrink-0" />}
-      />
+      <PageHeader className="bg-forest-300">
+        <div className="flex items-center gap-3">
+          <BackButton fallback="/app/plan" />
+          <h1 className="min-w-0 font-display text-[2rem] font-semibold text-blue-950 leading-tight">
+            {COPY.favoritesTitle}
+          </h1>
+        </div>
+        <p className="text-sm text-blue-950/70 font-sans mt-1">{COPY.stepFavorites}</p>
+      </PageHeader>
 
       <div className="mt-4 flex flex-1 flex-col gap-8 rounded-t-2xl bg-paper-100 px-5 pb-28 pt-5 shadow-[0_-2px_16px_rgba(45,36,24,0.05)]">
-        <PlanTabs value="/app/favorites" />
         <section aria-labelledby="fav-recipes" className="flex flex-col gap-4">
           {library.length > 0 && (
             <Link
@@ -115,7 +115,7 @@ export default function FavoritesScreen() {
               className="inline-flex min-h-[56px] items-center justify-center gap-2 w-full rounded-md bg-blue-950 px-6 py-4
                 font-sans text-sm font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
             >
-              {COPY.browseMoreRecipes}
+              {COPY.chooseMoreRecipes}
               <ArrowRight size={16} aria-hidden="true" />
             </Link>
           )}

@@ -675,7 +675,7 @@ export default function ProfileScreen() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-paper-100 px-4 pt-10">
+      <div className="min-h-screen bg-paper-100 px-4 pt-[max(1rem,env(safe-area-inset-top))]">
         <DataState
           status={navigator.onLine === false ? 'offline-no-cache' : 'error-api'}
           screenName="profile"
@@ -697,12 +697,12 @@ export default function ProfileScreen() {
     <div className="min-h-screen -mb-28 bg-forest-300 flex flex-col">
 
       {/* ── 1. Header zone ─────────────────────────────────────────────────── */}
-      <div className="bg-forest-300 px-5 pt-10 pb-6">
+      <div className="bg-forest-300 px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-4">
         {/* Page label row */}
-        <p className="font-label text-xs tracking-widest uppercase text-blue-950/60">Edit profile</p>
+        <p className="font-label text-xs tracking-widest uppercase text-blue-950/60">Profile</p>
 
         {/* Display name — same size as HomeScreen's "Hi there, [name]" greeting */}
-        <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight mt-2">
+        <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight">
           {displayName}
         </h1>
 

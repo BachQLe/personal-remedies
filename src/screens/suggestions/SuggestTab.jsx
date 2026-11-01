@@ -1,5 +1,5 @@
 /**
- * SuggestTab — the 17 Nutridigm FINE food groups as tappable photo rows,
+ * SuggestTab — the 18 Nutridigm FINE food groups as tappable photo rows,
  * bucketed under their coarse-family headers. This is the Wave 2 "Suggest"
  * browse surface.
  *
@@ -28,9 +28,9 @@
  *     error/Retry state-matrix — exactly GroupsTab's reasoning for its own
  *     fine-group preview line.
  *
- * Grouping: the 17 rows are bucketed by their `coarse` field (the leading
- * letter of the fine code) rather than rendered as one flat 17-row list — a
- * product call for this app's older-adult users, since 17 undifferentiated
+ * Grouping: the 18 rows are bucketed by their `coarse` field (the leading
+ * letter of the fine code) rather than rendered as one flat 18-row list — a
+ * product call for this app's older-adult users, since 18 undifferentiated
  * rows is too much scrolling. A coarse family with exactly one fine group
  * under it (d "Fruits & Juices", e "Vegetables", f "Breads, Grains, Cereals,
  * Pasta" as of this writing — each flagged BOTH isCoarseFoodGroup and
@@ -90,6 +90,7 @@ const SKELETON_BUCKETS = [
   ['g1', 'g2'],
   ['h1', 'h2'],
   ['i1', 'i2'],
+  ['j1'],
   ['k1', 'k2'],
 ];
 

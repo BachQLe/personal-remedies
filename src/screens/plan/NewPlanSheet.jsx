@@ -5,10 +5,8 @@ import BackButton from '../../components/shared/BackButton.jsx';
 import SavedList from '../favorites/SavedList.jsx';
 import { favoritesBySlot } from '../../api/api.js';
 import { PLAN_SLOTS } from '../../api/config.js';
+import FavoritesNudge from './FavoritesNudge.jsx';
 import { COPY, SHEET_Z } from './plannerCopy.js';
-
-// Fewer than this many favorites per meal and the randomizer repeats itself.
-const NUDGE_AT_OR_BELOW = 3;
 
 function Choice({ title, hint, onClick, disabled, primary }) {
   return (
@@ -44,7 +42,6 @@ export default function NewPlanSheet({ favorites, weeks, ready, generating, onRa
   const [view, setView] = useState('choices');
   const bySlot = useMemo(() => favoritesBySlot(favorites), [favorites]);
   const noneFit = PLAN_SLOTS.every((s) => bySlot[s.key].length === 0);
-  const shortMeals = PLAN_SLOTS.filter((s) => bySlot[s.key].length <= NUDGE_AT_OR_BELOW).map((s) => s.label);
 
   return (
     <BottomSheet open onClose={onClose} title={view === 'weeks' ? COPY.loadWeekTitle : COPY.newPlanTitle} zClass={SHEET_Z}>
@@ -62,14 +59,17 @@ export default function NewPlanSheet({ favorites, weeks, ready, generating, onRa
         </>
       ) : (
         <div className="flex flex-col gap-4">
-          {(noneFit || shortMeals.length > 0) && (
+          <p className="font-sans text-sm text-char-500">{COPY.stepGenerate}</p>
+
+          {noneFit ? (
             <div className="flex flex-col items-start gap-1.5 rounded-xl bg-paper-200 px-4 py-3">
-              <p className="font-sans text-sm text-blue-950">{noneFit ? COPY.noFavorites : COPY.nudge}</p>
-              {!noneFit && <p className="font-sans text-xs text-char-500">{COPY.nudgeShort(shortMeals)}</p>}
+              <p className="font-sans text-sm text-blue-950">{COPY.noFavorites}</p>
               <Link to="/app/favorites" className="inline-flex min-h-[44px] items-center font-sans text-sm font-semibold text-blue-950 underline underline-offset-2">
                 {COPY.goToFavorites}
               </Link>
             </div>
+          ) : (
+            <FavoritesNudge bySlot={bySlot} />
           )}
 
           <div className="flex flex-col gap-3">

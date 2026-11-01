@@ -3,8 +3,8 @@
  * (My Favorites), then New meal plan builds a week from them in one tap. The
  * week card holds the day strip plus New meal plan, Save week and Load week.
  * Each day lists its meals with + (add a favorite) and X (remove); Save day /
- * Load day sit next to the day's calories at the top of the day. My Meal Plan /
- * My Favorites tabs on top. No calendars, no shuffling, no regenerating.
+ * Load day sit next to the day's calories at the top of the day. My Favorites /
+ * My Meal Plan tabs on top. No calendars, no shuffling, no regenerating.
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,6 +22,7 @@ import { useOnline, planLoadState } from './usePlanLoadState.js';
 import SlotSection from './SlotSection.jsx';
 import DayStrip from './DayStrip.jsx';
 import PlanTabs from './PlanTabs.jsx';
+import FavoritesNudge from './FavoritesNudge.jsx';
 import HowToUseSheet from './HowToUseSheet.jsx';
 import SuggestionsSheet from './SuggestionsSheet.jsx';
 import CalorieGapSheet from './CalorieGapSheet.jsx';
@@ -378,11 +379,11 @@ export default function MealQueueScreen() {
       {/* Header zone. `rm-print-hide` hides it under @media print; only
           `.plan-print-view` (bottom of this file) renders on paper. */}
       <PageHeader
-        label={COPY.planLabel}
-        title="My Meal Plan"
+        title={COPY.planTitle}
+        description={firstRunEmpty ? COPY.stepGenerate : COPY.stepDay}
         className="bg-forest-300 rm-print-hide"
         right={
-          <div className="flex items-center gap-2 shrink-0 -mt-3 -mr-1">
+          <div className="flex items-center gap-2 shrink-0 -mr-1">
             <button
               type="button"
               onClick={() => setHowToUseOpen(true)}
@@ -516,6 +517,8 @@ export default function MealQueueScreen() {
           />
         ) : (
           <div className="flex flex-col gap-4">
+            {!showGhost && <FavoritesNudge bySlot={favoritesBySlot(library)} />}
+
             {/* Unsaved-changes banner: shown once the live week has drifted from the saved week it came from. */}
             {dirty && (
               <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3">

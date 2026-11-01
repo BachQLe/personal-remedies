@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Loader2, X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, Loader2 } from 'lucide-react';
 import { searchEverything, buildRecipeDetail, getGroupLabel } from '../../api/api.js';
 import { storage } from '../../api/storage.js';
+import { getServingSize } from '../../api/localTables.js';
 import { getRecentSearches, addRecentSearch } from '../../state/recentSearches.js';
 import Icon from '../../components/shared/Icon.jsx';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
@@ -84,7 +86,7 @@ async function attachFoodGroupLabels(sections) {
   return sections;
 }
 
-function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked, onGoodForMe }) {
+function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSaveBlocked, onGoodForMe }) {
   // `saveItem` is opt-in — only recipe rows carry one (they're the only
   // saveable kind here; a plain food/nutrient/herbal result has nothing to
   // save, so passing a SaveButton for it would always render as blocked).
@@ -105,6 +107,7 @@ function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked, on
           <span className="flex-1 min-w-0">
             <span className="block font-semibold text-sm text-char-900 break-words leading-tight">{title}</span>
             {subtitle && <span className="block text-xs text-char-500 mt-0.5 break-words">{subtitle}</span>}
+            {servingSize && <span className="block text-xs text-char-500 mt-0.5">Serving size: {servingSize}</span>}
           </span>
         </button>
         {goodForMeUnlocked ? (
@@ -153,10 +156,10 @@ function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked, on
 const calmSpring = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
 
 const PAD_IDLE = '3vh';
-// Idle and results states now share the same header offset (pt-10 elsewhere
-// in the app), so the label no longer shifts when the user starts typing —
-// only the enter/exit animation still moves from PAD_IDLE.
-const PAD_CENTER = '40px';
+// Idle and results states share the same header offset, so the title doesn't
+// shift when the user starts typing — only the enter/exit animation still
+// moves from PAD_IDLE.
+const PAD_CENTER = '1rem';
 
 function getProfile() {
   const saved = storage.get('profile', null);
@@ -165,13 +168,24 @@ function getProfile() {
 }
 
 export default function SearchScreen({ active, onClose }) {
-  const [query, setQuery] = useState('');
+  // The committed query lives in the URL, so coming back to search (from a
+  // food's Other options, say) restores the results (checklist 4.10).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlQuery = searchParams.get('q') ?? '';
+  const [query, setQuery] = useState(urlQuery);
+  // True once Back has left the results for the input; the query stays put.
+  const [resultsDismissed, setResultsDismissed] = useState(false);
   // The query a fetch actually runs against — updated 300ms after the last
   // keystroke (handleChange's debounce), or immediately on Enter/a
   // recent-search chip. Kept separate from `query` (the raw input value) so
   // useAsyncData's deps array only re-fires once the debounce settles, not
   // on every keystroke.
-  const [committedQuery, setCommittedQuery] = useState('');
+  const [committedQuery, setCommittedQueryState] = useState(urlQuery);
+  const setCommittedQuery = useCallback((value) => {
+    setCommittedQueryState(value);
+    const trimmed = value.trim();
+    setSearchParams(trimmed ? { q: trimmed } : {}, { replace: true });
+  }, [setSearchParams]);
   // True only while a debounce timer is pending. useAsyncData's own
   // `status` only reports 'loading' for the hook's very first fetch — later
   // dep-driven refetches are stale-while-revalidate by design (see
@@ -188,12 +202,16 @@ export default function SearchScreen({ active, onClose }) {
   const { show } = useSnackbar();
 
   const hasQuery = query.trim().length > 0;
+  const showResults = hasQuery && !resultsDismissed;
   const trimmedCommitted = committedQuery.trim();
 
   const fetcher = useCallback(
-    async () => (trimmedCommitted
-      ? attachFoodGroupLabels(await searchEverything(trimmedCommitted, profile.current))
-      : EMPTY_SECTIONS),
+    async () => ({
+      ...(trimmedCommitted
+        ? await attachFoodGroupLabels(await searchEverything(trimmedCommitted, profile.current))
+        : EMPTY_SECTIONS),
+      forQuery: trimmedCommitted,
+    }),
     [trimmedCommitted],
   );
 
@@ -201,6 +219,11 @@ export default function SearchScreen({ active, onClose }) {
     isEmpty: isSectionsEmpty,
   });
   const results = data ?? EMPTY_SECTIONS;
+  // useAsyncData keeps the last answer while the next query is in flight, so an
+  // empty answer for an earlier query must not read as "No matches" for this one.
+  const resultsStatus = status === 'empty' && (debouncePending || data?.forQuery !== trimmedCommitted)
+    ? 'loading'
+    : status;
 
   // Derived straight from storage on every render rather than mirrored into
   // state — addRecentSearch() writes synchronously, so by the time any
@@ -218,7 +241,8 @@ export default function SearchScreen({ active, onClose }) {
     return () => {
       clearTimeout(t);
       setQuery('');
-      setCommittedQuery('');
+      setCommittedQueryState('');
+      setResultsDismissed(false);
       setDebouncePending(false);
       setSelectedItem(null);
       setGoodForFood(null);
@@ -227,8 +251,20 @@ export default function SearchScreen({ active, onClose }) {
 
   useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
 
+  // Back from the results goes to the input with the query intact; Back from
+  // there leaves search.
+  const handleBack = () => {
+    if (!showResults) {
+      onClose();
+      return;
+    }
+    setResultsDismissed(true);
+    inputRef.current?.focus();
+  };
+
   const handleChange = (val) => {
     setQuery(val);
+    setResultsDismissed(false);
     setSelectedItem(null);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     const trimmed = val.trim();
@@ -246,6 +282,7 @@ export default function SearchScreen({ active, onClose }) {
 
   const runChip = (term) => {
     setQuery(term);
+    setResultsDismissed(false);
     addRecentSearch(term);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     setDebouncePending(false);
@@ -262,6 +299,7 @@ export default function SearchScreen({ active, onClose }) {
     if (e.key === 'Enter') {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       commitRecent(query);
+      setResultsDismissed(false);
       setDebouncePending(false);
       setCommittedQuery(query);
     } else if (e.key === 'Escape') {
@@ -327,6 +365,7 @@ export default function SearchScreen({ active, onClose }) {
                 kind="food"
                 title={item.food.name}
                 subtitle={item.food.groupLabel || 'Ingredient'}
+                servingSize={getServingSize(item.food.id)}
                 onClick={() => openFood(item.food)}
                 onGoodForMe={() => setGoodForFood({ id: item.food.id, name: item.food.name })}
               />
@@ -372,16 +411,12 @@ export default function SearchScreen({ active, onClose }) {
               exit={{ paddingTop: PAD_IDLE, opacity: 0 }}
               transition={{ default: calmSpring, opacity: { duration: 0.25, ease: 'easeOut' } }}
             >
-              {/* The only visible way out of the results list (4.10). */}
               <div className="flex items-center gap-3 flex-none pointer-events-auto">
-                <BackButton onClick={onClose} />
-                <p className="font-label text-xs tracking-widest uppercase text-blue-950/60">
-                  Search
-                </p>
+                <BackButton onClick={handleBack} />
+                <h1 className="min-w-0 font-display text-[2rem] font-semibold text-blue-950 leading-tight">
+                  {HEADING}
+                </h1>
               </div>
-              <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight mt-2 flex-none">
-                {HEADING}
-              </h1>
 
               <div className="relative mt-4 flex-none pointer-events-auto">
                 <Search size={20} aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-char-400 pointer-events-none" />
@@ -395,28 +430,20 @@ export default function SearchScreen({ active, onClose }) {
                   placeholder={PLACEHOLDER}
                   className={`w-full pl-12 pr-12 py-4 rounded-xl bg-white border-[1.5px] border-sand-200
                     text-base text-char-900 placeholder:text-char-400 font-sans
+                    [&::-webkit-search-cancel-button]:appearance-none
                     shadow-[0_2px_8px_rgba(45,36,24,0.06)]
                     transition-all duration-fast ease-ds-out
                     focus:outline-none ${ACCENT_FOCUS_CLASS} focus:shadow-[0_4px_12px_rgba(45,36,24,0.10)]`}
                 />
-                {searching ? (
+                {searching && (
                   <Loader2 size={18} className={`absolute right-4 top-1/2 -translate-y-1/2 ${SPINNER_CLASS} animate-spin`} aria-hidden="true" />
-                ) : query ? (
-                  <button
-                    onClick={() => handleChange('')}
-                    aria-label="Clear search"
-                    className="tap-target absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center
-                      rounded-full text-char-400 hover:text-char-700 hover:bg-sand-100 transition-colors duration-fast"
-                  >
-                    <X size={16} aria-hidden="true" />
-                  </button>
-                ) : null}
+                )}
               </div>
 
               <div className="flex-1 min-h-0 mt-4 pointer-events-auto">
                 <div className="h-full p-3 flex flex-col rounded-t-[24px]" style={{ backgroundColor: 'rgba(255,255,255,0.62)', borderTop: '1px solid rgba(255,255,255,0.75)', borderLeft: '1px solid rgba(255,255,255,0.75)', borderRight: '1px solid rgba(255,255,255,0.75)' }}>
                   <AnimatePresence mode="wait">
-                    {hasQuery ? (
+                    {showResults ? (
                       <motion.div
                         key="results"
                         initial={{ opacity: 0, y: 8 }}
@@ -426,11 +453,11 @@ export default function SearchScreen({ active, onClose }) {
                         className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
                       >
                         {/* Idle-vs-no-results distinction (must survive): this
-                            DataState only ever mounts once `hasQuery` is true —
+                            DataState only ever mounts once `showResults` is true —
                             the idle recents/hint view below is a completely
                             separate branch, never routed through 'empty'. */}
                         <DataState
-                          status={status}
+                          status={resultsStatus}
                           onRetry={retry}
                           emptyTitle="No matches"
                           emptyBody={`No matches for "${query.trim()}" — try a different term.`}

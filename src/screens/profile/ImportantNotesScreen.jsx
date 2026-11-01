@@ -30,9 +30,9 @@ function Section({ title, paragraphs }) {
 export default function ImportantNotesScreen() {
   return (
     <div className="min-h-screen -mb-28 bg-forest-300 flex flex-col">
-      <div className="px-5 pt-10 pb-6 flex flex-col gap-3">
+      <div className="px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex items-center gap-3">
         <BackButton fallback="/app/profile" />
-        <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight">
+        <h1 className="min-w-0 font-display text-[2rem] font-semibold text-blue-950 leading-tight">
           Important notes
         </h1>
       </div>

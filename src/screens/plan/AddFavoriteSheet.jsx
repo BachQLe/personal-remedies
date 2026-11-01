@@ -3,15 +3,17 @@ import { Plus } from 'lucide-react';
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import { getOverlayImageFile } from '../../api/localTables.js';
+import { mealTypeToRecipesHref } from '../../utils/foodDetailCard.js';
 import { COPY, SHEET_Z } from './plannerCopy.js';
 
 /**
  * The + tile's sheet: the user's favorites for ONE meal, minus what is already
- * in the day. Tapping one adds it. When nothing is left to add it says why and
- * links to My Favorites.
+ * in the day. Tapping one adds it. When nothing is left to add it says why;
+ * with no favorites for the meal at all it goes straight to that meal's recipes,
+ * otherwise to My Favorites.
  *
  * @param {Object} props
- * @param {{key: string, label: string}} props.slot
+ * @param {{key: string, label: string, recipeMealType: string|string[]}} props.slot
  * @param {Array<Object>} props.options - favorites for this meal not yet in the day
  * @param {boolean} props.hasAny - whether the meal has any favorites at all
  * @param {(item: Object) => void} props.onAdd
@@ -52,11 +54,11 @@ export default function AddFavoriteSheet({ slot, options, hasAny, onAdd, onClose
             {hasAny ? COPY.addAllUsed(slot.label) : COPY.addNone(slot.label)}
           </p>
           <Link
-            to="/app/favorites"
-            className="inline-flex min-h-[44px] items-center rounded-pill bg-blue-950 px-5 font-sans text-sm font-semibold text-white
+            to={hasAny ? '/app/favorites' : mealTypeToRecipesHref([slot.recipeMealType].flat()[0])}
+            className="inline-flex min-h-[44px] items-center rounded-pill bg-blue-950 px-5 py-2 font-sans text-sm font-semibold text-white
               transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
           >
-            {COPY.goToFavorites}
+            {hasAny ? COPY.goToFavorites : COPY.chooseMealRecipes(slot.label)}
           </Link>
         </div>
       )}

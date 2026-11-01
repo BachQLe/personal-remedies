@@ -102,8 +102,8 @@ describe('FoodGroupsTab', () => {
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="suggest-tab"]')).toBeNull();
     expect(container.textContent).toContain('Ten broad categories, good for an everyday look.');
-    expect(container.textContent).toContain('Basic groups');
-    expect(container.textContent).toContain('Fine groups');
+    expect(container.textContent).toContain('Choose this, not that');
+    expect(container.textContent).toContain('Suggestions');
   });
 
   it('?mode=fine deep-links straight into fine mode: renders SuggestTab and the fine subtitle', async () => {
@@ -119,22 +119,22 @@ describe('FoodGroupsTab', () => {
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeNull();
   });
 
-  it('a manual tap on "Fine groups" swaps from GroupsTab to SuggestTab (pure client-side, no refetch)', async () => {
+  it('a manual tap on "Suggestions" swaps from GroupsTab to SuggestTab (pure client-side, no refetch)', async () => {
     await mount('/app/suggestions?tab=groups');
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeTruthy();
 
-    await clickPillByLabel('Fine groups');
+    await clickPillByLabel('Suggestions');
 
     expect(container.querySelector('[data-testid="suggest-tab"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeNull();
     expect(container.textContent).toContain('Narrower groups, good for finding a swap for a food.');
   });
 
-  it('a manual tap back to "Basic groups" swaps back to GroupsTab', async () => {
+  it('a manual tap back to "Choose this, not that" swaps back to GroupsTab', async () => {
     await mount('/app/suggestions?tab=groups&mode=fine');
     expect(container.querySelector('[data-testid="suggest-tab"]')).toBeTruthy();
 
-    await clickPillByLabel('Basic groups');
+    await clickPillByLabel('Choose this, not that');
 
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="suggest-tab"]')).toBeNull();
@@ -146,10 +146,10 @@ describe('FoodGroupsTab mode lives in the URL (checklist 4.10)', () => {
   it('a toggle tap writes ?tab=groups&mode= and replaces the history entry', async () => {
     await mount('/app/suggestions?tab=groups', ['/home', '/app/suggestions?tab=groups']);
 
-    await clickPillByLabel('Fine groups');
+    await clickPillByLabel('Suggestions');
     expect(container.querySelector('[data-testid="loc"]').textContent).toBe('/app/suggestions?tab=groups&mode=fine');
 
-    await clickPillByLabel('Basic groups');
+    await clickPillByLabel('Choose this, not that');
     expect(container.querySelector('[data-testid="loc"]').textContent).toBe('/app/suggestions?tab=groups&mode=basic');
 
     await clickPillByLabel('history back');
@@ -158,13 +158,13 @@ describe('FoodGroupsTab mode lives in the URL (checklist 4.10)', () => {
 
   it('tapping the already-active mode changes nothing', async () => {
     await mount('/app/suggestions?tab=groups&mode=fine');
-    await clickPillByLabel('Fine groups');
+    await clickPillByLabel('Suggestions');
     expect(container.querySelector('[data-testid="loc"]').textContent).toBe('/app/suggestions?tab=groups&mode=fine');
   });
 
   it('the retired ?tab=suggest alias drops off once a mode is chosen', async () => {
     await mount('/app/suggestions?tab=suggest');
-    await clickPillByLabel('Basic groups');
+    await clickPillByLabel('Choose this, not that');
     expect(container.querySelector('[data-testid="loc"]').textContent).toBe('/app/suggestions?tab=groups&mode=basic');
     expect(container.querySelector('[data-testid="groups-tab"]')).toBeTruthy();
   });

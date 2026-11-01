@@ -3,6 +3,8 @@ import BottomSheet from '../../components/shared/BottomSheet.jsx';
 import BackButton from '../../components/shared/BackButton.jsx';
 import FoodRating from '../../components/shared/FoodRating.jsx';
 import Skeleton from '../../components/shared/Skeleton.jsx';
+import { SlowLoadingNote } from '../../components/shared/DataState.jsx';
+import { getServingSize } from '../../api/localTables.js';
 import { getGoodForMe } from '../../api/api.js';
 import { summarizeGoodForMe, unscoredRowText } from './goodForMe.js';
 
@@ -22,19 +24,20 @@ const DEFAULT_VERDICT_STYLE = 'bg-sand-100 text-char-700';
  */
 export default function GoodForMeSheet({ food, profile, onClose }) {
   const open = !!food;
-  const [result, setResult] = useState({ key: null, status: 'loading', rows: [] });
+  const [result, setResult] = useState({ key: null, status: 'loading', rows: [], overallNumericId: null });
   const [attempt, setAttempt] = useState(0);
   const foodId = food?.id;
   const requestKey = `${foodId}:${attempt}`;
   // Results are tagged with the request they answer; a stale/absent tag means loading.
-  const state = result.key === requestKey ? result : { status: 'loading', rows: [] };
+  const state = result.key === requestKey ? result : { status: 'loading', rows: [], overallNumericId: null };
+  const servingSize = getServingSize(foodId);
 
   useEffect(() => {
     if (foodId == null) return undefined;
     let cancelled = false;
     getGoodForMe(foodId, profile)
-      .then((res) => { if (!cancelled) setResult({ key: requestKey, status: 'done', rows: res.rows }); })
-      .catch(() => { if (!cancelled) setResult({ key: requestKey, status: 'failed', rows: [] }); });
+      .then((res) => { if (!cancelled) setResult({ key: requestKey, status: 'done', rows: res.rows, overallNumericId: res.overallNumericId ?? null }); })
+      .catch(() => { if (!cancelled) setResult({ key: requestKey, status: 'failed', rows: [], overallNumericId: null }); });
     return () => { cancelled = true; };
     // profile is a stable ref from the caller; re-run only per food / retry.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,6 +59,7 @@ export default function GoodForMeSheet({ food, profile, onClose }) {
           <div className="min-w-0">
             <p className="font-label text-[0.875rem] tracking-[0.14em] uppercase text-char-500">Check against my profile</p>
             <h2 className="font-display text-xl font-semibold text-char-900 leading-tight break-words">{food?.name}</h2>
+            {servingSize && <p className="text-xs text-char-500 mt-0.5">Serving size: {servingSize}</p>}
           </div>
         </div>
 
@@ -64,6 +68,7 @@ export default function GoodForMeSheet({ food, profile, onClose }) {
             <Skeleton shape="block" className="h-16 w-full" />
             <Skeleton shape="text" className="w-3/4" />
             <Skeleton shape="text" className="w-2/3" />
+            <SlowLoadingNote />
           </div>
         )}
 
@@ -74,7 +79,10 @@ export default function GoodForMeSheet({ food, profile, onClose }) {
               data-kind={summary.kind}
               className={`rounded-sm px-4 py-3 ${VERDICT_STYLE[summary.kind] || DEFAULT_VERDICT_STYLE}`}
             >
-              <p className="font-semibold text-base leading-snug">{summary.headline}</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-semibold text-base leading-snug">{summary.headline}</p>
+                <FoodRating numericId={state.overallNumericId} size={14} tone="light" />
+              </div>
               <p className="text-sm mt-1 leading-snug">{summary.detail}</p>
             </div>
 

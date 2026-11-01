@@ -1,3 +1,5 @@
+import { PLAN_SLOTS } from '../../api/config.js';
+
 /**
  * plannerCopy.js - every user-facing string of the My Favorites + New Meal Plan
  * flow (checklist 1.24), in one file so the copy review is a one-file job.
@@ -7,10 +9,28 @@
 /** Layer for this flow's sheets: above the app-shell toast (z-50), so a toast never covers a sheet's title. */
 export const SHEET_Z = 'z-[60]';
 
+// At or below this many favorites for a meal, the randomizer repeats itself.
+const NUDGE_AT_OR_BELOW = 3;
+
+/**
+ * Labels of the meals too short on favorites for the plan to vary day to day (1.25).
+ * @param {Object<string, Array>} bySlot - favoritesBySlot's result
+ * @returns {string[]}
+ */
+export function mealsShortOnFavorites(bySlot) {
+  return PLAN_SLOTS.filter((slot) => bySlot[slot.key].length <= NUDGE_AT_OR_BELOW).map((slot) => slot.label);
+}
+
 export const COPY = {
-  // Step labels (the eyebrow above each screen's title)
+  // Step labels: one instruction at the top of each page (checklist 1.24).
+  // DRAFT pending copy review (C13).
+  stepFavorites: 'Select your favorite recipes and foods from everything we recommend for your health profile.',
+  stepGenerate: "We'll suggest a meal plan for each day of the week using your favorites.",
+  stepDay: 'Keep or remove items for each day to build your plan.',
+  stepSave: 'Save a day or week you like so you can reuse it later.',
+
   stepPick: 'Pick your favorites',
-  planLabel: 'Plan',
+  planTitle: 'Meal Planner',
 
   // My Favorites page
   favoritesTitle: 'My Favorites',
@@ -21,7 +41,7 @@ export const COPY = {
   groupRecent: 'Most recent',
   groupMeal: 'By meal type',
   browseRecipes: 'Browse recipes',
-  browseMoreRecipes: 'Browse more recipes',
+  chooseMoreRecipes: 'Choose more recipes',
   emptyTitle: 'No favorites yet',
   emptyBody: 'Bookmark recipes you like and they show up here. Your meal plans are built from them.',
   noSavedDays: 'No saved days yet. Use Save day on any day of your plan.',
@@ -73,6 +93,7 @@ export const COPY = {
   alreadyInDay: 'Already in this day',
   added: (name) => `Added ${name}`,
   goToFavorites: 'Go to My Favorites',
+  chooseMealRecipes: (slotLabel) => `Choose ${slotLabel} recipes`,
 
   // Name sheets
   nameDayTitle: 'Save this day',

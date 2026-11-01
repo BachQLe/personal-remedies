@@ -56,11 +56,11 @@ export default function GroupDetailScreen() {
     // background reaches behind the floating TabBar (appshell-cream-fix
     // pattern); GlassPanel's own pb-28 keeps the last row clear of the bar.
     <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
-      <PageHeader label="Best & Worst Choices" className="pb-3">
-        <div className="flex items-center gap-3 mt-3">
+      <PageHeader className="pb-3">
+        <div className="flex items-center gap-3">
           {/* Real history back (4.10); fallback only for a deep link. */}
           <BackButton fallback="/app/suggestions?tab=groups" />
-          <h1 className="font-display text-[1.5rem] font-semibold text-blue-950 leading-tight break-words">
+          <h1 className="font-display text-[1.5rem] font-semibold text-blue-950 leading-tight min-w-0 break-words">
             {groupLabel}
           </h1>
         </div>
@@ -94,6 +94,7 @@ export default function GroupDetailScreen() {
         item={selectedFood ? {
           foodId: selectedFood.id,
           name: selectedFood.name,
+          openDetails: selectedFood.openDetails,
           group: selectedFood.group,
           fineGroup: selectedFood.fineGroup,
         } : null}

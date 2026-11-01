@@ -220,9 +220,8 @@ export function resolveGroupLinkTarget(item, facts, assessment) {
  *
  * `dessert` maps to the `Snack` tab, not a `Dessert` tab — there isn't one;
  * RecipesScreen's Snack tab deliberately shows snack AND dessert recipes
- * together (Task C1). `beverage` has no tab at all and, like a
- * missing/unrecognized mealType, falls back to a plain unfiltered
- * `/app/recipes` link rather than guessing one.
+ * together (Task C1). A missing/unrecognized mealType falls back to a plain
+ * unfiltered `/app/recipes` link rather than guessing one.
  *
  * @param {string|undefined|null} mealType
  * @returns {string}
@@ -235,4 +234,4 @@ export function mealTypeToRecipesHref(mealType) {
   return match ? `/app/recipes?meal=${match}` : '/app/recipes';
 }
 
-const RECIPE_MEAL_LABELS = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+const RECIPE_MEAL_LABELS = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Beverage'];

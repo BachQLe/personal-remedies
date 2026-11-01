@@ -1497,10 +1497,13 @@ export async function getCategoryRecipes(profile) {
       });
       const mealTypesById = new Map(extras.filter((e) => e.mealTypes).map((e) => [e.id, e.mealTypes]));
       const recipes = (await buildRecipes(scored, ids)).map((recipe) => {
+        // Outside the top 20 it may rank low, so the card shows its per-condition
+        // verdicts rather than listing every condition as "Best for".
+        const extra = { ...recipe, matchedConditions: [] };
         const mealTypes = mealTypesById.get(recipe.id);
-        if (!mealTypes) return recipe;
+        if (!mealTypes) return extra;
         const [mealType, ...alsoFits] = mealTypes;
-        return { ...recipe, mealType, alsoFits, mealTypeDefaulted: false, isPreparedFood: true };
+        return { ...extra, mealType, alsoFits, mealTypeDefaulted: false, isPreparedFood: true };
       });
       return [...top, ...recipes];
     },

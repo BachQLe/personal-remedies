@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { BrowserRouter, Routes, Route, Outlet, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigationType, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { storage } from "./api/storage.js";
 import { prefetchAppData } from "./api/prefetch.js";
@@ -27,6 +27,7 @@ import MealQueueScreen from "./screens/plan/MealQueueScreen";
 import RecipesScreen from "./screens/recipes/RecipesScreen";
 import FavoritesScreen from "./screens/favorites/FavoritesScreen";
 import FavoritesPruneNotice from "./screens/favorites/FavoritesPruneNotice";
+import RestoredFoodCard from "./components/RestoredFoodCard";
 import PaywallScreen from "./screens/paywall/PaywallScreen";
 import RequireEntitlement from "./components/shared/RequireEntitlement.jsx";
 // App chrome
@@ -35,11 +36,13 @@ import FAB from "./components/layout/FAB";
 // Dev
 import KitchenSink from "./pages/KitchenSink";
 
+// New screens start at the top; Back keeps the browser's restored position.
 function ScrollToTop() {
   const { pathname } = useLocation();
+  const navigationType = useNavigationType();
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    if (navigationType !== "POP") window.scrollTo(0, 0);
+  }, [pathname, navigationType]);
   return null;
 }
 
@@ -124,6 +127,7 @@ function AppLayout() {
           </RouteErrorBoundary>
         </AppShell>
         <FavoritesPruneNotice />
+        <RestoredFoodCard />
       </SnackbarProvider>
     </RequireOnboarding>
   );

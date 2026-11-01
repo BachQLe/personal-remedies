@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getProfile, getRecipes, buildRecipeDetail } from '../../api/api.js';
+import { getProfile, getCategoryRecipes, buildRecipeDetail } from '../../api/api.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import BackButton from '../../components/shared/BackButton.jsx';
-import DataState from '../../components/shared/DataState.jsx';
+import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
 import BottomSheet from '../../components/shared/BottomSheet.jsx';
 import BestRecipesRails from '../../components/shared/BestRecipesRails.jsx';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
@@ -30,20 +30,17 @@ const EMPTY_PROFILE = {
 // `mealFilterFromSearchParams` (the `?meal=` deep-link below) and
 // `matchesMealFilter`'s bucketing. 'All' is not a bucket; it just means "no
 // deep link requested".
-const MEAL_TYPES = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Snack'];
+const MEAL_TYPES = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Snack', 'Beverage'];
 
 // Maps a deep-link/bucket label onto the PLAN_SLOT_KEYS value its recipes are
 // grouped under (the Plan screen's own slot vocabulary — see
-// api/config.js's PLAN_SLOTS). There's no label for 'beverages': recipes are
-// never tagged as beverages (see adapter.js's getRecipesRaw doc), so that
-// rail always renders BestRecipesRails' own "No options yet" line — same as
-// the Meal Planner picker's "Best recipes" tab, which this screen otherwise
-// mirrors exactly.
+// api/config.js's PLAN_SLOTS).
 const LABEL_TO_SLOT_KEY = {
   Breakfast: 'breakfast',
   Lunch: 'lunch',
   Dinner: 'dinner',
   Snack: 'snacks',
+  Beverage: 'beverages',
 };
 
 /**
@@ -147,9 +144,7 @@ function toCardItem(recipe, slotKey) {
  * — breakfast/lunch/dinner/snacks/beverages — by reusing `matchesMealFilter`
  * against each real label. A recipe with both a primary `mealType` and an
  * `alsoFits` match (see that function's doc) lands in every slot it
- * qualifies for, not just one. `beverages` never gets a label here (recipes
- * are structurally never tagged as beverages), so it always renders empty —
- * same as the Meal Planner picker's "Best recipes" tab.
+ * qualifies for, not just one.
  * @param {import('../../api/types.js').Recipe[]} recipes
  * @returns {Record<string, Object[]>}
  */
@@ -189,12 +184,12 @@ export function RecipesBrowser() {
   // Retry instead of silently collapsing to "no recipes" (the previous
   // `catch(...) { setAllRecipes([]) }`). Bundled into one object because
   // both are needed together and `getProfile()` itself never rejects (it
-  // always resolves to a profile or null — see api.js) — only `getRecipes`
+  // always resolves to a profile or null — see api.js) — only the recipes call
   // can genuinely fail (network/API), and that failure now propagates.
   const fetcher = useCallback(async () => {
     let p = await getProfile();
     if (!p) p = EMPTY_PROFILE;
-    const { recipes, unscorableReason } = await getRecipes(p);
+    const { recipes, unscorableReason } = await getCategoryRecipes(p);
     return { profile: p, recipes: recipes ?? [], unscorableReason };
   }, []);
 
@@ -231,6 +226,7 @@ export function RecipesBrowser() {
         conditions: recipe.matchedConditions ?? [],
         ingredients: recipe.ingredients,
         isRecipe: true,
+        isPreparedFood: recipe.isPreparedFood,
         // Forwarded so FoodDetailCard's "see other good recipes" link
         // (mealTypeToRecipesHref) can deep-link back to this recipe's own
         // meal type instead of an unfiltered list.
@@ -269,6 +265,7 @@ export function RecipesBrowser() {
       conditions: card.matchedConditions,
       ingredients: [],
       isRecipe: true,
+      isPreparedFood: recipe.isPreparedFood,
       // See the `seeded` branch above — same forwarding, for the same
       // reason. `buildRecipeDetail` doesn't read/copy `mealType` through
       // (it's not part of its documented output shape), so it's merged
@@ -276,11 +273,19 @@ export function RecipesBrowser() {
       mealType: recipe.mealType ?? null,
     });
     buildRecipeDetail(card, profile)
-      .then((detail) => setSelectedRecipe({ ...detail, isRecipe: true, mealType: recipe.mealType ?? null }))
+      .then((detail) => setSelectedRecipe({
+        ...detail,
+        isRecipe: true,
+        isPreparedFood: recipe.isPreparedFood,
+        mealType: recipe.mealType ?? null,
+      }))
       .catch(() => {});
   }
 
   return (
+    <>
+    {/* Outside the ghost wrapper, whose CSS blanks all text inside it. */}
+    {ghost && <SlowLoadingNote className="mb-3" />}
     <div className={`flex flex-col gap-5${ghost ? ' rm-ghost' : ''}`} aria-busy={ghost}>
       {ghost ? (
         <BestRecipesRails
@@ -353,6 +358,7 @@ export function RecipesBrowser() {
         onClose={() => setSelectedRecipe(null)}
       />
     </div>
+    </>
   );
 }
 
@@ -369,12 +375,12 @@ export default function RecipesScreen() {
           card's "other options" link); My Favorites is only the deep-link
           fallback. Each rail below is its own meal-type filter, so there's no
           search or filter UI here. */}
-      <div className="px-5 pt-10 pb-6 flex flex-col gap-3">
-        <BackButton fallback="/app/favorites" />
-        <div>
-          <h1 className="font-display text-[2rem] font-semibold leading-tight text-blue-950">Recipes</h1>
-          <p className="mt-1 font-sans text-sm text-blue-950/70">Pick your favorite recipes from our suggestions!</p>
+      <div className="px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex flex-col gap-1">
+        <div className="flex items-center gap-3">
+          <BackButton fallback="/app/favorites" />
+          <h1 className="min-w-0 font-display text-[2rem] font-semibold leading-tight text-blue-950">Choose recipes</h1>
         </div>
+        <p className="font-sans text-sm text-blue-950/70">Pick your favorite recipes from our suggestions!</p>
       </div>
 
       {/* Content shell — full-bleed white container with rounded top corners */}

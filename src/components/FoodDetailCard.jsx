@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { X, Bookmark, ChevronLeft, ExternalLink } from 'lucide-react';
 import ConditionTag from './shared/ConditionTag.jsx';
 import Icon from './shared/Icon.jsx';
@@ -7,6 +7,8 @@ import Skeleton from './shared/Skeleton.jsx';
 import FoodRating from './shared/FoodRating.jsx';
 import StudyReferences from './shared/StudyReferences.jsx';
 import EmptyState from './shared/EmptyState.jsx';
+import { SlowLoadingNote } from './shared/DataState.jsx';
+import { getServingSize } from '../api/localTables.js';
 import { getLibrary, addToLibrary, removeFromLibrary } from '../state/library.js';
 import { getFoodFacts, assessFood, getFoodIdByName, getGroupLabel } from '../api/api.js';
 import { storage } from '../api/storage.js';
@@ -81,7 +83,7 @@ function getProfile() {
  * card, unlike FoodRating's usual dark photo-overlay context.
  */
 function ConditionRow({ conditionAssessment, showReferences = true }) {
-  const { conditionName, numericId, referenceCount, citations, referenceStatus, status } = conditionAssessment;
+  const { conditionName, numericId, verdict, referenceCount, citations, referenceStatus, status } = conditionAssessment;
   const refsErrored = referenceStatus === 'error';
   // Honest unscorable state (unauthorized / no data / error for this condition).
   const unscorable = status != null && status !== 'ok';
@@ -101,6 +103,12 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
         ) : (
         <div className="flex items-center gap-2">
           <FoodRating numericId={numericId} size={14} tone="light" />
+          {/* Fine group 'x' items have a /detailed verdict but no rating to draw. */}
+          {numericId == null && verdict && (
+            <span className={`text-[0.875rem] font-sans ${verdict === 'harmful' ? 'text-avoid-600' : 'text-benefit-600'}`}>
+              {verdict === 'harmful' ? 'Ranked lower' : 'Ranked favorably'}
+            </span>
+          )}
           {showReferences && !refsErrored && referenceCount > 0 && (
             <span className="text-[0.875rem] text-char-400 font-sans">
               {referenceCount} {referenceCount === 1 ? 'reference' : 'references'}
@@ -149,6 +157,7 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
  */
 export default function FoodDetailCard({ item: itemProp, open, onClose, listType }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [saved, setSaved] = useState(false);
   const [flipped, setFlipped] = useState(false);
   const [dragY, setDragY] = useState(0);
@@ -268,7 +277,8 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
   const [lastResetKey, setLastResetKey] = useState(resetKey);
   if (resetKey !== lastResetKey) {
     setLastResetKey(resetKey);
-    setFlipped(false);
+    // `openDetails`: opened to read the references, or restored by Back.
+    setFlipped(open && !!item?.openDetails);
     setDragY(0);
   }
 
@@ -395,6 +405,16 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
     [item]
   );
 
+  // Leaving the card for another screen: the current history entry remembers the
+  // card, so Back returns to these health details (checklist 4.10), not just to
+  // the list behind them. RestoredFoodCard reopens it.
+  const leaveCardFor = (path) => {
+    onClose?.();
+    const { pathname, search, hash, state } = location;
+    navigate({ pathname, search, hash }, { replace: true, state: { ...state, reopenCard: { ...item, openDetails: true } } });
+    navigate(path);
+  };
+
   const handleClose = useCallback(() => {
     setFlipped(false);
     setDragY(0);
@@ -448,6 +468,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
 
   if (!mounted || !item) return null;
 
+  const servingSize = getServingSize(combinedFoodId);
   const dismissProgress = Math.min(1, dragY / DISMISS_THRESHOLD);
   const cardOpacity = 1 - dismissProgress * 0.4;
   const backdropOpacity = 1 - dismissProgress * 0.6;
@@ -620,7 +641,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 that when the verdict-group chips below wrap onto several
                 lines — see conditionGroups/groupConditionsByVerdict. */}
             <div
-              className="absolute bottom-0 left-0 right-0 z-20 bg-neutral-900/70 backdrop-blur-sm rounded-t-2xl px-5 pt-4 pb-5 flex flex-col gap-2 min-h-[250px]"
+              className="absolute bottom-0 left-0 right-0 z-20 bg-neutral-900/70 backdrop-blur-sm rounded-t-2xl px-5 pt-4 pb-5 flex flex-col gap-2 min-h-[250px] max-h-full overflow-y-auto touch-pan-y hide-scrollbar"
               onPointerDown={(e) => e.stopPropagation()}
             >
               {/* Verdict rating — pinned to top-right of the info panel.
@@ -638,16 +659,20 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
               <h2 className="font-display text-2xl font-semibold text-white leading-snug tracking-tightish pr-24">
                 {item?.name}
               </h2>
+              {servingSize && (
+                <p className="text-[0.875rem] text-white font-sans">Serving size: {servingSize}</p>
+              )}
               <p className="text-[0.875rem] text-white/60 font-sans">
                 Ask your doctor before changing your diet, especially if you take medication.
               </p>
+              {detailLoading && <SlowLoadingNote tone="dark" />}
 
               {/* Eyebrow + verdict-group condition chips — every entry in
                   perCondition is represented (grouped Helps/Neutral/Avoid
                   for), and each group's chip row wraps (flex-wrap) rather
                   than clipping to one line. */}
               {conditionGroups.length > 0 && (
-                <div className="flex flex-col gap-1 overflow-y-auto max-h-28 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex flex-col gap-1">
                   {conditionGroups.map((g) => (
                     <div key={g.key} className="flex items-start gap-2 flex-wrap">
                       <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-white/50 flex-none pt-0.5">
@@ -707,6 +732,9 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 <h3 className="font-display text-xl font-semibold text-blue-950 leading-snug tracking-tightish break-words">
                   {item?.name}
                 </h3>
+                {servingSize && (
+                  <p className="text-xs text-char-500 font-sans mt-0.5">Serving size: {servingSize}</p>
+                )}
                 {isRecipe ? (
                   item?.sourceName && (
                     <p className="text-xs text-char-500 font-sans mt-0.5 break-words">
@@ -770,6 +798,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                       <Skeleton shape="text" className="w-3/4" />
                       <Skeleton shape="text" className="w-2/3" />
                       <Skeleton shape="text" className="w-1/2" />
+                      <SlowLoadingNote />
                     </div>
                   ) : assessStatus === 'error' ? (
                     // A real failure (network error, or the 15s timeout race
@@ -878,6 +907,11 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                           <span className="text-[0.875rem] font-sans text-char-600 text-center leading-tight line-clamp-2">
                             {food.name}
                           </span>
+                          {getServingSize(food.foodId) && (
+                            <span className="text-[0.875rem] font-sans text-char-500 text-center leading-tight">
+                              {getServingSize(food.foodId)}
+                            </span>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -909,7 +943,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 {!isRecipe && groupLinkTarget && groupLinkLabel && (
                   <button
                     type="button"
-                    onClick={() => { onClose?.(); navigate(groupLinkTarget.path); }}
+                    onClick={() => leaveCardFor(groupLinkTarget.path)}
                     className="w-full flex items-center justify-between gap-3 rounded-xl border border-neutral-300/50
                       shadow-xs bg-white p-4 text-left transition-all duration-base ease-ds-out
                       hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
@@ -931,7 +965,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 {isRecipe && (
                   <button
                     type="button"
-                    onClick={() => { onClose?.(); navigate('/app/suggestions?tab=groups&mode=fine'); }}
+                    onClick={() => leaveCardFor('/app/suggestions?tab=groups&mode=fine')}
                     className="w-full flex items-center justify-between gap-3 rounded-xl border border-neutral-300/50
                       shadow-xs bg-white p-4 text-left transition-all duration-base ease-ds-out
                       hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
@@ -950,7 +984,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 `linkTarget.label` already embeds the attribution text when
                 sourceUrl wins (see resolveRecipeLinkTarget) — never shown
                 as a separate/equal element alongside the search fallback. */}
-            {isRecipe && (
+            {isRecipe && !item?.isPreparedFood && (
               <div className="flex-shrink-0 px-4 pb-4">
                 <button
                   onClick={handleGetRecipe}

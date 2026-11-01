@@ -81,7 +81,7 @@ export default function FineGroupDetailScreen() {
 function FineGroupDetail({ fineGroupId }) {
   const [selectedFood, setSelectedFood] = useState(null);
   const [selectedListType, setSelectedListType] = useState(undefined);
-  const [groupLabel, setGroupLabel] = useState(fineGroupId);
+  const [groupLabel, setGroupLabel] = useState('');
 
   // The real 17-code menu, resolved once on mount. `null` means "not yet
   // resolved" (see docblock) — only a real array gates the redirect check
@@ -142,12 +142,12 @@ function FineGroupDetail({ fineGroupId }) {
     // background reaches behind the floating TabBar (appshell-cream-fix
     // pattern); GlassPanel's own pb-28 keeps the last row clear of the bar.
     <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
-      <PageHeader label="Best & Worst Choices" className="pb-3">
-        <div className="flex items-center gap-3 mt-3">
+      <PageHeader className="pb-3">
+        <div className="flex items-center gap-3">
           {/* Real history back (4.10); the fallback is the canonical URL,
               same as the invalid-param redirect above, for deep links. */}
           <BackButton fallback="/app/suggestions?tab=groups&mode=fine" />
-          <h1 className="font-display text-[1.5rem] font-semibold text-blue-950 leading-tight break-words">
+          <h1 className="font-display text-[1.5rem] font-semibold text-blue-950 leading-tight min-w-0 break-words">
             {groupLabel}
           </h1>
         </div>
@@ -212,6 +212,7 @@ function FineGroupDetail({ fineGroupId }) {
         item={selectedFood ? {
           foodId: selectedFood.id,
           name: selectedFood.name,
+          openDetails: selectedFood.openDetails,
           group: selectedFood.group,
           fineGroup: selectedFood.fineGroup,
         } : null}

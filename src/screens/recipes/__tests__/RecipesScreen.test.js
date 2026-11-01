@@ -87,7 +87,10 @@ describe('mealFilterFromSearchParams', () => {
 
   it('falls back to All for an unrecognized or garbage value', () => {
     expect(mealFilterFromSearchParams(new URLSearchParams('meal=Dessert'))).toBe('All');
-    expect(mealFilterFromSearchParams(new URLSearchParams('meal=beverage'))).toBe('All');
     expect(mealFilterFromSearchParams(new URLSearchParams('meal=xyz'))).toBe('All');
+  });
+
+  it('recognizes Beverage, so a beverage link opens that list', () => {
+    expect(mealFilterFromSearchParams(new URLSearchParams('meal=beverage'))).toBe('Beverage');
   });
 });

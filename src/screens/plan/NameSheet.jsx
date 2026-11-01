@@ -21,6 +21,8 @@ export default function NameSheet({ title, placeholder, onSubmit, onClose, updat
 
   return (
     <BottomSheet open onClose={onClose} title={title} zClass={SHEET_Z}>
+      <p className="mb-4 font-sans text-sm text-char-500">{COPY.stepSave}</p>
+
       {updateName && (
         <div className="mb-5 flex flex-col gap-3">
           <button

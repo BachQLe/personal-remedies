@@ -36,8 +36,8 @@ import GroupsTab from './GroupsTab.jsx';
 import SuggestTab from './SuggestTab.jsx';
 
 const MODE_OPTIONS = [
-  { key: 'basic', label: 'Basic groups', tone: 'neutral' },
-  { key: 'fine', label: 'Fine groups', tone: 'neutral' },
+  { key: 'basic', label: 'Choose this, not that', tone: 'neutral' },
+  { key: 'fine', label: 'Suggestions', tone: 'neutral' },
 ];
 
 const SUBTITLE = {

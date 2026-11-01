@@ -89,7 +89,7 @@ export default function SuggestionsScreen() {
     // pattern); the shell's own pb-28 keeps the last row clear of the bar.
     <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
 
-      <PageHeader label="Best & Worst Choices" className="pb-6">
+      <PageHeader label="Best & Worst Choices" className="pb-4">
         {/* Title crossfade between tabs — min-height keeps the slider from
             jumping while the title swaps. */}
         <div className="min-h-[44px]">
@@ -100,7 +100,7 @@ export default function SuggestionsScreen() {
               animate={{ opacity: 1, transition: { duration: 0.2, ease: 'easeOut' } }}
               exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeOut' } }}
             >
-              <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight mt-2">
+              <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight">
                 {TAB_META[activeTab].title}
               </h1>
             </motion.div>

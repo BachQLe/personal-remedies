@@ -85,8 +85,8 @@ describe('mealTypeToRecipesHref — maps a recipe mealType to its MEAL_TYPES tab
     expect(mealTypeToRecipesHref('DESSERT')).toBe('/app/recipes?meal=Snack');
   });
 
-  it('falls back to an unfiltered link for beverage (no tab exists for it)', () => {
-    expect(mealTypeToRecipesHref('beverage')).toBe('/app/recipes');
+  it('links beverage to its own rail', () => {
+    expect(mealTypeToRecipesHref('beverage')).toBe('/app/recipes?meal=Beverage');
   });
 
   it('falls back to an unfiltered link when mealType is missing or unrecognized', () => {
