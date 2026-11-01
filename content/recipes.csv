@@ -10,19 +10,19 @@ FI,FI_TEXT,LONG_DESC,Meal,URL
 5009,Vietnamese Noodle Soup,FN Kitchen,L/D,https://www.foodnetwork.com/recipes/food-network-kitchen/vietnamese-noodle-soup-recipe-1972821
 5010,Broccoli Cheddar Soup,FN Kitchen; Healthified Broccoli .. (using chicken broth),L/D,https://www.foodnetwork.com/recipes/food-network-kitchen/healthified-broccoli-cheddar-soup-recipe-2119129
 5011,Lemony Yogurt Pound Cake,FN Kitchen,B/D,https://www.foodnetwork.com/recipes/food-network-kitchen/healthy-lemony-yogurt-loaf-cake-recipe-2112126
-5012,Pasta e Fagioli,FN; Rachel Ray; Pasta and Beans,L/D,https://www.foodnetwork.com/recipes/rachael-ray/pasta-and-beans-pasta-e-fagioli-recipe-1939374
-5013,Hash Brown Casserole,FN Kitchen,B/L,https://www.foodnetwork.com/recipes/food-network-kitchen/hash-brown-casserole-recipe-2121182
+5012,Pasta e Fagioli,FN; Rachel Ray; Pasta and Beans,L/D,https://www.foodnetwork.com/recipes/giada-de-laurentiis/pasta-e-fagioli-recipe-1943219
+5013,Hash Brown Casserole,FN Kitchen,B/L,https://www.foodnetwork.com/fnk/recipes/hash-brown-casserole-9579503
 5014,Chicken & Broccoli Stir-fry,FN Kitchen,L/D,https://www.foodnetwork.com/recipes/food-network-kitchen/chicken-and-broccoli-stir-fry-recipe-1942670
-5015,Buiscuit Crust,FN; Ellie Krieger,D,
+5015,Buiscuit Crust,FN; Ellie Krieger,D,https://www.foodnetwork.com/recipes/turkey-potpie-with-a-biscuit-crust-4593494
 5016,Steel Cut Oatmeal,FN; Alton Brown,B,https://www.foodnetwork.com/recipes/alton-brown/steel-cut-oatmeal-recipe-1939448
 5018,Green Beans w/Lemon & Garlic,FN; The Neelys,L/D,https://www.foodnetwork.com/recipes/patrick-and-gina-neely/green-beans-with-lemon-and-garlic-recipe-1938670
-5020,"Oven ""Fries""",FN Kitchen,L/D/S,https://www.foodnetwork.com/recipes/oven-fries-recipe-1958449
+5020,"Oven ""Fries""",FN Kitchen,L/D/S,https://www.foodnetwork.com/recipes/tyler-florence/oven-fries-recipe-1946000
 5021,Marinated Pork Tenderloins,FN; Ina Garten; Herb-Marinated ..,L/D,https://www.foodnetwork.com/recipes/ina-garten/herb-marinated-pork-tenderloins-recipe-1948375
 5022,Herbed Quinoa w/Dressing,FN; Giada at Home,L/D,https://www.foodnetwork.com/recipes/giada-de-laurentiis/herbed-quinoa-recipe-2012212
 5023,Frozen Blueberries Smoothies,FN Kitchen,L/D,https://www.foodnetwork.com/recipes/food-network-kitchen/frozen-fruit-smoothies-recipe-1914927
-5024,Chicken Piccata,FN Kitchen,L/D,
+5024,Chicken Piccata,FN Kitchen,L/D,https://www.foodnetwork.com/recipes/giada-de-laurentiis/chicken-piccata-recipe2-1913809
 5025,Overnight Oatmeal,FN; Alton Brown,B/D,https://www.foodnetwork.com/recipes/alton-brown/overnight-oatmeal-recipe-1939324
-5026,Quinoa Salad,"FN; Mary Sue Milliken, Susan Feniger",L/D,
+5026,Quinoa Salad,"FN; Mary Sue Milliken, Susan Feniger",L/D,https://www.foodnetwork.com/recipes/quinoa-salad-recipe0-1946649
 5027,Zucchini Parmesan Crisps,FN; Ellie Krieger,L/D/S,https://www.foodnetwork.com/recipes/ellie-krieger/zucchini-parmesan-crisps-recipe-1939866
 5028,Frozen Strawberries Smoothies,FN Kitchen,B/Bv,https://www.foodnetwork.com/recipes/food-network-kitchen/frozen-fruit-smoothies-recipe-1914927
 5029,Roman-Style Chicken,FN; Giada De Laurentiis,L/D,https://www.foodnetwork.com/recipes/giada-de-laurentiis/roman-style-chicken-recipe-1945439
@@ -30,12 +30,12 @@ FI,FI_TEXT,LONG_DESC,Meal,URL
 5031,Lentil Soup,FN; Alto Brown; using chicken broth,L/D,https://www.foodnetwork.com/recipes/alton-brown/lentil-soup-recipe-1947017
 5032,Marinated Chicken Breast,FN Kitchen,L/D,https://www.foodnetwork.com/recipes/food-network-kitchen/marinated-chicken-breasts-recipe-1951801
 5033,Chicken Saltimbocca,FN; Giada De Laurentiis,L/D,https://www.foodnetwork.com/recipes/giada-de-laurentiis/chicken-saltimbocca-recipe-1942157
-5034,Garden Vegetable Soup,FN; Alto Brown; using chicken broth,L/D,https://www.foodnetwork.com/recipes/alton-brown/garden-vegetable-soup-recipe.html
+5034,Garden Vegetable Soup,FN; Alto Brown; using chicken broth,L/D,https://www.foodnetwork.com/recipes/alton-brown/garden-vegetable-soup-recipe-1915670
 5035,Salmon w/ Herb Mustard Glaze,FN; Giada De Laurentiis; Broiled Salmon ..,L/D,https://www.foodnetwork.com/recipes/giada-de-laurentiis/broiled-salmon-with-herb-mustard-glaze-recipe-2103443
 5036,Healthy Cauliflower Rice,FN Kitchen,L/D,https://www.foodnetwork.com/recipes/food-network-kitchen/healthy-cauliflower-rice-3363582
-5037,Roasted Brussels Sprout,FN; Ina Garten,L/D,https://www.foodnetwork.com/recipes/ina-garten/roasted-brussels-sprouts-recipe-1913316
+5037,Roasted Brussels Sprout,FN; Ina Garten,L/D,https://www.foodnetwork.com/recipes/ina-garten/roasted-brussels-sprouts-recipe2-1941953
 5038,Sauteed Kale,FN; Bobby Flay,L/D,https://www.foodnetwork.com/recipes/bobby-flay/sauteed-kale-recipe-1960155
-5039,Chicken Pot Pie (no crust),FN; Ellie Krieger; see also recipe for biscuit crust,L/D,https://www.foodnetwork.com/recipes/ellie-krieger/you-and-me-chicken-pot-pies-recipe-1952274
+5039,Chicken Pot Pie (no crust),FN; Ellie Krieger; see also recipe for biscuit crust,L/D,https://www.foodnetwork.com/recipes/sunny-anderson/easy-chicken-pot-pie-recipe-1923875
 5040,Three Bean and Beef Chili,FN; Ellie Krieger,L/D,https://www.foodnetwork.com/recipes/ellie-krieger/three-bean-and-beef-chili-recipe-1917076
 5042,Hasselback Sweet Potatoes,FN Kitchen,B/L/D,https://www.foodnetwork.com/recipes/food-network-kitchen/hasselback-sweet-potatoes-recipe-2106932
 5043,Tuscan Vegetable Soup,FN; Ellie Krieger,L/D,https://www.foodnetwork.com/recipes/ellie-krieger/tuscan-vegetable-soup-recipe-1957503

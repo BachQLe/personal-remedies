@@ -1,4 +1,1349 @@
 {
-  "267": { "isBeverage": true },
-  "449": { "isBeverage": true }
+  "14": {
+    "isSnack": true
+  },
+  "39": {
+    "isSnack": true
+  },
+  "67": {
+    "isSnack": true
+  },
+  "147": {
+    "isBreakfast": true
+  },
+  "152": {
+    "isBreakfast": true
+  },
+  "153": {
+    "isBreakfast": true
+  },
+  "205": {
+    "isSnack": true
+  },
+  "206": {
+    "isSnack": true
+  },
+  "207": {
+    "isSnack": true
+  },
+  "209": {
+    "isSnack": true
+  },
+  "224": {
+    "isSnack": true
+  },
+  "225": {
+    "isSnack": true
+  },
+  "226": {
+    "isSnack": true
+  },
+  "227": {
+    "isSnack": true
+  },
+  "228": {
+    "isSnack": true
+  },
+  "229": {
+    "isSnack": true
+  },
+  "231": {
+    "isSnack": true
+  },
+  "232": {
+    "isSnack": true
+  },
+  "233": {
+    "isBeverage": true
+  },
+  "234": {
+    "isSnack": true
+  },
+  "235": {
+    "isBreakfast": true
+  },
+  "236": {
+    "isBreakfast": true
+  },
+  "237": {
+    "isBreakfast": true
+  },
+  "238": {
+    "isBreakfast": true
+  },
+  "239": {
+    "isBreakfast": true
+  },
+  "240": {
+    "isBreakfast": true
+  },
+  "241": {
+    "isBreakfast": true
+  },
+  "242": {
+    "isSnack": true
+  },
+  "243": {
+    "isSnack": true
+  },
+  "244": {
+    "isSnack": true
+  },
+  "247": {
+    "isSnack": true
+  },
+  "248": {
+    "isSnack": true
+  },
+  "249": {
+    "isSnack": true
+  },
+  "250": {
+    "isSnack": true
+  },
+  "252": {
+    "isSnack": true
+  },
+  "253": {
+    "isSnack": true
+  },
+  "254": {
+    "isSnack": true
+  },
+  "255": {
+    "isSnack": true
+  },
+  "256": {
+    "isSnack": true
+  },
+  "257": {
+    "isSnack": true
+  },
+  "258": {
+    "isSnack": true
+  },
+  "259": {
+    "isSnack": true
+  },
+  "260": {
+    "isSnack": true
+  },
+  "261": {
+    "isSnack": true
+  },
+  "262": {
+    "isSnack": true
+  },
+  "263": {
+    "isSnack": true
+  },
+  "264": {
+    "isSnack": true
+  },
+  "265": {
+    "isSnack": true
+  },
+  "266": {
+    "isSnack": true
+  },
+  "267": {
+    "isBeverage": true
+  },
+  "270": {
+    "isSnack": true
+  },
+  "271": {
+    "isSnack": true
+  },
+  "272": {
+    "isSnack": true
+  },
+  "273": {
+    "isSnack": true
+  },
+  "274": {
+    "isBeverage": true
+  },
+  "275": {
+    "isSnack": true
+  },
+  "276": {
+    "isSnack": true
+  },
+  "277": {
+    "isSnack": true
+  },
+  "278": {
+    "isSnack": true
+  },
+  "279": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "280": {
+    "isSnack": true
+  },
+  "281": {
+    "isSnack": true
+  },
+  "282": {
+    "isSnack": true
+  },
+  "283": {
+    "isSnack": true
+  },
+  "284": {
+    "isSnack": true
+  },
+  "285": {
+    "isSnack": true
+  },
+  "286": {
+    "isSnack": false
+  },
+  "287": {
+    "isSnack": true
+  },
+  "288": {
+    "isSnack": true
+  },
+  "289": {
+    "isSnack": true
+  },
+  "290": {
+    "isSnack": true
+  },
+  "291": {
+    "isSnack": true
+  },
+  "292": {
+    "isSnack": true,
+    "isBeverage": false
+  },
+  "293": {
+    "isSnack": true
+  },
+  "294": {
+    "isSnack": true
+  },
+  "295": {
+    "isSnack": true
+  },
+  "296": {
+    "isSnack": true
+  },
+  "297": {
+    "isSnack": true
+  },
+  "298": {
+    "isSnack": true
+  },
+  "299": {
+    "isSnack": true
+  },
+  "300": {
+    "isSnack": true
+  },
+  "301": {
+    "isSnack": true
+  },
+  "302": {
+    "isSnack": true
+  },
+  "303": {
+    "isSnack": true
+  },
+  "304": {
+    "isBeverage": true
+  },
+  "305": {
+    "isSnack": true
+  },
+  "306": {
+    "isBeverage": true
+  },
+  "307": {
+    "isSnack": true
+  },
+  "308": {
+    "isSnack": true
+  },
+  "309": {
+    "isSnack": true
+  },
+  "310": {
+    "isSnack": true
+  },
+  "311": {
+    "isSnack": true
+  },
+  "312": {
+    "isSnack": true
+  },
+  "313": {
+    "isSnack": true
+  },
+  "314": {
+    "isSnack": true
+  },
+  "315": {
+    "isSnack": true
+  },
+  "316": {
+    "isSnack": true
+  },
+  "317": {
+    "isSnack": true
+  },
+  "318": {
+    "isSnack": true
+  },
+  "319": {
+    "isSnack": true
+  },
+  "320": {
+    "isSnack": true
+  },
+  "321": {
+    "isSnack": true
+  },
+  "322": {
+    "isSnack": true
+  },
+  "323": {
+    "isSnack": true
+  },
+  "324": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "325": {
+    "isBeverage": true
+  },
+  "326": {
+    "isSnack": true
+  },
+  "327": {
+    "isSnack": true
+  },
+  "328": {
+    "isSnack": true
+  },
+  "329": {
+    "isSnack": true
+  },
+  "330": {
+    "isSnack": true
+  },
+  "331": {
+    "isSnack": true
+  },
+  "332": {
+    "isSnack": true
+  },
+  "333": {
+    "isSnack": true
+  },
+  "334": {
+    "isSnack": true
+  },
+  "335": {
+    "isSnack": true,
+    "isBeverage": false
+  },
+  "336": {
+    "isSnack": true
+  },
+  "337": {
+    "isSnack": true
+  },
+  "338": {
+    "isSnack": true
+  },
+  "339": {
+    "isSnack": true
+  },
+  "340": {
+    "isSnack": true,
+    "isBeverage": false
+  },
+  "341": {
+    "isSnack": true,
+    "isBeverage": false
+  },
+  "342": {
+    "isSnack": true
+  },
+  "343": {
+    "isSnack": true
+  },
+  "344": {
+    "isSnack": true
+  },
+  "345": {
+    "isSnack": true
+  },
+  "346": {
+    "isSnack": true
+  },
+  "348": {
+    "isSnack": false
+  },
+  "349": {
+    "isSnack": true
+  },
+  "350": {
+    "isSnack": true
+  },
+  "351": {
+    "isSnack": true
+  },
+  "352": {
+    "isBeverage": true
+  },
+  "353": {
+    "isSnack": true
+  },
+  "365": {
+    "isSnack": true
+  },
+  "366": {
+    "isSnack": true
+  },
+  "369": {
+    "isSnack": true
+  },
+  "370": {
+    "isSnack": true
+  },
+  "376": {
+    "isSnack": true
+  },
+  "377": {
+    "isSnack": true
+  },
+  "378": {
+    "isSnack": true
+  },
+  "382": {
+    "isSnack": true
+  },
+  "385": {
+    "isSnack": true
+  },
+  "398": {
+    "isBreakfast": true
+  },
+  "400": {
+    "isBreakfast": true
+  },
+  "404": {
+    "isBreakfast": true
+  },
+  "405": {
+    "isBreakfast": true
+  },
+  "406": {
+    "isBreakfast": true
+  },
+  "407": {
+    "isBreakfast": true
+  },
+  "410": {
+    "isBreakfast": true
+  },
+  "412": {
+    "isBreakfast": true
+  },
+  "435": {
+    "isSnack": true
+  },
+  "440": {
+    "isBreakfast": true
+  },
+  "442": {
+    "isBreakfast": true
+  },
+  "443": {
+    "isBreakfast": true
+  },
+  "448": {
+    "isBreakfast": true
+  },
+  "449": {
+    "isBeverage": true
+  },
+  "450": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "451": {
+    "isSnack": true
+  },
+  "459": {
+    "isBreakfast": true
+  },
+  "460": {
+    "isSnack": true
+  },
+  "461": {
+    "isBreakfast": true
+  },
+  "463": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "465": {
+    "isSnack": true
+  },
+  "466": {
+    "isSnack": true
+  },
+  "467": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "468": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "469": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "470": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "471": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "472": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "474": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "475": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "478": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "479": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "480": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "481": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "482": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "483": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "484": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "485": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "486": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "487": {
+    "isBreakfast": true
+  },
+  "490": {
+    "isSnack": true
+  },
+  "491": {
+    "isSnack": true
+  },
+  "492": {
+    "isSnack": true
+  },
+  "493": {
+    "isSnack": true
+  },
+  "494": {
+    "isSnack": true
+  },
+  "495": {
+    "isSnack": true
+  },
+  "496": {
+    "isSnack": true
+  },
+  "497": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "498": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "499": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "501": {
+    "isBreakfast": false,
+    "isSnack": true
+  },
+  "502": {
+    "isBreakfast": false,
+    "isSnack": true
+  },
+  "504": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "506": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "507": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "508": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "509": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "510": {
+    "isBreakfast": true
+  },
+  "511": {
+    "isBreakfast": true
+  },
+  "512": {
+    "isBreakfast": true
+  },
+  "513": {
+    "isBreakfast": true
+  },
+  "514": {
+    "isBreakfast": true
+  },
+  "515": {
+    "isBreakfast": true
+  },
+  "516": {
+    "isBreakfast": true
+  },
+  "525": {
+    "isSnack": true
+  },
+  "526": {
+    "isSnack": true
+  },
+  "527": {
+    "isSnack": true
+  },
+  "528": {
+    "isSnack": true
+  },
+  "536": {
+    "isSnack": true
+  },
+  "537": {
+    "isSnack": true
+  },
+  "538": {
+    "isSnack": true
+  },
+  "540": {
+    "isBreakfast": true
+  },
+  "547": {
+    "isSnack": false
+  },
+  "548": {
+    "isSnack": true
+  },
+  "549": {
+    "isSnack": true
+  },
+  "550": {
+    "isSnack": true
+  },
+  "551": {
+    "isSnack": true
+  },
+  "552": {
+    "isSnack": true
+  },
+  "553": {
+    "isSnack": true
+  },
+  "554": {
+    "isBreakfast": false,
+    "isSnack": true
+  },
+  "555": {
+    "isSnack": true
+  },
+  "556": {
+    "isSnack": true
+  },
+  "557": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "558": {
+    "isSnack": true
+  },
+  "559": {
+    "isSnack": true
+  },
+  "560": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "561": {
+    "isSnack": true
+  },
+  "562": {
+    "isSnack": true
+  },
+  "563": {
+    "isSnack": true
+  },
+  "564": {
+    "isSnack": true
+  },
+  "565": {
+    "isSnack": true
+  },
+  "566": {
+    "isSnack": true
+  },
+  "567": {
+    "isSnack": true
+  },
+  "568": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "569": {
+    "isSnack": true
+  },
+  "570": {
+    "isSnack": true
+  },
+  "571": {
+    "isSnack": true
+  },
+  "572": {
+    "isSnack": true
+  },
+  "573": {
+    "isBeverage": true
+  },
+  "574": {
+    "isBeverage": true
+  },
+  "591": {
+    "isBeverage": true
+  },
+  "592": {
+    "isBeverage": true
+  },
+  "593": {
+    "isBeverage": true
+  },
+  "594": {
+    "isBeverage": true
+  },
+  "595": {
+    "isBeverage": true
+  },
+  "596": {
+    "isBeverage": true
+  },
+  "597": {
+    "isBeverage": true
+  },
+  "632": {
+    "isBeverage": true
+  },
+  "633": {
+    "isBreakfast": true,
+    "isSnack": true
+  },
+  "634": {
+    "isBeverage": true
+  },
+  "635": {
+    "isSnack": true
+  },
+  "636": {
+    "isSnack": true
+  },
+  "637": {
+    "isBeverage": true
+  },
+  "638": {
+    "isSnack": true
+  },
+  "639": {
+    "isSnack": true
+  },
+  "640": {
+    "isSnack": true
+  },
+  "641": {
+    "isSnack": true
+  },
+  "642": {
+    "isSnack": true
+  },
+  "643": {
+    "isSnack": true
+  },
+  "644": {
+    "isSnack": true
+  },
+  "645": {
+    "isSnack": true
+  },
+  "646": {
+    "isSnack": true
+  },
+  "647": {
+    "isSnack": true
+  },
+  "648": {
+    "isSnack": true
+  },
+  "649": {
+    "isSnack": true
+  },
+  "650": {
+    "isSnack": true
+  },
+  "651": {
+    "isSnack": true
+  },
+  "652": {
+    "isSnack": true
+  },
+  "653": {
+    "isSnack": true
+  },
+  "654": {
+    "isSnack": true
+  },
+  "655": {
+    "isSnack": true
+  },
+  "656": {
+    "isSnack": true
+  },
+  "657": {
+    "isSnack": true
+  },
+  "658": {
+    "isSnack": true
+  },
+  "659": {
+    "isSnack": true
+  },
+  "660": {
+    "isSnack": true
+  },
+  "661": {
+    "isSnack": true
+  },
+  "662": {
+    "isBeverage": true
+  },
+  "663": {
+    "isBeverage": true
+  },
+  "664": {
+    "isSnack": true
+  },
+  "665": {
+    "isSnack": true
+  },
+  "666": {
+    "isSnack": true
+  },
+  "667": {
+    "isSnack": true
+  },
+  "668": {
+    "isSnack": true
+  },
+  "669": {
+    "isSnack": true
+  },
+  "670": {
+    "isSnack": true
+  },
+  "671": {
+    "isSnack": true
+  },
+  "672": {
+    "isSnack": true
+  },
+  "673": {
+    "isSnack": true
+  },
+  "674": {
+    "isSnack": true
+  },
+  "675": {
+    "isSnack": true
+  },
+  "676": {
+    "isSnack": true
+  },
+  "677": {
+    "isSnack": true
+  },
+  "678": {
+    "isSnack": true
+  },
+  "679": {
+    "isBeverage": true
+  },
+  "680": {
+    "isSnack": true
+  },
+  "682": {
+    "isBeverage": true
+  },
+  "683": {
+    "isSnack": true
+  },
+  "684": {
+    "isSnack": true
+  },
+  "685": {
+    "isSnack": true
+  },
+  "686": {
+    "isBeverage": true
+  },
+  "687": {
+    "isBeverage": true
+  },
+  "689": {
+    "isBeverage": true
+  },
+  "690": {
+    "isSnack": true
+  },
+  "691": {
+    "isSnack": true
+  },
+  "692": {
+    "isSnack": true
+  },
+  "695": {
+    "isBeverage": true
+  },
+  "696": {
+    "isBeverage": true
+  },
+  "697": {
+    "isBeverage": true
+  },
+  "700": {
+    "isSnack": false
+  },
+  "701": {
+    "isSnack": false
+  },
+  "703": {
+    "isSnack": true
+  },
+  "704": {
+    "isSnack": true
+  },
+  "705": {
+    "isSnack": true
+  },
+  "706": {
+    "isSnack": true
+  },
+  "707": {
+    "isSnack": true
+  },
+  "708": {
+    "isSnack": true
+  },
+  "709": {
+    "isSnack": true
+  },
+  "710": {
+    "isSnack": true
+  },
+  "711": {
+    "isBeverage": true
+  },
+  "712": {
+    "isSnack": true
+  },
+  "713": {
+    "isSnack": false
+  },
+  "714": {
+    "isSnack": true
+  },
+  "715": {
+    "isSnack": true
+  },
+  "716": {
+    "isSnack": true
+  },
+  "717": {
+    "isSnack": true
+  },
+  "719": {
+    "isSnack": true
+  },
+  "720": {
+    "isBeverage": true
+  },
+  "721": {
+    "isBeverage": true
+  },
+  "723": {
+    "isSnack": true
+  },
+  "724": {
+    "isBeverage": true
+  },
+  "725": {
+    "isBeverage": true
+  },
+  "726": {
+    "isBeverage": true
+  },
+  "727": {
+    "isBeverage": true
+  },
+  "728": {
+    "isSnack": true
+  },
+  "729": {
+    "isBeverage": true
+  },
+  "730": {
+    "isBeverage": true
+  },
+  "731": {
+    "isBeverage": true
+  },
+  "732": {
+    "isBeverage": true
+  },
+  "734": {
+    "isSnack": true,
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner",
+      "snack"
+    ]
+  },
+  "740": {
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner"
+    ]
+  },
+  "741": {
+    "isSnack": true,
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner",
+      "snack"
+    ]
+  },
+  "754": {
+    "isSnack": true
+  },
+  "755": {
+    "isSnack": true
+  },
+  "759": {
+    "isSnack": true
+  },
+  "760": {
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner"
+    ]
+  },
+  "763": {
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner"
+    ]
+  },
+  "766": {
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner"
+    ]
+  },
+  "767": {
+    "isSnack": true
+  },
+  "768": {
+    "isSnack": true,
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner",
+      "snack"
+    ]
+  },
+  "770": {
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner"
+    ]
+  },
+  "778": {
+    "isSnack": true,
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner",
+      "snack"
+    ]
+  },
+  "781": {
+    "isSnack": true,
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner",
+      "snack"
+    ]
+  },
+  "786": {
+    "isSnack": true
+  },
+  "787": {
+    "isSnack": true
+  },
+  "788": {
+    "isSnack": true
+  },
+  "789": {
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner"
+    ]
+  },
+  "791": {
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner"
+    ]
+  },
+  "792": {
+    "isRecipe": true,
+    "mealTypes": [
+      "lunch",
+      "dinner"
+    ]
+  },
+  "839": {
+    "isBreakfast": true
+  },
+  "844": {
+    "isBeverage": true
+  },
+  "845": {
+    "isBeverage": true
+  },
+  "875": {
+    "isSnack": true
+  },
+  "908": {
+    "isBeverage": true
+  },
+  "917": {
+    "isSnack": true
+  },
+  "918": {
+    "isSnack": true
+  },
+  "920": {
+    "isSnack": true
+  },
+  "921": {
+    "isBreakfast": true
+  },
+  "923": {
+    "isBreakfast": true
+  },
+  "925": {
+    "isSnack": true
+  },
+  "926": {
+    "isSnack": true
+  },
+  "927": {
+    "isBeverage": true
+  },
+  "928": {
+    "isSnack": true
+  },
+  "932": {
+    "isSnack": true
+  },
+  "941": {
+    "isBeverage": true
+  },
+  "942": {
+    "isBeverage": true
+  },
+  "946": {
+    "isBeverage": true
+  },
+  "981": {
+    "isSnack": true
+  },
+  "982": {
+    "isSnack": true
+  },
+  "995": {
+    "isSnack": false
+  },
+  "1238": {
+    "isBeverage": false
+  },
+  "1258": {
+    "isSnack": false
+  },
+  "1262": {
+    "isBreakfast": false
+  },
+  "1279": {
+    "isBeverage": false
+  },
+  "1286": {
+    "isBeverage": false
+  },
+  "1294": {
+    "isBreakfast": false
+  },
+  "1297": {
+    "isBeverage": false
+  },
+  "1298": {
+    "isBeverage": false
+  },
+  "1308": {
+    "isSnack": false
+  },
+  "1314": {
+    "isBeverage": false
+  },
+  "1315": {
+    "isBeverage": false
+  },
+  "1316": {
+    "isBeverage": false
+  },
+  "1317": {
+    "isBeverage": false
+  },
+  "1318": {
+    "isSnack": false
+  },
+  "1319": {
+    "isBeverage": false
+  },
+  "1343": {
+    "isSnack": false
+  },
+  "1347": {
+    "isBeverage": false
+  },
+  "1349": {
+    "isBeverage": false
+  },
+  "1387": {
+    "isSnack": false
+  },
+  "1390": {
+    "isSnack": false
+  },
+  "1391": {
+    "isSnack": false
+  },
+  "1400": {
+    "isSnack": false
+  },
+  "1401": {
+    "isSnack": false
+  },
+  "1403": {
+    "isSnack": false
+  },
+  "1404": {
+    "isSnack": false
+  },
+  "1406": {
+    "isSnack": false
+  },
+  "1410": {
+    "isSnack": false
+  },
+  "1411": {
+    "isSnack": false
+  },
+  "1415": {
+    "isSnack": false
+  },
+  "1417": {
+    "isSnack": false
+  },
+  "1428": {
+    "isSnack": false
+  },
+  "1429": {
+    "isSnack": false
+  },
+  "1430": {
+    "isSnack": false
+  }
 }

@@ -117,7 +117,7 @@
       "dinner"
     ],
     "fineFoodGroup": "l",
-    "sourceUrl": "https://www.foodnetwork.com/recipes/rachael-ray/pasta-and-beans-pasta-e-fagioli-recipe-1939374"
+    "sourceUrl": "https://www.foodnetwork.com/recipes/giada-de-laurentiis/pasta-e-fagioli-recipe-1943219"
   },
   {
     "foodItemID": 5013,
@@ -127,7 +127,7 @@
       "lunch"
     ],
     "fineFoodGroup": "l",
-    "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/hash-brown-casserole-recipe-2121182"
+    "sourceUrl": "https://www.foodnetwork.com/fnk/recipes/hash-brown-casserole-9579503"
   },
   {
     "foodItemID": 5014,
@@ -138,6 +138,13 @@
     ],
     "fineFoodGroup": "l",
     "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/chicken-and-broccoli-stir-fry-recipe-1942670"
+  },
+  {
+    "foodItemID": 5015,
+    "name": "Buiscuit Crust",
+    "mealType": "dinner",
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/turkey-potpie-with-a-biscuit-crust-4593494"
   },
   {
     "foodItemID": 5016,
@@ -165,7 +172,7 @@
       "snack"
     ],
     "fineFoodGroup": "l",
-    "sourceUrl": "https://www.foodnetwork.com/recipes/oven-fries-recipe-1958449"
+    "sourceUrl": "https://www.foodnetwork.com/recipes/tyler-florence/oven-fries-recipe-1946000"
   },
   {
     "foodItemID": 5021,
@@ -198,6 +205,16 @@
     "sourceUrl": "https://www.foodnetwork.com/recipes/food-network-kitchen/frozen-fruit-smoothies-recipe-1914927"
   },
   {
+    "foodItemID": 5024,
+    "name": "Chicken Piccata",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/giada-de-laurentiis/chicken-piccata-recipe2-1913809"
+  },
+  {
     "foodItemID": 5025,
     "name": "Overnight Oatmeal",
     "mealType": "breakfast",
@@ -206,6 +223,16 @@
     ],
     "fineFoodGroup": "l",
     "sourceUrl": "https://www.foodnetwork.com/recipes/alton-brown/overnight-oatmeal-recipe-1939324"
+  },
+  {
+    "foodItemID": 5026,
+    "name": "Quinoa Salad",
+    "mealType": "lunch",
+    "alsoFits": [
+      "dinner"
+    ],
+    "fineFoodGroup": "l",
+    "sourceUrl": "https://www.foodnetwork.com/recipes/quinoa-salad-recipe0-1946649"
   },
   {
     "foodItemID": 5027,
@@ -286,7 +313,7 @@
       "dinner"
     ],
     "fineFoodGroup": "l",
-    "sourceUrl": "https://www.foodnetwork.com/recipes/alton-brown/garden-vegetable-soup-recipe.html"
+    "sourceUrl": "https://www.foodnetwork.com/recipes/alton-brown/garden-vegetable-soup-recipe-1915670"
   },
   {
     "foodItemID": 5035,
@@ -316,7 +343,7 @@
       "dinner"
     ],
     "fineFoodGroup": "l",
-    "sourceUrl": "https://www.foodnetwork.com/recipes/ina-garten/roasted-brussels-sprouts-recipe-1913316"
+    "sourceUrl": "https://www.foodnetwork.com/recipes/ina-garten/roasted-brussels-sprouts-recipe2-1941953"
   },
   {
     "foodItemID": 5038,
@@ -336,7 +363,7 @@
       "dinner"
     ],
     "fineFoodGroup": "l",
-    "sourceUrl": "https://www.foodnetwork.com/recipes/ellie-krieger/you-and-me-chicken-pot-pies-recipe-1952274"
+    "sourceUrl": "https://www.foodnetwork.com/recipes/sunny-anderson/easy-chicken-pot-pie-recipe-1923875"
   },
   {
     "foodItemID": 5040,

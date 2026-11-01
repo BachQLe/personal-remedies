@@ -136,3 +136,34 @@ export function getOverlayFlags(foodItemID) {
   }
   return { isBreakfast, isSnack, isBeverage };
 }
+
+/**
+ * Items Sunny flagged R (checklist 7.6): prepared foods that count as recipes,
+ * each carrying its `mealTypes`. Empty until the overlay holds R rows.
+ * @returns {Array}
+ */
+export function getRecipeFlaggedItems() {
+  return getItemTable().filter((item) => item.isRecipe);
+}
+
+/** @type {Map<number, string>|null} */
+let _servingSizes = null;
+
+/**
+ * PR's serving size for an item (checklist 4.17), e.g. "20 g". Comes from the
+ * dictionary's numeric `unitOfMeasure` (2-488), read as grams. Blank or
+ * unit-only values ('gram', 'mg', 'srvg', 'n/a') carry no amount, so they give
+ * null: never a generic or rounded substitute.
+ * @param {number|string|null|undefined} foodItemID
+ * @returns {string|null}
+ */
+export function getServingSize(foodItemID) {
+  if (!_servingSizes) {
+    _servingSizes = new Map(
+      itemsRaw
+        .filter((item) => /^\d+(\.\d+)?$/.test(String(item.unitOfMeasure ?? '').trim()))
+        .map((item) => [item.foodItemID, `${String(item.unitOfMeasure).trim()} g`])
+    );
+  }
+  return _servingSizes.get(Number(foodItemID)) ?? null;
+}

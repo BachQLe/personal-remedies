@@ -1,0 +1,1486 @@
+FI,FI_DISPLAY,Meal Planner categories
+1,Abalone,"L, D"
+2,Anchovy,"L, D"
+3,Bacon,"L, D"
+4,Freshwater bass,"L, D"
+5,Seabass,"L, D"
+6,Striped bass,"L, D"
+7,Bear meat,"L, D"
+8,Beaver meat,"L, D"
+9,Beef,"L, D"
+10,Beef brain,"L, D"
+11,Beef chuck/brisket,"L, D"
+12,Beef filet mignon,"L, D"
+13,Beef heart,"L, D"
+14,Beef jerky sticks,S
+15,Beef kidneys,"L, D"
+16,Beef liver,"L, D"
+17,Beef rib eye,"L, D"
+18,Beef ribs,"L, D"
+19,Beef round steak,"L, D"
+20,Beef shank,"L, D"
+21,Beef spleen,"L, D"
+22,Beef tenderloin/T-bone,"L, D"
+23,Beef tongue,"L, D"
+24,Beef top sirloin,"L, D"
+25,High heel shoes,
+26,Dried cured beef,"L, D"
+27,Ground beef,"L, D"
+28,Beerwurst beer salami,"L, D"
+29,Buffalo/Bison meat,"L, D"
+30,Bluefish,"L, D"
+31,Boar meat,"L, D"
+32,Bologna,"L, D"
+33,Burbot,"L, D"
+34,Butterfish,"L, D"
+35,Squid (Calamari),"L, D"
+36,Caribou meat,"L, D"
+37,Carp,"L, D"
+38,Catfish,"L, D"
+39,Caviar,"L, D, S"
+40,Chicken,"L, D"
+41,Chicken breast (no skin),"L, D"
+42,Chicken dark meat,"L, D"
+43,Chicken giblets,"L, D"
+44,Chicken heart,"L, D"
+45,Chicken liver,"L, D"
+46,Chicken skin,"L, D"
+47,Chicken wings,"L, D"
+48,Chorizo,"L, D"
+49,Cisco,"L, D"
+50,Cisco (smoked),"L, D"
+51,Clams,"L, D"
+52,Cod,"L, D"
+53,Corned beef,"L, D"
+54,Alaskan king crab,"L, D"
+55,Blue crab,"L, D"
+56,Dungeness crab,"L, D"
+57,Crayfish,"L, D"
+58,Croaker,"L, D"
+59,Cured meats,"L, D"
+60,Cusk,"L, D"
+61,Cuttlefish,"L, D"
+62,Dolphinfish (Mahi-Mahi),"L, D"
+63,Drum,"L, D"
+64,Duck (no skin),"L, D"
+65,Eel,"L, D"
+66,Fish,"L, D"
+67,Fish roe,"L, D, S"
+68,Flatfish (flounder & sole),"L, D"
+69,Beef frankfurter,"L, D"
+70,Chicken frankfurter,"L, D"
+71,Game birds,"L, D"
+72,Game meat,"L, D"
+73,Goose,"L, D"
+74,Grouper,"L, D"
+75,Guinea hen,"L, D"
+76,Haddock,"L, D"
+77,Halibut,"L, D"
+78,Herring,"L, D"
+79,Lamb,"L, D"
+80,Lamb brain,"L, D"
+81,Lamb heart,"L, D"
+82,Lamb kidneys,"L, D"
+83,Lamb leg,"L, D"
+84,Lamb liver,"L, D"
+85,Lamb loin,"L, D"
+86,Lamb ribs,"L, D"
+87,Lamb shoulder,"L, D"
+88,Lamb spleen,"L, D"
+89,Lamb tongue,"L, D"
+90,Ground lamb,"L, D"
+91,Ling,"L, D"
+92,Lingcod,"L, D"
+93,Liver,"L, D"
+94,Lobster,"L, D"
+95,Spiny lobster,"L, D"
+96,Luncheon/processed meats,"L, D"
+97,Worcestershire sauce,
+98,Cured beef luncheon meat,"L, D"
+99,Mackerel,"L, D"
+100,King mackerel,"L, D"
+101,Paprika,"L, D"
+102,Meat,"L, D"
+103,Milkfish,"L, D"
+104,Monkfish,"L, D"
+105,Mullet,"L, D"
+106,Mussels,"L, D"
+107,Northern pike,"L, D"
+108,Octopus,"L, D"
+109,Orange roughy,"L, D"
+110,Organ meats,"L, D"
+111,Oysters,"L, D"
+112,"Pancreas (lamb, beef, veal)","L, D"
+113,Pastrami (cured beef),"L, D"
+114,Pastrami (turkey),"L, D"
+115,Pepperoni,"L, D"
+116,Perch,"L, D"
+117,Pheasant,"L, D"
+118,Pheasant breast,"L, D"
+119,Pollock,"L, D"
+120,Pompano fish,"L, D"
+121,Pork,"L, D"
+122,Pork back ribs,"L, D"
+123,Food prep -- well-cooked,
+124,Pork cured ham,"L, D"
+125,Pork headcheese,"L, D"
+126,Pork heart,"L, D"
+127,Pork kidneys,"L, D"
+128,Pork leg/ham,"L, D"
+129,Pork liver,"L, D"
+130,Pork liver cheese,"L, D"
+131,Pork loin/sirloin,"L, D"
+132,Pork lungs,"L, D"
+133,Use your humidifier,
+134,Pork shldr,"L, D"
+135,Pork skins,"L, D"
+136,Pork spare ribs,"L, D"
+137,Pork spleen,"L, D"
+138,Poultry or Fowl,"L, D"
+139,Pout,"L, D"
+140,Pumpkinseed sunfish,"L, D"
+141,Quail,"L, D"
+142,Quail breast,"L, D"
+143,Rabbit meat,"L, D"
+144,Rockfish,"L, D"
+145,Sablefish,"L, D"
+146,Salami,"L, D"
+147,"Salmon (smoked, Lox)","B, L, D"
+148,Pink salmon,"L, D"
+149,Sardines,"L, D"
+150,Blood sausage,"L, D"
+151,Liver sausage,"L, D"
+152,Meatless sausage,"B, L, D"
+153,Smoked sausage,"B, L, D"
+154,Scallops,"L, D"
+155,Scup,"L, D"
+156,Seafood,"L, D"
+157,Seatrout,"L, D"
+158,Shad,"L, D"
+159,Shark,"L, D"
+160,Sheepshead,"L, D"
+161,Shellfish,"L, D"
+162,Shower/Bath (see note),
+163,Smelt,"L, D"
+164,Snail,"L, D"
+165,Snapper,"L, D"
+166,Spot,"L, D"
+167,Squab (pigeon),"L, D"
+168,Sturgeon,"L, D"
+169,Sucker,"L, D"
+170,Surimi,"L, D"
+171,Swordfish,"L, D"
+172,Tilapia,"L, D"
+173,Tilefish,"L, D"
+174,Trout,"L, D"
+175,Blue fin tuna,"L, D"
+176,Canned tuna,"L, D"
+177,Yellowfin tuna,"L, D"
+178,Turbot,"L, D"
+179,Turkey,"L, D"
+180,Turkey breast,"L, D"
+181,Turkey dark meat,"L, D"
+182,Turkey giblets,"L, D"
+183,Turkey heart,"L, D"
+184,Turkey liver,"L, D"
+185,Turkey skins,"L, D"
+186,Veal,"L, D"
+187,Veal heart,"L, D"
+188,Veal kidneys,"L, D"
+189,Veal liver,"L, D"
+190,Veal loin,"L, D"
+191,Veal lungs,"L, D"
+192,Veal shank,"L, D"
+193,Veal shoulder,"L, D"
+194,Veal spleen,"L, D"
+195,Veal thymus,"L, D"
+196,Veal tongue,"L, D"
+197,Venison,"L, D"
+198,Walleye,"L, D"
+199,Whelk,"L, D"
+200,White fish,"L, D"
+201,White fish (smoked),"L, D"
+202,Whiting,"L, D"
+203,Wolffish,"L, D"
+204,Yellowtail,"L, D"
+205,Acorns,S
+206,Alfalfa sprouts,"L, D, S"
+207,Almonds,S
+208,Adzuki beans,"L, D"
+209,Baked beans,"L, D, S"
+210,Black beans,"L, D"
+211,Black-eyed peas,"L, D"
+212,Fava beans,"L, D"
+213,Hyacinth beans,"L, D"
+214,Kidney beans,"L, D"
+215,Lima beans,"L, D"
+216,Moth beans,"L, D"
+217,Mung beans,"L, D"
+218,Navy beans,"L, D"
+219,Pinto beans,"L, D"
+220,Winged beans,"L, D"
+221,Yardlong beans,"L, D"
+222,Yellow beans,"L, D"
+223,Beans/Legumes,"L, D"
+224,Beechnuts,S
+225,Brazil nuts,S
+226,Breadfruit seeds,S
+227,Butternuts,S
+228,Cashew nuts,S
+229,Chestnuts,S
+230,Chickpeas,"L, D"
+231,Coconut meat (raw),"S, Ds"
+232,Coconut meat (dried),"S, Ds"
+233,Coconut milk,Bv
+234,Cornnuts,S
+235,Egg (raw),"B, L, D"
+236,Eggs,"B, L, D"
+237,Egg substitute,"B, L, D"
+238,Egg white,"B, L, D"
+239,Egg yolk,"B, L, D"
+240,Hard boiled egg,"B, L, D"
+241,Duck egg,"B, L, D"
+242,Ginkgo nuts,S
+243,Hazelnuts or Filberts,S
+244,Hickory nuts,S
+245,Lentils,"L, D"
+246,Lupin,"L, D"
+247,Macadamia nuts,S
+248,Nuts,S
+249,Peanuts,S
+250,Green peas,"L, D, S"
+251,Split peas,"L, D"
+252,Sugar/snap peas non-org,"L, D, S"
+253,Pecans,S
+254,Pili nuts,S
+255,Pine nuts,S
+256,Pistachio nuts,S
+257,Seeds,S
+258,Breadnut tree seeds,S
+259,Chia seeds,S
+260,Cottonseed,S
+261,Flaxseed,S
+262,Pumpkin & squash seeds,S
+263,Safflower seeds,S
+264,Sesame seeds,S
+265,Sunflower seeds,S
+266,Watermelon seeds,S
+267,Soy milk,Bv
+268,Soybeans (dried),"L, D"
+269,Soybeans (green),"L, D"
+270,Walnuts,S
+271,Black walnuts,S
+272,Abiyuch,S
+273,Acerola,S
+274,Apple juice,Bv
+275,Apples non-organic,S
+276,Dried apples,S
+277,Apricots,S
+278,Dried apricots,S
+279,Avocado,"B, L, D, S"
+280,Banana,S
+281,Dried banana,S
+282,Berries,S
+283,Blackberries,S
+284,Blueberries non-organic,S
+285,Boysenberries,S
+286,Breadfruit,"L, D"
+287,Cantaloupe,S
+288,Cherries non-organic,S
+289,Citrus fruits,S
+290,Cowberries,S
+291,Cranberries,S
+292,Cranberry juice,S
+293,Zante currants,S
+294,Currants (raw),S
+295,Dates,S
+296,Dried fruits,S
+297,Durian,S
+298,Elderberries,S
+299,Figs,S
+300,Dried figs,S
+301,Fruits & juices,S
+302,Goji berry,S
+303,Gooseberries,S
+304,Grape juice,Bv
+305,Grapefruit non-organic,S
+306,Grapefruit juice,Bv
+307,Grapes non-organic,S
+308,Guava,S
+309,Honeydew melon,S
+310,Jujube (fruit),S
+311,Kiwi fruit,S
+312,Kumquats,S
+313,Lemon,S
+314,Lime,S
+315,Litchi,S
+316,Dried litchi,S
+317,Loganberry,S
+318,Longans,S
+319,Dried longans,S
+320,Mango,S
+321,Mulberries,S
+322,Natal Plum (Carissa),S
+323,Nectarine non-organic,S
+324,Olives,"B, L, D, S"
+325,Orange juice,Bv
+326,Oranges non-organic,S
+327,Papaya,S
+328,Passion fruit,S
+329,Peaches non-organic,S
+330,Dried peaches,S
+331,Pears non-organic,S
+332,Dried pears,S
+333,Persimmons,S
+334,Pineapple,S
+335,Pineapple juice,S
+336,Pitanga,S
+337,Plantains,S
+338,Plum non-organic,S
+339,Pomegranate,S
+340,Pomegranate juice,S
+341,Prune juice,S
+342,Prunes (dried),S
+343,Pomelo,S
+344,Quince,S
+345,Raisins non-organic,S
+346,Raspberries non-organic,S
+347,Oxalate,
+348,Rhubarb,Ds
+349,Rowal,S
+350,Strawberries non-organic,S
+351,Tangerines non-organic,S
+352,Tapioca pearls,"Bv, Ds"
+353,Watermelon,S
+354,Amaranth leaves,"L, D"
+355,Arrowhead,"L, D"
+356,Arrowroot,"L, D"
+357,Artichoke,"L, D"
+358,Jerusalem artichoke,"L, D"
+359,Arugula,"L, D"
+360,Asparagus,"L, D"
+361,Balsam pear,"L, D"
+362,Balsam pear leafy tips,"L, D"
+363,Beet greens,"L, D"
+364,Beets,"L, D"
+365,Green bell peppers non-org,"L, D, S"
+366,Red bell peppers non-org,"L, D, S"
+367,Bok choy,"L, D"
+368,Borage,"L, D"
+369,Broccoli non-organic,"L, D, S"
+370,Chinese broccoli,"L, D, S"
+371,Brussels sprouts,"L, D"
+372,Cabbage (Cruciferous) family,"L, D"
+373,Green cabbage,"L, D"
+374,Red cabbage,"L, D"
+375,Savoy cabbage,"L, D"
+376,Carrots non-organic,"L, D, S"
+377,Cauliflower,"L, D, S"
+378,Celery non-organic,"L, D, S"
+379,Celtuce,"L, D"
+380,Chicory greens,"L, D"
+381,Garland Chrysanthemum,"L, D"
+382,Daikon,"L, D, S"
+383,Collards non-organic,"L, D"
+384,Cowpeas leafy tips,"L, D"
+385,Cucumbers w/peel non-org,"L, D, S"
+386,Dandelion Greens,"L, D"
+387,Dark green leafy veg's,"L, D"
+388,Eggplant,"L, D"
+389,Escarole/Endive,"L, D"
+390,Epazote,"L, D"
+391,Fennel (Bulb),"L, D"
+392,Fiddlehead ferns,"L, D"
+393,Cloud ear fungus,"L, D"
+394,Garden cress,"L, D"
+395,Garlic,"L, D"
+396,Grape leaves,"L, D"
+397,Green beans non-organic,"L, D"
+398,Green onions (scallions),"B, L, D"
+399,Hearts of palm,"L, D"
+400,Kale non-organic,"B, L, D"
+401,Kelp,"L, D"
+402,Kohlrabi,"L, D"
+403,Lambsquarters,"L, D"
+404,Leeks,"B, L, D"
+405,Romaine lettuce non-org,"B, L, D"
+406,Head lettuce non-organic,"B, L, D"
+407,Loose leaf lettuce non-org,"B, L, D"
+408,Lotus root,"L, D"
+409,Jew's ear mushrooms,"L, D"
+410,Portabella mushrooms,"B, L, D"
+411,Shitake mushrooms,"L, D"
+412,Various mushrooms,"B, L, D"
+413,Mustard greens non-organic,"L, D"
+414,Mustard spinach,"L, D"
+415,Night-shade family,"L, D"
+416,Nopal,"L, D"
+417,Okra,"L, D"
+418,Onions,"L, D"
+419,Parsnips,"L, D"
+420,Banana pepper,"L, D"
+421,Ancho peppers non-organic,"L, D"
+422,Hot chili peppers non-organic,"L, D"
+423,Red hot chili peppers non-org,"L, D"
+424,Peppers (hot variety),"L, D"
+425,Jalapeno peppers non-org,"L, D"
+426,Pasilla peppers non-organic,"L, D"
+427,Pimento peppers non-org,"L, D"
+428,Pigeon peas,"L, D"
+429,Pokeberry shoots,"L, D"
+430,Potato non-organic,"L, D"
+431,Potatoes w/skin non-org,"L, D"
+432,Pumpkin non-organic,"L, D"
+433,Pumpkin flowers,"L, D"
+434,Purslane,"L, D"
+435,Radishes,"L, D, S"
+436,Root vegetables,"L, D"
+437,Rutabaga,"L, D"
+438,Sesbania Flower,"L, D"
+439,Shallots,"L, D"
+440,Spinach non-organic,"B, L, D"
+441,Acorn squash non-organic,"L, D"
+442,Butternut squash non-org,"B, L, D"
+443,Sweet potatoes,"B, L, D"
+444,Sweet potatoes leaves,"L, D"
+445,Swiss chard,"L, D"
+446,Taro,"L, D"
+447,Taro leaves,"L, D"
+448,Tahitian taro,"B, L, D"
+449,Tomato juice,Bv
+450,Tomatoes non-organic,"B, L, D, S"
+451,Sun-dried tomatoes,"L, D, S"
+452,Turnip greens,"L, D"
+453,Turnips,"L, D"
+454,Vegetables,"L, D"
+455,Vine spinach,"L, D"
+456,Wasabi root,"L, D"
+457,Watercress,"L, D"
+458,Winged beans leaves,"L, D"
+459,Yam,"B, L, D"
+460,Yellow-orange fruits & veg's,"L, D, S, Ds"
+461,Zucchini non-organic,"B, L, D"
+462,Amaranth,"L, D"
+463,Bagels (plain),"B, L, D, S"
+464,Barley,"L, D"
+465,Biscuits,"L, D, S"
+466,Bread sticks,"L, D, S"
+467,Banana bread,"B, S, Ds"
+468,Cornbread,"B, L, D, S"
+469,Italian bread,"B, L, D, S"
+470,Oat bran bread,"B, L, D, S"
+471,Pumpernickel bread,"B, L, D, S"
+472,Various bread,"B, L, D, S"
+473,Pasteurized products,
+474,White bread,"B, L, D, S"
+475,Whole-wheat bread,"B, L, D, S"
+476,Buckwheat,"L, D"
+477,Bulgur,"L, D"
+478,Bran flakes cereal,"B,S"
+479,Corn flakes cereal,"B,S"
+480,Cream of wheat,"B,S"
+481,Granola cereal,"B,S"
+482,Rice crisps cereal,"B,S"
+483,Shredded wheat cereal,"B,S"
+484,Wheat germ cereal,"B,S"
+485,Whole-wheat cereal,"B,S"
+486,Cereals,"B,S"
+487,Corn,"B, L, D"
+488,Corn bran,"L, D, Ds"
+489,Couscous,"L, D"
+490,Matzo crackers,S
+491,Melba toast,S
+492,Milk crackers,S
+493,Saltines crackers,S
+494,Various crackers,S
+495,Wheat crackers,S
+496,Whole-wheat crackers,S
+497,Croissant,"B, L, D, S"
+498,Danish pastry,"B, S, Ds"
+499,Donuts,"B, S, Ds"
+500,Durum wheat,"L, D"
+501,English muffins,S
+502,Whole-wheat English muffins,S
+503,Whole grains,"L, D"
+504,Granola bars,"B, S, Ds"
+505,Millet,"L, D"
+506,Blueberry muffins,"B, S, Ds"
+507,Corn muffins,"B, S, Ds"
+508,Oat bran muffins,"B, S, Ds"
+509,Wheat bran muffins,"B, S, Ds"
+510,Chinese chow Mein noodles,"B, L, D"
+511,Egg noodles,"B, L, D"
+512,Japanese noodles,"B, L, D"
+513,Rice noodles,"B, L, D"
+514,Oat bran,"B, L, D"
+515,Oatmeal (cereal),"B, L, D"
+516,Oats,"B, L, D"
+517,Pasta,"L, D"
+518,Quinoa,"L, D"
+519,Rice bran,"L, D, Ds"
+520,Allspice,
+521,Brown rice,"L, D"
+522,Various rice,"L, D"
+523,White rice,"L, D"
+524,Wild rice,"L, D"
+525,Kaiser dinner rolls,"L, D, S"
+526,Whole-wheat dinner rolls,"L, D, S"
+527,French rolls,"L, D, S"
+528,Hamburger & hot dog rolls,"L, D, S"
+529,Rye grain,"L, D, Ds"
+530,Semolina (flour),
+531,Sorghum grain,"L, D"
+532,Spaghetti,"L, D"
+533,Spinach spaghetti,"L, D"
+534,Whole-wheat spaghetti,"L, D"
+535,Spelt,"L, D"
+536,Sweet rolls,"S, Ds"
+537,Toasted bread,"L, D, S"
+538,Tortillas,"L, D, S"
+539,Triticale,"L, D, Ds"
+540,Waffles,"B, Ds"
+541,Wheat (white flour),
+542,Wheat bran,"L, D"
+543,Wheat germ,"L, D"
+544,Whole-wheat (flour),
+545,Butter (salted),
+546,Butter (unsalted),
+547,Cheese spread,
+548,American cheese,"L, D, S"
+549,Blue cheese,"L, D, S"
+550,Brie cheese,"L, D, S"
+551,Camembert cheese,"L, D, S"
+552,Cheddar cheese,"L, D, S"
+553,Colby cheese,"L, D, S"
+554,Cottage cheese,"L, D, S"
+555,Cream cheese,"L, D, S"
+556,Edam cheese,"L, D, S"
+557,Feta cheese,"B, L, D, S"
+558,Fontina cheese,"L, D, S"
+559,Gjetost cheese,"L, D, S"
+560,Goat cheese,"B, L, D, S"
+561,Gouda cheese,"L, D, S"
+562,Gruyere cheese,"L, D, S"
+563,Limburger cheese,"L, D, S"
+564,Mozzarella cheese,"L, D, S"
+565,Parmesan cheese,"L, D, S"
+566,Pimento cheese,"L, D, S"
+567,Port de salut cheese,"L, D, S"
+568,Ricotta cheese,"B, L, D, S"
+569,Romano cheese,"L, D, S"
+570,Roquefort cheese,"L, D, S"
+571,Swiss cheese,"L, D, S"
+572,Various cheese,"L, D, S"
+573,Light cream,"Bv, Ds"
+574,Whipped cream,"Bv, Ds"
+575,Dairy Products,
+576,Animal fat,
+577,Beef/lamb/pork fat,
+578,Chicken fat,
+579,Goose fat,
+580,Turkey fat,
+581,Cod liver fish oil,
+582,Herring fish oil,
+583,Menhaden fish oil,
+584,Salmon fish oil,
+585,Sardine fish oil,
+586,Various fish oil,
+587,Lard,
+588,Margarine (salted),
+589,Margarine (unsalted),
+590,Margarine-like spreads,
+591,Milk,Bv
+592,2% fat milk,Bv
+593,Chocolate milk,Bv
+594,1% fat milk,Bv
+595,Skim milk,Bv
+596,Whole milk,Bv
+597,Non-dairy creamers,Bv
+598,Almonds oil,
+599,Apricot kernel oil,
+600,Avocado oil,
+601,Babassu oil,
+602,Canola oil,
+603,Cocoa Butter oil,
+604,Coconut oil,
+605,Corn oil,
+606,Cottonseed oil,
+607,Cupu Assu oil,
+608,Flaxseed oil,
+609,Grape seeds oil,
+610,Hazelnut oil,
+611,Hydrogenated vegetable oil,
+612,Mustard oil,
+613,Oat oil,
+614,Olive oil,
+615,Palm oil,
+616,Peanut oil,
+617,Poppy seed oil,
+618,Rice bran oil,
+619,Safflower oil,
+620,Sesame oil,
+621,Shea nut oil,
+622,Soybean oil,
+623,Sunflower oil,
+624,Tea seed oil,
+625,Tomato seeds oil,
+626,Ucuhuba Butter oil,
+627,Various veg's/seeds/nuts oil,
+628,Walnut oil,
+629,Wheat germ oil,
+630,Sour cream,
+631,Vegetable shortening,
+632,Whey (sweet),Bv
+633,Yogurt (Plain),"B, S, Ds"
+634,Club soda,Bv
+635,After-dinner mints,"S, Ds"
+636,Applesauce non-organic,"S, Ds"
+637,Beer,Bv
+638,Angel food cake,"S, Ds"
+639,Boston cream pie,"S, Ds"
+640,Chocolate cake,"S, Ds"
+641,Gingerbread,"S, Ds"
+642,Pound cake,"S, Ds"
+643,Shortcake,"S, Ds"
+644,Sponge cake,"S, Ds"
+645,Yellow cake,"S, Ds"
+646,Various cakes,"S, Ds"
+647,Candies,"S, Ds"
+648,Caramel candies,"S, Ds"
+649,Carob,"S, Ds"
+650,Halvah,"S, Ds"
+651,Hard candies,"S, Ds"
+652,Marshmallows,"S, Ds"
+653,Peanut bar candies,"S, Ds"
+654,Peanut brittle,"S, Ds"
+655,Sesame crunch candies,"S, Ds"
+656,Sweet chocolate,"S, Ds"
+657,Cheesecake,"S, Ds"
+658,Chewing gum,"S, Ds"
+659,Chocolate,"S, Ds"
+660,Chocolate mousse,"S, Ds"
+661,Dark chocolate,"S, Ds"
+662,Coffee,Bv
+663,Coffee liqueur,Bv
+664,Coffeecake,"S, Ds"
+665,Cookies,"S, Ds"
+666,Animal crackers,"S, Ds"
+667,Brownies,"S, Ds"
+668,Butter cookies,"S, Ds"
+669,Chocolate chip cookies,"S, Ds"
+670,Gingersnaps cookies,"S, Ds"
+671,Lady fingers cookies,"S, Ds"
+672,Molasses cookies,"S, Ds"
+673,Oatmeal cookies,"S, Ds"
+674,Peanut butter cookies,"S, Ds"
+675,Shortbread cookies,"S, Ds"
+676,Sugar cookies,"S, Ds"
+677,Vanilla wafers,"S, Ds"
+678,Cream puffs/Éclair,"S, Ds"
+679,Crème de menthe,Bv
+680,Dessert toppings,"S, Ds"
+681,Luncheon meat (pork),"L, D"
+682,Eggnog,"Bv, Ds"
+683,Frostings,"S, Ds"
+684,Frozen yogurt,"S, Ds"
+685,Fruit leather/rolls,"S, Ds"
+686,Fruit punch,Bv
+687,Ginger ale,Bv
+688,Honey,
+689,Hot chocolate,Bv
+690,Ice cream cones,"S, Ds"
+691,Chocolate ice cream,"S, Ds"
+692,Vanilla ice cream,"S, Ds"
+693,Jams & Preserves,
+694,Jellies,Ds
+695,Lemonade,Bv
+696,Malted drinks (nonalcoholic),Bv
+697,Milk shakes,"Bv, Ds"
+698,Molasses,
+699,OTC Drugs,
+700,Pancakes,
+701,Peanut butter,
+702,Pie crust,
+703,Apple pie,"S, Ds"
+704,Coconut cream pie,"S, Ds"
+705,Fried pies (fruit),"S, Ds"
+706,Lemon meringue pie,"S, Ds"
+707,Pecan pie,"S, Ds"
+708,Pumpkin pie,"S, Ds"
+709,Vanilla cream pie,"S, Ds"
+710,Various types of pie,"S, Ds"
+711,Piña colada,Bv
+712,Air popped popcorn,S
+713,Oil popped popcorn,
+714,Potato chips,S
+715,Potato sticks,S
+716,Pretzels,S
+717,Pudding,"S, Ds"
+718,Puff pastry,Ds
+719,Sherbet,"S, Ds"
+720,Soft (carbonated) drinks,Bv
+721,Sports drinks,Bv
+722,Sweets,
+723,Taro chips,S
+724,Green tea,Bv
+725,Herbal tea,Bv
+726,Plain tea,Bv
+727,Tonic water,Bv
+728,Tortilla chips,S
+729,Water,Bv
+730,Whiskey,Bv
+731,Red wine,Bv
+732,White wine,Bv
+733,Basil (fresh),"L, D"
+734,Breaded shrimp,"R, L, D, S"
+735,Capers,"L, D"
+736,Cardamom,
+737,Cayenne (red) pepper,
+738,Vegetable broth,"L, D"
+739,Cheeseburger,
+740,Chervil,"R, L, D"
+741,Chicken Nuggets,"R, L, D, S"
+742,Chives,
+743,Cinnamon,
+744,Cloves,
+745,Cocoa,
+746,Cole slaw,"L, D"
+747,Cilantro,
+748,Corn cakes,"L, D"
+749,Corn salad,"L, D"
+750,Whole-grain cornmeal,"L, D"
+751,SCD Diet,
+752,Croutons,"L, D"
+753,Dill weed,
+754,Egg rolls (veg),"L, D, S"
+755,Falafel,"L, D, S"
+756,Fast foods: various,"L, D"
+757,Fennel seeds,
+758,Foie gras or liver pate,"L, D"
+759,French fries,"L, D, S"
+760,French toast,"R, L, D"
+761,Ginger,
+762,Gravies (canned),"L, D"
+763,Hamburger,"R, L, D"
+764,Hash brown potatoes,"L, D"
+765,Horseradish,"L, D"
+766,Hot dog,"R, L, D"
+767,Hummus,"L, D, S"
+768,Hush puppies,"R, L, D, S"
+769,Ketchup,
+770,Macaroni and Cheese,"R, L, D"
+771,Mace,
+772,Marjoram,
+773,Mayonnaise,
+774,Red pepper flakes,
+775,Miso,"L, D"
+776,Mustard,
+777,Mustard seed,
+778,Nachos,"R, L, D, S"
+779,Natto,"L, D"
+780,Nutmeg,
+781,Onion rings,"R, L, D, S"
+782,Oregano,
+783,Parsley (fresh),
+784,Pepper (black),
+785,Peppermint,
+786,Pickled cucumber,"L, D, S"
+787,Pickle relish,"L, D, S"
+788,Pickle (sweet),"L, D, S"
+789,Pizza,"R, L, D"
+790,Poppy seed,
+791,Potato pancakes,"R, L, D"
+792,Potato salad,"R, L, D"
+793,Rosemary (fresh),
+794,Saffron,
+795,Sage,
+796,Blue/Roquefort salad dressing,
+797,French salad dressing,
+798,Italian salad dressing,
+799,Various salad dressing,
+800,Table salt,
+801,Barbecue sauce,
+802,Cheese sauce,
+803,Fish sauce,
+804,Hoisin sauce,
+805,Oyster sauce,
+806,Pepper or hot sauce,
+807,Sofrito sauce,
+808,Tabasco sauce,
+809,Teriyaki sauce,
+810,Sauces,
+811,Sauerkraut,"L, D"
+812,Beef broth,"L, D"
+813,Beef stock,"L, D"
+814,Chicken broth,"L, D"
+815,Chicken noodle soup,"L, D"
+816,Chicken stock,"L, D"
+817,Clam chowder,"L, D"
+818,Fish stock,"L, D"
+819,Minestrone soup,"L, D"
+820,Tomato soup,"L, D"
+821,Veg/beef soup,"L, D"
+822,Vegetable soup,"L, D"
+823,Soy sauce,
+824,Spearmint (fresh),
+825,Succotash,"L, D"
+826,Brown sugar,
+827,Maple sugar,
+828,"Sugar (table, powder)",
+829,Chocolate syrup,
+830,Malt syrup,
+831,Maple syrup,
+832,Sorghum syrup,
+833,Syrup (table blends),
+834,Taco shells,"L, D"
+835,Skipping meals,
+836,Tarragon (dried),
+837,Tempeh,"L, D"
+838,Thyme (fresh),
+839,Tofu,"B, L, D"
+840,Fried tofu,"L, D"
+841,Tomato paste,
+842,Turmeric,
+843,Distilled Vinegar,
+844,1-2 alcoholic drinks/day,Bv
+845,2+ alcoholic drinks/day,Bv
+846,Abrupt changes in diet/exercise,
+847,Acidophilus,
+848,Acupressure,
+849,Acupuncture,
+850,Air pollutants,
+851,Alexander Technique,
+852,Alkaline diet,
+853,Antacids,
+854,Antibiotics,
+855,Anti-inflammation diet,
+856,Apply heat,
+857,Apply ice then heat,
+858,Aromatherapy,
+859,Artificial colors,
+860,Aspartame/Equal,
+861,Aspirin,
+862,Aston-Patterning,
+863,Baking using butter,
+864,BHA (butylated hydroxyanisole),
+865,BHT (butylated hydroxytoluene),
+866,Biofeedback,
+867,Birth control pills,
+868,Breastfeeding a baby,
+869,Brush your teeth & floss,
+870,Call an ambulance!,
+871,Canned foods,"L, D"
+872,Canned vegetables,"L, D"
+873,Casein-containing foods/brands,
+874,Challenge your mind,
+875,Cheese made w/whole milk,"L, D, S"
+876,Chiropractic,
+877,Choose smaller food portions,
+878,Clean your tongue,
+879,Consult your dentist,
+880,Consult your doctor,
+881,Contact poison center,
+882,Corn starch,
+883,Corn syrup (HFCS),
+884,Crash or yo-yo diets,
+885,Determine your allergens,
+886,Determine your stone type,
+887,Detoxification,
+888,Drugs/Narcotics,
+889,Eat slowly,
+890,Eat smaller more frequent meals,
+891,Eating before bed time,
+892,Elimination diet,
+893,Energy Medicine (TENS),
+894,Enzyme Therapy,
+895,Excess body weight,
+896,Excessive shampoo/blow-dry,
+897,Excessive TV viewing,
+898,Exercise,
+899,Exercise - cardiovascular,
+900,Exercise - weight training,
+901,Exposure to sun,
+902,Fasting (for a specific period),
+903,Fat-free or low fat products,
+904,Fats & Oils,
+905,FD&C yellow dye #5. Tartrazine,
+906,Feldenkrais Method,
+907,Fermented foods,
+908,Fluids/juices/water,Bv
+909,DASH diet,
+910,Low FODMAP diet,
+911,Mediterranean diet,
+912,Nitrates/Nitrites food additives,
+913,Food additives/preservatives,
+914,Food allergens,
+915,Braised foods,"L, D"
+916,Charbroiled foods,"L, D"
+917,Deep-fried foods,"L, D, S"
+918,Pickled foods,"L, D, S"
+919,Raw or rare meat,"L, D"
+920,Raw/uncooked foods,"L, D, S, Ds"
+921,Smoked food/fish,"B, L, D"
+922,Spicy foods,"L, D"
+923,Toasted foods,"B, L, D"
+924,Cook in cast-iron pots,
+925,Fresh/uncooked fruits/veg's,"L, D, S, Ds"
+926,Fresh/raw vegetables,"L, D, S"
+927,Fruit juice (sugared/concentrate),Bv
+928,Stewed/canned fruits,"S, Ds"
+929,Gargle with salt water,
+930,Glucomannan,
+931,Glucosamine,
+932,Green plants and vegetables,"L, D, S"
+933,Hang mirrors where you eat,
+934,Harsh chemicals & fumes,
+935,Hellerwork,
+936,High dosages of Niacin,
+937,Homeopathy,
+938,Hydrotherapy,
+939,Hyperthermia,
+940,Hypnotherapy,
+941,Ice cold drinks,Bv
+942,Fruit & vegetable juice,Bv
+943,"Laugh, laughter",
+944,Laxatives,
+945,L-carnitine,
+946,Liquids (see note),Bv
+947,Low-calorie diet foods,
+948,Magnetic Field Therapy,
+949,Massage,
+950,Meditation,
+951,Melatonin,
+952,Monosodium Glutamate,"L, D"
+953,Myotherapy,
+954,Non-organic foods,
+955,Organic cold-pressed oils,
+956,Organically grown foods,
+957,Ornish Plan & Diet,
+958,Osteopathic Medicine,
+959,Over-training,
+960,Pesticide-loaded crops,
+961,Pets,
+962,Physical therapy,
+963,Poor fitting shoes,
+964,"Pray, practice your religion",
+965,Prescription drugs,
+966,Sulfite (preservative),
+967,Probiotics,
+968,Processed or Refined foods,
+969,Proper sitting posture,
+970,Psychotherapy/psychological help,
+971,Qigong,
+972,Radiation,
+973,Radon gas,
+974,Raw fish/shellfish,"L, D"
+975,Reconstructive Therapy,
+976,Reflexology,
+977,Relaxation/breathing techniques,
+978,Repetitive body parts movement,
+979,Rolfing,
+980,Saccharine/NutraSweet,
+981,"Salted foods, nuts, etc","L, D, S"
+982,Salt-free or low-salt foods,"L, D, S, Ds"
+983,Sexual activity,
+984,Shampoo (anti-dandruff) daily,
+985,Rest. Get enough sleep.,
+986,Smoking/Tobacco,
+987,"Socialize, join a club",
+988,Sound Therapy,
+989,Sour foods,
+990,Steroids,
+991,Stress,
+992,Artificial sweeteners,
+993,Tai Chi,
+994,Take a vacation!,
+995,Tamarind,
+996,Therapeutic Touch,
+997,Trager Integration,
+998,Training through pain,
+999,Supplements,
+1000,Unpasteurized products,
+1001,Urinate often,
+1002,Vegetarian diet,
+1003,Very hot drinks/soups,
+1004,"Walk, wheel, or jog",
+1005,Warm-up/stretch before activity,
+1006,Wash your hands,
+1007,Preservative waxes,
+1008,Wear appropriate clothing,
+1009,Wear sun glasses,
+1010,Wild fish and free range animals,
+1011,Wipe yourself from front to back,
+1012,Yoga,
+1013,Acid-forming,
+1014,Activated Charcoal,
+1015,Agrimony,
+1016,Alcohol,
+1017,Alkaline-forming,
+1018,Allspice oil,
+1019,Allspice tea,
+1020,Aloe (Aloe Vera),
+1021,Anise seed,
+1022,Arnica,
+1023,Ashwagandha,
+1024,Astragalus root,
+1025,Lemon balm,
+1026,Barberry,
+1027,Bread (French/Sourdough),
+1028,Bee Pollen,
+1029,Beta Carotene,
+1030,Betel Nut,
+1031,Biotin,
+1032,Birch,
+1033,Bitter Orange,
+1034,Black cohosh,
+1035,Black Haw,
+1036,Black walnut extract,
+1037,Blessed Thistle,
+1038,Bloodroot,
+1039,Bogbean,
+1040,Boldo,
+1041,Boron,
+1042,Brewer's Yeast,
+1043,Bromelain,
+1044,Buchu,
+1045,Buckthorn,
+1046,Bugleweed,
+1047,Burdock Root,
+1048,Butcher's Broom,
+1049,Caffeine,
+1050,Calcium,
+1051,Calendula,
+1052,Calories,
+1053,Camphor,
+1054,Capsaicin,
+1055,Caraway,
+1056,Carbohydrates,
+1057,Cascara Sagrada,
+1058,Castor Oil,
+1059,Catnip,
+1060,Cat's Claw,
+1061,Eastern red cedar,
+1062,Celery seed,
+1063,Chaste Tree Berry,
+1064,Chickweed,
+1065,Chicory Root,
+1066,Chloride,
+1067,Chlorophyll,
+1068,Cholesterol,
+1069,Chromium,
+1070,Cleavers,
+1071,Codonopsis,
+1072,Coltsfoot,
+1073,Comfrey,
+1074,Copper,
+1075,Coriolus versicolor,
+1076,Corn silk,
+1077,Couch Grass,
+1078,Cowslip,
+1079,Damiana,
+1080,Dandelion root,
+1081,Deer antler,
+1082,Devil's claw,
+1083,Devil's Dung,
+1084,DHEA (dehydroepiandosterone),
+1085,Ketogenic Diet,
+1086,"Dong Quai, Dong gui",
+1087,Echinacea,
+1088,Elder,
+1089,Elecampane,
+1090,English Walnut Leaf,
+1091,Eucalyptus,
+1092,Evening primrose oil,
+1093,Monounsaturated fat,
+1094,Polyunsaturated fat,
+1095,Saturated fat,
+1096,Total fat,
+1097,Fenugreek seeds,
+1098,Feverfew,
+1099,Fiber,
+1100,Fireweed leaves,
+1101,Flavonoids,
+1102,Fluoride,
+1103,Folic Acid,
+1104,Fo-ti,
+1105,Foxglove,
+1106,Fumitory,
+1107,Gentian,
+1108,Chamomile,
+1109,Ginkgo Biloba,
+1110,Ginseng (Asian),
+1111,Ginseng (Siberian),
+1112,Gluten,
+1113,Goldenrod,
+1114,Goldenseal,
+1115,Gotu Kola,
+1116,Guarana,
+1117,Guggul,
+1118,Gymnema,
+1119,Hawthorn,
+1120,Honeysuckle,
+1121,Hops herbal med,
+1122,Horehound,
+1123,Horse Chestnut,
+1124,Horsetail,
+1125,Hyssop,
+1126,Iceland Moss,
+1127,Iodine,
+1128,Irish Moss,
+1129,Iron,
+1130,Ivy,
+1131,Jojoba oil,
+1132,Juniper,
+1133,Jute potherb,
+1134,Kava,
+1135,Kola nut,
+1136,Kudzu,
+1137,Labrador Tea,
+1138,Lady's Mantle,
+1139,Lavender,
+1140,Lecithin/Choline,
+1141,Lemon grass,
+1142,Licorice,
+1143,Linden flower,
+1144,Lovage,
+1145,Magnesium,
+1146,Maitake mushrooms,
+1147,Manganese,
+1148,Medical Cannabis,
+1149,Marshmallow plant,
+1150,Mate,
+1151,Meadowsweet,
+1152,Mercury,
+1153,Milk thistle,
+1154,Molybdenum,
+1155,Motherwort,
+1156,Mugwort,
+1157,Great Mullein,
+1158,Reishi mushrooms,
+1159,Myrrh,
+1160,Neem,
+1161,Nettle,
+1162,Oak bark,
+1163,Omega-3 fatty acids,
+1164,Pansy,
+1165,Passionflower,
+1166,Pau d'Arco,
+1167,Peony,
+1168,Peppermint oil,
+1169,Pesticides,
+1170,Phosphorus,
+1171,Picrorhiza,
+1172,Pine oil,
+1173,Potassium,
+1174,Prickly Ash,
+1175,Propolis,
+1176,Protein,
+1177,Psyllium,
+1178,Purine,
+1179,French Pine Bark,
+1180,Quassia,
+1181,Red Bush,
+1182,Red Clover,
+1183,Rehmannia,
+1184,Rhatany,
+1185,Chinese rhubarb,
+1186,Rose Hip,
+1187,Roselle,
+1188,Salvia,
+1189,SAMe,
+1190,Savory,
+1191,Saw Palmetto Berry,
+1192,Schisandra,
+1193,Scullcap,
+1194,Selenium,
+1195,Senega root,
+1196,Senna,
+1197,Shrimp,
+1198,Slippery Elm,
+1199,Soapwort,
+1200,Sodium/salt,
+1201,St. John's wort,
+1202,Starch/complex carbohydrates,
+1203,Fructose sugar,
+1204,Refined sugar,
+1205,Total sugar,
+1206,Sulfur,
+1207,Tea tree oil,
+1208,Tienchi,
+1209,Trans fatty acids,
+1210,Tree fern,
+1211,Turpentine oil,
+1212,Uva ursi,
+1213,Valerian,
+1214,Vanadium,
+1215,Vervain,
+1216,Vitamin A,
+1217,Vitamin B-1 (Thiamine),
+1218,Vitamin B-12 (Cobalamin),
+1219,Vitamin B-2 (Riboflavin),
+1220,Vitamin B-3 (Niacin),
+1221,Vitamin B-5 (Pantothenic Acid),
+1222,Vitamin B-6 (Pyridoxine),
+1223,Vitamin C,
+1224,Vitamin D,
+1225,Vitamin E,
+1226,Vitamin K,
+1227,White Willow bark,
+1228,Wild Cherry bark/leaves,
+1229,Wild strawberry leaves,
+1230,Spirulina,
+1231,Wintergreen,
+1232,Witch hazel/Hamamelis,
+1233,Wood betony,
+1234,Yarrow,
+1235,Yellow Dock,
+1236,Yucca,
+1237,Zinc,
+1238,Buttermilk,
+1239,Kimchi,
+1240,Kombucha,
+1241,Allowed supplements,
+1242,Tomatoes (canned),
+1243,"Tomatoes (canned, no salt)",
+1244,Cooked vegetables,
+1245,Microalgae,
+1246,Direct contact with infected persons,
+1247,Ebola facilities in West Africa,
+1248,Foods served mashed or as soup,
+1249,Balsamic vinegar,
+1250,Conch,
+1251,Snow crab,
+1252,Frog legs,
+1253,Goat meat,
+1254,Chanterelle mushrooms,
+1255,Morel mushrooms,
+1256,Sleep with head raised,
+1257,Beef barley soup,
+1258,Starfruit,
+1259,Tahini,
+1260,Tight fitting belt/clothes,
+1261,Great Northern beans,
+1262,Raisin bran cereal,
+1263,Change in environment,
+1264,Glycemic Index,
+1265,Myo-inositol,
+1266,1000 Island salad dressing,
+1267,Tomato sauce,
+1268,Hubbard squash non-org,
+1269,Spaghetti squash non-org,
+1270,Lycopene,
+1271,Magnesium baths,
+1272,Magnesium mineral drops,
+1273,Meat tenderizers,
+1274,Overripe fruits,
+1275,Tyramine,
+1276,Avocado-soybean oil mix,
+1277,Boswellia serrata,
+1278,Chondroitin,
+1279,Decaf coffee,
+1280,Lutein/Zeaxanthin,
+1281,Positive attitude,
+1282,Too thin/Light weight,
+1283,Heat and Cold,
+1284,Omega-6 fatty acid (LA),
+1285,Eat breakfast,
+1286,Red Bull (fortified drink),
+1287,Silicon,
+1288,Weigh yourself daily,
+1289,Sleeping Pills,
+1290,Sauna,
+1291,Body care products,
+1292,"Fragrance, Perfume",
+1293,Filter bathing water,
+1294,Bagels (multigrain),
+1295,Cumin seed,
+1296,Curry Powder,
+1297,Kefir,
+1298,Rice milk,
+1299,Salsa verde,
+1300,Salsa,
+1301,Soy products,
+1302,Cider vinegar,
+1303,Red wine vinegar,
+1304,Arginine,
+1305,Lysine,
+1306,Bay leaf,
+1307,Belgian Endive,
+1308,Provolone Cheese,
+1309,Chicken bone broth,
+1310,Jicama,
+1311,Prebiotics,
+1312,Caesar Salad dressing,
+1313,Stewed apples,
+1314,V8 beverage,
+1315,Gin,
+1316,Rum,
+1317,Vodka,
+1318,Almond Butter,
+1319,Almond Milk,
+1320,Baking Powder,
+1321,Baking Soda,
+1322,Bladder training,
+1323,Calcium glycerophosphate,
+1324,Cognitive Behavior Thrpy,
+1325,Low sodium salt,
+1326,Salt substitute,
+1327,Vanilla extract,
+1328,CoQ10,
+1331,Alkaline Salt,
+1332,Leftover foods,
+1333,Net Carbohydrates,
+1334,Baker's yeast,
+1335,Baking chocolate,
+1336,Basil (dried),
+1337,White beans,
+1338,Yellow bell peppers non-org,
+1339,Coffee Enema,
+1340,Cooking spray,
+1341,Coriander seed,
+1342,Cornmeal (degermed),
+1343,Dried cranberries,
+1344,Half and Half cream,
+1345,Cream of tartar,
+1346,Garlic powder,
+1347,Lemon juice,
+1348,Lemon peel,
+1349,Lime juice,
+1350,Condensed milk,
+1351,Evaporated milk,
+1352,Nigella sativa,
+1353,Onion powder,
+1354,Sweet onions,
+1355,Orange peel,
+1356,Ozone Therapy,
+1357,Parsley (dried),
+1358,Poultry seasoning,
+1359,Proline,
+1360,Pumpkin (canned),
+1361,Pumpkin pie spice,
+1362,Cream of mushrooms soup,
+1363,Soy sauce (low salt),
+1364,Thyme (dried),
+1365,Alpha Lipoic acid (ALA),
+1366,Aluminum products/exposure,
+1367,Beta Glucan,
+1368,Chayote squash non-org,
+1369,Chili powder,
+1370,Pork frankfurter,
+1371,Turkey frankfurter,
+1372,Inorganic copper,
+1373,Marinara/Spaghetti sauce,
+1374,Yellow squash non-org,
+1375,Apigenin,
+1376,Luteolin,
+1377,Quercetin,
+1378,N-acetylcysteine (NAC),
+1379,Forest bathing,
+1380,Group Drumming,
+1381,NSAIDs,
+1382,Organic Broccoli,
+1383,Organic butternut squash,
+1384,Organic carrots,
+1385,Organic Celery,
+1386,Organic Chayote,
+1387,Organic cherries,
+1388,Organic collards,
+1389,Organic Cucumber w/peel,
+1390,Organic grapefruit,
+1391,Organic grapes,
+1392,Organic green beans,
+1393,Organic head lettuce,
+1394,Organic hot chili peppers,
+1395,Organic hubbard squash,
+1396,Organic jalapeno peppers,
+1397,Organic Kale,
+1398,Organic loose leaf lettuce,
+1399,Organic mustard greens,
+1400,Organic nectarine,
+1401,Organic oranges,
+1402,Organic pasilla peppers,
+1403,Organic peaches,
+1404,Organic pears,
+1405,Organic pimento peppers,
+1406,Organic Plum,
+1407,Organic Potato,
+1408,Organic potatoes w/skin,
+1409,Organic Pumpkin,
+1410,Organic Raisins,
+1411,Organic raspberries,
+1412,Organic Romaine lettuce,
+1413,Organic spaghetti squash,
+1414,Organic spinach,
+1415,Organic strawberries,
+1416,Organic sugar/snap peas,
+1417,Organic tangerines,
+1418,Organic tomatoes,
+1419,Organic yellow squash,
+1420,Organic Zucchini,
+1421,Paleo diet,
+1422,Org. green bell peppers,
+1423,Org. red bell peppers,
+1424,Org. red hot chili peppers,
+1425,Organic ancho peppers,
+1426,Organic acorn squash,
+1427,Org. yellow bell peppers,
+1428,Organic apples,
+1429,Organic applesauce,
+1430,Organic Blueberries,
+1431,Berberine,
+1432,Exposure to blue light,
+1433,Repetitive facial movements,
+5000,Lemon-Garlic Shrimp and Grits,
+5001,Low-Cal Fettuccine Alfredo,
+5002,Cinn Spiced Swt Potato..,
+5003,American Macaroni Salald,
+5004,Linguine with Chicken Ragu,
+5005,Spicy Cauliflower Stir-Fry,
+5006,Portobello Lasagna Rollups,
+5007,Slow-Cooker Pork Tacos,
+5008,Shrimp Stir-Fry,
+5009,Vietnamese Noodle Soup,
+5010,Broccoli Cheddar Soup,
+5011,Lemony Yogurt Pound Cake,
+5012,Pasta e Fagioli,
+5013,Hash Brown Casserole,
+5014,Chicken & Broccoli Stir-fry,
+5015,Buiscuit Crust,
+5016,Steel Cut Oatmeal,
+5017,Pork Tenderloin w/ Season..,
+5018,Green Beans w/Lemon & Garlic,
+5019,Frozen Cherries Smoothies,
+5020,"Oven ""Fries",
+5021,Marinated Pork Tenderloins,
+5022,Herbed Quinoa w/Dressing,
+5023,Frozen Blueberries Smoothies,
+5024,Chicken Piccata,
+5025,Overnight Oatmeal,
+5026,Quinoa Salad,
+5027,Zucchini Parmesan Crisps,
+5028,Frozen Strawberries Smoothies,
+5029,Roman-Style Chicken,
+5030,Frozen Raspberries Smoothies,
+5031,Lentil Soup,
+5032,Marinated Chicken Breast,
+5033,Chicken Saltimbocca,
+5034,Garden Vegetable Soup,
+5035,Salmon w/ Herb Mustard Glaze,
+5036,Healthy Cauliflower Rice,
+5037,Roasted Brussels Sprout,
+5038,Sauteed Kale,
+5039,Chicken Pot Pie (no crust),
+5040,Three Bean and Beef Chili,
+5041,Toasted Almond Parsley Salad,
+5042,Hasselback Sweet Potatoes,
+5043,Tuscan Vegetable Soup,
+5044,Salmon Baked in Foil,
+5045,Garlic Sauteed Spinach,
+5046,Roasted Caulif. & Broccoli,
+5047,Oven-baked Salmon w/Squash,
+5048,Chia Seed Pudding,
+5049,Easy Tomato Sauce,
+5050,Roasted Carrots,
+5051,Fish Tacos,
+5052,Marinara Sauce - FN Recipe,
+5053,Guacamole,
