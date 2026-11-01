@@ -166,7 +166,7 @@ export default function Survey() {
       <header className="flex items-center px-6 py-4 border-b border-sand-200">
         <button
           onClick={() => navigate("/")}
-          className="font-display font-semibold text-[22px] tracking-tightish text-blue-950"
+          className="font-display font-semibold text-[1.375rem] tracking-tightish text-blue-950"
         >
           personalRemedies
         </button>
@@ -176,7 +176,7 @@ export default function Survey() {
       {!loading && (
         <div className="flex justify-center px-5 pt-4 pb-1">
           <div className="w-full max-w-lg flex items-center gap-3">
-            <span className="font-mono text-[12px] text-char-500 whitespace-nowrap shrink-0">
+            <span className="font-mono text-[0.875rem] text-char-500 whitespace-nowrap shrink-0">
               {done ? "Done" : `Step ${step + 1} of ${steps.length}`}
             </span>
             <div className="flex-1 h-1.5 bg-sand-200 rounded-full overflow-hidden">
@@ -207,7 +207,7 @@ export default function Survey() {
                   <div className="mx-auto mb-5 w-14 h-14 flex items-center justify-center">
                     <div className="w-10 h-10 rounded-full border-[3px] border-forest-700 border-t-transparent animate-spin" />
                   </div>
-                  <h2 className="font-display font-semibold tracking-tightish text-[24px] text-blue-950 leading-snug">
+                  <h2 className="font-display font-semibold tracking-tightish text-[1.5rem] text-blue-950 leading-snug">
                     Building your personalized plan
                   </h2>
                   <p className="text-sm text-char-500 mt-2 font-sans">
@@ -221,17 +221,17 @@ export default function Survey() {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1, duration: 0.5 }}
                 >
-                  <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-2 text-center">
+                  <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-2 text-center">
                     A fact while you wait
                   </p>
                   <div className="bg-white rounded-[28px] border border-sand-200 shadow-card px-8 py-5 text-left">
-                    <p className="font-display font-semibold text-[24px] text-forest-700 leading-none mb-3">
+                    <p className="font-display font-semibold text-[1.5rem] text-forest-700 leading-none mb-3">
                       {fact.stat}
                     </p>
-                    <p className="text-[18px] leading-[1.6] text-char-900 font-sans mb-2">
+                    <p className="text-[1.125rem] leading-[1.6] text-char-900 font-sans mb-2">
                       {fact.claim}
                     </p>
-                    <p className="text-[12px] text-char-500 font-sans">-- {fact.source}</p>
+                    <p className="text-[0.875rem] text-char-500 font-sans">-- {fact.source}</p>
                   </div>
                 </motion.div>
               </motion.div>
@@ -247,8 +247,8 @@ export default function Survey() {
                   <Icon name="check" size={36} className="text-forest-700" />
                 </motion.div>
 
-                <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500">Your plan is ready</p>
-                <h2 className="font-display font-semibold tracking-tightish mt-3 text-[36px] sm:text-[48px] leading-[1.06] text-blue-950">
+                <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500">Your plan is ready</p>
+                <h2 className="font-display font-semibold tracking-tightish mt-3 text-[2.25rem] sm:text-[3rem] leading-[1.06] text-blue-950">
                   Here's{" "}
                   <em className="font-display italic font-normal text-forest-700 mr-1">your</em>
                   {" "}superfood plan.
@@ -264,7 +264,7 @@ export default function Survey() {
 
                 <button
                   onClick={() => navigate("/login")}
-                  className="mt-7 inline-flex items-center gap-2 text-[15px] px-7 py-3.5 rounded-[6px] bg-forest-700 hover:bg-forest-800 text-[#F3EFE6] font-semibold transition-colors duration-fast min-h-[48px] font-sans"
+                  className="mt-7 inline-flex items-center gap-2 text-[0.9375rem] px-7 py-3.5 rounded-[6px] bg-forest-700 hover:bg-forest-800 text-[#F3EFE6] font-semibold transition-colors duration-fast min-h-[48px] font-sans"
                 >
                   Get my free plan
                   <Icon name="arrow-right" size={18} />
@@ -274,25 +274,25 @@ export default function Survey() {
                 <div className="mt-5 text-left bg-white rounded-[28px] border border-sand-200 shadow-card divide-y divide-sand-200 overflow-hidden">
                   {answers.goal && (
                     <div className="px-4 py-3">
-                      <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500">Your goal</p>
+                      <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500">Your goal</p>
                       <p className="text-sm font-medium text-char-900 mt-0.5 font-sans">{answers.goal}</p>
                     </div>
                   )}
                   {answers.condition && answers.condition[0] !== "None" && (
                     <div className="px-4 py-3">
-                      <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500">Conditions</p>
+                      <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500">Conditions</p>
                       <p className="text-sm font-medium text-char-900 mt-0.5 font-sans">{answers.condition.join(", ")}</p>
                     </div>
                   )}
                   {answers.diet && (
                     <div className="px-4 py-3">
-                      <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500">Diet</p>
+                      <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500">Diet</p>
                       <p className="text-sm font-medium text-char-900 mt-0.5 font-sans">{answers.diet}</p>
                     </div>
                   )}
                   {answers.age && (
                     <div className="px-4 py-3">
-                      <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500">Age range</p>
+                      <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500">Age range</p>
                       <p className="text-sm font-medium text-char-900 mt-0.5 font-sans">{answers.age}</p>
                     </div>
                   )}
@@ -317,10 +317,10 @@ export default function Survey() {
                     Back
                   </button>
                 )}
-                <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-5">
+                <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-5">
                   Question {step + 1}
                 </p>
-                <h2 className="font-display font-semibold tracking-tightish text-[28px] sm:text-[36px] leading-[1.1] text-blue-950 mb-8">
+                <h2 className="font-display font-semibold tracking-tightish text-[1.75rem] sm:text-[2.25rem] leading-[1.1] text-blue-950 mb-8">
                   {current.question}
                 </h2>
 
@@ -380,7 +380,7 @@ export default function Survey() {
                       )}
                     </div>
 
-                    <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-2">
+                    <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-2">
                       Common conditions -- pick up to 3
                     </p>
                     <div className="flex flex-col gap-2">

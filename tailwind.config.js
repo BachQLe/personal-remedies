@@ -142,6 +142,10 @@ export default {
           info: { DEFAULT: "#3F6E86", tint: "#DDE8ED" },
         },
       },
+      fontSize: {
+        // The caption size is the floor for user-facing text (Mory's 30 Oct review).
+        xs: ["0.875rem", { lineHeight: "1.25rem" }],
+      },
       fontFamily: {
         display: ['"Chillax"', "ui-sans-serif", "system-ui", "sans-serif"],
         sans: ['"Switzer"', "ui-sans-serif", "system-ui", "sans-serif"],

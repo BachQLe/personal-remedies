@@ -19,14 +19,14 @@ export default function TrustStrip() {
     <section className="border-y border-char-900/[0.08] backdrop-blur-lg bg-white/30 mx-36 rounded-full mb-2 shadow-sm">
       <div className="mx-auto max-w-7xl container-px py-2 sm:py-2 px-6">
         <div className="hidden lg:flex lg:items-center justify-center gap-6">
-          <span className="text-[14px] sm:text-[15px] text-black font-medium tracking-tight shrink-0">
+          <span className="text-[0.875rem] sm:text-[0.9375rem] text-black font-medium tracking-tight shrink-0">
             The technology behind
           </span>
           <ul className="flex items-center justify-center gap-x-4">
             {items.map((item, i) => (
               <li key={i} className="flex items-center gap-3">
                 {item.type === "snowflake" ? (
-                  <span className="flex items-center gap-2 text-[14px] sm:text-[15px] text-black font-medium tracking-tight">
+                  <span className="flex items-center gap-2 text-[0.875rem] sm:text-[0.9375rem] text-black font-medium tracking-tight">
                     Advised by the former CEO of
                     <img src={item.src} alt="Snowflake" className="h-6 sm:h-7 w-auto object-contain" style={logoStyle} />
                   </span>
@@ -64,7 +64,7 @@ export default function TrustStrip() {
             {[...items, ...items].map((item, i) => (
               <div key={i} className="flex items-center gap-3 shrink-0">
                 {item.type === "snowflake" ? (
-                  <span className="flex items-center gap-2 text-[12px] text-black font-medium tracking-tight whitespace-nowrap">
+                  <span className="flex items-center gap-2 text-[0.875rem] text-black font-medium tracking-tight whitespace-nowrap">
                     Advised by the former CEO of
                     <img src={item.src} alt="Snowflake" className="h-5 w-auto object-contain" style={logoStyle} />
                   </span>

@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 
-const PHONE_W = 430;
-const PHONE_H = 932;
+// The 6.1" iPhone. Rendered at this size or not at all: never scaled down to fit
+// a short window, which made text unreadable. A short window scrolls instead.
+const PHONE_W = 393;
+const PHONE_H = 852;
 const BEZEL = 12;
 const RADIUS = 50;
-const PAD = 8;
 const GRID = 60;
 
 const plusPattern = `url("data:image/svg+xml,${encodeURIComponent(
@@ -61,19 +62,6 @@ function generateFoodItems() {
   return items;
 }
 
-function useScale() {
-  const [scale, setScale] = useState(() =>
-    Math.min(1, (window.innerHeight - PAD) / (PHONE_H + BEZEL * 2))
-  );
-  useEffect(() => {
-    const onResize = () =>
-      setScale(Math.min(1, (window.innerHeight - PAD) / (PHONE_H + BEZEL * 2)));
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-  return scale;
-}
-
 export default function PhoneFrame({ children }) {
   const [enabled, setEnabled] = useState(() => {
     if (window.innerWidth < 500) return false;
@@ -81,7 +69,6 @@ export default function PhoneFrame({ children }) {
     return !params.has("noframe");
   });
 
-  const scale = useScale();
   const foodItems = useMemo(generateFoodItems, []);
 
   useEffect(() => {
@@ -106,8 +93,10 @@ export default function PhoneFrame({ children }) {
         position: "fixed",
         inset: 0,
         display: "flex",
-        alignItems: "center",
+        alignItems: "safe center",
         justifyContent: "center",
+        padding: 16,
+        overflow: "auto",
         background: `#1a1a1a ${plusPattern}`,
         zIndex: 0,
       }}
@@ -156,8 +145,6 @@ export default function PhoneFrame({ children }) {
           background: "#000",
           boxShadow: "0 0 0 2px #333, 0 20px 60px rgba(0,0,0,0.5)",
           flexShrink: 0,
-          transform: `scale(${scale})`,
-          transformOrigin: "center center",
           zIndex: 1,
         }}
       >
@@ -208,7 +195,7 @@ export default function PhoneFrame({ children }) {
           bottom: 16,
           right: 16,
           color: "#666",
-          fontSize: 12,
+          fontSize: "0.875rem",
           fontFamily: "system-ui",
           zIndex: 2,
         }}

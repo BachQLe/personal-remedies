@@ -230,12 +230,12 @@ function ConditionsEditor({ value, onChange }) {
             {(cond?.longDescription || cond?.ICD10) && (
               <div className="flex items-baseline gap-2 px-3">
                 {cond?.longDescription && (
-                  <span className="text-[11px] text-char-400 font-sans truncate">
+                  <span className="text-[0.875rem] text-char-400 font-sans break-words">
                     {cond.longDescription}
                   </span>
                 )}
                 {cond?.ICD10 && (
-                  <span className="text-[10px] text-char-300 font-mono flex-none">
+                  <span className="text-[0.875rem] text-char-300 font-mono flex-none">
                     {cond.ICD10}
                   </span>
                 )}
@@ -323,15 +323,15 @@ function ConditionDropdown({ value, onChange }) {
         disabled={loading}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-2 pl-4 pr-3 py-[15px] rounded-full border-[1.5px] bg-white text-[16px] text-char-500 font-sans shadow-sm outline-none transition-all duration-fast ease-ds-out disabled:opacity-60"
+        className="w-full flex items-center justify-between gap-2 pl-4 pr-3 py-[15px] rounded-full border-[1.5px] bg-white text-[1rem] text-char-500 font-sans shadow-sm outline-none transition-all duration-fast ease-ds-out disabled:opacity-60"
         style={{ borderColor: open ? '#111E58' : '#FFFFFF' }}
       >
-        <span className="truncate">
+        <span className="break-words">
           {loading ? 'Loading conditions…' : 'Select your conditions'}
         </span>
         <span
           aria-hidden="true"
-          className={`material-symbols-rounded text-[18px] text-char-400 flex-shrink-0 transition-transform duration-fast ease-ds-out ${
+          className={`material-symbols-rounded text-[1.125rem] text-char-400 flex-shrink-0 transition-transform duration-fast ease-ds-out ${
             open ? 'rotate-180' : ''
           }`}
         >
@@ -344,7 +344,7 @@ function ConditionDropdown({ value, onChange }) {
         <div className="absolute z-30 left-0 right-0 mt-2 rounded-2xl border border-sand-200 bg-white shadow-md overflow-hidden origin-top animate-sheet-up">
           <div className="p-2 border-b border-sand-200">
             <div className="relative group">
-              <span className="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-[18px] pointer-events-none transition-colors duration-fast text-char-400 group-focus-within:text-blue-900">
+              <span className="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-[1.125rem] pointer-events-none transition-colors duration-fast text-char-400 group-focus-within:text-blue-900">
                 search
               </span>
               <input
@@ -354,7 +354,7 @@ function ConditionDropdown({ value, onChange }) {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search conditions…"
                 aria-label="Search conditions"
-                className="w-full pl-10 pr-3 py-2.5 rounded-full border-[1.5px] border-sand-200 bg-paper-100 text-[15px] text-char-900 placeholder:text-char-400 font-sans outline-none transition-colors duration-fast ease-ds-out focus:border-blue-900 focus:bg-white"
+                className="w-full pl-10 pr-3 py-2.5 rounded-full border-[1.5px] border-sand-200 bg-paper-100 text-[0.9375rem] text-char-900 placeholder:text-char-400 font-sans outline-none transition-colors duration-fast ease-ds-out focus:border-blue-900 focus:bg-white"
               />
             </div>
           </div>
@@ -373,15 +373,15 @@ function ConditionDropdown({ value, onChange }) {
                   }`}
                 >
                   <span
-                    className="material-symbols-rounded text-[18px] flex-shrink-0"
+                    className="material-symbols-rounded text-[1.125rem] flex-shrink-0"
                     style={{ color: meta.color }}
                   >
                     {isSelected ? 'check' : meta.icon}
                   </span>
                   <span className="flex-1 min-w-0 flex flex-col gap-0.5">
-                    <span className="truncate text-char-900">{c.description}</span>
+                    <span className="break-words text-char-900">{c.description}</span>
                     {c.longDescription && (
-                      <span className="block text-[11px] font-normal text-char-400 truncate">
+                      <span className="block text-[0.875rem] font-normal text-char-400 break-words">
                         {c.longDescription.length > 70
                           ? c.longDescription.trim().slice(0, 69).trimEnd() + '…'
                           : c.longDescription.trim()}
@@ -702,7 +702,7 @@ export default function ProfileScreen() {
         <p className="font-label text-xs tracking-widest uppercase text-blue-950/60">Edit profile</p>
 
         {/* Display name — same size as HomeScreen's "Hi there, [name]" greeting */}
-        <h1 className="font-display text-[32px] font-semibold text-blue-950 leading-tight mt-2">
+        <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight mt-2">
           {displayName}
         </h1>
 
@@ -714,7 +714,6 @@ export default function ProfileScreen() {
                 key={id}
                 condition={conditionNames[i] ?? `Condition ${id}`}
                 solid
-                truncate
                 className="shrink-0 max-w-[220px]"
               />
             ))}
@@ -811,7 +810,7 @@ export default function ProfileScreen() {
                   <span className="text-char-500">
                     <Icon name="mail" size={20} aria-hidden="true" />
                   </span>
-                  <span className="flex-1 text-sm font-medium font-sans text-char-900 truncate">
+                  <span className="flex-1 text-sm font-medium font-sans text-char-900 break-words">
                     {user.email}
                   </span>
                 </span>

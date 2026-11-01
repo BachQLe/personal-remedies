@@ -131,12 +131,12 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, imag
         {/* Skip 'x' — Nutridigm's catch-all fine group has no real label, so
             getGroupLabel echoes the raw code back (see adapter.js). */}
         {food.groupLabel && food.groupLabel !== 'x' && (
-          <span className="block text-[11px] text-char-400 font-sans mt-0.5 truncate">
+          <span className="block text-[0.875rem] text-char-400 font-sans mt-0.5 break-words">
             {food.groupLabel}
           </span>
         )}
         {servingSize && (
-          <span className="block text-[11px] text-char-500 font-sans mt-0.5">
+          <span className="block text-[0.875rem] text-char-500 font-sans mt-0.5">
             Serving size: {servingSize}
           </span>
         )}
@@ -150,7 +150,7 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, imag
           ${imageRight ? 'relative z-10 bg-white/90 rounded-md pl-2 pr-1.5 py-1' : ''}`}
       >
         {typeof studyCount === 'number' && studyCount > 0 && (
-          <span data-reference-count className="flex-shrink-0 self-center text-[11px] text-char-400 font-sans underline underline-offset-2">
+          <span data-reference-count className="flex-shrink-0 self-center text-[0.875rem] text-char-400 font-sans underline underline-offset-2">
             {studyCount} {studyCount === 1 ? 'reference' : 'references'}
           </span>
         )}

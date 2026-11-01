@@ -15,17 +15,17 @@
   --fw-bold: 700; /* @kind font */
   --fw-extrabold: 800; /* @kind font */
 
-  /* Type scale (px) — editorial, generous display steps */
-  --fs-display: 56px;   /* hero serif */
-  --fs-h1: 40px;
-  --fs-h2: 30px;
-  --fs-h3: 23px;
-  --fs-h4: 19px;
-  --fs-body-lg: 18px;
-  --fs-body: 16px;
-  --fs-body-sm: 14px;
-  --fs-caption: 13px;
-  --fs-label: 12px;     /* eyebrow / overline */
+  /* Type scale — relative, so it follows the iPhone text-size setting. --fs-caption is the floor. */
+  --fs-display: 3.5rem;   /* hero serif */
+  --fs-h1: 2.5rem;
+  --fs-h2: 1.875rem;
+  --fs-h3: 1.4375rem;
+  --fs-h4: 1.1875rem;
+  --fs-body-lg: 1.125rem;
+  --fs-body: 1rem;
+  --fs-body-sm: 0.875rem;
+  --fs-caption: 0.875rem;
+  --fs-label: 0.875rem;     /* eyebrow / overline */
 
   /* Line heights */
   --lh-tight: 1.08; /* @kind font */

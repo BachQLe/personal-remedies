@@ -60,7 +60,7 @@ export default function GroupDetailScreen() {
         <div className="flex items-center gap-3 mt-3">
           {/* Real history back (4.10); fallback only for a deep link. */}
           <BackButton fallback="/app/suggestions?tab=groups" />
-          <h1 className="font-display text-[24px] font-semibold text-blue-950 leading-tight truncate">
+          <h1 className="font-display text-[1.5rem] font-semibold text-blue-950 leading-tight break-words">
             {groupLabel}
           </h1>
         </div>

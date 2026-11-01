@@ -166,13 +166,13 @@ export default function Differentiators() {
           {/* Left: text */}
           <div>
             <Reveal delay={0.1}>
-              <span className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-char-500">
+              <span className="text-[0.875rem] font-label font-semibold tracking-eyebrow uppercase text-char-500">
                 Multi-condition intelligence
               </span>
-              <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06] max-w-[22ch]">
+              <h2 className="display mt-5 text-[2.125rem] leading-[1.1] sm:text-[3rem] sm:leading-[1.08] lg:text-[4rem] lg:leading-[1.06] max-w-[22ch]">
                 Handles multiple conditions.
               </h2>
-              <p className="mt-3 font-sans text-[18px] sm:text-[20px] text-char-500 tracking-tight leading-[1.5]">
+              <p className="mt-3 font-sans text-[1.125rem] sm:text-[1.25rem] text-char-500 tracking-tight leading-[1.5]">
                 General advice is dead. Know exactly what is and isn&apos;t helping your conditions.
               </p>
             </Reveal>
@@ -186,7 +186,7 @@ export default function Differentiators() {
               <div className="grid grid-cols-2 gap-3 mb-3 relative z-10">
 
                 <div ref={profileBoxRef} className="rounded-xl border border-sand-200 bg-paper-200 p-4 h-[172px] overflow-hidden shadow-card">
-                  <p className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-char-500 mb-3">Your profile</p>
+                  <p className="text-[0.875rem] font-label font-semibold tracking-eyebrow uppercase text-char-500 mb-3">Your profile</p>
                   <div className="flex flex-col gap-2">
                     <AnimatePresence>
                       {profileIds.map((id) => {
@@ -199,7 +199,7 @@ export default function Differentiators() {
                             animate={{ opacity: draggingId === id ? 0.2 : 1, y: 0, scale: draggingId === id ? 0.94 : 1 }}
                             exit={{ opacity: 0, y: 4 }}
                             transition={{ duration: 0.25, ease: [0.22, 0.61, 0.36, 1] }}
-                            className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium bg-forest-100 text-forest-700 border border-forest-700/15"
+                            className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.875rem] font-medium bg-forest-100 text-forest-700 border border-forest-700/15"
                           >
                             <span className="h-1.5 w-1.5 rounded-full bg-forest-700/50 flex-shrink-0" />
                             {c.label}
@@ -211,7 +211,7 @@ export default function Differentiators() {
                 </div>
 
                 <div ref={poolBoxRef} className="rounded-xl border border-dashed border-sand-200 bg-paper-100 p-4 h-[172px] overflow-hidden">
-                  <p className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-char-400 mb-3">Not in profile</p>
+                  <p className="text-[0.875rem] font-label font-semibold tracking-eyebrow uppercase text-char-400 mb-3">Not in profile</p>
                   <div className="flex flex-col gap-2">
                     <AnimatePresence>
                       {poolIds.map((id) => {
@@ -224,7 +224,7 @@ export default function Differentiators() {
                             animate={{ opacity: draggingId === id ? 0.2 : 0.55, y: 0, scale: draggingId === id ? 0.94 : 1 }}
                             exit={{ opacity: 0, y: 4 }}
                             transition={{ duration: 0.25, ease: [0.22, 0.61, 0.36, 1] }}
-                            className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium bg-white text-char-500 border border-sand-200"
+                            className="inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.875rem] font-medium bg-white text-char-500 border border-sand-200"
                           >
                             <span className="h-1.5 w-1.5 rounded-full bg-char-300 flex-shrink-0" />
                             {c.label}
@@ -241,8 +241,8 @@ export default function Differentiators() {
                 <div className="flex items-center gap-3 mb-3">
                   <Icon name="leaf" size={24} className="text-forest-500" />
                   <div>
-                    <p className="font-sans font-semibold text-char-900 text-[14.5px] leading-tight">Garlic</p>
-                    <p className="text-[11px] font-sans text-char-400 leading-tight">Allium sativum</p>
+                    <p className="font-sans font-semibold text-char-900 text-[0.9062rem] leading-tight">Garlic</p>
+                    <p className="text-[0.875rem] font-sans text-char-400 leading-tight">Allium sativum</p>
                   </div>
                   <div className="ml-auto">
                     <AnimatePresence mode="wait">
@@ -270,7 +270,7 @@ export default function Differentiators() {
                 <div className="pt-3 border-t border-sand-200">
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <Icon name="zap" size={14} className="text-yellow-400" />
-                    <p className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-char-500">Nutri reasoning</p>
+                    <p className="text-[0.875rem] font-label font-semibold tracking-eyebrow uppercase text-char-500">Nutri reasoning</p>
                   </div>
                   {/* Fixed height so the card doesn't resize when text swaps */}
                   <div className="h-[88px] overflow-hidden">
@@ -281,7 +281,7 @@ export default function Differentiators() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -5 }}
                         transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
-                        className="text-[13px] font-sans leading-[1.65] text-char-900"
+                        className="text-[0.875rem] font-sans leading-[1.65] text-char-900"
                       >
                         {rec.reason}
                       </motion.p>
@@ -308,7 +308,7 @@ export default function Differentiators() {
               <motion.div
                 animate={ghostAnim}
                 initial={{ x: -400, y: 0, opacity: 0, scale: 0.88 }}
-                className="absolute top-0 left-0 pointer-events-none z-[100] inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12.5px] font-medium bg-forest-100 text-forest-700 border border-forest-700/20 shadow-md"
+                className="absolute top-0 left-0 pointer-events-none z-[100] inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.875rem] font-medium bg-forest-100 text-forest-700 border border-forest-700/20 shadow-md"
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-forest-700/50 flex-shrink-0" />
                 {ghostLabel}

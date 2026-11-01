@@ -103,8 +103,8 @@ function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked, on
             <Icon name="leaf" size={18} aria-hidden="true" />
           </span>
           <span className="flex-1 min-w-0">
-            <span className="block font-semibold text-sm text-char-900 truncate leading-tight">{title}</span>
-            {subtitle && <span className="block text-xs text-char-500 mt-0.5 truncate">{subtitle}</span>}
+            <span className="block font-semibold text-sm text-char-900 break-words leading-tight">{title}</span>
+            {subtitle && <span className="block text-xs text-char-500 mt-0.5 break-words">{subtitle}</span>}
           </span>
         </button>
         {goodForMeUnlocked ? (
@@ -139,8 +139,8 @@ function ResultRow({ kind, title, subtitle, onClick, saveItem, onSaveBlocked, on
       </span>
 
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-char-900 truncate leading-tight">{title}</p>
-        {subtitle && <p className="text-xs text-char-500 mt-0.5 truncate">{subtitle}</p>}
+        <p className="font-semibold text-sm text-char-900 break-words leading-tight">{title}</p>
+        {subtitle && <p className="text-xs text-char-500 mt-0.5 break-words">{subtitle}</p>}
       </div>
 
       {saveItem && (
@@ -316,7 +316,7 @@ export default function SearchScreen({ active, onClose }) {
     if (!rows || !rows.length) return null;
     return (
       <div key={key}>
-        <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
+        <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
           {label}
         </p>
         <div className="flex flex-col gap-2.5">
@@ -379,7 +379,7 @@ export default function SearchScreen({ active, onClose }) {
                   Search
                 </p>
               </div>
-              <h1 className="font-display text-[32px] font-semibold text-blue-950 leading-tight mt-2 flex-none">
+              <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight mt-2 flex-none">
                 {HEADING}
               </h1>
 
@@ -450,7 +450,7 @@ export default function SearchScreen({ active, onClose }) {
                       >
                         {recents.length > 0 && (
                           <>
-                            <p className="text-[12px] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
+                            <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
                               Recent searches
                             </p>
                             <div className="flex flex-wrap gap-2">

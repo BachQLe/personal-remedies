@@ -95,14 +95,14 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
           {conditionName}
         </span>
         {unscorable ? (
-          <span data-testid="condition-unscorable" className="text-[11px] text-char-400 font-sans italic whitespace-nowrap">
+          <span data-testid="condition-unscorable" className="text-[0.875rem] text-char-400 font-sans italic">
             Can&apos;t be scored yet
           </span>
         ) : (
         <div className="flex items-center gap-2">
           <FoodRating numericId={numericId} size={14} tone="light" />
           {showReferences && !refsErrored && referenceCount > 0 && (
-            <span className="text-[11px] text-char-400 font-sans whitespace-nowrap">
+            <span className="text-[0.875rem] text-char-400 font-sans">
               {referenceCount} {referenceCount === 1 ? 'reference' : 'references'}
             </span>
           )}
@@ -112,7 +112,7 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
 
       {/* Reference fetch failed — say so rather than implying zero studies */}
       {showReferences && !unscorable && refsErrored && (
-        <p className="mt-1 text-[11px] text-char-400 font-sans italic">
+        <p className="mt-1 text-[0.875rem] text-char-400 font-sans italic">
           Couldn&apos;t load references
         </p>
       )}
@@ -638,7 +638,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
               <h2 className="font-display text-2xl font-semibold text-white leading-snug tracking-tightish pr-24">
                 {item?.name}
               </h2>
-              <p className="text-[11px] text-white/60 font-sans">
+              <p className="text-[0.875rem] text-white/60 font-sans">
                 Ask your doctor before changing your diet, especially if you take medication.
               </p>
 
@@ -650,7 +650,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 <div className="flex flex-col gap-1 overflow-y-auto max-h-28 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {conditionGroups.map((g) => (
                     <div key={g.key} className="flex items-start gap-2 flex-wrap">
-                      <p className="text-[10px] font-label tracking-[0.14em] uppercase text-white/50 flex-none whitespace-nowrap pt-0.5">
+                      <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-white/50 flex-none pt-0.5">
                         {g.label}
                       </p>
                       <div className="flex flex-wrap gap-1.5">
@@ -704,18 +704,18 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
             {/* Back header */}
             <div className="flex-shrink-0 flex items-center justify-between px-5 pt-5 pb-3">
               <div className="min-w-0">
-                <h3 className="font-display text-xl font-semibold text-blue-950 leading-snug tracking-tightish truncate">
+                <h3 className="font-display text-xl font-semibold text-blue-950 leading-snug tracking-tightish break-words">
                   {item?.name}
                 </h3>
                 {isRecipe ? (
                   item?.sourceName && (
-                    <p className="text-xs text-char-500 font-sans mt-0.5 truncate">
+                    <p className="text-xs text-char-500 font-sans mt-0.5 break-words">
                       {item.sourceName}
                     </p>
                   )
                 ) : (
                   facts?.groupLabel && facts.groupLabel !== 'x' && (
-                    <p className="text-xs text-char-500 font-sans mt-0.5 truncate">
+                    <p className="text-xs text-char-500 font-sans mt-0.5 break-words">
                       {facts.groupLabel}
                     </p>
                   )
@@ -751,7 +751,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                     citations, "couldn't load studies" state). Recipes show
                     verdicts but never studies. */}
                 <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
-                  <p className="text-[11px] font-label tracking-[0.14em] uppercase text-char-400 mb-3">
+                  <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-400 mb-3">
                     Conditions in your profile
                   </p>
 
@@ -857,7 +857,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 {!isRecipe && item?.topFoodsForConditions?.length > 1 && (
                   <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
                     {/* COPY-REVIEW: flagged for C2 health-claim audit */}
-                    <p className="text-[11px] font-label tracking-[0.14em] uppercase text-char-400 mb-3">
+                    <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-400 mb-3">
                       Top-ranked foods for your conditions
                     </p>
                     <div className="flex gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
@@ -875,7 +875,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                               <Icon name="leaf" size={22} className="text-char-300" aria-hidden="true" />
                             </div>
                           )}
-                          <span className="text-[11px] font-sans text-char-600 text-center leading-tight line-clamp-2">
+                          <span className="text-[0.875rem] font-sans text-char-600 text-center leading-tight line-clamp-2">
                             {food.name}
                           </span>
                         </div>
@@ -962,7 +962,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                     active:translate-y-[1px] active:scale-[0.99]"
                 >
                   <ExternalLink size={17} className="flex-shrink-0" aria-hidden="true" />
-                  <span className="truncate">{linkTarget.label}</span>
+                  <span className="break-words">{linkTarget.label}</span>
                 </button>
               </div>
             )}

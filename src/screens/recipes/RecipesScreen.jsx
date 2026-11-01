@@ -372,7 +372,7 @@ export default function RecipesScreen() {
       <div className="px-5 pt-10 pb-6 flex flex-col gap-3">
         <BackButton fallback="/app/favorites" />
         <div>
-          <h1 className="font-display text-[32px] font-semibold leading-tight text-blue-950">Recipes</h1>
+          <h1 className="font-display text-[2rem] font-semibold leading-tight text-blue-950">Recipes</h1>
           <p className="mt-1 font-sans text-sm text-blue-950/70">Pick your favorite recipes from our suggestions!</p>
         </div>
       </div>

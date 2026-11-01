@@ -25,7 +25,7 @@ export default function ConsentStep({ onNext, onBack }) {
         <FruitScene scene="room" src={privacyFruit} alt="A contented apple beside a pear looking over with a gentle smile" />
       </div>
       <div className="flex flex-col my-auto py-6">
-        <h1 className="text-[32px] text-balance leading-[1.16] font-semibold tracking-tight text-center" style={{ fontFamily: 'Chillax, sans-serif' }}>
+        <h1 className="text-[2rem] text-balance leading-[1.16] font-semibold tracking-tight text-center" style={{ fontFamily: 'Chillax, sans-serif' }}>
           Before you add health information
         </h1>
         <div className="mt-4 mb-5 font-sans text-base leading-relaxed text-blue-950/75 flex flex-col gap-3">

@@ -61,13 +61,13 @@ function MathTerm({ value, label, big = false, emphasize = false, colorClass }) 
     <div className="text-center">
       <span
         className={`font-mono font-semibold block leading-[0.95] whitespace-pre-line ${color} ${
-          big ? "text-[40px] sm:text-[56px]" : "text-[30px] sm:text-[40px]"
+          big ? "text-[2.5rem] sm:text-[3.5rem]" : "text-[1.875rem] sm:text-[2.5rem]"
         }`}
       >
         {value}
       </span>
       {label && (
-        <span className="mt-2 block font-sans text-[13px] sm:text-[14px] leading-[1.4] text-char-500 max-w-[20ch] mx-auto">
+        <span className="mt-2 block font-sans text-[0.875rem] sm:text-[0.875rem] leading-[1.4] text-char-500 max-w-[20ch] mx-auto">
           {label}
         </span>
       )}
@@ -82,16 +82,16 @@ export default function Science() {
       <section className="bg-paper-200">
         <div className="mx-auto max-w-5xl container-px py-20 lg:py-28 text-center">
           <Reveal>
-            <span className="font-label text-[12px] font-semibold tracking-[.14em] uppercase text-char-500">The science</span>
+            <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500">The science</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-[34px] leading-[1.08] sm:text-[48px] sm:leading-[1.08] lg:text-[58px] lg:leading-[1.08] max-w-[20ch] mx-auto text-blue-950">
+            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-[2.125rem] leading-[1.08] sm:text-[3rem] sm:leading-[1.08] lg:text-[3.625rem] lg:leading-[1.08] max-w-[20ch] mx-auto text-blue-950">
               The human body is too complex for{" "}
               <em className="font-display italic font-normal text-forest-700">human memory alone.</em>
             </h1>
           </Reveal>
           <Reveal delay={0.2}>
-            <p className="mt-7 font-sans text-[17px] sm:text-[18px] leading-[1.6] text-char-500 max-w-[52ch] mx-auto">
+            <p className="mt-7 font-sans text-[1.0625rem] sm:text-[1.125rem] leading-[1.6] text-char-500 max-w-[52ch] mx-auto">
               That's not a limitation of medicine. It's the problem we solved.
             </p>
           </Reveal>
@@ -102,10 +102,10 @@ export default function Science() {
       <section className="py-16 lg:py-24 bg-paper-200">
         <div className="mx-auto max-w-5xl container-px">
           <Reveal>
-            <span className="font-label text-[12px] font-semibold tracking-[.14em] uppercase text-char-500 block text-center">The problem</span>
+            <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500 block text-center">The problem</span>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="font-display font-semibold tracking-[-0.02em] mt-4 text-[28px] leading-[1.08] sm:text-[40px] sm:leading-[1.08] text-center max-w-[24ch] mx-auto text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] mt-4 text-[1.75rem] leading-[1.08] sm:text-[2.5rem] sm:leading-[1.08] text-center max-w-[24ch] mx-auto text-blue-950">
               Why no doctor, dietitian, or app has solved this --{" "}
               <em className="font-display italic font-normal text-forest-700">until now</em>
             </h2>
@@ -120,12 +120,12 @@ export default function Science() {
                       <div key={j} className="flex items-center gap-6 lg:gap-8">
                         <MathTerm value={p.value} label={p.label} />
                         {j < row.parts.length - 1 && (
-                          <span className="font-mono text-[34px] sm:text-[44px] text-char-300 leading-none">{row.op}</span>
+                          <span className="font-mono text-[2.125rem] sm:text-[2.75rem] text-char-300 leading-none">{row.op}</span>
                         )}
                       </div>
                     ))}
 
-                    <span className="font-mono text-[34px] sm:text-[44px] text-char-300 leading-none">=</span>
+                    <span className="font-mono text-[2.125rem] sm:text-[2.75rem] text-char-300 leading-none">=</span>
 
                     <MathTerm
                       value={row.result.value}
@@ -141,7 +141,7 @@ export default function Science() {
           </div>
 
           <Reveal delay={0.2}>
-            <p className="mt-8 text-center font-sans text-[15px] sm:text-[16px] italic text-char-500">
+            <p className="mt-8 text-center font-sans text-[0.9375rem] sm:text-[1rem] italic text-char-500">
               This is what Nutri computes for each patient profile, instantly.
             </p>
           </Reveal>
@@ -152,10 +152,10 @@ export default function Science() {
       <section className="py-16 lg:py-24 bg-paper-200 border-y border-sand-200">
         <div className="mx-auto max-w-5xl container-px">
           <Reveal>
-            <span className="font-label text-[12px] font-semibold tracking-[.14em] uppercase text-char-500 block text-center">Our data</span>
+            <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500 block text-center">Our data</span>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="font-display font-semibold tracking-[-0.02em] mt-4 text-[30px] leading-[1.08] sm:text-[42px] sm:leading-[1.08] text-center mb-12 text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] mt-4 text-[1.875rem] leading-[1.08] sm:text-[2.625rem] sm:leading-[1.08] text-center mb-12 text-blue-950">
               Where the data comes from
             </h2>
           </Reveal>
@@ -164,8 +164,8 @@ export default function Science() {
               <StaggerItem key={s.title}>
                 <div className="h-full rounded-[28px] bg-white border border-sand-200 shadow-card p-8">
                   <Icon name={s.icon} size={28} className="text-forest-700 mb-4 block" />
-                  <h3 className="font-display font-semibold tracking-[-0.02em] text-[20px] sm:text-[22px] leading-tight text-blue-950">{s.title}</h3>
-                  <p className="mt-3 font-sans text-[15px] leading-[1.6] text-char-500">{s.body}</p>
+                  <h3 className="font-display font-semibold tracking-[-0.02em] text-[1.25rem] sm:text-[1.375rem] leading-tight text-blue-950">{s.title}</h3>
+                  <p className="mt-3 font-sans text-[0.9375rem] leading-[1.6] text-char-500">{s.body}</p>
                 </div>
               </StaggerItem>
             ))}
@@ -177,7 +177,7 @@ export default function Science() {
               {["NIH", "USDA", "PubMed", "EU Health Agencies"].map((ref) => (
                 <span
                   key={ref}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-signal-info-tint text-signal-info text-[13px] font-semibold tracking-tight"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-signal-info-tint text-signal-info text-[0.875rem] font-semibold tracking-tight"
                 >
                   <Icon name="external-link" size={16} />
                   {ref}
@@ -192,13 +192,13 @@ export default function Science() {
       <section className="py-20 lg:py-28 bg-forest-700 text-[#F3EFE6]">
         <div className="mx-auto max-w-3xl container-px text-center">
           <Reveal>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[30px] leading-[1.08] sm:text-[44px] sm:leading-[1.08] text-[#F3EFE6]">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.875rem] leading-[1.08] sm:text-[2.75rem] sm:leading-[1.08] text-[#F3EFE6]">
               It's not a search engine.{" "}
               <em className="font-display italic font-normal text-yellow-400">It's a reasoning engine.</em>
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mt-7 font-sans text-[17px] sm:text-[18px] leading-[1.65] text-[#F3EFE6]/75">
+            <p className="mt-7 font-sans text-[1.0625rem] sm:text-[1.125rem] leading-[1.65] text-[#F3EFE6]/75">
               For each food item, our algorithms weigh every relevant nutrient -- how much it helps one
               condition, how much it harms another, how two nutrients interact with each other -- and produce
               a single, actionable answer: helpful, harmful, or somewhere in between. Specific to your profile.
@@ -216,7 +216,7 @@ export default function Science() {
               {footerBar.map((item) => (
                 <li key={item.text} className="flex items-center gap-x-2">
                   <Icon name={item.icon} size={16} className="text-forest-700" />
-                  <span className="font-sans text-[13.5px] sm:text-[14.5px] font-medium tracking-tight text-char-500">
+                  <span className="font-sans text-[0.875rem] sm:text-[0.9062rem] font-medium tracking-tight text-char-500">
                     {item.text}
                   </span>
                 </li>

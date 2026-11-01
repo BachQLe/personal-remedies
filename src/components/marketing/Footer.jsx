@@ -56,11 +56,11 @@ export default function Footer() {
           <div>
             <Link to="/" className="flex items-center gap-2.5">
               <img src={logoMark} alt="Remedy" className="h-8 w-8" />
-              <span className="text-[20px] font-display font-semibold tracking-tight text-[#F3EFE6]">
+              <span className="text-[1.25rem] font-display font-semibold tracking-tight text-[#F3EFE6]">
                 Personal Remedies
               </span>
             </Link>
-            <p className="mt-4 text-[14px] leading-[1.6] font-sans text-[#BFC9BD] max-w-[34ch]">
+            <p className="mt-4 text-[0.875rem] leading-[1.6] font-sans text-[#BFC9BD] max-w-[34ch]">
               Individualized help for chronic conditions.
             </p>
           </div>
@@ -68,7 +68,7 @@ export default function Footer() {
           {/* Link columns */}
           {cols.map((c) => (
             <div key={c.heading}>
-              <h4 className="text-[12px] font-label font-medium tracking-[0.14em] uppercase text-[#BFC9BD]">
+              <h4 className="text-[0.875rem] font-label font-medium tracking-[0.14em] uppercase text-[#BFC9BD]">
                 {c.heading}
               </h4>
               <ul className="mt-5 space-y-3">
@@ -76,7 +76,7 @@ export default function Footer() {
                   <li key={i.label}>
                     <Link
                       to={i.to}
-                      className="text-[14.5px] font-sans text-[#BFC9BD] hover:text-[#F3EFE6] transition-colors duration-[120ms]"
+                      className="text-[0.9062rem] font-sans text-[#BFC9BD] hover:text-[#F3EFE6] transition-colors duration-[120ms]"
                     >
                       {i.label}
                     </Link>
@@ -89,12 +89,12 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-16 pt-8 border-t border-[#F3EFE6]/10 flex flex-col gap-4">
-          <p className="text-[12.5px] leading-[1.6] font-sans text-[#BFC9BD]/70 max-w-[90ch]">
+          <p className="text-[0.875rem] leading-[1.6] font-sans text-[#BFC9BD]/70 max-w-[90ch]">
             Personal Remedies provides general health
             information and is not a substitute for professional medical advice.
             Always consult a qualified healthcare provider.
           </p>
-          <p className="text-[12.5px] font-mono text-[#BFC9BD]/50">
+          <p className="text-[0.875rem] font-mono text-[#BFC9BD]/50">
             &copy; 2026 Personal Remedies, LLC.
           </p>
         </div>

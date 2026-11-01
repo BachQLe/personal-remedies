@@ -147,7 +147,7 @@ function FineGroupDetail({ fineGroupId }) {
           {/* Real history back (4.10); the fallback is the canonical URL,
               same as the invalid-param redirect above, for deep links. */}
           <BackButton fallback="/app/suggestions?tab=groups&mode=fine" />
-          <h1 className="font-display text-[24px] font-semibold text-blue-950 leading-tight truncate">
+          <h1 className="font-display text-[1.5rem] font-semibold text-blue-950 leading-tight break-words">
             {groupLabel}
           </h1>
         </div>

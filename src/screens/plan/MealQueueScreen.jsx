@@ -81,7 +81,7 @@ function CalorieLine({ slots }) {
   if (total <= 0) return null;
 
   return (
-    <p className="whitespace-nowrap pl-4 font-sans text-sm font-semibold text-blue-950/70">
+    <p className="pl-4 font-sans text-sm font-semibold text-blue-950/70">
       {`${formatCalories(total)} cal`}
     </p>
   );

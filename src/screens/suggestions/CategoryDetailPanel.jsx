@@ -156,7 +156,7 @@ export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp,
   return (
     <div className="flex flex-col gap-3">
       {!hideTitle && (
-        <h2 className="font-display text-base font-semibold text-char-900 truncate">
+        <h2 className="font-display text-base font-semibold text-char-900 break-words">
           {groupLabel || 'Category'}
         </h2>
       )}

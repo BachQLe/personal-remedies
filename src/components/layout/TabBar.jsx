@@ -55,7 +55,7 @@ export default function TabBar() {
                             animate={{ opacity: 1, width: 'auto' }}
                             exit={{ opacity: 0, width: 0 }}
                             transition={{ duration: 0.18, ease: 'easeOut' }}
-                            className="overflow-hidden whitespace-nowrap text-[11px] font-semibold font-sans"
+                            className="overflow-hidden whitespace-nowrap text-[0.875rem] font-semibold font-sans"
                           >
                             {tab.label}
                           </motion.span>

@@ -127,7 +127,7 @@ export default function MealTypeTag({ mealKey, size = 12, className = '' }) {
       aria-label={label}
       title={label}
       className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5
-        text-[10px] font-semibold font-sans shadow-sm ${toneClass} ${className}`}
+        text-[0.875rem] font-semibold font-sans shadow-sm ${toneClass} ${className}`}
     >
       <Icon size={size} strokeWidth={2} />
       {letter}

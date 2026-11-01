@@ -189,7 +189,7 @@ export default function FoodImageCard({
             }
           }}
           className={`tap-target absolute top-3 left-3 inline-flex items-center rounded-full
-            px-2.5 py-1 text-[11px] font-semibold font-sans cursor-pointer
+            px-2.5 py-1 text-[0.875rem] font-semibold font-sans cursor-pointer
             transition-all duration-fast hover:scale-105 active:scale-95
             ${badgeVariantClasses[badgeVariant] || badgeVariantClasses.primary}`}
         >

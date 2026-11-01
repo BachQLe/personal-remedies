@@ -29,7 +29,7 @@ export default function SavedList({ entries, onPick, emptyText, rowClassName = '
               transition duration-fast active:scale-[0.99] ${rowClassName}`}
           >
             <span className="flex min-w-0 flex-col">
-              <span className="truncate font-sans text-sm font-semibold text-blue-950">{entry.name}</span>
+              <span className="break-words font-sans text-sm font-semibold text-blue-950">{entry.name}</span>
               <span className="font-sans text-xs text-char-500">
                 {COPY.savedOn(new Date(entry.savedAt).toLocaleDateString())}
               </span>

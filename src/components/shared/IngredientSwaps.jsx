@@ -73,10 +73,10 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
 
   return (
     <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
-      <p className="text-[11px] font-label tracking-[0.14em] uppercase text-char-400">
+      <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-400">
         Ingredients
       </p>
-      <p className="text-[11px] text-char-400 font-sans mt-1 mb-3 leading-snug">
+      <p className="text-[0.875rem] text-char-400 font-sans mt-1 mb-3 leading-snug">
         {derived
           ? 'Read from the recipe name — tap one to see other swaps ranked for your conditions.'
           : 'From the source recipe — tap one to see other swaps ranked for your conditions.'}
@@ -94,7 +94,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
             <li key={key} className="py-2 first:pt-0 last:pb-0">
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-sm font-sans text-char-700 leading-snug truncate">
+                  <p className="text-sm font-sans text-char-700 leading-snug break-words">
                     {swap ? swap.name : ing.name}
                   </p>
                   {swap && (
@@ -105,10 +105,10 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
                         delete next[key];
                         return next;
                       })}
-                      className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-sans text-char-400 hover:text-char-700 transition-colors duration-fast"
+                      className="mt-0.5 inline-flex items-center gap-1 text-[0.875rem] font-sans text-char-400 hover:text-char-700 transition-colors duration-fast"
                     >
                       <RotateCcw size={11} aria-hidden="true" />
-                      <span className="truncate">instead of {ing.name} — undo</span>
+                      <span className="break-words">instead of {ing.name} — undo</span>
                     </button>
                   )}
                 </div>
@@ -145,13 +145,13 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
 
                   {state?.status === 'error' && (
                     <div className="flex items-center justify-between gap-2 py-1">
-                      <p className="text-[11px] font-sans text-char-500">
+                      <p className="text-[0.875rem] font-sans text-char-500">
                         Couldn&apos;t load alternatives.
                       </p>
                       <button
                         type="button"
                         onClick={() => load(key, ing)}
-                        className="flex-shrink-0 px-3 py-1.5 rounded-xs bg-forest-700 text-white text-[11px] font-semibold font-sans
+                        className="flex-shrink-0 px-3 py-1.5 rounded-xs bg-forest-700 text-white text-[0.875rem] font-semibold font-sans
                           transition-all duration-fast ease-ds-out hover:bg-forest-800 active:scale-[0.98]"
                       >
                         Retry
@@ -160,7 +160,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
                   )}
 
                   {state?.status === 'success' && state.items.length === 0 && (
-                    <p className="text-[11px] font-sans text-char-500 py-1">
+                    <p className="text-[0.875rem] font-sans text-char-500 py-1">
                       No higher-ranked alternatives in this food group.
                     </p>
                   )}
@@ -184,7 +184,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
                                 className="w-9 h-9 rounded-lg object-cover object-center flex-shrink-0"
                                 loading="lazy"
                               />
-                              <span className="flex-1 min-w-0 text-[13px] font-sans text-char-700 truncate">
+                              <span className="flex-1 min-w-0 text-[0.875rem] font-sans text-char-700 break-words">
                                 {alt.name}
                               </span>
                               <FoodRating numericId={alt.numericId} size={12} tone="light" className="flex-shrink-0" />

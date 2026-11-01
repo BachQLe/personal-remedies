@@ -44,12 +44,12 @@ export default function FinalCTA() {
     >
       <div className="relative z-10 mx-auto max-w-3xl container-px text-center">
         <Reveal>
-          <span className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-yellow-400">
+          <span className="text-[0.875rem] font-label font-semibold tracking-eyebrow uppercase text-yellow-400">
             You don't have to manage this alone
           </span>
         </Reveal>
         <Reveal delay={0.1}>
-          <h2 className="font-display font-medium tracking-tightish mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06] text-white">
+          <h2 className="font-display font-medium tracking-tightish mt-5 text-[2.125rem] leading-[1.1] sm:text-[3rem] sm:leading-[1.08] lg:text-[4rem] lg:leading-[1.06] text-white">
             Get started with a plan built around your profile.{" "}
             <em className="font-display italic font-normal text-yellow-300">
               Your first diet plan is on us.
@@ -57,14 +57,14 @@ export default function FinalCTA() {
           </h2>
         </Reveal>
         <Reveal delay={0.2}>
-          <p className="mt-7 text-[17px] sm:text-[18px] leading-[1.55] font-sans text-white/70">
+          <p className="mt-7 text-[1.0625rem] sm:text-[1.125rem] leading-[1.55] font-sans text-white/70">
             No card. No appointment. No waiting room.
           </p>
         </Reveal>
         <Reveal delay={0.3}>
           <Link
             to="/onboarding"
-            className="pill-honey mt-10 inline-flex text-[16px] px-7 py-3"
+            className="pill-honey mt-10 inline-flex text-[1rem] px-7 py-3"
           >
             Start free
           </Link>

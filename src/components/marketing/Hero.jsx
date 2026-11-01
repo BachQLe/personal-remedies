@@ -296,7 +296,7 @@ export default function Hero({ topOffset = 0 }) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.32, ease: DS_EASE }}
-          className="font-display font-semibold tracking-[-0.02em] text-[56px] leading-[1.04] sm:text-[48px] sm:leading-[1.02] lg:text-[72px] lg:leading-[1.0] text-[#F3EFE6] text-center"
+          className="font-display font-semibold tracking-[-0.02em] text-[3.5rem] leading-[1.04] sm:text-[3rem] sm:leading-[1.02] lg:text-[4.5rem] lg:leading-[1.0] text-[#F3EFE6] text-center"
         >
           <span className="relative inline-block">
             Less pills,{" "}
@@ -339,7 +339,7 @@ export default function Hero({ topOffset = 0 }) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.32, delay: 0.12, ease: DS_EASE }}
-          className="font-sans mt-4 max-w-[34ch] mx-auto text-[17px] sm:text-[19px] leading-snug text-[#F3EFE6]/85 text-center tracking-tight"
+          className="font-sans mt-4 max-w-[34ch] mx-auto text-[1.0625rem] sm:text-[1.1875rem] leading-snug text-[#F3EFE6]/85 text-center tracking-tight"
         >
           A simple diet change can reverse many chronic conditions — the question is{" "}
           <em className="font-display italic text-[#F3EFE6]">what foods to eat.</em>
@@ -348,11 +348,11 @@ export default function Hero({ topOffset = 0 }) {
         <div className="relative z-10 flex flex-col items-center mt-8">
           <button
             onClick={() => navigate("/onboarding")}
-            className="rounded-full bg-forest-700 hover:bg-forest-800 active:translate-y-[1px] active:scale-[0.98] text-white text-[16px] px-7 py-3 font-semibold transition-all duration-200"
+            className="rounded-full bg-forest-700 hover:bg-forest-800 active:translate-y-[1px] active:scale-[0.98] text-white text-[1rem] px-7 py-3 font-semibold transition-all duration-200"
           >
             Get your personalized plan
           </button>
-          <p className="font-sans mt-3 text-center text-[11px] sm:text-[12px] text-[#F3EFE6]/80 tracking-tight">
+          <p className="font-sans mt-3 text-center text-[0.875rem] sm:text-[0.875rem] text-[#F3EFE6]/80 tracking-tight">
             Based on Nutridigm's ranked reference database.
           </p>
         </div>
@@ -365,7 +365,7 @@ export default function Hero({ topOffset = 0 }) {
           className="mt-12 flex items-center justify-center gap-3"
         >
           <span className="h-px w-8 bg-[#F3EFE6]/25" />
-          <span className="font-label text-[12px] font-semibold tracking-[0.14em] uppercase text-yellow-400">
+          <span className="font-label text-[0.875rem] font-semibold tracking-[0.14em] uppercase text-yellow-400">
             See it in action
           </span>
           <span className="h-px w-8 bg-[#F3EFE6]/25" />
@@ -401,11 +401,11 @@ export default function Hero({ topOffset = 0 }) {
           {/* chrome bar */}
           <div className="flex items-center gap-3 px-5 py-3.5 border-b border-black/[0.10] relative z-50 bg-forest-800">
             <span className="h-2.5 w-2.5 rounded-full bg-yellow-400 animate-slow-pulse" />
-            <span className="text-[11px] sm:text-[13px] font-medium tracking-tight text-white">
+            <span className="text-[0.875rem] sm:text-[0.875rem] font-medium tracking-tight text-white">
               Nutri <span className="text-white/50">·</span>{" "}
               <span className="text-white/80">Personal Remedies</span>
             </span>
-            <span className="ml-auto text-[9px] sm:text-[11px] text-white/60">demo</span>
+            <span className="ml-auto text-[0.875rem] sm:text-[0.875rem] text-white/60">demo</span>
           </div>
 
           {/* two-pane body */}
@@ -417,7 +417,7 @@ export default function Hero({ topOffset = 0 }) {
               {/* Nutri Recommendations */}
               <div className="px-4 pt-4 pb-3 border-b border-black/[0.06]">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-[9px] sm:text-[11px] font-semibold tracking-widest uppercase text-char-900/40">
+                  <span className="text-[0.875rem] sm:text-[0.875rem] font-semibold tracking-widest uppercase text-char-900/40">
                     Nutri Recommendations
                   </span>
                   <span className="flex gap-1">
@@ -443,15 +443,15 @@ export default function Hero({ topOffset = 0 }) {
                   >
                     <span className="text-2xl sm:text-3xl leading-none select-none" aria-hidden>{food.emoji}</span>
                     <div>
-                      <p className="text-[12px] sm:text-[14px] font-semibold tracking-tight text-char-900 leading-none">{food.name}</p>
-                      <p className="text-[9px] sm:text-[11px] text-char-900/45 mt-0.5">{food.tag}</p>
+                      <p className="text-[0.875rem] sm:text-[0.875rem] font-semibold tracking-tight text-char-900 leading-none">{food.name}</p>
+                      <p className="text-[0.875rem] sm:text-[0.875rem] text-char-900/45 mt-0.5">{food.tag}</p>
                     </div>
                   </motion.div>
                 </AnimatePresence>
                 <div className="space-y-2">
                   {food.stats.map(({ label }, rowIdx) => (
                     <div key={rowIdx} className={`flex items-center justify-between gap-2 ${rowIdx >= 3 ? "hidden lg:flex" : ""}`}>
-                      <span className="text-[10px] sm:text-[12px] text-char-900/60 truncate">{label}</span>
+                      <span className="text-[0.875rem] sm:text-[0.875rem] text-char-900/60 truncate">{label}</span>
                       <div className="flex items-center gap-1.5 shrink-0">
                         <span className="flex items-center gap-1 -mr-1">
                           <RatingDots filled={animatedFilled[rowIdx]} />
@@ -463,14 +463,14 @@ export default function Hero({ topOffset = 0 }) {
                                 animate={{ y: 0, opacity: 1 }}
                                 exit={{ y: 10, opacity: 0 }}
                                 transition={{ duration: 0.12, ease: DS_EASE }}
-                                className="text-[9px] sm:text-[11px] font-semibold text-char-900 block"
+                                className="text-[0.875rem] sm:text-[0.875rem] font-semibold text-char-900 block"
                               >
                                 {animatedRatings[rowIdx]}
                               </motion.span>
                             </AnimatePresence>
                           </span>
                         </span>
-                        <span className="text-[9px] sm:text-[11px] text-char-900/30 font-normal">/10</span>
+                        <span className="text-[0.875rem] sm:text-[0.875rem] text-char-900/30 font-normal">/10</span>
                       </div>
                     </div>
                   ))}
@@ -479,21 +479,21 @@ export default function Hero({ topOffset = 0 }) {
 
               {/* Your Profile */}
               <div className="px-4 pt-3 pb-4 flex-1">
-                <p className="text-[9px] sm:text-[11px] font-semibold tracking-widest uppercase text-char-900/40 mb-2.5">
+                <p className="text-[0.875rem] sm:text-[0.875rem] font-semibold tracking-widest uppercase text-char-900/40 mb-2.5">
                   Your Profile
                 </p>
-                <p className="text-[9px] sm:text-[11px] text-char-900/50 mb-1.5 font-medium">Conditions</p>
+                <p className="text-[0.875rem] sm:text-[0.875rem] text-char-900/50 mb-1.5 font-medium">Conditions</p>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {CONDITIONS.map(({ label, color }) => (
-                    <span key={label} className={`text-[9px] sm:text-[11px] font-medium px-2 py-0.5 rounded-full ${color}`}>
+                    <span key={label} className={`text-[0.875rem] sm:text-[0.875rem] font-medium px-2 py-0.5 rounded-full ${color}`}>
                       {label}
                     </span>
                   ))}
                 </div>
-                <p className="hidden sm:block text-[9px] sm:text-[11px] text-char-900/50 mb-1.5 font-medium">Preferences</p>
+                <p className="hidden sm:block text-[0.875rem] sm:text-[0.875rem] text-char-900/50 mb-1.5 font-medium">Preferences</p>
                 <div className="hidden sm:flex flex-wrap gap-1.5">
                   {PREFERENCES.map((pref) => (
-                    <span key={pref} className="text-[9px] sm:text-[11px] font-medium px-2 py-0.5 rounded-full bg-forest/10 text-forest">
+                    <span key={pref} className="text-[0.875rem] sm:text-[0.875rem] font-medium px-2 py-0.5 rounded-full bg-forest/10 text-forest">
                       {pref}
                     </span>
                   ))}
@@ -539,7 +539,7 @@ export default function Hero({ topOffset = 0 }) {
                       className={`flex shrink-0 ${m.from === "user" ? "justify-end" : "justify-start"}`}
                     >
                       <div
-                        className={`max-w-[85%] rounded-2xl px-4 py-3 text-[11px] sm:text-[13.5px] leading-[1.55] ${m.from === "user"
+                        className={`max-w-[85%] rounded-2xl px-4 py-3 text-[0.875rem] sm:text-[0.875rem] leading-[1.55] ${m.from === "user"
                           ? "bg-forest-700 text-white rounded-tr-md"
                           : "bg-white text-char-900 rounded-tl-md border border-char-900/[0.06]"
                           }`}
@@ -553,7 +553,7 @@ export default function Hero({ topOffset = 0 }) {
 
               {/* input bar */}
               <div className="absolute bottom-0 left-0 right-0 px-4 py-3 border-t border-char-900/[0.06] flex items-center gap-2 bg-white">
-                <div className="flex-1 rounded-full bg-paper-100 px-4 py-2 text-[11px] sm:text-[13px] border border-char-900/[0.06] flex items-center min-w-0">
+                <div className="flex-1 rounded-full bg-paper-100 px-4 py-2 text-[0.875rem] sm:text-[0.875rem] border border-char-900/[0.06] flex items-center min-w-0">
                   {inputText ? (
                     <>
                       <span className="text-char-900 truncate">{inputText}</span>

@@ -19,6 +19,7 @@ html { -webkit-text-size-adjust: 100%; }
 }
 
 body {
+  overflow-wrap: anywhere; /* a long word wraps rather than clips at large text sizes */
   font-family: var(--font-sans);
   font-size: 1rem; /* = var(--fs-body), but relative so it follows the root size */
   line-height: var(--lh-normal);

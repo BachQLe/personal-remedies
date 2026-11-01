@@ -11,7 +11,7 @@
  *     ALSO shows a slim "Offline — showing saved data" banner above them,
  *     non-blocking — the data underneath is still real and interactive).
  *   - 'loading'                     → a neutral Skeleton/SkeletonGroup
- *     block plus a SlowLoadingNote that fades in after ~2.5 s. Screens with their own bespoke ghost/skeleton UI (the
+ *     block plus a SlowLoadingNote that fades in after ~400 ms. Screens with their own bespoke ghost/skeleton UI (the
  *     `.rm-ghost` system, local skeletons) should keep using it and simply
  *     never pass 'loading' through this component — this is the fallback
  *     for screens that don't have one, not a replacement for those that do.
@@ -84,11 +84,13 @@ const ERROR_STATUSES = ['error-network', 'error-api', 'offline-no-cache'];
  * "Nutri is thinking…" — shown only when a load runs long. Invisible until
  * the `.slow-loading-note` CSS animation-delay (src/index.css) elapses, so
  * there are no timers or state here; fast loads never see it. Drop it under
- * any bespoke skeleton/ghost, as a sibling of that loading region.
+ * any bespoke skeleton/ghost, as a sibling of that loading region. `tone` is
+ * the surface it sits on: 'light' (default) or 'dark' (a photo-card panel).
  */
-export function SlowLoadingNote({ className = '' }) {
+export function SlowLoadingNote({ className = '', tone = 'light' }) {
+  const color = tone === 'dark' ? 'text-white/80' : 'text-char-500';
   return (
-    <p role="status" className={`slow-loading-note text-center text-xs font-sans text-char-500 ${className}`}>
+    <p role="status" className={`slow-loading-note text-center text-xs font-sans ${color} ${className}`}>
       Nutri is thinking…
     </p>
   );

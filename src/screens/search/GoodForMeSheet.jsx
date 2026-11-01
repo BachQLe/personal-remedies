@@ -54,8 +54,8 @@ export default function GoodForMeSheet({ food, profile, onClose }) {
         <div className="flex items-center gap-3">
           <BackButton onClick={onClose} aria-label="Close" />
           <div className="min-w-0">
-            <p className="font-label text-[11px] tracking-[0.14em] uppercase text-char-500">Check against my profile</p>
-            <h2 className="font-display text-xl font-semibold text-char-900 leading-tight truncate">{food?.name}</h2>
+            <p className="font-label text-[0.875rem] tracking-[0.14em] uppercase text-char-500">Check against my profile</p>
+            <h2 className="font-display text-xl font-semibold text-char-900 leading-tight break-words">{food?.name}</h2>
           </div>
         </div>
 

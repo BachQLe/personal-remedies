@@ -69,7 +69,7 @@ export default function Card({
         <div className="flex items-start justify-between gap-3 mb-3.5">
           <div>
             {eyebrow && (
-              <div className="text-[12px] font-label font-bold tracking-eyebrow uppercase text-char-500 mb-1">
+              <div className="text-[0.875rem] font-label font-bold tracking-eyebrow uppercase text-char-500 mb-1">
                 {eyebrow}
               </div>
             )}

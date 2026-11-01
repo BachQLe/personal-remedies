@@ -111,7 +111,7 @@ export default function SchedulerView({ days, onSelectItem, showEaten = false })
                                       </button>
                                       <MealTypeTag mealKey={slot.key} />
                                       <span
-                                        className={`flex-1 truncate text-sm text-blue-950 ${isEaten ? 'line-through opacity-60' : ''}`}
+                                        className={`flex-1 break-words text-sm text-blue-950 ${isEaten ? 'line-through opacity-60' : ''}`}
                                       >
                                         {item.name}
                                       </span>

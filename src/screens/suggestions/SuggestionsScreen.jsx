@@ -100,13 +100,13 @@ export default function SuggestionsScreen() {
               animate={{ opacity: 1, transition: { duration: 0.2, ease: 'easeOut' } }}
               exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeOut' } }}
             >
-              <h1 className="font-display text-[32px] font-semibold text-blue-950 leading-tight mt-2">
+              <h1 className="font-display text-[2rem] font-semibold text-blue-950 leading-tight mt-2">
                 {TAB_META[activeTab].title}
               </h1>
             </motion.div>
           </AnimatePresence>
         </div>
-        <p className="text-[11px] text-blue-950/60 font-sans mt-1">
+        <p className="text-[0.875rem] text-blue-950/60 font-sans mt-1">
           Ask your doctor before changing your diet, especially if you take medication.
         </p>
       </PageHeader>

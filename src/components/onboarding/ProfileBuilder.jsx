@@ -187,7 +187,7 @@ function ConditionsPanel({
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ ...snappySpring, delay: 0.1 }}
-          className="flex-none -mx-3 text-[32px] text-balance leading-[1.16] font-semibold tracking-tight text-center mt-3 mb-6"
+          className="flex-none -mx-3 text-[2rem] text-balance leading-[1.16] font-semibold tracking-tight text-center mt-3 mb-6"
           style={{ fontFamily: 'Chillax, sans-serif' }}
         >
           Select the health topics that matter most to you
@@ -195,7 +195,7 @@ function ConditionsPanel({
 
         {/* Standalone search field */}
         <div className="relative group flex-none mb-3">
-          <span className="material-symbols-rounded absolute left-[15px] top-1/2 -translate-y-1/2 text-[18px] pointer-events-none transition-colors duration-fast text-blue-950/55 group-focus-within:text-blue-950">
+          <span className="material-symbols-rounded absolute left-[15px] top-1/2 -translate-y-1/2 text-[1.125rem] pointer-events-none transition-colors duration-fast text-blue-950/55 group-focus-within:text-blue-950">
             search
           </span>
           <input
@@ -207,7 +207,7 @@ function ConditionsPanel({
             onBlur={() => setFocused(false)}
             aria-label="Search conditions, diets, allergies"
             placeholder="Search conditions, diets, allergies…"
-            className="w-full pl-11 pr-4 py-[15px] rounded-full border-[1.5px] border-blue-950/10 bg-[#E6E8DD] text-[16px] text-blue-950 placeholder:text-blue-950/55 font-sans shadow-sm transition-all duration-fast ease-ds-out focus:outline-none focus:border-blue-950/40 focus:shadow-sm"
+            className="w-full pl-11 pr-4 py-[15px] rounded-full border-[1.5px] border-blue-950/10 bg-[#E6E8DD] text-[1rem] text-blue-950 placeholder:text-blue-950/55 font-sans shadow-sm transition-all duration-fast ease-ds-out focus:outline-none focus:border-blue-950/40 focus:shadow-sm"
           />
         </div>
 
@@ -229,7 +229,7 @@ function ConditionsPanel({
             {/* "In profile" chips */}
             {conditions.length > 0 && (
               <div className="flex-none flex flex-col gap-1.5 mb-2" onMouseDown={(e) => e.preventDefault()}>
-                <span className="text-[11px] font-semibold text-blue-950 uppercase tracking-wider">in profile</span>
+                <span className="text-[0.875rem] font-semibold text-blue-950 uppercase tracking-wider">in profile</span>
                 <div className="flex flex-wrap gap-1.5">
                   {conditions.map((c) => {
                     const label = describeCondition(c);
@@ -238,11 +238,11 @@ function ConditionsPanel({
                       <button
                         key={c}
                         onClick={() => toggleInList('conditions', c)}
-                        className="flex items-center gap-1 px-2 py-[3px] rounded-full text-[11px] font-semibold text-white font-sans"
+                        className="flex items-center gap-1 px-2 py-[3px] rounded-full text-[0.875rem] font-semibold text-white font-sans"
                         style={{ backgroundColor: `${meta.color}88` }}
                       >
                         {label}
-                        <span className="material-symbols-rounded text-[12px] text-white/60">close</span>
+                        <span className="material-symbols-rounded text-[0.875rem] text-white/60">close</span>
                       </button>
                     );
                   })}
@@ -252,7 +252,7 @@ function ConditionsPanel({
 
             {/* Synonym hint */}
             {synonymMatch && conditionQuery.trim() && (
-              <p className="flex-none text-[13px] mt-3 font-sans font-semibold tracking-wide" style={{ color: '#59694C' }}>
+              <p className="flex-none text-[0.875rem] mt-3 font-sans font-semibold tracking-wide" style={{ color: '#59694C' }}>
                 Showing results for "{synonymMatch}"
               </p>
             )}
@@ -277,7 +277,7 @@ function ConditionsPanel({
                     const meta = getConditionMeta(c.description);
                     return (
                       <span
-                        className="material-symbols-rounded text-[18px] flex-shrink-0"
+                        className="material-symbols-rounded text-[1.125rem] flex-shrink-0"
                         style={{ color: meta.color }}
                       >
                         {meta.icon}
@@ -285,9 +285,9 @@ function ConditionsPanel({
                     );
                   })()}
                   <span className="flex-1 min-w-0 flex flex-col gap-0.5">
-                    <span className="truncate">{c.description}</span>
+                    <span className="break-words">{c.description}</span>
                     {c.longDescription && (
-                      <span className="block text-[11px] font-normal text-char-400 truncate">
+                      <span className="block text-[0.875rem] font-normal text-char-400 break-words">
                         {truncate(c.longDescription)}
                       </span>
                     )}
@@ -295,7 +295,7 @@ function ConditionsPanel({
                 </motion.button>
               ))}
               {conditionQuery.trim() && conditionResults.length === 0 && (
-                <p className="text-[15px] text-center py-8 font-sans font-medium tracking-wide" style={{ color: '#6B645A' }}>
+                <p className="text-[0.9375rem] text-center py-8 font-sans font-medium tracking-wide" style={{ color: '#6B645A' }}>
                   No conditions found for "{conditionQuery}"
                 </p>
               )}
@@ -361,7 +361,7 @@ function ConditionsPanel({
                           {/* Category label — top left */}
                           <div className="absolute top-2.5 left-2.5">
                             <span
-                              className="text-[9px] font-semibold uppercase tracking-widest text-black/35"
+                              className="text-[0.875rem] font-semibold uppercase tracking-widest text-black/35"
                               style={{ fontFamily: 'Quantico, sans-serif' }}
                             >
                               {meta.label}
@@ -369,11 +369,11 @@ function ConditionsPanel({
                           </div>
                           {/* Close — top right */}
                           <div className="absolute top-2 right-2">
-                            <span className="material-symbols-rounded text-[14px] text-black/20">close</span>
+                            <span className="material-symbols-rounded text-[0.875rem] text-black/20">close</span>
                           </div>
                           {/* Condition name — centered */}
                           <div className="flex-1 flex items-center justify-center px-2">
-                            <span className="text-[16px] font-semibold text-char-900 leading-tight text-center" style={{ fontFamily: 'Switzer, sans-serif' }}>
+                            <span className="text-[1rem] font-semibold text-char-900 leading-tight text-center" style={{ fontFamily: 'Switzer, sans-serif' }}>
                               {label}
                             </span>
                           </div>

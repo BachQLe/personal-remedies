@@ -75,15 +75,15 @@ export default function Contact() {
         />
         <div className="relative mx-auto max-w-5xl container-px py-20 lg:py-28 text-center">
           <Reveal>
-            <span className="font-label text-[12px] font-semibold tracking-[.14em] uppercase text-char-500">Contact us</span>
+            <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500">Contact us</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-[32px] leading-[1.1] sm:text-[46px] sm:leading-[1.05] lg:text-[54px] lg:leading-[1.03] max-w-[24ch] mx-auto text-blue-950">
+            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-[2rem] leading-[1.1] sm:text-[2.875rem] sm:leading-[1.05] lg:text-[3.375rem] lg:leading-[1.03] max-w-[24ch] mx-auto text-blue-950">
               Get in touch with our team
             </h1>
           </Reveal>
           <Reveal delay={0.2}>
-            <p className="mt-7 text-[17px] sm:text-[18px] leading-[1.6] text-char-500 max-w-[62ch] mx-auto font-sans">
+            <p className="mt-7 text-[1.0625rem] sm:text-[1.125rem] leading-[1.6] text-char-500 max-w-[62ch] mx-auto font-sans">
               Have a question or want to learn more about Personal Remedies? We'd love to hear from you. Send us a message and we'll get back to you as soon as possible.
             </p>
           </Reveal>
@@ -97,7 +97,7 @@ export default function Contact() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name */}
               <div>
-                <label htmlFor="name" className="block text-[15px] font-medium text-char-900 mb-2 font-sans">
+                <label htmlFor="name" className="block text-[0.9375rem] font-medium text-char-900 mb-2 font-sans">
                   Full name
                 </label>
                 <input
@@ -113,7 +113,7 @@ export default function Contact() {
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-[15px] font-medium text-char-900 mb-2 font-sans">
+                <label htmlFor="email" className="block text-[0.9375rem] font-medium text-char-900 mb-2 font-sans">
                   Email address
                 </label>
                 <input
@@ -129,7 +129,7 @@ export default function Contact() {
 
               {/* Subject */}
               <div>
-                <label htmlFor="subject" className="block text-[15px] font-medium text-char-900 mb-2 font-sans">
+                <label htmlFor="subject" className="block text-[0.9375rem] font-medium text-char-900 mb-2 font-sans">
                   Subject
                 </label>
                 <input
@@ -145,7 +145,7 @@ export default function Contact() {
 
               {/* Message */}
               <div>
-                <label htmlFor="message" className="block text-[15px] font-medium text-char-900 mb-2 font-sans">
+                <label htmlFor="message" className="block text-[0.9375rem] font-medium text-char-900 mb-2 font-sans">
                   Message
                 </label>
                 <textarea
@@ -164,7 +164,7 @@ export default function Contact() {
                 <div className="p-4 rounded-md bg-signal-avoid-tint border border-signal-avoid">
                   <div className="flex items-center gap-2">
                     <Icon name="alert-triangle" size={20} className="text-signal-avoid" />
-                    <p className="text-[15px] text-signal-avoid font-sans">{error}</p>
+                    <p className="text-[0.9375rem] text-signal-avoid font-sans">{error}</p>
                   </div>
                 </div>
               )}
@@ -174,7 +174,7 @@ export default function Contact() {
                 <div className="p-4 rounded-md bg-signal-beneficial-tint border border-signal-beneficial">
                   <div className="flex items-center gap-2">
                     <Icon name="check" size={20} className="text-signal-beneficial" />
-                    <p className="text-[15px] text-signal-beneficial font-sans">
+                    <p className="text-[0.9375rem] text-signal-beneficial font-sans">
                       Thank you! We've received your message and will get back to you soon.
                     </p>
                   </div>
@@ -185,7 +185,7 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full inline-flex items-center justify-center font-sans font-semibold text-[16px] px-7 py-3 rounded-[6px] bg-forest-700 text-[#F3EFE6] hover:bg-forest-800 active:translate-y-[1px] active:scale-[0.99] transition-all duration-fast disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full inline-flex items-center justify-center font-sans font-semibold text-[1rem] px-7 py-3 rounded-[6px] bg-forest-700 text-[#F3EFE6] hover:bg-forest-800 active:translate-y-[1px] active:scale-[0.99] transition-all duration-fast disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Sending..." : "Send message"}
               </button>
@@ -198,7 +198,7 @@ export default function Contact() {
       <section className="py-16 lg:py-24 bg-paper-100 border-y border-sand-200">
         <div className="mx-auto max-w-3xl container-px">
           <Reveal>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[30px] leading-[1.1] sm:text-[42px] sm:leading-[1.06] text-center mb-12 text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.875rem] leading-[1.1] sm:text-[2.625rem] sm:leading-[1.06] text-center mb-12 text-blue-950">
               Other ways to reach us
             </h2>
           </Reveal>
@@ -207,9 +207,9 @@ export default function Contact() {
               <div className="bg-white rounded-[28px] border border-sand-200 shadow-card p-6">
                 <div className="flex items-center gap-3 mb-2">
                   <Icon name="mail" size={24} className="text-forest-700" />
-                  <h3 className="text-[18px] font-semibold text-char-900 font-sans">Email</h3>
+                  <h3 className="text-[1.125rem] font-semibold text-char-900 font-sans">Email</h3>
                 </div>
-                <p className="text-[16px] text-char-500 font-sans">
+                <p className="text-[1rem] text-char-500 font-sans">
                   <a href="mailto:hello@personalremedies.com" className="hover:text-forest-700 transition-colors duration-fast">
                     hello@personalremedies.com
                   </a>
@@ -220,9 +220,9 @@ export default function Contact() {
               <div className="bg-white rounded-[28px] border border-sand-200 shadow-card p-6">
                 <div className="flex items-center gap-3 mb-2">
                   <Icon name="stethoscope" size={24} className="text-lavender-700" />
-                  <h3 className="text-[18px] font-semibold text-char-900 font-sans">For providers</h3>
+                  <h3 className="text-[1.125rem] font-semibold text-char-900 font-sans">For providers</h3>
                 </div>
-                <p className="text-[16px] text-char-500 font-sans">
+                <p className="text-[1rem] text-char-500 font-sans">
                   <a href="mailto:providers@personalremedies.com" className="hover:text-forest-700 transition-colors duration-fast">
                     providers@personalremedies.com
                   </a>

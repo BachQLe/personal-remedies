@@ -11,7 +11,7 @@ export default function NonFoodGuidance({ foodId, group, fineGroup, longDescript
   if (!g) return null;
   return (
     <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4" data-testid="nonfood-guidance">
-      <p className="text-[11px] font-label tracking-[0.14em] uppercase text-char-400 mb-2">
+      <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-400 mb-2">
         {g.title}
       </p>
       {g.about && (

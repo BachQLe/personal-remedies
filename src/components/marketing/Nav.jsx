@@ -37,7 +37,7 @@ function Dropdown({ menu }) {
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <button className="flex items-center gap-1 text-[14px] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]">
+      <button className="flex items-center gap-1 text-[0.875rem] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]">
         {menu.label}
         <Icon name="chevron-down" size={18} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
@@ -61,8 +61,8 @@ function Dropdown({ menu }) {
                   to={item.to}
                   className="block rounded-[14px] px-3.5 py-2.5 hover:bg-paper-200 transition-colors duration-[120ms]"
                 >
-                  <span className="block text-[14px] font-medium font-sans text-char">{item.label}</span>
-                  <span className="block text-[12px] text-char-500 mt-0.5">{item.blurb}</span>
+                  <span className="block text-[0.875rem] font-medium font-sans text-char">{item.label}</span>
+                  <span className="block text-[0.875rem] text-char-500 mt-0.5">{item.blurb}</span>
                 </Link>
               ))}
             </div>
@@ -105,16 +105,16 @@ function MobileMenu({ open, onClose, user, signOut }) {
 
             <nav className="flex flex-col gap-1">
               {MARKETING_VISIBLE && (
-                <Link to="/" onClick={onClose} className="text-[16px] font-medium font-sans text-char hover:text-forest-700 py-2 transition-colors duration-[120ms]">
+                <Link to="/" onClick={onClose} className="text-[1rem] font-medium font-sans text-char hover:text-forest-700 py-2 transition-colors duration-[120ms]">
                   For individuals
                 </Link>
               )}
               {menus.map((m) => (
                 <div key={m.label} className="py-2">
-                  <span className="text-[12px] font-label uppercase tracking-[0.14em] font-medium text-char-500">{m.label}</span>
+                  <span className="text-[0.875rem] font-label uppercase tracking-[0.14em] font-medium text-char-500">{m.label}</span>
                   <div className="mt-2 flex flex-col gap-1 pl-2">
                     {m.items.map((item) => (
-                      <Link key={item.to} to={item.to} onClick={onClose} className="text-[15px] font-sans text-char hover:text-forest-700 py-1.5 transition-colors duration-[120ms]">
+                      <Link key={item.to} to={item.to} onClick={onClose} className="text-[0.9375rem] font-sans text-char hover:text-forest-700 py-1.5 transition-colors duration-[120ms]">
                         {item.label}
                       </Link>
                     ))}
@@ -125,7 +125,7 @@ function MobileMenu({ open, onClose, user, signOut }) {
 
             <div className="mt-6 pt-4 border-t border-sand-200 flex flex-col gap-3">
               {user ? (
-                <button onClick={() => { signOut(); onClose(); }} className="text-[14px] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]">
+                <button onClick={() => { signOut(); onClose(); }} className="text-[0.875rem] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]">
                   Log out
                 </button>
               ) : (
@@ -133,7 +133,7 @@ function MobileMenu({ open, onClose, user, signOut }) {
                   <Link to="/onboarding" onClick={onClose} className="pill-forest text-center">
                     Get Remedy free
                   </Link>
-                  <Link to="/login" onClick={onClose} className="text-[14px] font-medium font-sans text-char hover:text-forest-700 text-center py-2 transition-colors duration-[120ms]">
+                  <Link to="/login" onClick={onClose} className="text-[0.875rem] font-medium font-sans text-char hover:text-forest-700 text-center py-2 transition-colors duration-[120ms]">
                     Log in
                   </Link>
                 </>
@@ -182,7 +182,7 @@ export default function Nav({ offset = 0 }) {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5">
             <img src={logoMark} alt="Remedy" className="h-8 w-8" />
-            <span className="text-[20px] font-display font-semibold tracking-tight text-char">
+            <span className="text-[1.25rem] font-display font-semibold tracking-tight text-char">
               Personal Remedies
             </span>
           </Link>
@@ -190,7 +190,7 @@ export default function Nav({ offset = 0 }) {
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8 ml-auto mr-8">
             {MARKETING_VISIBLE && (
-              <Link to="/" className="text-[14px] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]">
+              <Link to="/" className="text-[0.875rem] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]">
                 For individuals
               </Link>
             )}
@@ -204,7 +204,7 @@ export default function Nav({ offset = 0 }) {
             {user ? (
               <button
                 onClick={signOut}
-                className="text-[14px] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]"
+                className="text-[0.875rem] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]"
               >
                 Log out
               </button>
@@ -215,7 +215,7 @@ export default function Nav({ offset = 0 }) {
                 </Link>
                 <Link
                   to="/login"
-                  className="text-[14px] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]"
+                  className="text-[0.875rem] font-medium font-sans text-char hover:text-forest-700 transition-colors duration-[120ms]"
                 >
                   Log in
                 </Link>

@@ -120,10 +120,10 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="font-sans text-[15px] text-char-900">
+        <p className="font-sans text-[0.9375rem] text-char-900">
           We emailed a 6-digit code to <strong>{email}</strong>.
         </p>
-        <p className="font-sans text-[13px] text-char-500 mt-1">Enter it below to continue.</p>
+        <p className="font-sans text-[0.875rem] text-char-500 mt-1">Enter it below to continue.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
@@ -146,18 +146,18 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
           aria-invalid={!!error}
           aria-describedby={error ? 'otp-code-error' : undefined}
           autoFocus
-          className="w-full text-center tracking-[0.5em] text-[22px] font-sans px-4 py-3 bg-white border border-sand-200 rounded-md text-char-900 placeholder:text-char-500 focus:outline-none focus:border-char-700 focus:shadow-[0_0_0_3px_rgba(66,61,54,0.22)] transition-[border-color,box-shadow] duration-[120ms] disabled:opacity-60"
+          className="w-full text-center tracking-[0.5em] text-[1.375rem] font-sans px-4 py-3 bg-white border border-sand-200 rounded-md text-char-900 placeholder:text-char-500 focus:outline-none focus:border-char-700 focus:shadow-[0_0_0_3px_rgba(66,61,54,0.22)] transition-[border-color,box-shadow] duration-[120ms] disabled:opacity-60"
           style={{ minHeight: 44 }}
         />
 
         {error && (
-          <p id="otp-code-error" role="alert" className="font-sans text-[14px] text-signal-avoid">
+          <p id="otp-code-error" role="alert" className="font-sans text-[0.875rem] text-signal-avoid">
             {error.message}
           </p>
         )}
 
         {!error && expiredHint && (
-          <p className="font-sans text-[13px] text-char-500">
+          <p className="font-sans text-[0.875rem] text-char-500">
             Codes expire after about 10 minutes. If yours is old, request a new one below.
           </p>
         )}
@@ -165,7 +165,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
         <button
           type="submit"
           disabled={!isValidCode(code) || verifying}
-          className="w-full bg-char-900 text-[#F3EFE6] font-sans font-semibold text-[16px] py-3 rounded-[6px] hover:bg-char-700 disabled:opacity-50 disabled:cursor-not-allowed active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
+          className="w-full bg-char-900 text-[#F3EFE6] font-sans font-semibold text-[1rem] py-3 rounded-[6px] hover:bg-char-700 disabled:opacity-50 disabled:cursor-not-allowed active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
           style={{ minHeight: 44 }}
         >
           {verifying ? 'Verifying…' : 'Verify code'}
@@ -178,7 +178,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
           onClick={handleResend}
           disabled={!resendReady || resending}
           aria-label={resendReady ? 'Resend code' : `Resend code available in ${secondsLeft} seconds`}
-          className="font-sans text-[14px] font-semibold text-char-900 hover:text-char-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-[120ms]"
+          className="font-sans text-[0.875rem] font-semibold text-char-900 hover:text-char-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors duration-[120ms]"
           style={{ minHeight: 44 }}
         >
           {resending ? 'Sending…' : resendReady ? 'Resend code' : `Resend in ${secondsLeft}s`}
@@ -188,7 +188,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
           <button
             type="button"
             onClick={onCancel}
-            className="font-sans text-[14px] text-char-500 hover:text-char-900 transition-colors duration-[120ms]"
+            className="font-sans text-[0.875rem] text-char-500 hover:text-char-900 transition-colors duration-[120ms]"
             style={{ minHeight: 44 }}
           >
             Use a different email
@@ -197,7 +197,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
       </div>
 
       {resendNote && !error && (
-        <p role="status" className="font-sans text-[13px] text-char-700">
+        <p role="status" className="font-sans text-[0.875rem] text-char-700">
           {resendNote}
         </p>
       )}

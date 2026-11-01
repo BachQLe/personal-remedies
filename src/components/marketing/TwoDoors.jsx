@@ -21,10 +21,10 @@ export default function TwoDoors() {
       <div className="mx-auto max-w-5xl container-px">
         <div className="text-center max-w-[64ch] mx-auto">
           <Reveal>
-            <span className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-char-500">Two paths, one agent</span>
+            <span className="text-[0.875rem] font-label font-semibold tracking-eyebrow uppercase text-char-500">Two paths, one agent</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06]">
+            <h2 className="display mt-5 text-[2.125rem] leading-[1.1] sm:text-[3rem] sm:leading-[1.08] lg:text-[4rem] lg:leading-[1.06]">
               Built for the people living it --{" "}
               <em className="font-display italic font-normal text-forest-700">
                 and the people treating it.
@@ -32,7 +32,7 @@ export default function TwoDoors() {
             </h2>
           </Reveal>
           <Reveal delay={0.2}>
-            <p className="mt-6 text-[17px] leading-[1.6] font-sans text-char-500">
+            <p className="mt-6 text-[1.0625rem] leading-[1.6] font-sans text-char-500">
               The consumer product helps those in need. That same engine can be used to power health-tech partners.
             </p>
           </Reveal>
@@ -45,13 +45,13 @@ export default function TwoDoors() {
               transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
               className="h-full rounded-xl p-8 sm:p-10 bg-forest-700 flex flex-col shadow-card hover:shadow-md"
             >
-              <span className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-yellow-400">
+              <span className="text-[0.875rem] font-label font-semibold tracking-eyebrow uppercase text-yellow-400">
                 For patients and caregivers
               </span>
-              <h3 className="font-display font-medium tracking-tightish mt-4 text-[26px] sm:text-[30px] leading-[1.15] text-white">
+              <h3 className="font-display font-medium tracking-tightish mt-4 text-[1.625rem] sm:text-[1.875rem] leading-[1.15] text-white">
                 Take an active role in your health.
               </h3>
-              <p className="mt-4 text-[15.5px] leading-[1.6] font-sans text-white/80 max-w-[42ch]">
+              <p className="mt-4 text-[0.9688rem] leading-[1.6] font-sans text-white/80 max-w-[42ch]">
                 Guidance tailored to your profile, in plain language, easy to
                 act on.
               </p>
@@ -59,7 +59,7 @@ export default function TwoDoors() {
                 {patientBullets.map((b) => (
                   <li
                     key={b}
-                    className="flex gap-3 text-[15px] leading-[1.5] font-sans text-white/90"
+                    className="flex gap-3 text-[0.9375rem] leading-[1.5] font-sans text-white/90"
                   >
                     <Icon name="arrow-right" size={18} className="text-yellow-400 mt-0.5 flex-shrink-0" />
                     <span>{b}</span>
@@ -68,7 +68,7 @@ export default function TwoDoors() {
               </ul>
               <Link
                 to="/onboarding"
-                className="mt-auto pt-8 inline-flex items-center gap-1.5 text-[14.5px] font-medium text-white border-b border-white/40 self-start hover:border-white transition-colors duration-base"
+                className="mt-auto pt-8 inline-flex items-center gap-1.5 text-[0.9062rem] font-medium text-white border-b border-white/40 self-start hover:border-white transition-colors duration-base"
               >
                 Start free
                 <Icon name="arrow-right" size={16} />
@@ -82,20 +82,20 @@ export default function TwoDoors() {
               transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
               className="h-full rounded-xl p-8 sm:p-10 bg-lavender-700 flex flex-col shadow-card hover:shadow-md"
             >
-              <span className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-yellow-400">
+              <span className="text-[0.875rem] font-label font-semibold tracking-eyebrow uppercase text-yellow-400">
                 For providers and developers
               </span>
-              <h3 className="font-display font-medium tracking-tightish mt-4 text-[26px] sm:text-[30px] leading-[1.15] text-white">
+              <h3 className="font-display font-medium tracking-tightish mt-4 text-[1.625rem] sm:text-[1.875rem] leading-[1.15] text-white">
                 The API behind better outcomes.
               </h3>
-              <p className="mt-4 text-[15.5px] leading-[1.6] font-sans text-white/80 max-w-[42ch]">
+              <p className="mt-4 text-[0.9688rem] leading-[1.6] font-sans text-white/80 max-w-[42ch]">
                 Engage patients in proactive management of their own conditions.
               </p>
               <ul className="mt-7 space-y-3.5">
                 {providerBullets.map((b) => (
                   <li
                     key={b}
-                    className="flex gap-3 text-[15px] leading-[1.5] font-sans text-white/90"
+                    className="flex gap-3 text-[0.9375rem] leading-[1.5] font-sans text-white/90"
                   >
                     <Icon name="arrow-right" size={18} className="text-yellow-400 mt-0.5 flex-shrink-0" />
                     <span>{b}</span>
@@ -104,7 +104,7 @@ export default function TwoDoors() {
               </ul>
               <a
                 href="#api"
-                className="mt-auto pt-8 inline-flex items-center gap-1.5 text-[14.5px] font-medium text-white border-b border-white/40 self-start hover:border-white transition-colors duration-base"
+                className="mt-auto pt-8 inline-flex items-center gap-1.5 text-[0.9062rem] font-medium text-white border-b border-white/40 self-start hover:border-white transition-colors duration-base"
               >
                 Explore the API
                 <Icon name="arrow-right" size={16} />

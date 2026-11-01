@@ -66,7 +66,7 @@ export default function DayStrip({ days, selected, onSelect, bgClassName = 'bg-f
               />
             )}
             <span
-              className={`relative z-10 text-[10px] font-semibold font-sans uppercase
+              className={`relative z-10 text-[0.875rem] font-semibold font-sans uppercase
                 tracking-eyebrow
                 ${isSelected ? 'text-white/70' : isToday ? 'text-blue-500' : 'text-blue-950/50'}`}
             >

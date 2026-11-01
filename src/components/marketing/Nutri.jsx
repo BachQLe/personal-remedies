@@ -67,7 +67,7 @@ function PaperWheel() {
               padding: "0 20px",
             }}
           >
-            <p className="text-[13px] leading-[1.45] font-sans font-medium text-char-900">
+            <p className="text-[0.875rem] leading-[1.45] font-sans font-medium text-char-900">
               {paper.title}
             </p>
           </div>
@@ -95,10 +95,10 @@ export default function Nutri() {
             {/* LEFT -- headline copy */}
             <div>
               <Reveal>
-                <span className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-char-500">Meet Nutri, your AI dietician</span>
+                <span className="text-[0.875rem] font-label font-semibold tracking-eyebrow uppercase text-char-500">Meet Nutri, your AI dietician</span>
               </Reveal>
               <Reveal delay={0.1}>
-                <h2 className="display mt-5 text-[34px] leading-[1.1] sm:text-[48px] sm:leading-[1.08] lg:text-[64px] lg:leading-[1.06] text-char-900">
+                <h2 className="display mt-5 text-[2.125rem] leading-[1.1] sm:text-[3rem] sm:leading-[1.08] lg:text-[4rem] lg:leading-[1.06] text-char-900">
                   We read <span className="font-mono tabular-nums">100,000</span>+ studies{" "}
                   <em className="font-display italic font-normal text-forest-700">
                     so you don't have to
@@ -106,7 +106,7 @@ export default function Nutri() {
                 </h2>
               </Reveal>
               <Reveal delay={0.18}>
-                <p className="mt-3 font-sans text-[18px] sm:text-[20px] text-char-500 tracking-tight leading-[1.5]">
+                <p className="mt-3 font-sans text-[1.125rem] sm:text-[1.25rem] text-char-500 tracking-tight leading-[1.5]">
                   Nutri shows you the everyday foods that ranked for your conditions -- the same everyday foods medical companies can't monetize.
                 </p>
               </Reveal>
@@ -131,7 +131,7 @@ export default function Nutri() {
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.5, delay: 0.4, ease: [0.22, 0.61, 0.36, 1] }}
               >
-                <p className="text-[12px] font-label font-semibold tracking-eyebrow uppercase text-white/75">
+                <p className="text-[0.875rem] font-label font-semibold tracking-eyebrow uppercase text-white/75">
                   <span className="font-mono tabular-nums">100,000</span>+ peer-reviewed studies
                 </p>
                 <PaperWheel />

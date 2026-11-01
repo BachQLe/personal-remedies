@@ -15,7 +15,7 @@ export default function RemediWelcome({ onNext }) {
         />
       </div>
       <div className="text-center pt-3 pb-6">
-        <h1 className="text-[32px] text-balance leading-[1.16] font-semibold tracking-tight" style={{ fontFamily: 'Chillax, sans-serif' }}>
+        <h1 className="text-[2rem] text-balance leading-[1.16] font-semibold tracking-tight" style={{ fontFamily: 'Chillax, sans-serif' }}>
           Eating for your health can feel overwhelming.
         </h1>
         <p className="font-sans text-base leading-relaxed text-blue-950/75 mt-4 max-w-[320px] mx-auto">

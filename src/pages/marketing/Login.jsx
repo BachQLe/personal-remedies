@@ -76,10 +76,10 @@ export default function Login() {
             <img src={remedyMark} alt="Personal Remedies" className="h-10 w-auto" />
           </Link>
 
-          <h1 className="font-display font-semibold tracking-[-0.02em] text-[24px] text-char-900 text-center mb-1">
+          <h1 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-char-900 text-center mb-1">
             Welcome back
           </h1>
-          <p className="font-sans text-[16px] text-char-500 text-center mb-8">
+          <p className="font-sans text-[1rem] text-char-500 text-center mb-8">
             Log in to your account
           </p>
 
@@ -96,7 +96,7 @@ export default function Login() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block font-sans text-[14px] font-medium text-char-900 mb-2">
+                <label className="block font-sans text-[0.875rem] font-medium text-char-900 mb-2">
                   Email address
                 </label>
                 <input
@@ -106,7 +106,7 @@ export default function Login() {
                     setEmail(e.target.value);
                     setError("");
                   }}
-                  className="w-full font-sans text-[16px] px-4 py-3 bg-white border border-sand-200 rounded-md text-char-900 placeholder:text-char-400 focus:outline-none focus:border-char-700 focus:shadow-[0_0_0_3px_rgba(66,61,54,0.22)] transition-[border-color,box-shadow] duration-[120ms]"
+                  className="w-full font-sans text-[1rem] px-4 py-3 bg-white border border-sand-200 rounded-md text-char-900 placeholder:text-char-400 focus:outline-none focus:border-char-700 focus:shadow-[0_0_0_3px_rgba(66,61,54,0.22)] transition-[border-color,box-shadow] duration-[120ms]"
                   placeholder="you@example.com"
                   autoComplete="email"
                   autoFocus
@@ -118,7 +118,7 @@ export default function Login() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.12 }}
-                  className="font-sans text-[14px] text-signal-avoid"
+                  className="font-sans text-[0.875rem] text-signal-avoid"
                 >
                   {error}
                 </motion.p>
@@ -127,7 +127,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={sending}
-                className="w-full bg-char-900 text-[#F3EFE6] font-sans font-semibold text-[16px] py-3 rounded-[6px] hover:bg-char-700 disabled:opacity-50 disabled:cursor-not-allowed active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
+                className="w-full bg-char-900 text-[#F3EFE6] font-sans font-semibold text-[1rem] py-3 rounded-[6px] hover:bg-char-700 disabled:opacity-50 disabled:cursor-not-allowed active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
               >
                 {sending ? "Sending…" : "Continue with email"}
               </button>
@@ -139,7 +139,7 @@ export default function Login() {
               {/* Divider */}
               <div className="mt-8 mb-6 flex items-center gap-3">
                 <div className="flex-1 h-px bg-sand-200" />
-                <span className="font-sans text-[13px] text-char-500">or</span>
+                <span className="font-sans text-[0.875rem] text-char-500">or</span>
                 <div className="flex-1 h-px bg-sand-200" />
               </div>
 
@@ -156,7 +156,7 @@ export default function Login() {
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                   </svg>
-                  <span className="font-sans text-[14px] font-semibold text-char-900">Continue with Google</span>
+                  <span className="font-sans text-[0.875rem] font-semibold text-char-900">Continue with Google</span>
                 </button>
               </div>
             </>
@@ -164,7 +164,7 @@ export default function Login() {
 
           {/* Sign up link */}
           <div className="mt-8 pt-6 border-t border-sand-200">
-            <p className="font-sans text-[14px] text-char-500 text-center">
+            <p className="font-sans text-[0.875rem] text-char-500 text-center">
               No account yet?{" "}
               <Link to="/onboarding" className="text-char-900 font-semibold hover:text-char-700 transition-colors duration-[120ms]">
                 Sign up
@@ -174,7 +174,7 @@ export default function Login() {
         </div>
 
         {/* Legal text outside card */}
-        <p className="mt-6 font-sans text-[12px] text-char-400 text-center leading-relaxed max-w-sm mx-auto">
+        <p className="mt-6 font-sans text-[0.875rem] text-char-400 text-center leading-relaxed max-w-sm mx-auto">
           By continuing, you acknowledge that you understand and agree to the{" "}
           <Link to="/terms" className="text-char-500 hover:text-char-900 transition-colors duration-[120ms]">
             Terms &amp; Conditions

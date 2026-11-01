@@ -6,13 +6,13 @@ export default function TermsOfUse() {
       <div className="bg-paper-200 min-h-screen">
         <div className="mx-auto max-w-[60ch] px-6 py-16 lg:py-24">
           {/* Page header */}
-          <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-3">
+          <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-3">
             Legal
           </p>
-          <h1 className="font-display font-semibold tracking-[-0.02em] text-[36px] md:text-[42px] text-blue-950 mb-2">
+          <h1 className="font-display font-semibold tracking-[-0.02em] text-[2.25rem] md:text-[2.625rem] text-blue-950 mb-2">
             Terms of use
           </h1>
-          <p className="font-sans text-[16px] text-char-500 mb-12">
+          <p className="font-sans text-[1rem] text-char-500 mb-12">
             Last updated: October 2026
           </p>
 
@@ -20,13 +20,13 @@ export default function TermsOfUse() {
 
           {/* Section: Terms of Use Agreement */}
           <section className="mb-12">
-            <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-4">
+            <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Agreement
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[24px] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
               Terms of use agreement
             </h2>
-            <div className="font-sans text-[16px] leading-[1.65] text-char-900 space-y-4">
+            <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
               <p>
                 Personal Remedies, LLC ("Personal Remedies," "we," "us", "Company") maintains this Internet site as a service to our customers and the online community in general. The information presented, including images, text, scores or score indicators and symbols ("Content"), is the property of Personal Remedies and protected by United States and international intellectual property laws. As a user of the site, you may download Content for your personal, non-commercial use. You may not use the Content in any manner inconsistent with this Terms of Use Agreement ("Agreement") or applicable law, nor may you copy, modify or alter the Content.
               </p>
@@ -49,13 +49,13 @@ export default function TermsOfUse() {
 
           {/* Section: Medical Disclaimer */}
           <section className="mb-12">
-            <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-4">
+            <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Disclaimer
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[24px] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
               Medical disclaimer
             </h2>
-            <div className="font-sans text-[16px] leading-[1.65] text-char-900 space-y-4">
+            <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
               <p>
                 This Website does not provide medical advice. The information and the claims made about specific natural remedies on or through this Website have NOT been evaluated by the United States Food and Drug Administration and are NOT approved to diagnose, treat, cure or prevent disease.
               </p>
@@ -87,13 +87,13 @@ export default function TermsOfUse() {
 
           {/* Section: Use of Content */}
           <section className="mb-12">
-            <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-4">
+            <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Content
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[24px] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
               Use of the content of our website
             </h2>
-            <div className="font-sans text-[16px] leading-[1.65] text-char-900 space-y-4">
+            <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
               <p>
                 The Company authorizes you to view or download a single copy of the material on the Website and solely for your personal, noncommercial use, as long as you include the copyright notice, i.e., "©2017, Personal Remedies, LLC. All rights reserved" and other copyright and proprietary rights notices on the Website, if any, at the end of the material.
               </p>
@@ -116,13 +116,13 @@ export default function TermsOfUse() {
 
           {/* Section: Limitations & Prohibited Activities */}
           <section className="mb-12">
-            <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-4">
+            <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Restrictions
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[24px] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
               Limitations of use and prohibited activities
             </h2>
-            <div className="font-sans text-[16px] leading-[1.65] text-char-900 space-y-4">
+            <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
               <p>
                 You may not access or use the Website and its content for any other purpose other than that for which Company makes it available. The Website and Company services are for the personal use of Users only and may not be used in connection with any commercial endeavors except those that are specifically endorsed or approved by Company.
               </p>
@@ -152,13 +152,13 @@ export default function TermsOfUse() {
 
           {/* Section: Use at own risk */}
           <section className="mb-12">
-            <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-4">
+            <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               Liability
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[24px] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
               Use of our website and its content is at your own risk
             </h2>
-            <div className="font-sans text-[16px] leading-[1.65] text-char-900 space-y-4">
+            <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
               <p>
                 While we verify validity of our information against carefully selected sources and apply significant effort to ensure the accurate capture, storage and processing of this information, we can offer no guarantee or commitment on the accuracy, timeliness, applicability and effectiveness of this information for individual users of our Website.
               </p>
@@ -178,13 +178,13 @@ export default function TermsOfUse() {
 
           {/* Section: General Provisions */}
           <section className="mb-12">
-            <p className="font-label text-[12px] uppercase tracking-[.14em] text-char-500 mb-4">
+            <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-4">
               General
             </p>
-            <h2 className="font-display font-semibold tracking-[-0.02em] text-[24px] text-blue-950 mb-4">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.5rem] text-blue-950 mb-4">
               General provisions
             </h2>
-            <div className="font-sans text-[16px] leading-[1.65] text-char-900 space-y-4">
+            <div className="font-sans text-[1rem] leading-[1.65] text-char-900 space-y-4">
               <p>
                 This Agreement shall remain in full force and effect while you use the Website and Company Services or are otherwise a user or member of the Website, as applicable. You may terminate your use or participation at any time, for any reason, by ending your use of the Website. You may also delete your account at any time in the app from Profile. The Company can terminate your access to the Website under circumstances listed earlier. If Company terminates your account for any reason, you are prohibited from registering and creating a new account under your name, a fake or borrowed name, or the name of any third party, even if you may be acting on behalf of the third party. In addition to terminating or suspending your account, Company reserves the right to take appropriate legal action, including without limitation pursuing civil, criminal, and injunctive redress.
               </p>

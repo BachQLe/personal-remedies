@@ -82,10 +82,10 @@ export default function KitchenSink() {
 
         {/* ── Page header ─────────────────────────────── */}
         <header>
-          <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500 mb-2">
+          <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-500 mb-2">
             Design System
           </p>
-          <h1 className="font-display text-[40px] font-semibold tracking-tightish leading-[1.08] text-char-900">
+          <h1 className="font-display text-[2.5rem] font-semibold tracking-tightish leading-[1.08] text-char-900">
             Remedy Component Gallery
           </h1>
           <p className="text-char-500 text-lg mt-2 max-w-prose">
@@ -101,52 +101,52 @@ export default function KitchenSink() {
           <div className="flex flex-col gap-6">
             {/* Display / Serif */}
             <div>
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                 Newsreader (display)
               </p>
               <div className="flex flex-col gap-3">
-                <span className="font-display font-semibold text-[56px] leading-[1.08] tracking-tightish text-char-900">
+                <span className="font-display font-semibold text-[3.5rem] leading-[1.08] tracking-tightish text-char-900">
                   Display 56
                 </span>
-                <span className="font-display font-semibold text-[40px] leading-[1.08] tracking-tightish text-char-900">
+                <span className="font-display font-semibold text-[2.5rem] leading-[1.08] tracking-tightish text-char-900">
                   Heading 1 &mdash; 40px
                 </span>
-                <span className="font-display font-semibold text-[30px] leading-[1.08] tracking-tightish text-char-900">
+                <span className="font-display font-semibold text-[1.875rem] leading-[1.08] tracking-tightish text-char-900">
                   Heading 2 &mdash; 30px
                 </span>
-                <span className="font-display font-semibold text-[23px] leading-snug tracking-tightish text-char-900">
+                <span className="font-display font-semibold text-[1.4375rem] leading-snug tracking-tightish text-char-900">
                   Heading 3 &mdash; 23px
                 </span>
-                <span className="font-display font-semibold text-[19px] leading-snug tracking-tightish text-char-900">
+                <span className="font-display font-semibold text-[1.1875rem] leading-snug tracking-tightish text-char-900">
                   Heading 4 &mdash; 19px
                 </span>
               </div>
             </div>
             {/* Sans / Body */}
             <div>
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                 Hanken Grotesk (body)
               </p>
               <div className="flex flex-col gap-2">
-                <span className="font-sans text-[18px] text-char-900">Body Large &mdash; 18px</span>
-                <span className="font-sans text-[16px] text-char-900">Body &mdash; 16px</span>
-                <span className="font-sans text-[14px] text-char-700">Body Small &mdash; 14px</span>
-                <span className="font-sans text-[13px] text-char-500">Caption &mdash; 13px</span>
-                <span className="font-sans text-[12px] font-bold tracking-eyebrow uppercase text-char-500">
+                <span className="font-sans text-[1.125rem] text-char-900">Body Large &mdash; 18px</span>
+                <span className="font-sans text-[1rem] text-char-900">Body &mdash; 16px</span>
+                <span className="font-sans text-[0.875rem] text-char-700">Body Small &mdash; 14px</span>
+                <span className="font-sans text-[0.875rem] text-char-500">Caption &mdash; 13px</span>
+                <span className="font-sans text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-500">
                   Label / Eyebrow &mdash; 12px
                 </span>
               </div>
             </div>
             {/* Mono / Data */}
             <div>
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                 IBM Plex Mono (data)
               </p>
               <div className="flex flex-col gap-2">
-                <span className="font-mono text-[16px] tabular-nums text-char-900">
+                <span className="font-mono text-[1rem] tabular-nums text-char-900">
                   1,234.56 &mdash; 16px mono
                 </span>
-                <span className="font-mono text-[13px] tabular-nums text-char-500">
+                <span className="font-mono text-[0.875rem] tabular-nums text-char-500">
                   0.0042 mg/dL &mdash; 13px mono
                 </span>
               </div>
@@ -161,7 +161,7 @@ export default function KitchenSink() {
           <div className="flex flex-col gap-6">
             {Object.entries(PALETTES).map(([name, swatches]) => (
               <div key={name}>
-                <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+                <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                   {name}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -171,10 +171,10 @@ export default function KitchenSink() {
                         className="w-14 h-14 rounded-md border border-sand-200"
                         style={{ backgroundColor: hex }}
                       />
-                      <span className="text-[11px] font-mono text-char-500 text-center leading-tight">
+                      <span className="text-[0.875rem] font-mono text-char-500 text-center leading-tight">
                         {token}
                       </span>
-                      <span className="text-[10px] font-mono text-char-400">
+                      <span className="text-[0.875rem] font-mono text-char-400">
                         {hex}
                       </span>
                     </div>
@@ -196,8 +196,8 @@ export default function KitchenSink() {
                   className="w-16 h-16 bg-forest-100 border-2 border-forest-300"
                   style={{ borderRadius: val }}
                 />
-                <span className="text-[12px] font-mono text-char-500">{name}</span>
-                <span className="text-[10px] font-mono text-char-400">{val}</span>
+                <span className="text-[0.875rem] font-mono text-char-500">{name}</span>
+                <span className="text-[0.875rem] font-mono text-char-400">{val}</span>
               </div>
             ))}
           </div>
@@ -214,7 +214,7 @@ export default function KitchenSink() {
                   className="w-20 h-20 bg-white rounded-xl"
                   style={{ boxShadow: val }}
                 />
-                <span className="text-[12px] font-mono text-char-500">{name}</span>
+                <span className="text-[0.875rem] font-mono text-char-500">{name}</span>
               </div>
             ))}
           </div>
@@ -225,7 +225,7 @@ export default function KitchenSink() {
            ══════════════════════════════════════════════ */}
         <GallerySection eyebrow="Foundations" title="Material Symbols Rounded">
           <div>
-            <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+            <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
               Outline (default)
             </p>
             <div className="flex flex-wrap gap-4">
@@ -234,13 +234,13 @@ export default function KitchenSink() {
                   <span className="material-symbols-rounded text-char-700" style={{ fontSize: 28 }}>
                     {icon}
                   </span>
-                  <span className="text-[10px] font-mono text-char-400">{icon}</span>
+                  <span className="text-[0.875rem] font-mono text-char-400">{icon}</span>
                 </div>
               ))}
             </div>
           </div>
           <div className="mt-5">
-            <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+            <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
               Filled
             </p>
             <div className="flex flex-wrap gap-4">
@@ -249,7 +249,7 @@ export default function KitchenSink() {
                   <span className="material-symbols-rounded fill text-forest-700" style={{ fontSize: 28 }}>
                     {icon}
                   </span>
-                  <span className="text-[10px] font-mono text-char-400">{icon}</span>
+                  <span className="text-[0.875rem] font-mono text-char-400">{icon}</span>
                 </div>
               ))}
             </div>
@@ -262,7 +262,7 @@ export default function KitchenSink() {
         <GallerySection eyebrow="Components" title="Buttons">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-3">
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400">
                 PrimaryButton (forest)
               </p>
               <PrimaryButton>Primary Action</PrimaryButton>
@@ -270,7 +270,7 @@ export default function KitchenSink() {
               <PrimaryButton disabled>Disabled</PrimaryButton>
             </div>
             <div className="flex flex-col gap-3">
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400">
                 SecondaryButton (outline)
               </p>
               <SecondaryButton>Secondary Action</SecondaryButton>
@@ -279,7 +279,7 @@ export default function KitchenSink() {
           </div>
 
           <div className="mt-6">
-            <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+            <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
               Pill variants (class-based)
             </p>
             <div className="flex flex-wrap gap-3">
@@ -291,7 +291,7 @@ export default function KitchenSink() {
           </div>
 
           <div className="mt-6">
-            <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+            <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
               Danger (inline)
             </p>
             <button className="pill-btn bg-signal-avoid text-white hover:opacity-90 active:translate-y-[1px] active:scale-[0.99]">
@@ -306,7 +306,7 @@ export default function KitchenSink() {
         <GallerySection eyebrow="Components" title="SignalChip">
           <div className="flex flex-col gap-4">
             <div>
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                 Standard
               </p>
               <div className="flex flex-wrap gap-3">
@@ -316,7 +316,7 @@ export default function KitchenSink() {
               </div>
             </div>
             <div>
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                 Compact
               </p>
               <div className="flex flex-wrap gap-3">
@@ -326,7 +326,7 @@ export default function KitchenSink() {
               </div>
             </div>
             <div>
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                 Label hidden
               </p>
               <div className="flex flex-wrap gap-3">
@@ -336,7 +336,7 @@ export default function KitchenSink() {
               </div>
             </div>
             <div>
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                 Custom label
               </p>
               <div className="flex flex-wrap gap-3">
@@ -354,7 +354,7 @@ export default function KitchenSink() {
         <GallerySection eyebrow="Components" title="ConditionTag">
           <div className="flex flex-col gap-4">
             <div>
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                 Per-condition hues
               </p>
               <div className="flex flex-wrap gap-2">
@@ -366,7 +366,7 @@ export default function KitchenSink() {
               </div>
             </div>
             <div>
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                 Solid variant
               </p>
               <div className="flex flex-wrap gap-2">
@@ -375,7 +375,7 @@ export default function KitchenSink() {
               </div>
             </div>
             <div>
-              <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+              <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
                 With remove button
               </p>
               <div className="flex flex-wrap gap-2">
@@ -403,13 +403,13 @@ export default function KitchenSink() {
             ))}
           </div>
           <div className="mt-4">
-            <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
+            <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-400 mb-3">
               With eyebrow + title + action
             </p>
             <Card
               eyebrow="Daily Summary"
               title="Your food plan for today"
-              action={<button className="pill-forest text-[13px] px-4 py-1.5">View all</button>}
+              action={<button className="pill-forest text-[0.875rem] px-4 py-1.5">View all</button>}
             >
               <p className="text-sm text-char-500">Card content goes here.</p>
             </Card>
@@ -436,7 +436,7 @@ export default function KitchenSink() {
             icon="search"
             title="No results found"
             body="Try a different food or ingredient to see guidance."
-            action={<button className="pill-forest text-[14px]">Browse foods</button>}
+            action={<button className="pill-forest text-[0.875rem]">Browse foods</button>}
           />
         </GallerySection>
 
@@ -455,7 +455,7 @@ export default function KitchenSink() {
                 onChange={(e) => setInputVal(e.target.value)}
                 placeholder="Enter a food name..."
                 className="w-full h-[48px] px-4 rounded-md border border-sand-200 bg-white
-                  text-char-900 font-sans text-[15px] placeholder:text-char-400
+                  text-char-900 font-sans text-[0.9375rem] placeholder:text-char-400
                   outline-none transition-shadow duration-fast
                   focus:border-forest-600 focus:ring-[3px] focus:ring-forest-600/20"
               />
@@ -466,7 +466,7 @@ export default function KitchenSink() {
               </label>
               <select
                 className="w-full h-[48px] px-4 rounded-md border border-sand-200 bg-white
-                  text-char-900 font-sans text-[15px]
+                  text-char-900 font-sans text-[0.9375rem]
                   outline-none transition-shadow duration-fast
                   focus:border-forest-600 focus:ring-[3px] focus:ring-forest-600/20"
               >
@@ -483,7 +483,7 @@ export default function KitchenSink() {
                 rows={3}
                 placeholder="Add notes..."
                 className="w-full px-4 py-3 rounded-md border border-sand-200 bg-white
-                  text-char-900 font-sans text-[15px] placeholder:text-char-400
+                  text-char-900 font-sans text-[0.9375rem] placeholder:text-char-400
                   outline-none transition-shadow duration-fast resize-none
                   focus:border-forest-600 focus:ring-[3px] focus:ring-forest-600/20"
               />
@@ -512,13 +512,13 @@ function GallerySection({ eyebrow, title, children }) {
   return (
     <section className="flex flex-col gap-5">
       {eyebrow && (
-        <p className="text-[12px] font-bold tracking-eyebrow uppercase text-char-500">
+        <p className="text-[0.875rem] font-bold tracking-eyebrow uppercase text-char-500">
           {eyebrow}
         </p>
       )}
       <div className="bg-white rounded-xl border border-sand-200 shadow-card p-6 sm:p-8">
         {title && (
-          <h2 className="font-display text-[23px] font-semibold tracking-tightish leading-snug text-char-900 mb-5">
+          <h2 className="font-display text-[1.4375rem] font-semibold tracking-tightish leading-snug text-char-900 mb-5">
             {title}
           </h2>
         )}
