@@ -117,6 +117,7 @@ function DetailList({ group, listType, groupLabel, onSelectFood }) {
               key={food.id}
               food={food}
               studyCount={food.referenceTotal}
+              showGroup={false}
               onSelect={(selected) => onSelectFood(selected, listType)}
             />
           )}

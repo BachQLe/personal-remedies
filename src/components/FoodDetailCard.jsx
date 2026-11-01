@@ -581,7 +581,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 loading="eager"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-sand-100">
+              <div className="absolute inset-0 flex items-center justify-center bg-sand-100 pb-[45%]">
                 <Icon name={nonFoodIcon || 'leaf'} size={48} className="text-char-300" aria-hidden="true" />
               </div>
             )}

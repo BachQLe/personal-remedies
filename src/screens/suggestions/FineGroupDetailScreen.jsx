@@ -183,6 +183,7 @@ function FineGroupDetail({ fineGroupId }) {
                     key={food.id}
                     food={food}
                     studyCount={food.referenceTotal}
+                    showGroup={false}
                     onSelect={handleSelectFood}
                   />
                 ))}

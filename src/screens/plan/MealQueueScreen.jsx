@@ -380,7 +380,7 @@ export default function MealQueueScreen() {
           `.plan-print-view` (bottom of this file) renders on paper. */}
       <PageHeader
         title={COPY.planTitle}
-        description={firstRunEmpty ? COPY.stepGenerate : COPY.stepDay}
+        description={plan ? COPY.stepDay : COPY.stepGenerate}
         className="bg-forest-300 rm-print-hide"
         right={
           <div className="flex items-center gap-2 shrink-0 -mr-1">

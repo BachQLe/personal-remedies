@@ -98,9 +98,9 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
     return (
       <div
         className="flex-none w-full pl-4 pr-3 py-3 rounded-sm bg-white text-char-900
-          border border-sand-200 shadow-sm font-sans flex items-center gap-3"
+          border border-sand-200 shadow-sm font-sans flex flex-col items-start gap-1"
       >
-        <button type="button" onClick={onClick} className="flex-1 min-w-0 flex items-center gap-3 text-left py-2">
+        <button type="button" onClick={onClick} className="w-full min-w-0 flex items-center gap-3 text-left py-1">
           <span className="flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center bg-forest-100 text-forest-700">
             <Icon name="leaf" size={18} aria-hidden="true" />
           </span>
@@ -115,7 +115,7 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
           type="button"
           onClick={onGoodForMe}
           aria-label={`Check ${title} against my profile`}
-          className="flex-shrink-0 px-3 py-2 rounded-pill border border-forest-400 bg-forest-50 text-forest-700
+          className="min-h-[44px] px-3 py-2 rounded-pill border border-forest-400 bg-forest-50 text-forest-700
             text-xs font-semibold transition-colors duration-fast hover:bg-forest-100 active:bg-forest-100"
         >
           Check against my profile
@@ -235,18 +235,7 @@ export default function SearchScreen({ active, onClose }) {
   useEffect(() => {
     if (!active) return undefined;
     const t = setTimeout(() => inputRef.current?.focus(), 50);
-    // Reset on the way out (cleanup runs when `active` flips back to false,
-    // or on unmount) so the surface reopens blank next time, instead of
-    // setting state synchronously in the effect body itself.
-    return () => {
-      clearTimeout(t);
-      setQuery('');
-      setCommittedQueryState('');
-      setResultsDismissed(false);
-      setDebouncePending(false);
-      setSelectedItem(null);
-      setGoodForFood(null);
-    };
+    return () => clearTimeout(t);
   }, [active]);
 
   useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);

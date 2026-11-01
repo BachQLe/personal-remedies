@@ -1456,7 +1456,7 @@ const LISTED_WHATEVER_RANK = ['beverage', 'snack', 'dessert'];
  * The recipe lists for Choose recipes / Best & Worst Choices (4.1, 4.2, 7.3):
  * `getRecipes`' top 20, plus Sunny's Beverage, Snack and Dessert recipes and her
  * R items (prepared foods) whatever their rank. Those extras are scored one by
- * one on /goodfor (bounded, cached 8h); one that can't be scored stays listed,
+ * one on /goodfor (bounded, cached 8h); one that fails to score stays listed,
  * unrated and unsaveable, rather than disappearing.
  * @param {import('./types.js').Profile} profile
  * @returns {Promise<{ recipes: import('./types.js').Recipe[], unscorableReason: string|null }>}
@@ -1470,8 +1470,12 @@ export async function getCategoryRecipes(profile) {
     async (ids) => {
       const top = await getRecipesRaw(ids);
       const listed = new Set(top.map((r) => r.id));
+      // Sunny's newest recipes aren't loaded in Nutridigm yet (/goodfor answers
+      // 400), so a row joins once the item dictionary has its id.
+      const loaded = await ensureFoodItems();
       const extras = [
         ...loadRecipeOverlay()
+          .filter((row) => loaded.has(row.foodItemID))
           .filter((row) => [row.mealType, ...(row.alsoFits ?? [])].some((type) => LISTED_WHATEVER_RANK.includes(type)))
           .map((row) => ({ id: row.foodItemID, name: row.name })),
         ...getRecipeFlaggedItems().map((item) => ({
