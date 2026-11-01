@@ -101,3 +101,15 @@ describe('getIngredientImageOrIcon: opt-in sentinel resolver', () => {
     expect(result).toEqual({ photo: '/images/vitamin-d.jpg' });
   });
 });
+
+describe('dairy, fats and oils photos (Mory: salted margarine showed a strawberry dessert)', () => {
+  const DESSERT_PHOTO = '1488477181946-6428a0291777';
+
+  it.each(['Margarine (salted)', 'Margarine (unsalted)'])('%s gets the spread photo, not the dessert', (name) => {
+    expect(getIngredientImage(name, 'g')).toContain('1505206448417-789506e24f62');
+  });
+
+  it.each(['Safflower oil', 'Goose fat', 'Whipped cream', 'Half and Half cream'])('%s no longer falls back to the dessert', (name) => {
+    expect(getIngredientImage(name, 'g')).not.toContain(DESSERT_PHOTO);
+  });
+});

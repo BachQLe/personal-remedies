@@ -1,0 +1,1164 @@
+item_id,item_name,category,unit_of_measure_from_api
+1,Abalone,Fish & Seafood,
+2,Anchovy,Fish & Seafood,
+3,Bacon,"Meat, Red Meat & Organ Meats",
+4,Freshwater bass,Fish & Seafood,
+5,Seabass,Fish & Seafood,
+6,Striped bass,Fish & Seafood,
+7,Bear meat,"Meat, Red Meat & Organ Meats",
+8,Beaver meat,"Meat, Red Meat & Organ Meats",
+9,Beef,"Meat, Fish & Poultry",
+10,Beef brain,"Meat, Red Meat & Organ Meats",
+11,Beef chuck/brisket,"Meat, Red Meat & Organ Meats",
+12,Beef filet mignon,"Meat, Red Meat & Organ Meats",
+13,Beef heart,"Meat, Red Meat & Organ Meats",
+15,Beef kidneys,"Meat, Red Meat & Organ Meats",
+16,Beef liver,"Meat, Red Meat & Organ Meats",
+17,Beef rib eye,"Meat, Red Meat & Organ Meats",
+18,Beef ribs,"Meat, Red Meat & Organ Meats",
+19,Beef round steak,"Meat, Red Meat & Organ Meats",
+20,Beef shank,"Meat, Red Meat & Organ Meats",
+21,Beef spleen,"Meat, Red Meat & Organ Meats",
+22,Beef tenderloin/T-bone,"Meat, Red Meat & Organ Meats",
+23,Beef tongue,"Meat, Red Meat & Organ Meats",
+24,Beef top sirloin,"Meat, Red Meat & Organ Meats",
+25,High heel shoes,Alternative therapies & Misc.,
+26,Dried cured beef,"Meat, Red Meat & Organ Meats",
+27,Ground beef,"Meat, Red Meat & Organ Meats",
+28,Beerwurst beer salami,"Meat, Red Meat & Organ Meats",
+29,Buffalo/Bison meat,"Meat, Red Meat & Organ Meats",
+30,Bluefish,Fish & Seafood,
+31,Boar meat,"Meat, Red Meat & Organ Meats",
+32,Bologna,"Meat, Red Meat & Organ Meats",
+33,Burbot,Fish & Seafood,
+34,Butterfish,Fish & Seafood,
+35,Squid (Calamari),Fish & Seafood,
+36,Caribou meat,"Meat, Red Meat & Organ Meats",
+37,Carp,Fish & Seafood,
+38,Catfish,Fish & Seafood,
+40,Chicken,"Meat, Fish & Poultry",
+41,Chicken breast (no skin),Poultry,
+42,Chicken dark meat,Poultry,
+43,Chicken giblets,Poultry,
+44,Chicken heart,Poultry,
+45,Chicken liver,Poultry,
+46,Chicken skin,Poultry,
+47,Chicken wings,Poultry,
+48,Chorizo,"Meat, Red Meat & Organ Meats",
+49,Cisco,Fish & Seafood,
+50,Cisco (smoked),Fish & Seafood,
+51,Clams,Fish & Seafood,
+52,Cod,Fish & Seafood,
+53,Corned beef,"Meat, Red Meat & Organ Meats",
+54,Alaskan king crab,Fish & Seafood,
+55,Blue crab,Fish & Seafood,
+56,Dungeness crab,Fish & Seafood,
+57,Crayfish,Fish & Seafood,
+58,Croaker,Fish & Seafood,
+59,Cured meats,"Meat, Red Meat & Organ Meats",
+60,Cusk,Fish & Seafood,
+61,Cuttlefish,Fish & Seafood,
+62,Dolphinfish (Mahi-Mahi),Fish & Seafood,
+63,Drum,Fish & Seafood,
+64,Duck (no skin),Poultry,
+65,Eel,Fish & Seafood,
+66,Fish,"Meat, Fish & Poultry",
+68,Flatfish (flounder & sole),Fish & Seafood,
+69,Beef frankfurter,"Meat, Red Meat & Organ Meats",
+70,Chicken frankfurter,"Meat, Red Meat & Organ Meats",
+71,Game birds,"Meat, Fish & Poultry",
+72,Game meat,"Meat, Fish & Poultry",
+73,Goose,Poultry,
+74,Grouper,Fish & Seafood,
+75,Guinea hen,Poultry,
+76,Haddock,Fish & Seafood,
+77,Halibut,Fish & Seafood,
+78,Herring,Fish & Seafood,
+79,Lamb,"Meat, Fish & Poultry",
+80,Lamb brain,"Meat, Red Meat & Organ Meats",
+81,Lamb heart,"Meat, Red Meat & Organ Meats",
+82,Lamb kidneys,"Meat, Red Meat & Organ Meats",
+83,Lamb leg,"Meat, Red Meat & Organ Meats",
+84,Lamb liver,"Meat, Red Meat & Organ Meats",
+85,Lamb loin,"Meat, Red Meat & Organ Meats",
+86,Lamb ribs,"Meat, Red Meat & Organ Meats",
+87,Lamb shoulder,"Meat, Red Meat & Organ Meats",
+88,Lamb spleen,"Meat, Red Meat & Organ Meats",
+89,Lamb tongue,"Meat, Red Meat & Organ Meats",
+90,Ground lamb,"Meat, Red Meat & Organ Meats",
+91,Ling,Fish & Seafood,
+92,Lingcod,Fish & Seafood,
+93,Liver,"Meat, Fish & Poultry",
+94,Lobster,Fish & Seafood,
+95,Spiny lobster,Fish & Seafood,
+96,Luncheon/processed meats,"Meat, Fish & Poultry",
+98,Cured beef luncheon meat,"Meat, Red Meat & Organ Meats",
+99,Mackerel,Fish & Seafood,
+100,King mackerel,Fish & Seafood,
+102,Meat,"Meat, Fish & Poultry",
+103,Milkfish,Fish & Seafood,
+104,Monkfish,Fish & Seafood,
+105,Mullet,Fish & Seafood,
+106,Mussels,Fish & Seafood,
+107,Northern pike,Fish & Seafood,
+108,Octopus,Fish & Seafood,
+109,Orange roughy,Fish & Seafood,
+110,Organ meats,"Meat, Fish & Poultry",
+111,Oysters,Fish & Seafood,
+112,"Pancreas (lamb, beef, veal)","Meat, Red Meat & Organ Meats",
+113,Pastrami (cured beef),"Meat, Red Meat & Organ Meats",
+114,Pastrami (turkey),"Meat, Red Meat & Organ Meats",
+115,Pepperoni,"Meat, Red Meat & Organ Meats",
+116,Perch,Fish & Seafood,
+117,Pheasant,Poultry,
+118,Pheasant breast,Poultry,
+119,Pollock,Fish & Seafood,
+120,Pompano fish,Fish & Seafood,
+121,Pork,"Meat, Fish & Poultry",
+122,Pork back ribs,"Meat, Red Meat & Organ Meats",
+123,Food prep -- well-cooked,Alternative therapies & Misc.,
+124,Pork cured ham,"Meat, Red Meat & Organ Meats",
+125,Pork headcheese,"Meat, Red Meat & Organ Meats",
+126,Pork heart,"Meat, Red Meat & Organ Meats",
+127,Pork kidneys,"Meat, Red Meat & Organ Meats",
+128,Pork leg/ham,"Meat, Red Meat & Organ Meats",
+129,Pork liver,"Meat, Red Meat & Organ Meats",
+130,Pork liver cheese,"Meat, Red Meat & Organ Meats",
+131,Pork loin/sirloin,"Meat, Red Meat & Organ Meats",
+132,Pork lungs,"Meat, Red Meat & Organ Meats",
+133,Use your humidifier,Alternative therapies & Misc.,
+134,Pork shldr,"Meat, Red Meat & Organ Meats",
+135,Pork skins,"Meat, Red Meat & Organ Meats",
+136,Pork spare ribs,"Meat, Red Meat & Organ Meats",
+137,Pork spleen,"Meat, Red Meat & Organ Meats",
+138,Poultry or Fowl,"Meat, Fish & Poultry",
+139,Pout,Fish & Seafood,
+140,Pumpkinseed sunfish,Fish & Seafood,
+141,Quail,Poultry,
+142,Quail breast,Poultry,
+143,Rabbit meat,"Meat, Red Meat & Organ Meats",
+144,Rockfish,Fish & Seafood,
+145,Sablefish,Fish & Seafood,
+146,Salami,"Meat, Red Meat & Organ Meats",
+147,"Salmon (smoked, Lox)",Fish & Seafood,
+148,Pink salmon,Fish & Seafood,
+149,Sardines,Fish & Seafood,
+150,Blood sausage,"Meat, Red Meat & Organ Meats",
+151,Liver sausage,"Meat, Red Meat & Organ Meats",
+152,Meatless sausage,Fast & Prepared Foods,
+153,Smoked sausage,"Meat, Red Meat & Organ Meats",
+154,Scallops,Fish & Seafood,
+155,Scup,Fish & Seafood,
+156,Seafood,"Meat, Fish & Poultry",
+157,Seatrout,Fish & Seafood,
+158,Shad,Fish & Seafood,
+159,Shark,Fish & Seafood,
+160,Sheepshead,Fish & Seafood,
+161,Shellfish,"Meat, Fish & Poultry",
+162,Shower/Bath (see note),Alternative therapies & Misc.,
+163,Smelt,Fish & Seafood,
+164,Snail,Fish & Seafood,
+165,Snapper,Fish & Seafood,
+166,Spot,Fish & Seafood,
+167,Squab (pigeon),Poultry,
+168,Sturgeon,Fish & Seafood,
+169,Sucker,Fish & Seafood,
+170,Surimi,Fish & Seafood,
+171,Swordfish,Fish & Seafood,
+172,Tilapia,Fish & Seafood,
+173,Tilefish,Fish & Seafood,
+174,Trout,Fish & Seafood,
+175,Blue fin tuna,Fish & Seafood,
+176,Canned tuna,Fish & Seafood,
+177,Yellowfin tuna,Fish & Seafood,
+178,Turbot,Fish & Seafood,
+179,Turkey,"Meat, Fish & Poultry",
+180,Turkey breast,Poultry,
+181,Turkey dark meat,Poultry,
+182,Turkey giblets,Poultry,
+183,Turkey heart,Poultry,
+184,Turkey liver,Poultry,
+185,Turkey skins,Poultry,
+186,Veal,"Meat, Fish & Poultry",
+187,Veal heart,"Meat, Red Meat & Organ Meats",
+188,Veal kidneys,"Meat, Red Meat & Organ Meats",
+189,Veal liver,"Meat, Red Meat & Organ Meats",
+190,Veal loin,"Meat, Red Meat & Organ Meats",
+191,Veal lungs,"Meat, Red Meat & Organ Meats",
+192,Veal shank,"Meat, Red Meat & Organ Meats",
+193,Veal shoulder,"Meat, Red Meat & Organ Meats",
+194,Veal spleen,"Meat, Red Meat & Organ Meats",
+195,Veal thymus,"Meat, Red Meat & Organ Meats",
+196,Veal tongue,"Meat, Red Meat & Organ Meats",
+197,Venison,"Meat, Red Meat & Organ Meats",
+198,Walleye,Fish & Seafood,
+199,Whelk,Fish & Seafood,
+200,White fish,Fish & Seafood,
+201,White fish (smoked),Fish & Seafood,
+202,Whiting,Fish & Seafood,
+203,Wolffish,Fish & Seafood,
+204,Yellowtail,Fish & Seafood,
+206,Alfalfa sprouts,Beans & Legumes,
+208,Adzuki beans,Beans & Legumes,
+209,Baked beans,Beans & Legumes,
+210,Black beans,Beans & Legumes,
+211,Black-eyed peas,Beans & Legumes,
+212,Fava beans,Beans & Legumes,
+213,Hyacinth beans,Beans & Legumes,
+214,Kidney beans,Beans & Legumes,
+215,Lima beans,Beans & Legumes,
+216,Moth beans,Beans & Legumes,
+217,Mung beans,Beans & Legumes,
+218,Navy beans,Beans & Legumes,
+219,Pinto beans,Beans & Legumes,
+220,Winged beans,Beans & Legumes,
+221,Yardlong beans,Beans & Legumes,
+222,Yellow beans,Beans & Legumes,
+223,Beans/Legumes,"Eggs, Beans, Nuts and Seeds",
+230,Chickpeas,Beans & Legumes,
+235,Egg (raw),Eggs & Preparations,
+236,Eggs,"Eggs, Beans, Nuts and Seeds",
+237,Egg substitute,Eggs & Preparations,
+238,Egg white,Eggs & Preparations,
+239,Egg yolk,Eggs & Preparations,
+240,Hard boiled egg,Eggs & Preparations,
+241,Duck egg,Eggs & Preparations,
+245,Lentils,Beans & Legumes,
+246,Lupin,Beans & Legumes,
+250,Green peas,Beans & Legumes,
+251,Split peas,Beans & Legumes,
+252,Sugar/snap peas non-org,Beans & Legumes,
+268,Soybeans (dried),Beans & Legumes,
+269,Soybeans (green),Beans & Legumes,
+272,Abiyuch,Fruits & Juices,
+273,Acerola,Fruits & Juices,
+275,Apples non-organic,Fruits & Juices,
+277,Apricots,Fruits & Juices,
+279,Avocado,Fruits & Juices,
+280,Banana,Fruits & Juices,
+282,Berries,Fruits & Juices,
+283,Blackberries,Fruits & Juices,
+284,Blueberries non-organic,Fruits & Juices,
+285,Boysenberries,Fruits & Juices,
+286,Breadfruit,Fruits & Juices,
+287,Cantaloupe,Fruits & Juices,
+288,Cherries non-organic,Fruits & Juices,
+289,Citrus fruits,Fruits & Juices,
+290,Cowberries,Fruits & Juices,
+291,Cranberries,Fruits & Juices,
+294,Currants (raw),Fruits & Juices,
+297,Durian,Fruits & Juices,
+298,Elderberries,Fruits & Juices,
+299,Figs,Fruits & Juices,
+301,Fruits & juices,Fruits & Juices,
+303,Gooseberries,Fruits & Juices,
+305,Grapefruit non-organic,Fruits & Juices,
+307,Grapes non-organic,Fruits & Juices,
+308,Guava,Fruits & Juices,
+309,Honeydew melon,Fruits & Juices,
+310,Jujube (fruit),Fruits & Juices,
+311,Kiwi fruit,Fruits & Juices,
+312,Kumquats,Fruits & Juices,
+313,Lemon,Fruits & Juices,
+314,Lime,Fruits & Juices,
+315,Litchi,Fruits & Juices,
+317,Loganberry,Fruits & Juices,
+318,Longans,Fruits & Juices,
+320,Mango,Fruits & Juices,
+321,Mulberries,Fruits & Juices,
+322,Natal Plum (Carissa),Fruits & Juices,
+323,Nectarine non-organic,Fruits & Juices,
+326,Oranges non-organic,Fruits & Juices,
+327,Papaya,Fruits & Juices,
+328,Passion fruit,Fruits & Juices,
+329,Peaches non-organic,Fruits & Juices,
+331,Pears non-organic,Fruits & Juices,
+333,Persimmons,Fruits & Juices,
+334,Pineapple,Fruits & Juices,
+336,Pitanga,Fruits & Juices,
+337,Plantains,Fruits & Juices,
+338,Plum non-organic,Fruits & Juices,
+339,Pomegranate,Fruits & Juices,
+343,Pomelo,Fruits & Juices,
+344,Quince,Fruits & Juices,
+346,Raspberries non-organic,Fruits & Juices,
+347,Oxalate,"Vitamins, Minerals & Other",mg
+348,Rhubarb,Fruits & Juices,
+349,Rowal,Fruits & Juices,
+350,Strawberries non-organic,Fruits & Juices,
+351,Tangerines non-organic,Fruits & Juices,
+352,Tapioca pearls,Alternative therapies & Misc.,
+353,Watermelon,Fruits & Juices,
+354,Amaranth leaves,Vegetables,
+355,Arrowhead,Vegetables,
+356,Arrowroot,Vegetables,
+357,Artichoke,Vegetables,
+358,Jerusalem artichoke,Vegetables,
+359,Arugula,Vegetables,
+360,Asparagus,Vegetables,
+361,Balsam pear,Vegetables,
+362,Balsam pear leafy tips,Vegetables,
+363,Beet greens,Vegetables,
+364,Beets,Vegetables,
+365,Green bell peppers non-org,Vegetables,
+366,Red bell peppers non-org,Vegetables,
+367,Bok choy,Vegetables,
+368,Borage,Vegetables,
+369,Broccoli non-organic,Vegetables,
+370,Chinese broccoli,Vegetables,
+371,Brussels sprouts,Vegetables,
+372,Cabbage (Cruciferous) family,Vegetables,
+373,Green cabbage,Vegetables,
+374,Red cabbage,Vegetables,
+375,Savoy cabbage,Vegetables,
+376,Carrots non-organic,Vegetables,
+377,Cauliflower,Vegetables,
+378,Celery non-organic,Vegetables,
+379,Celtuce,Vegetables,
+380,Chicory greens,Vegetables,
+381,Garland Chrysanthemum,Vegetables,
+382,Daikon,Vegetables,
+383,Collards non-organic,Vegetables,
+384,Cowpeas leafy tips,Vegetables,
+385,Cucumbers w/peel non-org,Vegetables,
+386,Dandelion Greens,Vegetables,
+387,Dark green leafy veg's,Vegetables,
+388,Eggplant,Vegetables,
+389,Escarole/Endive,Vegetables,
+390,Epazote,Vegetables,
+391,Fennel (Bulb),Vegetables,
+392,Fiddlehead ferns,Vegetables,
+394,Garden cress,Vegetables,
+395,Garlic,Vegetables,
+396,Grape leaves,Vegetables,
+397,Green beans non-organic,Vegetables,
+398,Green onions (scallions),Vegetables,
+399,Hearts of palm,Vegetables,
+400,Kale non-organic,Vegetables,
+401,Kelp,Vegetables,
+402,Kohlrabi,Vegetables,
+403,Lambsquarters,Vegetables,
+404,Leeks,Vegetables,
+405,Romaine lettuce non-org,Vegetables,
+406,Head lettuce non-organic,Vegetables,
+407,Loose leaf lettuce non-org,Vegetables,
+408,Lotus root,Vegetables,
+409,Jew's ear mushrooms,Vegetables,
+410,Portabella mushrooms,Vegetables,
+411,Shitake mushrooms,Vegetables,
+412,Various mushrooms,Vegetables,
+413,Mustard greens non-organic,Vegetables,
+414,Mustard spinach,Vegetables,
+415,Night-shade family,Vegetables,
+416,Nopal,Vegetables,
+417,Okra,Vegetables,
+418,Onions,Vegetables,
+419,Parsnips,Vegetables,
+424,Peppers (hot variety),Vegetables,
+428,Pigeon peas,Beans & Legumes,
+429,Pokeberry shoots,Vegetables,
+430,Potato non-organic,Vegetables,
+431,Potatoes w/skin non-org,Vegetables,
+432,Pumpkin non-organic,Vegetables,
+433,Pumpkin flowers,Vegetables,
+434,Purslane,Vegetables,
+435,Radishes,Vegetables,
+436,Root vegetables,Vegetables,
+437,Rutabaga,Vegetables,
+438,Sesbania Flower,Vegetables,
+439,Shallots,Vegetables,
+440,Spinach non-organic,Vegetables,
+441,Acorn squash non-organic,Vegetables,
+442,Butternut squash non-org,Vegetables,
+443,Sweet potatoes,Vegetables,
+444,Sweet potatoes leaves,Vegetables,
+445,Swiss chard,Vegetables,
+446,Taro,Vegetables,
+447,Taro leaves,Vegetables,
+448,Tahitian taro,Vegetables,
+450,Tomatoes non-organic,Vegetables,
+452,Turnip greens,Vegetables,
+453,Turnips,Vegetables,
+454,Vegetables,Vegetables,
+455,Vine spinach,Vegetables,
+457,Watercress,Vegetables,
+458,Winged beans leaves,Vegetables,
+459,Yam,Vegetables,
+460,Yellow-orange fruits & veg's,Vegetables,
+461,Zucchini non-organic,Vegetables,
+462,Amaranth,"Breads, Grains, Cereals, Pasta",
+463,Bagels (plain),"Breads, Grains, Cereals, Pasta",
+464,Barley,"Breads, Grains, Cereals, Pasta",
+465,Biscuits,"Breads, Grains, Cereals, Pasta",
+466,Bread sticks,"Breads, Grains, Cereals, Pasta",
+467,Banana bread,"Breads, Grains, Cereals, Pasta",
+468,Cornbread,"Breads, Grains, Cereals, Pasta",
+469,Italian bread,"Breads, Grains, Cereals, Pasta",
+470,Oat bran bread,"Breads, Grains, Cereals, Pasta",
+471,Pumpernickel bread,"Breads, Grains, Cereals, Pasta",
+472,Various bread,"Breads, Grains, Cereals, Pasta",
+473,Pasteurized products,Alternative therapies & Misc.,
+474,White bread,"Breads, Grains, Cereals, Pasta",
+475,Whole-wheat bread,"Breads, Grains, Cereals, Pasta",
+476,Buckwheat,"Breads, Grains, Cereals, Pasta",
+477,Bulgur,"Breads, Grains, Cereals, Pasta",
+478,Bran flakes cereal,"Breads, Grains, Cereals, Pasta",
+479,Corn flakes cereal,"Breads, Grains, Cereals, Pasta",
+480,Cream of wheat,"Breads, Grains, Cereals, Pasta",
+481,Granola cereal,"Breads, Grains, Cereals, Pasta",
+482,Rice crisps cereal,"Breads, Grains, Cereals, Pasta",
+483,Shredded wheat cereal,"Breads, Grains, Cereals, Pasta",
+484,Wheat germ cereal,"Breads, Grains, Cereals, Pasta",
+485,Whole-wheat cereal,"Breads, Grains, Cereals, Pasta",
+486,Cereals,"Breads, Grains, Cereals, Pasta",
+487,Corn,"Breads, Grains, Cereals, Pasta",
+489,Couscous,"Breads, Grains, Cereals, Pasta",
+491,Melba toast,"Breads, Grains, Cereals, Pasta",
+497,Croissant,"Breads, Grains, Cereals, Pasta",
+498,Danish pastry,"Breads, Grains, Cereals, Pasta",
+499,Donuts,"Breads, Grains, Cereals, Pasta",
+501,English muffins,"Breads, Grains, Cereals, Pasta",
+502,Whole-wheat English muffins,"Breads, Grains, Cereals, Pasta",
+503,Whole grains,"Breads, Grains, Cereals, Pasta",
+504,Granola bars,"Breads, Grains, Cereals, Pasta",
+505,Millet,"Breads, Grains, Cereals, Pasta",
+506,Blueberry muffins,"Breads, Grains, Cereals, Pasta",
+507,Corn muffins,"Breads, Grains, Cereals, Pasta",
+508,Oat bran muffins,"Breads, Grains, Cereals, Pasta",
+509,Wheat bran muffins,"Breads, Grains, Cereals, Pasta",
+510,Chinese chow Mein noodles,"Breads, Grains, Cereals, Pasta",
+511,Egg noodles,"Breads, Grains, Cereals, Pasta",
+512,Japanese noodles,"Breads, Grains, Cereals, Pasta",
+513,Rice noodles,"Breads, Grains, Cereals, Pasta",
+514,Oat bran,"Breads, Grains, Cereals, Pasta",
+515,Oatmeal (cereal),"Breads, Grains, Cereals, Pasta",
+517,Pasta,"Breads, Grains, Cereals, Pasta",
+518,Quinoa,"Breads, Grains, Cereals, Pasta",
+521,Brown rice,"Breads, Grains, Cereals, Pasta",
+522,Various rice,"Breads, Grains, Cereals, Pasta",
+523,White rice,"Breads, Grains, Cereals, Pasta",
+524,Wild rice,"Breads, Grains, Cereals, Pasta",
+525,Kaiser dinner rolls,"Breads, Grains, Cereals, Pasta",
+526,Whole-wheat dinner rolls,"Breads, Grains, Cereals, Pasta",
+527,French rolls,"Breads, Grains, Cereals, Pasta",
+528,Hamburger & hot dog rolls,"Breads, Grains, Cereals, Pasta",
+532,Spaghetti,"Breads, Grains, Cereals, Pasta",
+533,Spinach spaghetti,"Breads, Grains, Cereals, Pasta",
+534,Whole-wheat spaghetti,"Breads, Grains, Cereals, Pasta",
+535,Spelt,"Breads, Grains, Cereals, Pasta",
+536,Sweet rolls,"Breads, Grains, Cereals, Pasta",
+537,Toasted bread,"Breads, Grains, Cereals, Pasta",
+538,Tortillas,"Breads, Grains, Cereals, Pasta",
+540,Waffles,"Breads, Grains, Cereals, Pasta",
+547,Cheese spread,Dairy Products,
+548,American cheese,Dairy Products,
+549,Blue cheese,Dairy Products,
+550,Brie cheese,Dairy Products,
+551,Camembert cheese,Dairy Products,
+552,Cheddar cheese,Dairy Products,
+553,Colby cheese,Dairy Products,
+554,Cottage cheese,Dairy Products,
+555,Cream cheese,Dairy Products,
+556,Edam cheese,Dairy Products,
+557,Feta cheese,Dairy Products,
+558,Fontina cheese,Dairy Products,
+559,Gjetost cheese,Dairy Products,
+560,Goat cheese,Dairy Products,
+561,Gouda cheese,Dairy Products,
+562,Gruyere cheese,Dairy Products,
+563,Limburger cheese,Dairy Products,
+564,Mozzarella cheese,Dairy Products,
+565,Parmesan cheese,Dairy Products,
+566,Pimento cheese,Dairy Products,
+567,Port de salut cheese,Dairy Products,
+568,Ricotta cheese,Dairy Products,
+569,Romano cheese,Dairy Products,
+570,Roquefort cheese,Dairy Products,
+571,Swiss cheese,Dairy Products,
+572,Various cheese,"Dairy Products, Fats & Oils",
+575,Dairy Products,"Dairy Products, Fats & Oils",
+630,Sour cream,Dairy Products,
+632,Whey (sweet),Dairy Products,
+633,Yogurt (Plain),Dairy Products,
+635,After-dinner mints,Sweets & Snacks,
+636,Applesauce non-organic,Sweets & Snacks,
+638,Angel food cake,Sweets & Snacks,
+639,Boston cream pie,Sweets & Snacks,
+640,Chocolate cake,Sweets & Snacks,
+641,Gingerbread,Sweets & Snacks,
+642,Pound cake,Sweets & Snacks,
+643,Shortcake,Sweets & Snacks,
+644,Sponge cake,Sweets & Snacks,
+645,Yellow cake,Sweets & Snacks,
+646,Various cakes,"Desserts, Snacks, Beverages",
+647,Candies,"Desserts, Snacks, Beverages",
+648,Caramel candies,Sweets & Snacks,
+649,Carob,Sweets & Snacks,
+650,Halvah,Sweets & Snacks,
+651,Hard candies,Sweets & Snacks,
+652,Marshmallows,Sweets & Snacks,
+653,Peanut bar candies,Sweets & Snacks,
+654,Peanut brittle,Sweets & Snacks,
+655,Sesame crunch candies,Sweets & Snacks,
+657,Cheesecake,Sweets & Snacks,
+658,Chewing gum,Sweets & Snacks,
+660,Chocolate mousse,Sweets & Snacks,
+664,Coffeecake,Sweets & Snacks,
+665,Cookies,"Desserts, Snacks, Beverages",
+666,Animal crackers,Sweets & Snacks,
+667,Brownies,Sweets & Snacks,
+668,Butter cookies,Sweets & Snacks,
+669,Chocolate chip cookies,Sweets & Snacks,
+670,Gingersnaps cookies,Sweets & Snacks,
+671,Lady fingers cookies,Sweets & Snacks,
+672,Molasses cookies,Sweets & Snacks,
+673,Oatmeal cookies,Sweets & Snacks,
+674,Peanut butter cookies,Sweets & Snacks,
+675,Shortbread cookies,Sweets & Snacks,
+676,Sugar cookies,Sweets & Snacks,
+677,Vanilla wafers,Sweets & Snacks,
+678,Cream puffs/Éclair,Sweets & Snacks,
+680,Dessert toppings,Sweets & Snacks,
+681,Luncheon meat (pork),"Meat, Red Meat & Organ Meats",
+683,Frostings,Sweets & Snacks,
+684,Frozen yogurt,Sweets & Snacks,
+685,Fruit leather/rolls,Sweets & Snacks,
+690,Ice cream cones,Sweets & Snacks,
+691,Chocolate ice cream,Sweets & Snacks,
+692,Vanilla ice cream,Sweets & Snacks,
+693,Jams & Preserves,Sweets & Snacks,
+694,Jellies,Sweets & Snacks,
+698,Molasses,Sweets & Snacks,
+699,OTC Drugs,Alternative therapies & Misc.,
+700,Pancakes,Sweets & Snacks,
+701,Peanut butter,Sweets & Snacks,
+702,Pie crust,Sweets & Snacks,
+703,Apple pie,Sweets & Snacks,
+704,Coconut cream pie,Sweets & Snacks,
+705,Fried pies (fruit),Sweets & Snacks,
+706,Lemon meringue pie,Sweets & Snacks,
+707,Pecan pie,Sweets & Snacks,
+708,Pumpkin pie,Sweets & Snacks,
+709,Vanilla cream pie,Sweets & Snacks,
+710,Various types of pie,"Desserts, Snacks, Beverages",
+712,Air popped popcorn,Sweets & Snacks,
+713,Oil popped popcorn,Sweets & Snacks,
+714,Potato chips,Sweets & Snacks,
+715,Potato sticks,Sweets & Snacks,
+716,Pretzels,Sweets & Snacks,
+717,Pudding,Sweets & Snacks,
+718,Puff pastry,Sweets & Snacks,
+719,Sherbet,Sweets & Snacks,
+722,Sweets,"Desserts, Snacks, Beverages",
+723,Taro chips,Sweets & Snacks,
+728,Tortilla chips,Sweets & Snacks,
+734,Breaded shrimp,Fast & Prepared Foods,
+739,Cheeseburger,Fast & Prepared Foods,
+741,Chicken Nuggets,Fast & Prepared Foods,
+746,Cole slaw,Fast & Prepared Foods,
+748,Corn cakes,Fast & Prepared Foods,
+749,Corn salad,Fast & Prepared Foods,
+750,Whole-grain cornmeal,Fast & Prepared Foods,
+751,SCD Diet,Alternative Therapies,n/a
+754,Egg rolls (veg),Fast & Prepared Foods,
+755,Falafel,Fast & Prepared Foods,
+756,Fast foods: various,"Herbs, Spices & Fast Foods",
+758,Foie gras or liver pate,Fast & Prepared Foods,
+759,French fries,Fast & Prepared Foods,
+760,French toast,Fast & Prepared Foods,
+763,Hamburger,Fast & Prepared Foods,
+764,Hash brown potatoes,Fast & Prepared Foods,
+766,Hot dog,Fast & Prepared Foods,
+767,Hummus,Fast & Prepared Foods,
+768,Hush puppies,Fast & Prepared Foods,
+770,Macaroni and Cheese,Fast & Prepared Foods,
+778,Nachos,Fast & Prepared Foods,
+779,Natto,Fast & Prepared Foods,
+781,Onion rings,Fast & Prepared Foods,
+789,Pizza,Fast & Prepared Foods,
+791,Potato pancakes,Fast & Prepared Foods,
+792,Potato salad,Fast & Prepared Foods,
+794,Saffron,"Herbs, Spices & Sauces"," native to Greece and sw Asia."""
+811,Sauerkraut,"Herbs, Spices & Sauces",
+825,Succotash,Fast & Prepared Foods,
+834,Taco shells,Fast & Prepared Foods,
+835,Skipping meals,Alternative therapies & Misc.,
+837,Tempeh,Fast & Prepared Foods,
+839,Tofu,Fast & Prepared Foods,
+840,Fried tofu,Fast & Prepared Foods,
+844,1-2 alcoholic drinks/day,Alternative therapies & Misc.,
+845,2+ alcoholic drinks/day,Alternative therapies & Misc.,
+846,Abrupt changes in diet/exercise,Alternative therapies & Misc.,
+847,Acidophilus,Herbal Supplements,n/a
+848,Acupressure,Alternative Therapies,n/a
+849,Acupuncture,Alternative Therapies,n/a
+850,Air pollutants,Alternative therapies & Misc.,
+851,Alexander Technique,Alternative Therapies,n/a
+852,Alkaline diet,Alternative Therapies,n/a
+853,Antacids,Alternative therapies & Misc.,
+854,Antibiotics,Alternative therapies & Misc.,
+855,Anti-inflammation diet,Alternative Therapies,n/a
+856,Apply heat,Alternative therapies & Misc.,
+857,Apply ice then heat,Alternative therapies & Misc.,
+858,Aromatherapy,Alternative Therapies,n/a
+859,Artificial colors,Alternative therapies & Misc.,
+861,Aspirin,Alternative therapies & Misc.,
+862,Aston-Patterning,Alternative Therapies,n/a
+863,Baking using butter,Alternative therapies & Misc.,
+864,BHA (butylated hydroxyanisole),Alternative therapies & Misc.,
+865,BHT (butylated hydroxytoluene),Alternative therapies & Misc.,
+866,Biofeedback,Alternative Therapies,n/a
+867,Birth control pills,Alternative therapies & Misc.,
+868,Breastfeeding a baby,Alternative therapies & Misc.,
+869,Brush your teeth & floss,Alternative therapies & Misc.,
+870,Call an ambulance!,Alternative therapies & Misc.,
+871,Canned foods,Alternative therapies & Misc.,
+872,Canned vegetables,Alternative therapies & Misc.,
+873,Casein-containing foods/brands,Alternative therapies & Misc.,
+874,Challenge your mind,Alternative therapies & Misc.,
+875,Cheese made w/whole milk,Alternative therapies & Misc.,
+876,Chiropractic,Alternative Therapies,n/a
+877,Choose smaller food portions,Alternative therapies & Misc.,
+878,Clean your tongue,Alternative therapies & Misc.,
+879,Consult your dentist,Alternative therapies & Misc.,
+880,Consult your doctor,Alternative therapies & Misc.,
+881,Contact poison center,Alternative therapies & Misc.,
+882,Corn starch,Alternative therapies & Misc.,
+884,Crash or yo-yo diets,Alternative therapies & Misc.,
+885,Determine your allergens,Alternative therapies & Misc.,
+886,Determine your stone type,Alternative therapies & Misc.,
+887,Detoxification,Alternative Therapies,n/a
+888,Drugs/Narcotics,Alternative therapies & Misc.,
+889,Eat slowly,Alternative therapies & Misc.,
+890,Eat smaller more frequent meals,Alternative therapies & Misc.,
+891,Eating before bed time,Alternative therapies & Misc.,
+892,Elimination diet,Alternative Therapies,n/a
+893,Energy Medicine (TENS),Alternative Therapies,n/a
+894,Enzyme Therapy,Alternative Therapies,n/a
+895,Excess body weight,Alternative therapies & Misc.,
+896,Excessive shampoo/blow-dry,Alternative therapies & Misc.,
+897,Excessive TV viewing,Alternative therapies & Misc.,
+898,Exercise,Alternative Therapies,n/a
+899,Exercise - cardiovascular,Alternative Therapies,n/a
+900,Exercise - weight training,Alternative Therapies,n/a
+901,Exposure to sun,Alternative Therapies,n/a
+902,Fasting (for a specific period),Alternative Therapies,n/a
+903,Fat-free or low fat products,Alternative therapies & Misc.,
+904,Fats & Oils,Alternative therapies & Misc.,
+905,FD&C yellow dye #5. Tartrazine,Alternative therapies & Misc.,
+906,Feldenkrais Method,Alternative Therapies, reduce pain and accelerate heal
+907,Fermented foods,Alternative therapies & Misc.,
+908,Fluids/juices/water,Alternative therapies & Misc.,
+909,DASH diet,Alternative Therapies,n/a
+910,Low FODMAP diet,Alternative Therapies,n/a
+911,Mediterranean diet,Alternative Therapies,n/a
+912,Nitrates/Nitrites food additives,Alternative therapies & Misc.,
+913,Food additives/preservatives,Alternative therapies & Misc.,
+914,Food allergens,Alternative therapies & Misc.,
+915,Braised foods,Alternative therapies & Misc.,
+916,Charbroiled foods,Alternative therapies & Misc.,
+917,Deep-fried foods,Alternative therapies & Misc.,
+918,Pickled foods,Alternative therapies & Misc.,
+919,Raw or rare meat,Alternative therapies & Misc.,
+920,Raw/uncooked foods,Alternative therapies & Misc.,
+921,Smoked food/fish,Alternative therapies & Misc.,
+922,Spicy foods,Alternative therapies & Misc.,
+923,Toasted foods,Alternative therapies & Misc.,
+924,Cook in cast-iron pots,Alternative therapies & Misc.,
+925,Fresh/uncooked fruits/veg's,Alternative therapies & Misc.,
+926,Fresh/raw vegetables,Alternative therapies & Misc.,
+927,Fruit juice (sugared/concentrate),Alternative therapies & Misc.,
+928,Stewed/canned fruits,Alternative therapies & Misc.,
+929,Gargle with salt water,Alternative therapies & Misc.,
+930,Glucomannan,Alternative therapies & Misc.,
+931,Glucosamine,Alternative therapies & Misc.,
+932,Green plants and vegetables,Alternative therapies & Misc.,
+933,Hang mirrors where you eat,Alternative therapies & Misc.,
+934,Harsh chemicals & fumes,Alternative therapies & Misc.,
+935,Hellerwork,Alternative Therapies,n/a
+936,High dosages of Niacin,Alternative therapies & Misc.,
+937,Homeopathy,Alternative Therapies,n/a
+938,Hydrotherapy,Alternative Therapies,n/a
+939,Hyperthermia,Alternative Therapies,n/a
+940,Hypnotherapy,Alternative Therapies,n/a
+941,Ice cold drinks,Alternative therapies & Misc.,
+942,Fruit & vegetable juice,Alternative therapies & Misc.,
+943,"Laugh, laughter",Alternative Therapies,n/a
+944,Laxatives,Alternative therapies & Misc.,
+945,L-carnitine,Alternative therapies & Misc.,
+946,Liquids (see note),Alternative therapies & Misc.,
+947,Low-calorie diet foods,Alternative therapies & Misc.,
+948,Magnetic Field Therapy,Alternative Therapies,n/a
+949,Massage,Alternative Therapies,n/a
+950,Meditation,Alternative Therapies,n/a
+951,Melatonin,Alternative therapies & Misc.,
+952,Monosodium Glutamate,Alternative therapies & Misc.,
+953,Myotherapy,Alternative Therapies,n/a
+954,Non-organic foods,Alternative therapies & Misc.,
+955,Organic cold-pressed oils,Alternative therapies & Misc.,
+956,Organically grown foods,Alternative therapies & Misc.,
+957,Ornish Plan & Diet,Alternative Therapies,n/a
+958,Osteopathic Medicine,Alternative Therapies,n/a
+959,Over-training,Alternative therapies & Misc.,
+960,Pesticide-loaded crops,Alternative therapies & Misc.,
+961,Pets,Alternative therapies & Misc.,
+962,Physical therapy,Alternative Therapies,n/a
+963,Poor fitting shoes,Alternative therapies & Misc.,
+964,"Pray, practice your religion",Alternative Therapies,n/a
+965,Prescription drugs,Alternative therapies & Misc.,
+966,Sulfite (preservative),Alternative therapies & Misc.,
+967,Probiotics,"Vitamins, Minerals & Other",gram
+968,Processed or Refined foods,Alternative therapies & Misc.,
+969,Proper sitting posture,Alternative therapies & Misc.,
+970,Psychotherapy/psychological help,Alternative Therapies,n/a
+971,Qigong,Alternative Therapies,n/a
+972,Radiation,Alternative therapies & Misc.,
+973,Radon gas,Alternative therapies & Misc.,
+974,Raw fish/shellfish,Alternative therapies & Misc.,
+975,Reconstructive Therapy,Alternative Therapies,n/a
+976,Reflexology,Alternative Therapies,n/a
+977,Relaxation/breathing techniques,Alternative Therapies,n/a
+978,Repetitive body parts movement,Alternative therapies & Misc.,
+979,Rolfing,Alternative Therapies,n/a
+981,"Salted foods, nuts, etc",Alternative therapies & Misc.,
+982,Salt-free or low-salt foods,Alternative therapies & Misc.,
+983,Sexual activity,Alternative Therapies,n/a
+984,Shampoo (anti-dandruff) daily,Alternative therapies & Misc.,
+985,Rest. Get enough sleep.,Alternative Therapies,n/a
+986,Smoking/Tobacco,Alternative therapies & Misc.,
+987,"Socialize, join a club",Alternative Therapies,n/a
+988,Sound Therapy,Alternative Therapies,n/a
+989,Sour foods,Alternative therapies & Misc.,
+990,Steroids,Alternative therapies & Misc.,
+991,Stress,Alternative therapies & Misc.,
+992,Artificial sweeteners,Alternative therapies & Misc.,
+993,Tai Chi,Alternative Therapies,n/a
+994,Take a vacation!,Alternative therapies & Misc.,
+995,Tamarind,Fruits & Juices,
+996,Therapeutic Touch,Alternative Therapies,n/a
+997,Trager Integration,Alternative Therapies,n/a
+998,Training through pain,Alternative therapies & Misc.,
+999,Supplements,Alternative therapies & Misc.,
+1000,Unpasteurized products,Alternative therapies & Misc.,
+1001,Urinate often,Alternative therapies & Misc.,
+1002,Vegetarian diet,Alternative Therapies,n/a
+1003,Very hot drinks/soups,Alternative therapies & Misc.,
+1004,"Walk, wheel, or jog",Alternative Therapies,n/a
+1005,Warm-up/stretch before activity,Alternative therapies & Misc.,
+1006,Wash your hands,Alternative therapies & Misc.,
+1007,Preservative waxes,Alternative therapies & Misc.,
+1008,Wear appropriate clothing,Alternative therapies & Misc.,
+1009,Wear sun glasses,Alternative therapies & Misc.,
+1010,Wild fish and free range animals,Alternative therapies & Misc.,
+1011,Wipe yourself from front to back,Alternative therapies & Misc.,
+1012,Yoga,Alternative Therapies,n/a
+1013,Acid-forming,"Vitamins, Minerals & Other",mEq/d
+1014,Activated Charcoal,Herbal Supplements,n/a
+1015,Agrimony,Herbal Supplements,n/a
+1016,Alcohol,"Vitamins, Minerals & Other",gram
+1017,Alkaline-forming,"Vitamins, Minerals & Other",mEq/d
+1018,Allspice oil,Herbal Supplements,n/a
+1019,Allspice tea,Herbal Supplements,n/a
+1020,Aloe (Aloe Vera),Herbal Supplements,n/a
+1022,Arnica,Herbal Supplements,n/a
+1023,Ashwagandha,Herbal Supplements,n/a
+1024,Astragalus root,Herbal Supplements,n/a
+1025,Lemon balm,Herbal Supplements,n/a
+1026,Barberry,Herbal Supplements,n/a
+1027,Bread (French/Sourdough),"Breads, Grains, Cereals, Pasta",
+1028,Bee Pollen,Herbal Supplements,n/a
+1029,Beta Carotene,"Vitamins, Minerals & Other",mcg
+1030,Betel Nut,Herbal Supplements,n/a
+1031,Biotin,"Vitamins, Minerals & Other",mcg
+1032,Birch,Herbal Supplements,n/a
+1033,Bitter Orange,Herbal Supplements,n/a
+1034,Black cohosh,Herbal Supplements,n/a
+1035,Black Haw,Herbal Supplements,n/a
+1036,Black walnut extract,Herbal Supplements,n/a
+1037,Blessed Thistle,Herbal Supplements,n/a
+1038,Bloodroot,Herbal Supplements,n/a
+1039,Bogbean,Herbal Supplements,n/a
+1040,Boldo,Herbal Supplements,n/a
+1041,Boron,"Vitamins, Minerals & Other",mcg
+1043,Bromelain,Herbal Supplements,n/a
+1044,Buchu,Herbal Supplements,n/a
+1045,Buckthorn,Herbal Supplements,n/a
+1046,Bugleweed,Herbal Supplements,n/a
+1047,Burdock Root,Herbal Supplements,n/a
+1048,Butcher's Broom,Herbal Supplements,n/a
+1049,Caffeine,"Vitamins, Minerals & Other",mg
+1050,Calcium,"Vitamins, Minerals & Other",mg
+1051,Calendula,Herbal Supplements,n/a
+1052,Calories,"Vitamins, Minerals & Other",kcal
+1053,Camphor,Herbal Supplements,n/a
+1054,Capsaicin,Herbal Supplements,n/a
+1055,Caraway,Herbal Supplements,n/a
+1056,Carbohydrates,"Vitamins, Minerals & Other",gram
+1057,Cascara Sagrada,Herbal Supplements,n/a
+1058,Castor Oil,Herbal Supplements,n/a
+1059,Catnip,Herbal Supplements,n/a
+1060,Cat's Claw,Herbal Supplements,n/a
+1061,Eastern red cedar,Herbal Supplements,n/a
+1063,Chaste Tree Berry,Herbal Supplements,n/a
+1064,Chickweed,Herbal Supplements,n/a
+1065,Chicory Root,Herbal Supplements,n/a
+1066,Chloride,"Vitamins, Minerals & Other",gram
+1067,Chlorophyll,"Vitamins, Minerals & Other",gram
+1068,Cholesterol,"Vitamins, Minerals & Other",mg
+1069,Chromium,"Vitamins, Minerals & Other",mcg
+1070,Cleavers,Herbal Supplements,n/a
+1071,Codonopsis,Herbal Supplements,n/a
+1072,Coltsfoot,Herbal Supplements,n/a
+1073,Comfrey,Herbal Supplements,n/a
+1074,Copper,"Vitamins, Minerals & Other",mg
+1075,Coriolus versicolor,Herbal Supplements,n/a
+1076,Corn silk,Herbal Supplements,n/a
+1077,Couch Grass,Herbal Supplements,n/a
+1078,Cowslip,Herbal Supplements,n/a
+1079,Damiana,Herbal Supplements,n/a
+1080,Dandelion root,Herbal Supplements,n/a
+1081,Deer antler,Herbal Supplements,n/a
+1082,Devil's claw,Herbal Supplements,n/a
+1083,Devil's Dung,Herbal Supplements,n/a
+1084,DHEA (dehydroepiandosterone),Herbal Supplements,n/a
+1085,Ketogenic Diet,Alternative Therapies,n/a
+1086,"Dong Quai, Dong gui",Herbal Supplements,n/a
+1087,Echinacea,Herbal Supplements,n/a
+1088,Elder,Herbal Supplements,n/a
+1089,Elecampane,Herbal Supplements,n/a
+1090,English Walnut Leaf,Herbal Supplements,n/a
+1091,Eucalyptus,Herbal Supplements,n/a
+1092,Evening primrose oil,Herbal Supplements,n/a
+1093,Monounsaturated fat,"Vitamins, Minerals & Other",gram
+1094,Polyunsaturated fat,"Vitamins, Minerals & Other",gram
+1095,Saturated fat,"Vitamins, Minerals & Other",gram
+1096,Total fat,"Vitamins, Minerals & Other",gram
+1098,Feverfew,Herbal Supplements,n/a
+1099,Fiber,"Vitamins, Minerals & Other",gram
+1100,Fireweed leaves,Herbal Supplements,n/a
+1101,Flavonoids,"Vitamins, Minerals & Other",mg
+1102,Fluoride,"Vitamins, Minerals & Other",mcg
+1103,Folic Acid,"Vitamins, Minerals & Other",mcg
+1104,Fo-ti,Herbal Supplements,n/a
+1105,Foxglove,Herbal Supplements,n/a
+1106,Fumitory,Herbal Supplements,n/a
+1107,Gentian,Herbal Supplements,n/a
+1108,Chamomile,Herbal Supplements,n/a
+1109,Ginkgo Biloba,Herbal Supplements,n/a
+1110,Ginseng (Asian),Herbal Supplements,n/a
+1111,Ginseng (Siberian),Herbal Supplements,n/a
+1112,Gluten,"Vitamins, Minerals & Other",none
+1113,Goldenrod,Herbal Supplements,n/a
+1114,Goldenseal,Herbal Supplements,n/a
+1115,Gotu Kola,Herbal Supplements,n/a
+1116,Guarana,Herbal Supplements,n/a
+1117,Guggul,Herbal Supplements,n/a
+1118,Gymnema,Herbal Supplements,n/a
+1119,Hawthorn,Herbal Supplements,n/a
+1120,Honeysuckle,Herbal Supplements,n/a
+1121,Hops herbal med,Herbal Supplements,n/a
+1122,Horehound,Herbal Supplements,n/a
+1123,Horse Chestnut,Herbal Supplements,n/a
+1124,Horsetail,Herbal Supplements,n/a
+1125,Hyssop,Herbal Supplements,n/a
+1126,Iceland Moss,Herbal Supplements,n/a
+1127,Iodine,"Vitamins, Minerals & Other",mcg
+1128,Irish Moss,Herbal Supplements,n/a
+1129,Iron,"Vitamins, Minerals & Other",mg
+1130,Ivy,Herbal Supplements,n/a
+1131,Jojoba oil,Herbal Supplements,n/a
+1132,Juniper,Herbal Supplements,n/a
+1133,Jute potherb,Herbal Supplements,n/a
+1134,Kava,Herbal Supplements,n/a
+1135,Kola nut,Herbal Supplements,n/a
+1136,Kudzu,Herbal Supplements,n/a
+1137,Labrador Tea,Herbal Supplements,n/a
+1138,Lady's Mantle,Herbal Supplements,n/a
+1139,Lavender,Herbal Supplements,n/a
+1140,Lecithin/Choline,"Vitamins, Minerals & Other",mg
+1141,Lemon grass,Herbal Supplements,n/a
+1142,Licorice,Herbal Supplements,n/a
+1143,Linden flower,Herbal Supplements,n/a
+1144,Lovage,Herbal Supplements,n/a
+1145,Magnesium,"Vitamins, Minerals & Other",mg
+1146,Maitake mushrooms,Vegetables,
+1147,Manganese,"Vitamins, Minerals & Other",mg
+1148,Medical Cannabis,Herbal Supplements,n/a
+1149,Marshmallow plant,Herbal Supplements,n/a
+1150,Mate,Herbal Supplements,n/a
+1151,Meadowsweet,Herbal Supplements,n/a
+1152,Mercury,"Vitamins, Minerals & Other",ppm
+1153,Milk thistle,Herbal Supplements,n/a
+1154,Molybdenum,"Vitamins, Minerals & Other",mcg
+1155,Motherwort,Herbal Supplements,n/a
+1156,Mugwort,Herbal Supplements,n/a
+1157,Great Mullein,Herbal Supplements,n/a
+1158,Reishi mushrooms,Herbal Supplements,n/a
+1159,Myrrh,Herbal Supplements,n/a
+1160,Neem,Herbal Supplements,n/a
+1161,Nettle,Herbal Supplements,n/a
+1162,Oak bark,Herbal Supplements,n/a
+1163,Omega-3 fatty acids,"Vitamins, Minerals & Other",gram
+1164,Pansy,Herbal Supplements,n/a
+1165,Passionflower,Herbal Supplements,n/a
+1166,Pau d'Arco,Herbal Supplements,n/a
+1167,Peony,Herbal Supplements,n/a
+1168,Peppermint oil,Herbal Supplements,n/a
+1169,Pesticides,"Vitamins, Minerals & Other",none
+1170,Phosphorus,"Vitamins, Minerals & Other",mg
+1171,Picrorhiza,Herbal Supplements,n/a
+1172,Pine oil,Herbal Supplements,n/a
+1173,Potassium,"Vitamins, Minerals & Other",mg
+1174,Prickly Ash,Herbal Supplements,n/a
+1175,Propolis,Herbal Supplements,n/a
+1176,Protein,"Vitamins, Minerals & Other",gram
+1177,Psyllium,Herbal Supplements,n/a
+1178,Purine,"Vitamins, Minerals & Other",mg
+1179,French Pine Bark,Herbal Supplements,n/a
+1180,Quassia,Herbal Supplements,n/a
+1181,Red Bush,Herbal Supplements,n/a
+1182,Red Clover,Herbal Supplements,n/a
+1183,Rehmannia,Herbal Supplements,n/a
+1184,Rhatany,Herbal Supplements,n/a
+1185,Chinese rhubarb,Herbal Supplements,n/a
+1186,Rose Hip,Herbal Supplements,n/a
+1187,Roselle,Herbal Supplements,n/a
+1188,Salvia,Herbal Supplements,n/a
+1189,SAMe,Herbal Supplements,n/a
+1190,Savory,Herbal Supplements,n/a
+1191,Saw Palmetto Berry,Herbal Supplements,n/a
+1192,Schisandra,Herbal Supplements,n/a
+1193,Scullcap,Herbal Supplements,n/a
+1194,Selenium,"Vitamins, Minerals & Other",mcg
+1195,Senega root,Herbal Supplements,n/a
+1196,Senna ,Herbal Supplements,n/a
+1197,Shrimp,Fish & Seafood,
+1198,Slippery Elm,Herbal Supplements,n/a
+1199,Soapwort,Herbal Supplements,n/a
+1200,Sodium/salt,"Vitamins, Minerals & Other",mg
+1201,St. John's wort,Herbal Supplements,n/a
+1202,Starch/complex carbohydrates,"Vitamins, Minerals & Other",gram
+1203,Fructose sugar,"Vitamins, Minerals & Other",gram
+1204,Refined sugar,"Vitamins, Minerals & Other",gram
+1205,Total sugar,"Vitamins, Minerals & Other",gram
+1206,Sulfur,"Vitamins, Minerals & Other",mg
+1207,Tea tree oil,Herbal Supplements,n/a
+1208,Tienchi,Herbal Supplements,n/a
+1209,Trans fatty acids,"Vitamins, Minerals & Other",gram
+1210,Tree fern,Herbal Supplements,n/a
+1211,Turpentine oil,Herbal Supplements,n/a
+1212,Uva ursi,Herbal Supplements,n/a
+1213,Valerian,Herbal Supplements,n/a
+1214,Vanadium,"Vitamins, Minerals & Other",mcg
+1215,Vervain,Herbal Supplements,n/a
+1216,Vitamin A,"Vitamins, Minerals & Other",IU
+1217,Vitamin B-1 (Thiamine),"Vitamins, Minerals & Other",mg
+1218,Vitamin B-12 (Cobalamin),"Vitamins, Minerals & Other",mcg
+1219,Vitamin B-2 (Riboflavin),"Vitamins, Minerals & Other",mg
+1220,Vitamin B-3 (Niacin),"Vitamins, Minerals & Other",mg
+1221,Vitamin B-5 (Pantothenic Acid),"Vitamins, Minerals & Other",mg
+1222,Vitamin B-6 (Pyridoxine),"Vitamins, Minerals & Other",mg
+1223,Vitamin C,"Vitamins, Minerals & Other",mg
+1224,Vitamin D,"Vitamins, Minerals & Other",mcg
+1225,Vitamin E,"Vitamins, Minerals & Other",IU
+1226,Vitamin K,"Vitamins, Minerals & Other",mcg
+1227,White Willow bark,Herbal Supplements,n/a
+1228,Wild Cherry bark/leaves,Herbal Supplements,n/a
+1229,Wild strawberry leaves,Herbal Supplements,n/a
+1231,Wintergreen,Herbal Supplements,n/a
+1232,Witch hazel/Hamamelis,Herbal Supplements,n/a
+1233,Wood betony,Herbal Supplements,n/a
+1234,Yarrow,Herbal Supplements,n/a
+1235,Yellow Dock,Herbal Supplements,n/a
+1236,Yucca,Herbal Supplements,n/a
+1237,Zinc,"Vitamins, Minerals & Other",mg
+1239,Kimchi,Fast & Prepared Foods,
+1240,Kombucha,Herbal Supplements,n/a
+1241,Allowed supplements,Alternative therapies & Misc.,
+1242,Tomatoes (canned),Vegetables,
+1243,"Tomatoes (canned, no salt)",Vegetables,
+1244,Cooked vegetables,Alternative therapies & Misc.,
+1246,Direct contact with infected persons,Alternative therapies & Misc.,
+1247,Ebola facilities in West Africa,Alternative therapies & Misc.,
+1248,Foods served mashed or as soup,Alternative therapies & Misc.,
+1250,Conch,Fish & Seafood,
+1251,Snow crab,Fish & Seafood,
+1252,Frog legs,Fish & Seafood,
+1253,Goat meat,"Meat, Red Meat & Organ Meats",
+1254,Chanterelle mushrooms,Vegetables,
+1255,Morel mushrooms,Vegetables,
+1256,Sleep with head raised,Alternative therapies & Misc.,
+1258,Starfruit,Fruits & Juices,
+1259,Tahini,Fast & Prepared Foods,
+1260,Tight fitting belt/clothes,Alternative therapies & Misc.,
+1261,Great Northern beans,Beans & Legumes,
+1262,Raisin bran cereal,"Breads, Grains, Cereals, Pasta",
+1263,Change in environment,Alternative therapies & Misc.,
+1264,Glycemic Index,"Vitamins, Minerals & Other",IX
+1265,Myo-inositol,"Vitamins, Minerals & Other",mg
+1268,Hubbard squash non-org,Vegetables,
+1269,Spaghetti squash non-org,Vegetables,
+1270,Lycopene,"Vitamins, Minerals & Other",mcg
+1271,Magnesium baths,Alternative therapies & Misc.,
+1272,Magnesium mineral drops,Alternative therapies & Misc.,
+1273,Meat tenderizers,Alternative therapies & Misc.,
+1274,Overripe fruits,Alternative therapies & Misc.,
+1275,Tyramine,"Vitamins, Minerals & Other",mg
+1276,Avocado-soybean oil mix,Alternative therapies & Misc.,
+1277,Boswellia serrata,Herbal Supplements,n/a
+1278,Chondroitin,Alternative therapies & Misc.,
+1280,Lutein/Zeaxanthin,"Vitamins, Minerals & Other",mcg
+1281,Positive attitude,Alternative therapies & Misc.,
+1282,Too thin/Light weight,Alternative therapies & Misc.,
+1283,Heat and Cold,Alternative therapies & Misc.,
+1284,Omega-6 fatty acid (LA),"Vitamins, Minerals & Other",gram
+1285,Eat breakfast,Alternative therapies & Misc.,
+1287,Silicon,"Vitamins, Minerals & Other",mg
+1288,Weigh yourself daily,Alternative therapies & Misc.,
+1289,Sleeping Pills,Alternative therapies & Misc.,
+1290,Sauna,Alternative Therapies,n/a
+1291,Body care products,Alternative therapies & Misc.,
+1292,"Fragrance, Perfume",Alternative therapies & Misc.,
+1293,Filter bathing water,Alternative therapies & Misc.,
+1294,Bagels (multigrain),"Breads, Grains, Cereals, Pasta",
+1297,Kefir,Dairy Products,
+1301,Soy products,Alternative therapies & Misc.,
+1304,Arginine,"Vitamins, Minerals & Other",gram
+1305,Lysine,"Vitamins, Minerals & Other",gram
+1307,Belgian Endive,Vegetables,
+1308,Provolone Cheese,Dairy Products,
+1309,Chicken bone broth,Alternative Therapies,n/a
+1310,Jicama,Vegetables,
+1311,Prebiotics,"Vitamins, Minerals & Other",gram
+1313,Stewed apples,Alternative Therapies,n/a
+1322,Bladder training,Alternative Therapies,n/a
+1323,Calcium glycerophosphate,Alternative therapies & Misc.,
+1324,Cognitive Behavior Thrpy,Alternative Therapies,n/a
+1328,CoQ10,"Vitamins, Minerals & Other",mg
+1331,Alkaline Salt,Alternative Therapies,n/a
+1332,Leftover foods,Alternative therapies & Misc.,
+1333,Net Carbohydrates,"Vitamins, Minerals & Other",gram
+1337,White beans,Beans & Legumes,
+1338,Yellow bell peppers non-org,Vegetables,
+1339,Coffee Enema,Alternative Therapies,n/a
+1342,Cornmeal (degermed),Fast & Prepared Foods,
+1352,Nigella sativa,Herbal Supplements,n/a
+1354,Sweet onions,Vegetables,
+1356,Ozone Therapy,Alternative Therapies,n/a
+1359,Proline,"Vitamins, Minerals & Other",gram
+1360,Pumpkin (canned),Vegetables,
+1365,Alpha Lipoic acid (ALA),"Vitamins, Minerals & Other",mg
+1366,Aluminum products/exposure,Alternative therapies & Misc.,
+1367,Beta Glucan,"Vitamins, Minerals & Other",gram
+1368,Chayote squash non-org,Vegetables,
+1370,Pork frankfurter,"Meat, Red Meat & Organ Meats",
+1371,Turkey frankfurter,"Meat, Red Meat & Organ Meats",
+1372,Inorganic copper,Alternative therapies & Misc.,
+1374,Yellow squash non-org,Vegetables,
+1375,Apigenin,"Vitamins, Minerals & Other",mg
+1376,Luteolin,"Vitamins, Minerals & Other",mg
+1377,Quercetin,"Vitamins, Minerals & Other",mg
+1378,N-acetylcysteine (NAC),Alternative therapies & Misc.,
+1379,Forest bathing,Alternative Therapies,n/a
+1380,Group Drumming,Alternative Therapies,n/a
+1381,NSAIDs,Alternative therapies & Misc.,
+1382,Organic Broccoli,Vegetables,
+1383,Organic butternut squash,Vegetables,
+1384,Organic carrots,Vegetables,
+1385,Organic Celery,Vegetables,
+1386,Organic Chayote,Vegetables,
+1387,Organic cherries,Fruits & Juices,
+1388,Organic collards,Vegetables,
+1389,Organic Cucumber w/peel,Vegetables,
+1390,Organic grapefruit,Fruits & Juices,
+1391,Organic grapes,Fruits & Juices,
+1392,Organic green beans,Vegetables,
+1393,Organic head lettuce,Vegetables,
+1395,Organic hubbard squash,Vegetables,
+1397,Organic Kale,Vegetables,
+1398,Organic loose leaf lettuce,Vegetables,
+1399,Organic mustard greens,Vegetables,
+1400,Organic nectarine,Fruits & Juices,
+1401,Organic oranges,Fruits & Juices,
+1403,Organic peaches,Fruits & Juices,
+1404,Organic pears,Fruits & Juices,
+1406,Organic Plum,Fruits & Juices,
+1407,Organic Potato,Vegetables,
+1408,Organic potatoes w/skin,Vegetables,
+1409,Organic Pumpkin,Vegetables,
+1411,Organic raspberries,Fruits & Juices,
+1412,Organic Romaine lettuce,Vegetables,
+1413,Organic spaghetti squash,Vegetables,
+1414,Organic spinach,Vegetables,
+1415,Organic strawberries,Fruits & Juices,
+1416,Organic sugar/snap peas,Beans & Legumes,
+1417,Organic tangerines,Fruits & Juices,
+1418,Organic tomatoes,Vegetables,
+1419,Organic yellow squash,Vegetables,
+1420,Organic Zucchini,Vegetables,
+1421,Paleo diet,Alternative Therapies,n/a
+1422,Org. green bell peppers,Vegetables,
+1423,Org. red bell peppers,Vegetables,
+1424,Org. red hot chili peppers,Vegetables,
+1426,Organic acorn squash,Vegetables,
+1427,Org. yellow bell peppers,Vegetables,
+1428,Organic apples,Fruits & Juices,
+1429,Organic applesauce,Sweets & Snacks,
+1430,Organic Blueberries,Fruits & Juices,
+1431,Berberine,Herbal Supplements,n/a
+1432,Exposure to blue light,Alternative Therapies,
+1433,Repetitive facial movements,Alternative therapies & Misc.,
+5000,Lemon-Garlic Shrimp and Grits,Recipes (from Food Network),srvg
+5001,Low-Cal Fettuccine Alfredo,Recipes (from Food Network),srvg
+5002,Cinn Spiced Swt Potato..,Recipes (from Food Network),srvg
+5003,American Macaroni Salald,Recipes (from Food Network),srvg
+5004,Linguine with Chicken Ragu,Recipes (from Food Network),srvg
+5005,Spicy Cauliflower Stir-Fry,Recipes (from Food Network),srvg
+5006,Portobello Lasagna Rollups,Recipes (from Food Network),srvg
+5007,Slow-Cooker Pork Tacos,Recipes (from Food Network),srvg
+5008,Shrimp Stir-Fry,Recipes (from Food Network),srvg
+5009,Vietnamese Noodle Soup,Recipes (from Food Network),srvg
+5010,Broccoli Cheddar Soup,Recipes (from Food Network),srvg
+5011,Lemony Yogurt Pound Cake,Recipes (from Food Network),srvg
+5012,Pasta e Fagioli,Recipes (from Food Network),srvg
+5013,Hash Brown Casserole,Recipes (from Food Network),srvg
+5014,Chicken & Broccoli Stir-fry,Recipes (from Food Network),srvg
+5015,Buiscuit Crust,Recipes (from Food Network),srvg
+5016,Steel Cut Oatmeal,Recipes (from Food Network),srvg
+5017,Pork Tenderloin w/ Season..,Recipes (from Food Network),srvg
+5018,Green Beans w/Lemon & Garlic,Recipes (from Food Network),srvg
+5019,Frozen Cherries Smoothies,Recipes (from Food Network),srvg
+5020,"Oven ""Fries""""""",Recipes (from Food Network),srvg
+5021,Marinated Pork Tenderloins,Recipes (from Food Network),srvg
+5022,Herbed Quinoa w/Dressing,Recipes (from Food Network),srvg
+5023,Frozen Blueberries Smoothies,Recipes (from Food Network),srvg
+5024,Chicken Piccata,Recipes (from Food Network),srvg
+5025,Overnight Oatmeal,Recipes (from Food Network),srvg
+5026,Quinoa Salad,Recipes (from Food Network),srvg
+5027,Zucchini Parmesan Crisps,Recipes (from Food Network),srvg
+5028,Frozen Strawberries Smoothies,Recipes (from Food Network),srvg
+5029,Roman-Style Chicken,Recipes (from Food Network),srvg
+5030,Frozen Raspberries Smoothies,Recipes (from Food Network),srvg
+5031,Lentil Soup,Recipes (from Food Network),srvg
+5032,Marinated Chicken Breast,Recipes (from Food Network),srvg
+5033,Chicken Saltimbocca,Recipes (from Food Network),srvg
+5034,Garden Vegetable Soup,Recipes (from Food Network),srvg
+5035,Salmon w/ Herb Mustard Glaze,Recipes (from Food Network),srvg
+5036,Healthy Cauliflower Rice,Recipes (from Food Network),srvg
+5037,Roasted Brussels Sprout,Recipes (from Food Network),srvg
+5038,Sauteed Kale,Recipes (from Food Network),srvg
+5039,Chicken Pot Pie (no crust),Recipes (from Food Network),srvg
+5040,Three Bean and Beef Chili,Recipes (from Food Network),srvg
+5041,Toasted Almond Parsley Salad,Recipes (from Food Network),srvg
+5042,Hasselback Sweet Potatoes,Recipes (from Food Network),srvg
+5043,Tuscan Vegetable Soup,Recipes (from Food Network),srvg
+5044,Salmon Baked in Foil,Recipes (from Food Network),srvg
+5045,Garlic Sauteed Spinach,Recipes (from Food Network),srvg
+5046,Roasted Caulif. & Broccoli,Recipes (from Food Network),srvg
+5047,Oven-baked Salmon w/Squash,Recipes (from Food Network),srvg
+5048,Chia Seed Pudding,Recipes (from Food Network),srvg
+5049,Easy Tomato Sauce,Recipes (from Food Network),srvg
+5050,Roasted Carrots,Recipes (from Food Network),srvg
+5051,Fish Tacos,Recipes (from Food Network),srvg
+5052,Marinara Sauce - FN Recipe,Recipes (from Food Network),srvg
+5053,Guacamole,Recipes (from Food Network),srvg

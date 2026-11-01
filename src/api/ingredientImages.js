@@ -131,6 +131,8 @@ const KEYWORD_MAP = [
   ['soy milk',    '1550583724-b2692b85b150'],    // ✓
   ['milk',        '1550583724-b2692b85b150'],    // ✓
   ['cheese',      '1486297678162-eb2a19b0a32d'], // ✓
+  ['cream',       '1550583724-b2692b85b150'],    // ✓ (milk stand-in)
+  ['margarine',   '1505206448417-789506e24f62'], // ✓ (spread on bread)
   ['butter',      '1474979266404-7eaacbcd87c5'], // ✓ (olive oil stand-in)
   ['ghee',        '1474979266404-7eaacbcd87c5'], // ✓
   ['olive oil',   '1474979266404-7eaacbcd87c5'], // ✓
@@ -172,7 +174,7 @@ const GROUP_FALLBACKS = {
   d: '1490645935967-10de6ba17061', // Fruits  ✓
   e: '1512621776951-a57141f2eefd', // Vegetables  ✓
   f: '1505253716362-afaea1d3d1af', // Grains  ✓
-  g: '1488477181946-6428a0291777', // Dairy  ✓
+  g: '1474979266404-7eaacbcd87c5', // Fats & oils  ✓ (what falls through here; never the dessert photo)
   h: '1551248429-40975aa4de74',    // Snacks/Beverages  ✓
   i: '1540420773420-3366772f4999', // Herbs/Spices  ✓
   k: '1546069901-ba9599a7e63c',    // Nutrients/Herbal  ✓
