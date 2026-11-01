@@ -1,6 +1,6 @@
 /**
  * adapter.fineGroupSuggest.test.js — Guards the Wave 1 "Suggest" browse
- * surface data layer: `getFineFoodGroups` (the static 17-group menu) and
+ * surface data layer: `getFineFoodGroups` (the static 18-group menu) and
  * `getFineGroupSuggestions` (one group's condition-ranked browse list), both
  * in adapter.js.
  *
@@ -81,6 +81,7 @@ vi.mock('../localTables.js', () => ({
 }));
 
 import { getFineFoodGroups } from '../adapter.js';
+import { FINE_GROUP_MENU_ORDER } from '../config.js';
 
 describe('getFineFoodGroups', () => {
   /** @type {Awaited<ReturnType<typeof getFineFoodGroups>>} */
@@ -90,15 +91,23 @@ describe('getFineFoodGroups', () => {
     menu = await getFineFoodGroups();
   });
 
-  it('returns exactly the 17 real fine groups', () => {
-    expect(menu).toHaveLength(17);
+  it('returns exactly the 18 real fine groups', () => {
+    expect(menu).toHaveLength(18);
   });
 
-  it('excludes the lifestyle/recipe codes (x, j1, l)', () => {
+  it('leaves out recipes and the unused catch-all (l, x)', () => {
     const codes = menu.map((g) => g.code);
     expect(codes).not.toContain('x');
-    expect(codes).not.toContain('j1');
     expect(codes).not.toContain('l');
+  });
+
+  it('includes Alternative Therapies and keeps Vitamins and Herbal Supplements', () => {
+    const codes = menu.map((g) => g.code);
+    expect(codes).toEqual(expect.arrayContaining(['j1', 'k1', 'k2']));
+  });
+
+  it('follows the single ordered config array', () => {
+    expect(menu.map((g) => g.code)).toEqual(FINE_GROUP_MENU_ORDER);
   });
 
   it('excludes coarse-only records (no isFineFoodGroup)', () => {
@@ -113,14 +122,6 @@ describe('getFineFoodGroups', () => {
     expect(codes).toEqual(expect.arrayContaining(['d', 'e', 'f']));
     const d = menu.find((g) => g.code === 'd');
     expect(d).toEqual({ code: 'd', label: 'Fruits & Juices', coarse: 'd' });
-  });
-
-  it('is ordered ascending by code, keeping each coarse letter contiguous', () => {
-    const codes = menu.map((g) => g.code);
-    const sorted = [...codes].sort();
-    expect(codes).toEqual(sorted);
-    // b1, b2, b3 stay adjacent and in order.
-    expect(codes.slice(codes.indexOf('b1'), codes.indexOf('b1') + 3)).toEqual(['b1', 'b2', 'b3']);
   });
 
   it('stamps the correct coarse letter and real label on every entry', () => {

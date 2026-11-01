@@ -19,7 +19,15 @@
  * @typedef {import('./types.js')} Types
  */
 
-import { EXCLUDED_FINE_GROUPS, COARSE_GROUP_LABELS, MEAL_SLOT_MAP, PLAN_SLOTS, PLAN_SLOT_KEYS } from './config.js';
+import {
+  EXCLUDED_FINE_GROUPS,
+  COARSE_GROUP_LABELS,
+  FINE_GROUP_MENU_ORDER,
+  NOT_IN_FINE_GROUP_MENU,
+  MEAL_SLOT_MAP,
+  PLAN_SLOTS,
+  PLAN_SLOT_KEYS,
+} from './config.js';
 import { getIngredientImage } from './ingredientImages.js';
 import {
   fetchGoodFor,
@@ -30,8 +38,8 @@ import {
   NutridigmAuthError,
 } from './nutridigm.js';
 import { cachedFetch, peekCache } from './cache.js';
-import { getItemTable, getConditionTable, getGroupTable, getOverlayImageFile } from './localTables.js';
-import { joinRecipeOverlay } from './recipeIngestion.js';
+import { getItemTable, getConditionTable, getGroupTable, getOverlayImageFile, getRecipeFlaggedItems } from './localTables.js';
+import { joinRecipeOverlay, loadRecipeOverlay } from './recipeIngestion.js';
 
 // ── Cache TTLs ────────────────────────────────────────────────────────────────
 
@@ -77,6 +85,33 @@ function cachedTopDoOrDonts(conditionsCSV, consumeOrAvoid, limit) {
 }
 
 /**
+ * Thrown by a cached fetcher that came back empty: cachedFetch only persists a
+ * RESOLVED value, so this keeps an empty answer from being served for the
+ * whole TTL, and a later retry reaches the API again (checklist 4.11).
+ */
+class EmptyResult extends Error {}
+
+/** cachedFetch for a list endpoint, resolving `[]` for an empty list without caching it. */
+async function cachedNonEmpty(key, ttlMs, fetcher) {
+  try {
+    return await cachedFetch(key, ttlMs, async () => {
+      const rows = await fetcher();
+      if (!rows?.length) throw new EmptyResult();
+      return rows;
+    });
+  } catch (err) {
+    if (err instanceof EmptyResult) return [];
+    throw err;
+  }
+}
+
+/** Cached /detailed list for one coarse group and verdict. */
+function cachedDetailed(conditionsCSV, coarseGroup, listType) {
+  const key = `detailed:${conditionsCSV}:${coarseGroup}:${listType}`;
+  return cachedNonEmpty(key, DETAILED_TTL_MS, () => fetchDetailed(conditionsCSV, coarseGroup, listType));
+}
+
+/**
  * Cached wrapper around fetchSuggest, keyed by {conditionsCSV, fineFoodGroup}.
  * Backs both `getRecipes` (fine group 'l', via its own `recipes:{csv}:l`
  * key — see `getRecipesRaw`) and `getMealPlanSuggestions` (the 10 Plan-slot
@@ -113,6 +148,46 @@ function refsCacheKey(conditionId, foodId) {
 function cachedReferences(conditionId, foodId) {
   const key = refsCacheKey(conditionId, foodId);
   return cachedFetch(key, REFERENCES_TTL_MS, () => fetchReferences(conditionId, foodId));
+}
+
+/** Requests per batch when fanning /goodfor out over a list (the API has fallen over on 100+ at once). */
+const GOODFOR_BATCH_SIZE = 8;
+
+/**
+ * Runs `fn` over `items`, GOODFOR_BATCH_SIZE at a time.
+ * @template T, R
+ * @param {T[]} items
+ * @param {(item: T) => Promise<R>} fn
+ * @returns {Promise<R[]>}
+ */
+async function inBatches(items, fn) {
+  const out = [];
+  for (let i = 0; i < items.length; i += GOODFOR_BATCH_SIZE) {
+    out.push(...(await Promise.all(items.slice(i, i + GOODFOR_BATCH_SIZE).map(fn))));
+  }
+  return out;
+}
+
+/**
+ * Makes /suggest rows show the rating the food card shows (2.1). For a
+ * multi-condition request /suggest and /goodfor return the same `value` but can
+ * bucket it differently (Fiber for Aging + High Cholesterol: value 1.05, /suggest
+ * 2, /goodfor 3), so the card's /goodfor rating wins. Single-condition requests
+ * agree, so they cost no extra calls. A failed lookup keeps the row's own rating
+ * and the card will be failing too. Shares the card's cache key, so opening a
+ * row from the list is instant.
+ * @param {Object[]} rows - Raw /suggest rows
+ * @param {number[]} conditionIds - The set the rows were requested for
+ * @returns {Promise<Object[]>}
+ */
+async function withGoodForRatings(rows, conditionIds) {
+  if (conditionIds.length < 2) return rows;
+  return inBatches(rows, async (row) => {
+    const raw = await cachedGoodFor(row.foodItemID, conditionIds).catch(() => null);
+    return raw?.descriptionNumericID != null
+      ? { ...row, description: raw.description, descriptionNumericID: raw.descriptionNumericID }
+      : row;
+  });
 }
 
 // ── Condition authorization ─────────────────────────────────────────────────
@@ -311,10 +386,10 @@ let _fineFoodGroupsCache = null;
  * the separate `/detailed` "choose this, not that" surface and are untouched
  * by this function). Sourced from the same cached /foodgroups dictionary as
  * `getFineGroupLabelsByCoarse`/`getGroupLabels`: every record with
- * `isFineFoodGroup: true`, minus `EXCLUDED_FINE_GROUPS` ('x'/'j1' lifestyle,
- * 'l' recipes — recipes have their own surface, RecipesScreen). That yields
- * exactly the 17 real fine groups (b1,b2,b3,c1,c2,c3,d,e,f,g1,g2,h1,h2,i1,
- * i2,k1,k2) as of this writing.
+ * `isFineFoodGroup: true`, minus `NOT_IN_FINE_GROUP_MENU` ('l' recipes have
+ * their own surface, RecipesScreen; 'x' is the unused catch-all). That yields
+ * the 18 real fine groups, Alternative Therapies (j1) and the k1/k2 nutrient
+ * groups included.
  *
  * SUBTLETY (the same one `getFineGroupLabelsByCoarse` documents, resolved
  * the OPPOSITE way here — read this before touching either function): d, e,
@@ -327,8 +402,8 @@ let _fineFoodGroupsCache = null;
  * flat menu of fine groups to browse — and for d/e/f that single record IS
  * the legitimate, only fine group for Fruits & Juices / Vegetables / Breads,
  * Grains, Cereals & Pasta. So this function does NOT apply that same
- * exclusion: d, e, and f MUST appear in this menu (17 groups total, not
- * 14) — only `isFineFoodGroup` + the `EXCLUDED_FINE_GROUPS` check gate
+ * exclusion: d, e, and f MUST appear in this menu (18 groups total, not
+ * 15) — only `isFineFoodGroup` + the `NOT_IN_FINE_GROUP_MENU` check gate
  * inclusion here. This is why the two functions don't share a filter
  * helper despite both reading the same "both flags set" record shape: the
  * correct handling of that record is inverted between them, not duplicated.
@@ -337,11 +412,7 @@ let _fineFoodGroupsCache = null;
  * — same source dictionary, same cache-once-forever lifetime, so adding this
  * export costs zero extra /foodgroups reads.
  *
- * Order: ascending by `code` (plain string compare). Every code is either a
- * single coarse letter (d, e, f) or a coarse-letter-plus-single-digit (b1,
- * c3, …) — never multi-digit — so a plain string sort keeps each coarse
- * group's codes contiguous and correctly ordered (b1 < b2 < b3) with no need
- * for a numeric-aware comparator.
+ * Order: `FINE_GROUP_MENU_ORDER` (config.js).
  *
  * Profile-independent — no /goodfor or condition scoring involved, this is
  * the static menu of groups to browse, not a ranked result. Pair with
@@ -353,10 +424,15 @@ export async function getFineFoodGroups() {
   if (_fineFoodGroupsCache) return _fineFoodGroupsCache;
 
   const groups = await ensureFoodGroups();
+  // A code the config doesn't list yet sorts last rather than disappearing.
+  const rank = (code) => {
+    const i = FINE_GROUP_MENU_ORDER.indexOf(code);
+    return i === -1 ? FINE_GROUP_MENU_ORDER.length : i;
+  };
   const menu = groups
-    .filter((g) => g.isFineFoodGroup && !EXCLUDED_FINE_GROUPS.includes(g.foodGroupID))
+    .filter((g) => g.isFineFoodGroup && !NOT_IN_FINE_GROUP_MENU.includes(g.foodGroupID))
     .map((g) => ({ code: g.foodGroupID, label: g.description, coarse: g.foodGroupID.charAt(0) }))
-    .sort((a, b) => (a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
+    .sort((a, b) => rank(a.code) - rank(b.code));
 
   _fineFoodGroupsCache = menu;
   return _fineFoodGroupsCache;
@@ -642,18 +718,6 @@ const RECIPE_MEAL_TYPE_KEYWORDS = [
   ['soup', 'lunch'],
   ['taco', 'lunch'],
   ['bowl', 'lunch'],
-  ['guacamole', 'snack'],
-  ['dip', 'snack'],
-  ['bar', 'snack'],
-  ['cake', 'snack'],
-  ['cookie', 'snack'],
-  ['pie', 'snack'],
-  ['brownie', 'snack'],
-  ['pudding', 'snack'],
-  ['tart', 'snack'],
-  ['ice cream', 'snack'],
-  ['cheesecake', 'snack'],
-  ['muffin', 'snack'],
 ];
 
 /**
@@ -806,34 +870,6 @@ export async function searchNaturalSources(query) {
 }
 
 /**
- * Fetch /references citations for a food across multiple conditions and
- * reduce them to the honest "study total" both `assessFoodRaw` and
- * `getCategoryDetailRaw` need: `null` (unknown) if ANY per-condition fetch
- * errored, otherwise the summed citation count — never a fabricated 0 when
- * we simply couldn't check. Runs the fetches through Promise.allSettled
- * (rather than Promise.all + try/catch per item) so one condition's
- * /references failure can't be silently swallowed into an
- * indistinguishable-from-"no studies" empty array. Also returns the raw
- * `refSettlements` so callers that need per-condition citations/
- * referenceStatus (assessFoodRaw) don't have to re-fetch.
- * @param {number} foodId
- * @param {number[]} conditionIds
- * @returns {Promise<{ refSettlements: PromiseSettledResult<string[]>[], referenceTotal: number|null }>}
- */
-async function fetchReferenceTotal(foodId, conditionIds) {
-  const refSettlements = await Promise.allSettled(
-    conditionIds.map((conditionId) => cachedReferences(conditionId, foodId))
-  );
-
-  const anyErrored = refSettlements.some((s) => s.status === 'rejected');
-  const referenceTotal = anyErrored
-    ? null
-    : refSettlements.reduce((sum, s) => sum + (s.value || []).length, 0);
-
-  return { refSettlements, referenceTotal };
-}
-
-/**
  * Assess a single food against the user's profile.
  * Calls /goodfor for the reconciled verdict, then /references for each condition.
  * @param {number} foodId
@@ -851,74 +887,84 @@ export async function assessFood(foodId, profile) {
 }
 
 /**
- * Internal sentinel thrown from `assessFoodRaw`'s `cachedFetch` fetcher when
- * `/goodfor` resolves with no result (HTTP 220 — a valid "nothing to
- * assess" response, `null`) — see `assessFoodRaw` for why.
+ * Internal sentinel for `/goodfor` resolving with no result (HTTP 220, a valid
+ * "nothing to assess" response, or a null body): thrown from the `cachedFetch`
+ * fetcher so a null is never cached for the full 8h `GOODFOR_TTL_MS`, since
+ * cache.js only persists a fetcher's RESOLVED value.
  */
 class GoodForEmptyResult extends Error {}
 
+/** Cached /goodfor for one condition or a combined set; rejects GoodForEmptyResult on no result. */
+function cachedGoodFor(foodId, conditionIds) {
+  const csv = conditionIds.join(',');
+  return cachedFetch(`goodfor:${csv}:${foodId}`, GOODFOR_TTL_MS, async () => {
+    const result = await fetchGoodFor(foodId, csv);
+    if (result == null) throw new GoodForEmptyResult();
+    return result;
+  });
+}
+
+const nullOnEmptyGoodFor = (err) => {
+  if (err instanceof GoodForEmptyResult) return null;
+  throw err;
+};
+
 /**
- * Unwrapped assessFood body.
- *
- * BUG FIX: `cachedFetch` persists whatever its fetcher resolves with, for
- * the full `ttlMs` it's given — including a null `/goodfor` result — so a
- * food with no assessment data got that `null` cached for the entire 8h
- * `GOODFOR_TTL_MS`, same as a real result. That's wrong for a value this
- * cheap and likely to change (data curation catching up, a retry after a
- * transient upstream gap): once null, a food stayed "unassessable" for the
- * rest of the day even if `/goodfor` would answer differently moments
- * later. `cache.js` isn't owned by this task, so instead of adding a
- * conditional-TTL option there, the fetcher throws this module-private
- * `GoodForEmptyResult` sentinel when the result is null; `cachedFetch`
- * (cache.js) only ever writes an entry from a fetcher's RESOLVED value — a
- * rejection is never persisted on a first fetch, and for an already-cached
- * STALE entry a background-revalidation rejection is swallowed while the
- * old stale value keeps serving (see cache.js's `cachedFetchWithMeta` doc)
- * — so this gets "never cache a null" with zero changes to cache.js. The
- * catch below turns the sentinel back into the same `null` this function
- * always returned for "no assessment"; any OTHER error (a real fetch
- * failure) is rethrown unchanged.
+ * The overall /goodfor verdict for a food, over the same conditions the lists
+ * score it on: every authorized condition, including one with no data of its
+ * own for this food (it still counts in /suggest's combined value). `combined`
+ * is an already-started request for the full `conditionIds`, when there is one.
+ * @param {number} foodId
+ * @param {number[]} conditionIds
+ * @param {Array<{conditionId: number, status: string}>} rows
+ * @param {Map<number, Object>} raws
+ * @param {Promise<Object>|null} [combined]
+ * @returns {Promise<Object|null>}
+ */
+async function overallGoodFor(foodId, conditionIds, rows, raws, combined = null) {
+  if (!rows.some((r) => r.status === 'ok') || raws.size === 0) return null;
+  const scorable = rows.filter((r) => r.status === 'ok' || r.status === 'nodata').map((r) => r.conditionId);
+  if (scorable.length === 1) return raws.get(scorable[0]);
+  if (combined && scorable.length === conditionIds.length) return combined.catch(nullOnEmptyGoodFor);
+  return cachedGoodFor(foodId, scorable).catch(nullOnEmptyGoodFor);
+}
+
+/**
+ * Unwrapped assessFood body. Per-condition /goodfor, the combined /goodfor and
+ * /references all go out together, one round trip rather than three, so the
+ * first open of a food is fast (2.3). One request per food+condition is spent
+ * on a condition the key can't score, whose /references rejection is ignored.
  * @param {number} foodId
  * @param {number[]} conditionIds
  * @returns {Promise<import('./types.js').Assessment|null>}
  */
 async function assessFoodRaw(foodId, conditionIds) {
-  // One /goodfor per condition (works for a single condition, whose combined
-  // response has no conditions[] array, and isolates NOTAUTHORIZEDHEALTHID
-  // to just that condition's row).
+  const cache = await ensureFoodItems();
+  const foodItem = cache.get(foodId);
+  const hasOverall = conditionIds.length > 1 && !isGoodForRejected(foodItem);
+
+  const combined = hasOverall ? cachedGoodFor(foodId, conditionIds) : null;
+  combined?.catch(() => {}); // Awaited below only if every condition turns out scorable.
+  const refsPromise = Promise.allSettled(conditionIds.map((id) => cachedReferences(id, foodId)));
   const { rows, raws } = await fetchGoodForRows(foodId, conditionIds);
+
   const okIds = rows.filter((r) => r.status === 'ok').map((r) => r.conditionId);
   const anyUnscorable = rows.some((r) => r.status === 'unauthorized' || r.status === 'error');
   if (!okIds.length && !anyUnscorable) return null;
 
-  // Overall verdict: the single scored condition's own response, or the
-  // combined /goodfor over just the scorable conditions.
-  let raw = null;
-  if (okIds.length === 1) {
-    raw = raws.get(okIds[0]);
-  } else if (okIds.length > 1) {
-    try {
-      raw = await cachedFetch(`goodfor:${okIds.join(',')}:${foodId}`, GOODFOR_TTL_MS, async () => {
-        const result = await fetchGoodFor(foodId, okIds.join(','));
-        if (result == null) throw new GoodForEmptyResult();
-        return result;
-      });
-    } catch (err) {
-      if (!(err instanceof GoodForEmptyResult)) throw err;
-    }
-  }
-
-  const cache = await ensureFoodItems();
-  const foodItem = cache.get(foodId);
+  const raw = await overallGoodFor(foodId, conditionIds, rows, raws, combined);
   const food = foodItem
     ? normalizeFood(foodItem)
     : { id: foodId, name: `Food ${foodId}`, group: '', fineGroup: '' };
-
   const tier = raw ? numericIdToTier(raw.descriptionNumericID) : null;
 
-  // /references only for scorable conditions (see fetchReferenceTotal for
-  // the allSettled/honest-null rationale).
-  const { refSettlements, referenceTotal } = await fetchReferenceTotal(foodId, okIds);
+  const refSettlements = await refsPromise;
+  const refsFor = (conditionId) => refSettlements[conditionIds.indexOf(conditionId)];
+  // Null (unknown), not 0, when ANY reference fetch failed for a scored condition.
+  const anyRefFailed = okIds.some((id) => refsFor(id).status === 'rejected');
+  const referenceTotal = anyRefFailed
+    ? null
+    : okIds.reduce((sum, id) => sum + (refsFor(id).value || []).length, 0);
 
   const perCondition = rows.map((row) => {
     if (row.status !== 'ok') {
@@ -934,7 +980,7 @@ async function assessFoodRaw(foodId, conditionIds) {
         errorCode: row.errorCode,
       };
     }
-    const settled = refSettlements[okIds.indexOf(row.conditionId)];
+    const settled = refsFor(row.conditionId);
     const referenceStatus = settled.status === 'fulfilled' ? 'ok' : 'error';
     const citations = referenceStatus === 'ok' ? settled.value || [] : [];
     return {
@@ -944,6 +990,7 @@ async function assessFoodRaw(foodId, conditionIds) {
       tier: row.tier,
       // Kept alongside tier so the UI can tell a real neutral (4) from missing.
       numericId: row.numericId,
+      verdict: row.verdict,
       referenceCount: citations.length,
       citations,
       referenceStatus,
@@ -951,7 +998,6 @@ async function assessFoodRaw(foodId, conditionIds) {
   });
 
   food.tier = tier;
-  // Null (unknown), not 0, when ANY reference fetch failed.
   food.referenceTotal = referenceTotal;
 
   return {
@@ -964,22 +1010,44 @@ async function assessFoodRaw(foodId, conditionIds) {
   };
 }
 
+/** /goodfor answers 400 XNOTALLOWED for any fine group 'x' item (Smoking, Beef, Eggs...). */
+function isGoodForRejected(foodItem) {
+  return foodItem?.fineFoodGroup === 'x';
+}
+
+/**
+ * One condition's verdict for a fine group 'x' item, from /detailed list
+ * membership, which is the only verdict the API has for these: no
+ * descriptionNumericID exists for them, so no star rating is ever derived.
+ * @param {Object} foodItem
+ * @param {number} conditionId
+ * @returns {Promise<{status: 'ok'|'nodata', verdict?: 'helpful'|'harmful', label?: string}>}
+ */
+async function detailedVerdict(foodItem, conditionId) {
+  const group = effectiveCoarseGroup(foodItem);
+  const lists = await Promise.all(
+    ['helpful', 'harmful'].map((listType) => cachedDetailed(String(conditionId), group, listType))
+  );
+  const [helpful, harmful] = lists.map((list) => list.some((row) => row.foodItemID === foodItem.foodItemID));
+  if (harmful) return { status: 'ok', verdict: 'harmful', label: 'Ranked lower' };
+  if (helpful) return { status: 'ok', verdict: 'helpful', label: 'Ranked favorably' };
+  return { status: 'nodata' };
+}
+
 /**
  * Shared per-condition /goodfor fetch (see getGoodForMe). Returns the
  * normalized rows plus each scored condition's raw response.
  */
 async function fetchGoodForRows(foodId, conditionIds) {
+  const foodItem = (await ensureFoodItems()).get(foodId);
   const raws = new Map();
   const rows = await Promise.all(
     conditionIds.map(async (conditionId) => {
       const conditionName = await getConditionName(conditionId);
       const base = { conditionId, conditionName, numericId: null, tier: null, label: null, notes: '' };
       try {
-        const raw = await cachedFetch(`goodfor:${conditionId}:${foodId}`, GOODFOR_TTL_MS, async () => {
-          const result = await fetchGoodFor(foodId, String(conditionId));
-          if (result == null) throw new GoodForEmptyResult();
-          return result;
-        });
+        if (isGoodForRejected(foodItem)) return { ...base, ...(await detailedVerdict(foodItem, conditionId)) };
+        const raw = await cachedGoodFor(foodId, [conditionId]);
         const numericId = raw?.descriptionNumericID ?? null;
         if (numericId == null) return { ...base, status: 'nodata' };
         raws.set(conditionId, raw);
@@ -1018,12 +1086,14 @@ async function fetchGoodForRows(foodId, conditionIds) {
  * Row `status`: 'ok' (scored, incl. neutral numericId 4), 'nodata' (API
  * returned nothing), 'unauthorized', 'error' (anything else; `errorCode`
  * carries the API code when present). No tier is ever fabricated.
+ * `overallNumericId` is the same overall rating the food card and lists show.
  * @param {number} foodId
  * @param {{conditions?: number[]}} profile
- * @returns {Promise<{ foodId: number, foodName: string, rows: Array<{
+ * @returns {Promise<{ foodId: number, foodName: string, overallNumericId: number|null, rows: Array<{
  *   conditionId: number, conditionName: string,
  *   status: 'ok'|'nodata'|'unauthorized'|'error',
  *   numericId: number|null, tier: import('./types.js').TierOrPoor,
+ *   verdict?: 'helpful'|'harmful',
  *   label: string|null, notes: string, errorCode?: string }> }>}
  */
 export async function getGoodForMe(foodId, profile) {
@@ -1031,8 +1101,10 @@ export async function getGoodForMe(foodId, profile) {
   const cache = await ensureFoodItems();
   const foodItem = cache.get(foodId);
   const foodName = foodItem ? normalizeFood(foodItem).name : `Food ${foodId}`;
-  const { rows } = await fetchGoodForRows(foodId, conditionIds);
-  return { foodId, foodName, rows };
+  const { rows, raws } = await fetchGoodForRows(foodId, conditionIds);
+  // A failed overall leaves the per-condition rows standing: they are the sheet's content.
+  const overall = await overallGoodFor(foodId, conditionIds, rows, raws).catch(() => null);
+  return { foodId, foodName, overallNumericId: overall?.descriptionNumericID ?? null, rows };
 }
 
 /**
@@ -1241,11 +1313,8 @@ export async function getCategoryDetail(profile, coarseGroup, listType) {
  */
 async function getCategoryDetailRaw(conditionIds, coarseGroup, listType) {
   const conditionIdStr = conditionIds.join(',');
-  const cacheKey = `detailed:${conditionIdStr}:${coarseGroup}:${listType}`;
-  const raw = await cachedFetch(cacheKey, DETAILED_TTL_MS, () =>
-    fetchDetailed(conditionIdStr, coarseGroup, listType)
-  );
-  if (!raw || !raw.length) return [];
+  const raw = await cachedDetailed(conditionIdStr, coarseGroup, listType);
+  if (!raw.length) return [];
 
   return Promise.all(
     raw.map(async (item) => {
@@ -1329,11 +1398,21 @@ export async function getRecipes(profile) {
 async function getRecipesRaw(conditionIds) {
   const conditionIdStr = conditionIds.join(',');
   const cacheKey = `recipes:${conditionIdStr}:${RECIPE_FINE_GROUP}`;
-  const raw = await cachedFetch(cacheKey, RECIPES_TTL_MS, () =>
+  const suggested = await cachedFetch(cacheKey, RECIPES_TTL_MS, () =>
     fetchSuggest(conditionIdStr, RECIPE_FINE_GROUP)
   );
-  if (!raw || !raw.length) return [];
+  if (!suggested || !suggested.length) return [];
 
+  return buildRecipes(await withGoodForRatings(suggested, conditionIds), conditionIds);
+}
+
+/**
+ * Raw /suggest-shaped rows -> Recipes, with the content overlay joined on.
+ * @param {Object[]} raw
+ * @param {number[]} conditionIds
+ * @returns {Promise<import('./types.js').Recipe[]>}
+ */
+async function buildRecipes(raw, conditionIds) {
   const matchedConditions = await getConditionNames(conditionIds);
 
   const recipes = raw.map((item) => {
@@ -1368,6 +1447,66 @@ async function getRecipesRaw(conditionIds) {
     });
     return { ...rest, mealType, mealTypeDefaulted, ingredients };
   });
+}
+
+/** Sunny's categories that /suggest's top 20 can leave out entirely (0 of 8 beverage recipes for Aging). */
+const LISTED_WHATEVER_RANK = ['beverage', 'snack', 'dessert'];
+
+/**
+ * The recipe lists for Choose recipes / Best & Worst Choices (4.1, 4.2, 7.3):
+ * `getRecipes`' top 20, plus Sunny's Beverage, Snack and Dessert recipes and her
+ * R items (prepared foods) whatever their rank. Those extras are scored one by
+ * one on /goodfor (bounded, cached 8h); one that can't be scored stays listed,
+ * unrated and unsaveable, rather than disappearing.
+ * @param {import('./types.js').Profile} profile
+ * @returns {Promise<{ recipes: import('./types.js').Recipe[], unscorableReason: string|null }>}
+ */
+export async function getCategoryRecipes(profile) {
+  const conditionIds = profile?.conditions || [];
+  if (!conditionIds.length) return { recipes: [], unscorableReason: null };
+
+  const { result, unscorableReason } = await withAuthorized(
+    conditionIds,
+    async (ids) => {
+      const top = await getRecipesRaw(ids);
+      const listed = new Set(top.map((r) => r.id));
+      const extras = [
+        ...loadRecipeOverlay()
+          .filter((row) => [row.mealType, ...(row.alsoFits ?? [])].some((type) => LISTED_WHATEVER_RANK.includes(type)))
+          .map((row) => ({ id: row.foodItemID, name: row.name })),
+        ...getRecipeFlaggedItems().map((item) => ({
+          id: item.foodItemID,
+          name: item.displayAs || item.description,
+          coarseFoodGroup: item.coarseFoodGroup,
+          mealTypes: item.mealTypes,
+        })),
+      ].filter((extra) => !listed.has(extra.id));
+
+      const scored = await inBatches(extras, async (extra) => {
+        const raw = await cachedGoodFor(extra.id, ids).catch((err) => {
+          if (isUnauthorized(err)) throw err;
+          return null;
+        });
+        return {
+          foodItemID: extra.id,
+          foodItemDisplayAs: extra.name,
+          coarseFoodGroup: extra.coarseFoodGroup,
+          descriptionNumericID: raw?.descriptionNumericID,
+          notes: extra.mealTypes ? '' : raw?.notes,
+        };
+      });
+      const mealTypesById = new Map(extras.filter((e) => e.mealTypes).map((e) => [e.id, e.mealTypes]));
+      const recipes = (await buildRecipes(scored, ids)).map((recipe) => {
+        const mealTypes = mealTypesById.get(recipe.id);
+        if (!mealTypes) return recipe;
+        const [mealType, ...alsoFits] = mealTypes;
+        return { ...recipe, mealType, alsoFits, mealTypeDefaulted: false, isPreparedFood: true };
+      });
+      return [...top, ...recipes];
+    },
+    []
+  );
+  return { recipes: result, unscorableReason };
 }
 
 /** Recipe tiers eligible to fill a Plan slot — reverse of numericIdToTier for 1/2/3 only. */
@@ -2106,8 +2245,9 @@ export async function getIngredientAlternatives(profile, ingredient, { limit = 6
  * }>>}
  */
 async function getFineGroupSuggestionsRaw(conditionIds, fineGroupCode) {
-  const raw = await cachedSuggest(conditionIds.join(','), fineGroupCode);
-  if (!raw || !raw.length) return [];
+  const suggested = await cachedSuggest(conditionIds.join(','), fineGroupCode);
+  if (!suggested || !suggested.length) return [];
+  const raw = await withGoodForRatings(suggested, conditionIds);
 
   const filtered = raw.filter((item) => item.descriptionNumericID != null && !isExcludedItem(item));
   filtered.sort((a, b) => a.descriptionNumericID - b.descriptionNumericID);
@@ -2145,7 +2285,7 @@ async function getFineGroupSuggestionsRaw(conditionIds, fineGroupCode) {
  * limit).
  *
  * @param {import('./types.js').Profile} profile
- * @param {string} fineGroupCode - One of the 17 codes `getFineFoodGroups`
+ * @param {string} fineGroupCode - One of the 18 codes `getFineFoodGroups`
  *   returns (e.g. 'b1', 'e'). An empty/falsy code or a profile with no
  *   conditions short-circuits to an honestly-empty result.
  * @returns {Promise<{

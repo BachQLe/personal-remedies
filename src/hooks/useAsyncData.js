@@ -33,6 +33,9 @@
  * @param {boolean} [options.requiresProfile] - When true, the fetcher is
  *   never called until a profile exists, and status is 'empty-no-profile'
  *   while it's missing instead of 'loading'.
+ * @param {boolean} [options.retryEmptyOnce] - When a fetch comes back empty,
+ *   stay in 'loading' and fetch once more before reporting 'empty', so a
+ *   not-ready-yet answer never reads as "nothing found" (checklist 4.11).
  * @returns {{
  *   status: import('../api/loadState.js').LoadState,
  *   data: T|undefined,
@@ -48,8 +51,10 @@ import { isOnline, subscribeOnline } from '../api/connectivity.js';
 import { storage } from '../api/storage.js';
 import { deriveState, isApiError, unwrapFetchResult, defaultIsEmpty } from '../api/loadState.js';
 
+const RETRY_EMPTY_DELAY_MS = 600;
+
 export function useAsyncData(fetcher, deps = [], options = {}) {
-  const { isEmpty = defaultIsEmpty, requiresProfile = false } = options;
+  const { isEmpty = defaultIsEmpty, requiresProfile = false, retryEmptyOnce = false } = options;
   const hasProfile = requiresProfile ? !!storage.get('profile', null) : true;
 
   // Latest fetcher, kept current via an effect (not written during render)
@@ -61,8 +66,10 @@ export function useAsyncData(fetcher, deps = [], options = {}) {
   // plain destructured value is already current — no ref/effect indirection
   // needed there, and reading a ref during render is disallowed anyway.
   const fetcherRef = useRef(fetcher);
+  const isEmptyRef = useRef(isEmpty);
   useEffect(() => {
     fetcherRef.current = fetcher;
+    isEmptyRef.current = isEmpty;
   });
 
   const [online, setOnline] = useState(isOnline());
@@ -85,6 +92,8 @@ export function useAsyncData(fetcher, deps = [], options = {}) {
   // resolution from an earlier, superseded attempt — or one arriving after
   // unmount — is ignored instead of clobbering newer state.
   const attemptRef = useRef(0);
+  const retriedEmptyRef = useRef(false);
+  const [emptyRetry, setEmptyRetry] = useState(0);
   const mountedRef = useRef(true);
   useEffect(() => {
     mountedRef.current = true;
@@ -115,18 +124,31 @@ export function useAsyncData(fetcher, deps = [], options = {}) {
       .then((result) => {
         if (!mountedRef.current || attempt !== attemptRef.current) return;
         const { data, fromCache } = unwrapFetchResult(result);
+        if (retryEmptyOnce && !retriedEmptyRef.current && isEmptyRef.current(data)) {
+          retriedEmptyRef.current = true;
+          setTimeout(() => {
+            if (mountedRef.current && attempt === attemptRef.current) setEmptyRetry((n) => n + 1);
+          }, RETRY_EMPTY_DELAY_MS);
+          return;
+        }
         setSnapshot({ loading: false, data, error: null, fromCache });
       })
       .catch((error) => {
         if (!mountedRef.current || attempt !== attemptRef.current) return;
         setSnapshot((s) => ({ ...s, loading: false, error }));
       });
-  }, [requiresProfile, hasProfile]);
+  }, [requiresProfile, hasProfile, retryEmptyOnce]);
+
+  // New deps get their own one retry.
+  useEffect(() => {
+    retriedEmptyRef.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `deps` is the caller-supplied trigger.
+  }, deps);
 
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `deps` (caller-supplied array) is the intended re-fetch trigger, spread deliberately; `run` already captures requiresProfile/hasProfile and is otherwise stable.
-  }, [run, ...deps]);
+  }, [run, emptyRetry, ...deps]);
 
   // Re-derive on connectivity change, and auto-retry once back online after
   // a network-shaped error (an API error is left alone — the server itself

@@ -51,7 +51,7 @@ async function setupAdapter({ overlay = [], suggestResponses = {} } = {}) {
 }
 
 describe('guessMealType never returns "dessert" — only a curated overlay row may', () => {
-  it('every dessert-sounding keyword still maps to "snack", never "dessert"', async () => {
+  it('a dessert-sounding title falls to the dinner default, never "snack" or "dessert"', async () => {
     const { guessMealType } = await setupAdapter();
     const dessertSoundingTitles = [
       'Chocolate Cake',
@@ -65,7 +65,7 @@ describe('guessMealType never returns "dessert" — only a curated overlay row m
       'Blueberry Muffin',
     ];
     for (const title of dessertSoundingTitles) {
-      expect(guessMealType(title)).toBe('snack');
+      expect(guessMealType(title)).toBe('dinner');
       expect(guessMealType(title)).not.toBe('dessert');
     }
   });
@@ -128,15 +128,14 @@ describe('getMealPlanSuggestions: the "snacks" slot pools BOTH snack- and desser
     expect(Object.keys(result.candidates)).not.toContain('desserts');
   });
 
-  it('a plain snack-mealType recipe (guessMealType keyword hit) still lands in snacks too, alongside dessert', async () => {
+  it("a title keyword no longer makes a recipe a snack: Sunny's list decides (4.1)", async () => {
     const { getMealPlanSuggestions } = await setupAdapter({
       suggestResponses: {
-        // guessMealType('Protein Bar') -> 'bar' keyword -> 'snack'
         l: [{ foodItemID: 602, foodItemDisplayAs: 'Protein Bar', descriptionNumericID: 2 }],
       },
     });
     const result = await getMealPlanSuggestions({ conditions: [9001] });
     const snackIds = result.candidates.snacks.map((c) => c.id);
-    expect(snackIds).toContain(602);
+    expect(snackIds).not.toContain(602);
   });
 });

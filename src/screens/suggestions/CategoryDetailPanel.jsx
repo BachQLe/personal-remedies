@@ -5,7 +5,7 @@
  *
  * Renders inline, directly below the group header (its sole caller,
  * GroupDetailScreen, mounts this once for the routed group). A segmented
- * control lets the user flip between Eat / Avoid; only the ACTIVE listType is
+ * control lets the user flip between Eat/Do / Avoid; only the ACTIVE listType is
  * ever fetched, on demand, the first time its tab is opened. Repeat visits to
  * an already-fetched tab cost no network call either way — adapter.js's own
  * cachedFetch (8h TTL) already makes a re-fetch of the same
@@ -39,10 +39,10 @@
  */
 import { useState, useEffect } from 'react';
 import { getCategoryDetail, getGroupLabel } from '../../api/api.js';
-import { MAX_RECOMMENDATIONS_PER_CATEGORY } from '../../api/config.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
+import ShowMoreList from '../../components/shared/ShowMoreList.jsx';
 import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
 import CoverageNote from '../../components/shared/CoverageNote.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
@@ -51,7 +51,7 @@ import { resolveProfileWithConditions } from './profileFallback.js';
 const LIST_TYPES = [
   {
     key: 'helpful',
-    label: 'Eat',
+    label: 'Eat/Do',
     tone: 'positive',
     emptyBody: 'There are no common food items within this food group that are ranked higher for your health profile.',
   },
@@ -85,9 +85,8 @@ function DetailList({ group, listType, groupLabel, onSelectFood }) {
   const { status, data, retry } = useAsyncData(fetchDetail, [group, listType], {
     isEmpty: isItemsEmpty,
     requiresProfile: true,
+    retryEmptyOnce: true,
   });
-
-  const items = (data?.items ?? []).slice(0, MAX_RECOMMENDATIONS_PER_CATEGORY);
 
   if (status === 'loading') {
     return (
@@ -111,14 +110,17 @@ function DetailList({ group, listType, groupLabel, onSelectFood }) {
     >
       <div className="flex flex-col gap-2">
         <CoverageNote coverage={data?.coverage} />
-        {items.map((food) => (
-          <RankedRow
-            key={food.id}
-            food={food}
-            studyCount={food.referenceTotal}
-            onSelect={(selected) => onSelectFood(selected, listType)}
-          />
-        ))}
+        <ShowMoreList
+          items={data?.items ?? []}
+          renderItem={(food) => (
+            <RankedRow
+              key={food.id}
+              food={food}
+              studyCount={food.referenceTotal}
+              onSelect={(selected) => onSelectFood(selected, listType)}
+            />
+          )}
+        />
       </div>
     </DataState>
   );
@@ -159,7 +161,7 @@ export default function CategoryDetailPanel({ group, groupLabel: groupLabelProp,
         </h2>
       )}
 
-      {/* Eat / Avoid pill switcher */}
+      {/* Eat/Do / Avoid pill switcher */}
       <PillSwitcher options={LIST_TYPES} value={listType} onChange={setListType} />
 
       <DetailList

@@ -101,8 +101,16 @@ describe('favoritesBySlot', () => {
     const b = favoritesBySlot([recipe(900, 'Oatmeal with Berries'), recipe(901, 'Garden Salad'), recipe(902, 'Chicken Roast'), recipe(903, 'Apple Pie')]);
     expect(ids(b.breakfast)).toEqual([900]);
     expect(ids(b.lunch)).toEqual([901]);
-    expect(ids(b.dinner)).toEqual([902]);
-    expect(ids(b.snacks)).toEqual([903]);
+    expect(ids(b.dinner)).toEqual([902, 903]);
+    expect(ids(b.snacks)).toEqual([]);
+  });
+
+  it("puts an R item in the meals Sunny assigned, not a title guess", () => {
+    const b = favoritesBySlot([recipe(778, 'Nachos')]);
+    expect(ids(b.lunch)).toEqual([778]);
+    expect(ids(b.dinner)).toEqual([778]);
+    expect(ids(b.snacks)).toEqual([778]);
+    expect(ids(b.breakfast)).toEqual([]);
   });
 
   it('excludes items the save gate blocks (low-ranked, unscored, non-recipe) and duplicate ids', () => {
@@ -182,6 +190,13 @@ describe('generateWeekFromFavorites', () => {
       expect(day.slots.dinner).toEqual([]);
       expect(day.slots.snacks).toEqual([]);
     }
+  });
+
+  it('draws each day independently: more than 3 favorites per meal gives different days (6.2)', async () => {
+    const favorites = [10, 11, 12, 13, 14].map((id) => recipe(id));
+    const { plan } = await generateWeekFromFavorites(PROFILE, favorites, { rng: seeded(5) });
+    const lunches = Object.values(plan.days).map((day) => day.slots.lunch.map((i) => i.id).sort().join());
+    expect(new Set(lunches).size).toBeGreaterThan(1);
   });
 
   it('allows repeats across days (a 3-recipe bucket shows all 3 on every day)', async () => {

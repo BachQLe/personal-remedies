@@ -8,7 +8,8 @@
  * (no data / unauthorized / error) are counted and surfaced, never guessed.
  *
  * numericId ladder (matches adapter.js numericIdToTier): 1-3 helpful,
- * 4 neutral (no chip), 5-7 harmful.
+ * 4 neutral (no chip), 5-7 harmful. A fine group 'x' row has a `verdict`
+ * ('helpful'|'harmful') from /detailed instead of a numericId.
  */
 
 const names = (rows) => rows.map((r) => r.conditionName).join(', ');
@@ -30,9 +31,9 @@ export function summarizeGoodForMe(rows) {
     };
   }
 
-  const scored = rows.filter((r) => r.status === 'ok' && Number.isFinite(r.numericId));
-  const helpful = scored.filter((r) => r.numericId >= 1 && r.numericId <= 3);
-  const harmful = scored.filter((r) => r.numericId >= 5 && r.numericId <= 7);
+  const scored = rows.filter((r) => r.status === 'ok' && (Number.isFinite(r.numericId) || r.verdict));
+  const helpful = scored.filter((r) => r.verdict === 'helpful' || (r.numericId >= 1 && r.numericId <= 3));
+  const harmful = scored.filter((r) => r.verdict === 'harmful' || (r.numericId >= 5 && r.numericId <= 7));
   const neutral = scored.filter((r) => r.numericId === 4);
   const unscored = rows.length - scored.length;
   const suffix = unscored

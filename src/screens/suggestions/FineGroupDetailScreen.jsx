@@ -42,7 +42,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { getFineFoodGroups, getFineGroupSuggestions, getGroupLabel } from '../../api/api.js';
-import { MAX_RECOMMENDATIONS_PER_CATEGORY } from '../../api/config.js';
+import { SUGGEST_MAX_ROWS } from '../../api/config.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
@@ -111,7 +111,7 @@ function FineGroupDetail({ fineGroupId }) {
   const { status, data, retry } = useAsyncData(
     () => fetchFineGroupDetail(fineGroupId),
     [fineGroupId],
-    { isEmpty: isItemsEmpty, requiresProfile: true }
+    { isEmpty: isItemsEmpty, requiresProfile: true, retryEmptyOnce: true }
   );
 
   // Invalid/unknown fine-group id — bounce back to the Suggest tab rather
@@ -123,7 +123,7 @@ function FineGroupDetail({ fineGroupId }) {
     return <Navigate to="/app/suggestions?tab=groups&mode=fine" replace />;
   }
 
-  const items = (data?.items ?? []).slice(0, MAX_RECOMMENDATIONS_PER_CATEGORY);
+  const items = data?.items ?? [];
 
   function handleSelectFood(food) {
     // No Eat/Avoid tab to forward here (unlike CategoryDetailPanel) — this
@@ -186,6 +186,12 @@ function FineGroupDetail({ fineGroupId }) {
                     onSelect={handleSelectFood}
                   />
                 ))}
+                {/* /suggest stops at 20 rows, so say so rather than imply this is everything. */}
+                {items.length >= SUGGEST_MAX_ROWS && (
+                  <p className="text-sm text-char-500 font-sans text-center py-2">
+                    Showing the top {SUGGEST_MAX_ROWS} for your profile.
+                  </p>
+                )}
               </div>
             </DataState>
           )}

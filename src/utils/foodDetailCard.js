@@ -13,7 +13,7 @@
  *      instead of through a DOM render.
  */
 
-import { EXCLUDED_FINE_GROUPS } from '../api/config.js';
+import { NOT_IN_FINE_GROUP_MENU } from '../api/config.js';
 
 /**
  * Decide whether an `item` handed to FoodDetailCard is a recipe or a plain
@@ -95,6 +95,8 @@ export function resolveRecipeLinkTarget(item) {
  *   - `neutral` — numericId 4, or no numericId at all (missing/out-of-range
  *     reads the same as neutral here: neither is a reason to avoid)
  *   - `avoid`   — numericId 5-7 (harmful verdict)
+ * A fine group 'x' row has a `verdict` from /detailed instead of a numericId
+ * (see adapter.js detailedVerdict) and lands in helps or avoid by that.
  * Within each bucket, conditions with more supporting studies sort first
  * (the "more evidence first" ordering the old single-line list also used).
  * @param {Array<{conditionName?: string, numericId?: number|null, referenceCount?: number}>} perCondition
@@ -111,8 +113,8 @@ export function groupConditionsByVerdict(perCondition) {
     // Unscorable rows (unauthorized/nodata/error) are not a verdict — omit from chips.
     if (c.status != null && c.status !== 'ok') continue;
     const id = c.numericId;
-    if (id >= 1 && id <= 3) helpsRows.push(c);
-    else if (id >= 5 && id <= 7) avoidRows.push(c);
+    if (c.verdict === 'helpful' || (id >= 1 && id <= 3)) helpsRows.push(c);
+    else if (c.verdict === 'harmful' || (id >= 5 && id <= 7)) avoidRows.push(c);
     else neutralRows.push(c); // 4, null/undefined, or out-of-range
   }
 
@@ -168,12 +170,11 @@ export function deriveAssessStatus(settled) {
  * resolves to something real and useful, else the coarse group's existing
  * page (`/app/suggestions/group/:code`), else no link at all.
  *
- * Fine wins over coarse UNLESS it's one of `EXCLUDED_FINE_GROUPS`
- * ('x'/'j1' lifestyle codes, plus every recipe's blanket 'l' — recipes
+ * Fine wins over coarse UNLESS it has no fine-group page
+ * (`NOT_IN_FINE_GROUP_MENU`: 'x', plus every recipe's blanket 'l' — recipes
  * never reach this function at all, see `mealTypeToRecipesHref` below for
  * their own link, but 'l' is excluded here too for any plain-food item that
- * somehow carries it) — those codes are too generic to deep-link into, so
- * the coarse parent is used instead.
+ * somehow carries it), in which case the coarse parent is used instead.
  *
  * `fineGroup`/`group` resolution mirrors the non-food icon lookup further
  * down this file EXACTLY: assessment's own Food (fresh off the /fooditems
@@ -202,7 +203,7 @@ export function resolveGroupLinkTarget(item, facts, assessment) {
   const fineGroup = assessment?.food?.fineGroup ?? facts?.fineGroup ?? item?.fineGroup ?? null;
   const group = assessment?.food?.group ?? facts?.group ?? item?.group ?? null;
 
-  if (fineGroup && !EXCLUDED_FINE_GROUPS.includes(fineGroup)) {
+  if (fineGroup && !NOT_IN_FINE_GROUP_MENU.includes(fineGroup)) {
     return { path: `/app/suggestions/fine/${fineGroup}`, code: fineGroup, kind: 'fine' };
   }
   if (group) {

@@ -42,15 +42,18 @@ describe('resolveGroupLinkTarget — fine group wins when it resolves and is not
   });
 });
 
-describe('resolveGroupLinkTarget — excluded fine groups fall back to coarse', () => {
-  it('falls back to the coarse group when fineGroup is x, j1, or l', () => {
+describe('resolveGroupLinkTarget — fine groups with no page fall back to coarse', () => {
+  it('falls back to the coarse group when fineGroup is x or l', () => {
     expect(resolveGroupLinkTarget({ fineGroup: 'x', group: 'k' }, null, null)).toEqual({
       path: '/app/suggestions/group/k',
       code: 'k',
       kind: 'coarse',
     });
-    expect(resolveGroupLinkTarget({ fineGroup: 'j1', group: 'k' }, null, null).kind).toBe('coarse');
     expect(resolveGroupLinkTarget({ fineGroup: 'l', group: 'g' }, null, null).kind).toBe('coarse');
+  });
+
+  it('links Alternative Therapies items to their own fine-group page', () => {
+    expect(resolveGroupLinkTarget({ fineGroup: 'j1', group: 'j' }, null, null).path).toBe('/app/suggestions/fine/j1');
   });
 });
 

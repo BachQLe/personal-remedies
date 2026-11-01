@@ -11,9 +11,9 @@
  *
  * Props:
  *   food          — { id, name, group?, fineGroup?, groupLabel?, isLifestyle?, numericId?, image? }
- *   studyCount    — number | null/undefined — rendered as "N references" when a real number,
- *                   with a small info affordance explaining what the count means.
- *   onSelect      — callback(food)
+ *   studyCount    — number | null/undefined — rendered as "N references" when a real number.
+ *                   Tapping it opens the card on Health Details, where the references are.
+ *   onSelect      — callback(food); `food.openDetails` is set when the count was the target
  *   saveAction    — optional save-button element (renders at the row's
  *                   trailing edge, before the chevron). Supports a plain node
  *                   or a function (same convention as FoodImageCard's
@@ -61,74 +61,10 @@
  * structure, with no visual tell distinguishing lifestyle items from food
  * items — there is no separate notes/description text either.
  */
-import { useEffect, useRef, useState } from 'react';
-import { ChevronRight, Info } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { getIngredientImage } from '../../api/ingredientImages.js';
-import { getOverlayImageFile } from '../../api/localTables.js';
+import { getOverlayImageFile, getServingSize } from '../../api/localTables.js';
 import FoodRating from './FoodRating.jsx';
-
-// ── Study count + info tooltip ──────────────────────────────────────────────
-
-/**
- * "N studies" text with a small tap/click-to-open explanation of what the
- * count means (a native `title` attribute doesn't work on touch devices, so
- * this is a minimal self-contained popover instead). Closes on outside
- * click/tap; stops propagation so tapping it never also triggers the row's
- * own onSelect.
- */
-function StudyCountBadge({ studyCount }) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef(null);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const handleOutside = (e) => {
-      if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, [open]);
-
-  const toggle = (e) => {
-    e.stopPropagation();
-    setOpen((v) => !v);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggle(e);
-    } else if (e.key === 'Escape') {
-      setOpen(false);
-    }
-  };
-
-  return (
-    <span ref={rootRef} className="relative flex-shrink-0 self-center">
-      <span
-        role="button"
-        tabIndex={0}
-        onClick={toggle}
-        onKeyDown={handleKeyDown}
-        aria-label={`${studyCount} ${studyCount === 1 ? 'reference' : 'references'} — what does this mean?`}
-        className="inline-flex items-center gap-0.5 -m-1 p-1 pt-0.5 text-[11px] text-char-400 font-sans
-          whitespace-nowrap cursor-pointer hover:text-char-600"
-      >
-        {studyCount} {studyCount === 1 ? 'reference' : 'references'}
-        <Info size={11} aria-hidden="true" />
-      </span>
-      {open && (
-        <span
-          role="tooltip"
-          className="absolute z-20 right-0 top-full mt-1 w-44 rounded-sm bg-char-900 text-white
-            text-[11px] font-sans leading-snug px-2.5 py-2 shadow-lg"
-        >
-          {studyCount} published {studyCount === 1 ? 'reference' : 'references'} on file for this item.
-        </span>
-      )}
-    </span>
-  );
-}
 
 // ── Image-right fade (10 discrete bars, never a CSS gradient) ───────────────
 
@@ -151,10 +87,11 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, imag
   const image = imageRight
     ? food.image || getIngredientImage(food.name, food.group, getOverlayImageFile(food.id))
     : null;
+  const servingSize = getServingSize(food.id);
 
   return (
     <button
-      onClick={() => onSelect(food)}
+      onClick={(e) => onSelect(e.target.closest('[data-reference-count]') ? { ...food, openDetails: true } : food)}
       className={`relative w-full flex items-start gap-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left overflow-hidden
         transition-all duration-fast hover:border-forest-300 hover:shadow-card active:scale-[0.99]
         ${imageRight ? 'min-h-[68px] px-4 py-3 items-center' : 'px-4 py-3'}`}
@@ -198,6 +135,11 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, imag
             {food.groupLabel}
           </span>
         )}
+        {servingSize && (
+          <span className="block text-[11px] text-char-500 font-sans mt-0.5">
+            Serving size: {servingSize}
+          </span>
+        )}
       </span>
 
       {/* Trailing cluster: cache-only study count, optional save action,
@@ -208,7 +150,9 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, imag
           ${imageRight ? 'relative z-10 bg-white/90 rounded-md pl-2 pr-1.5 py-1' : ''}`}
       >
         {typeof studyCount === 'number' && studyCount > 0 && (
-          <StudyCountBadge studyCount={studyCount} />
+          <span data-reference-count className="flex-shrink-0 self-center text-[11px] text-char-400 font-sans underline underline-offset-2">
+            {studyCount} {studyCount === 1 ? 'reference' : 'references'}
+          </span>
         )}
 
         {/* Save action — opt-in; see prop doc above. Rendered as-is (no extra

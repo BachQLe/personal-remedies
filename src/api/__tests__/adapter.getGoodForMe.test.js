@@ -39,7 +39,8 @@ describe('getGoodForMe', () => {
         ? { value: 1.9, description: 'More Helpful', descriptionNumericID: 2, notes: ' Rich in X. ' }
         : { value: 0.1, description: 'Neutral / OK', descriptionNumericID: 4, notes: '' });
     const res = await adapter.getGoodForMe(7, { conditions: [203, 244] });
-    expect(fetchGoodFor).toHaveBeenCalledTimes(2);
+    // One per condition, plus the combined overall the food card also shows.
+    expect(fetchGoodFor.mock.calls.map((c) => c[1])).toEqual(['203', '244', '203,244']);
     expect(res.foodName).toBe('Broccoli');
     expect(res.rows[0]).toMatchObject({ conditionName: 'Aging', status: 'ok', tier: 'Strong', label: 'More Helpful', notes: 'Rich in X.' });
     expect(res.rows[1]).toMatchObject({ conditionName: 'Pneumonia', status: 'ok', numericId: 4, tier: null });

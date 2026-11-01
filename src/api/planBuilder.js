@@ -31,6 +31,7 @@ import { nextSevenDays } from '../screens/plan/planDates.js';
 import { clearSchedule, getSchedule } from '../state/schedule.js';
 import { storage } from './storage.js';
 import { loadRecipeOverlay } from './recipeIngestion.js';
+import { getRecipeFlaggedItems } from './localTables.js';
 import { getSaveBlockReason } from '../utils/saveGate.js';
 import { isFavoritesPrunePending } from './favoritesPrune.js';
 
@@ -182,7 +183,8 @@ export function toPlanItem(candidate) {
  * Bucket favorites by the plan slots they fit, keeping only saveable recipes
  * (`getSaveBlockReason(item) === null`) and each id at most once per slot. A
  * recipe lands in EVERY slot it fits: the content overlay's `mealType` +
- * `alsoFits` when its id resolves there, else `guessMealType(name)`. Snack and
+ * `alsoFits` when its id resolves there, else an R item's `mealTypes`, else
+ * `guessMealType(name)`. Snack and
  * dessert both fit `snacks`; beverage fits `beverages` (`PLAN_SLOTS`'
  * `recipeMealType`). Pure; also what the favorites-count nudge counts.
  * @param {Array<Object>} favorites - library items (`recipeToSaveItem` shape)
@@ -190,11 +192,14 @@ export function toPlanItem(candidate) {
  */
 export function favoritesBySlot(favorites) {
   const overlay = new Map(loadRecipeOverlay().map((row) => [String(row.foodItemID), row]));
+  const flagged = new Map(getRecipeFlaggedItems().map((item) => [String(item.foodItemID), item.mealTypes]));
   const buckets = Object.fromEntries(PLAN_SLOT_KEYS.map((key) => [key, []]));
   for (const item of favorites || []) {
     if (getSaveBlockReason(item) !== null) continue;
     const row = overlay.get(String(item.id));
-    const mealTypes = row ? [row.mealType, ...(row.alsoFits ?? [])] : [guessMealType(item.name)];
+    const mealTypes = row
+      ? [row.mealType, ...(row.alsoFits ?? [])]
+      : flagged.get(String(item.id)) ?? [guessMealType(item.name)];
     for (const slot of PLAN_SLOTS) {
       const bucket = buckets[slot.key];
       if (bucket.some((i) => i.id === item.id)) continue;

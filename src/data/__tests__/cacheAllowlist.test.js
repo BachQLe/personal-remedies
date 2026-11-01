@@ -161,7 +161,7 @@ describe('(v) reference tables (items, conditions, groups) never wait on the net
   ]);
 
   it('group, condition and item lookups resolve while every Nutridigm fetcher hangs', async () => {
-    expect(await within(getFineFoodGroups())).toHaveLength(17);
+    expect(await within(getFineFoodGroups())).toHaveLength(18);
     expect((await within(getGroupLabels())).coarse.get('b')).toBe('Meat, Fish & Poultry');
     expect(await within(getGroupLabel('b1'))).toBe('Fish & Seafood');
     expect((await within(getFineGroupLabelsByCoarse())).get('b')).toHaveLength(3);

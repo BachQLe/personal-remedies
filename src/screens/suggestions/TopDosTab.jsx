@@ -27,10 +27,10 @@
  */
 import { useState } from 'react';
 import { getTopDosAndDonts } from '../../api/api.js';
-import { MAX_RECOMMENDATIONS_PER_CATEGORY } from '../../api/config.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
 import RankedRow from '../../components/shared/RankedRow.jsx';
+import ShowMoreList from '../../components/shared/ShowMoreList.jsx';
 import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
 import CoverageNote from '../../components/shared/CoverageNote.jsx';
 import ProfileSetupAction from './ProfileSetupAction.jsx';
@@ -82,7 +82,6 @@ export default function TopDosTab({ onSelectFood }) {
 
   const activeResult = data?.[direction];
   const items = activeResult?.items ?? [];
-  const visibleItems = items.slice(0, MAX_RECOMMENDATIONS_PER_CATEGORY);
 
   return (
     <div className="flex flex-col gap-4">
@@ -113,21 +112,25 @@ export default function TopDosTab({ onSelectFood }) {
         >
           <div className="flex flex-col gap-2">
             <CoverageNote coverage={data?.consume?.coverage} />
-            {visibleItems.length === 0 ? (
+            {items.length === 0 ? (
               <p className="text-sm text-char-500 font-sans text-center py-6">
                 {direction === 'consume'
                   ? 'Nothing specific to add right now.'
                   : 'Nothing flagged to avoid right now.'}
               </p>
             ) : (
-              visibleItems.map((food) => (
-                <RankedRow
-                  key={food.id}
-                  food={food}
-                  onSelect={onSelectFood}
-                  imageRight
-                />
-              ))
+              <ShowMoreList
+                key={direction}
+                items={items}
+                renderItem={(food) => (
+                  <RankedRow
+                    key={food.id}
+                    food={food}
+                    onSelect={onSelectFood}
+                    imageRight
+                  />
+                )}
+              />
             )}
           </div>
         </DataState>

@@ -79,6 +79,44 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe('useAsyncData retryEmptyOnce (checklist 4.11)', () => {
+  const isEmpty = (d) => d.length === 0;
+
+  it('stays loading through the retry and shows the real data when it arrives', async () => {
+    let calls = 0;
+    const fetcher = async () => { calls += 1; return calls === 1 ? [] : ['Broccoli']; };
+    const hook = mountHook(fetcher, [], { isEmpty, retryEmptyOnce: true });
+    hook.mount();
+    await act(async () => { await flush(10); });
+    expect(hook.latest().status).toBe('loading');
+    await act(async () => { await flush(650); });
+    expect(calls).toBe(2);
+    expect(hook.latest().status).toBe('success');
+    expect(hook.renders.some((r) => r.status === 'empty')).toBe(false);
+    hook.unmount();
+  });
+
+  it('reports empty after the one retry, and fetches no more', async () => {
+    const fetcher = vi.fn(async () => []);
+    const hook = mountHook(fetcher, [], { isEmpty, retryEmptyOnce: true });
+    hook.mount();
+    await act(async () => { await flush(1400); });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(hook.latest().status).toBe('empty');
+    hook.unmount();
+  });
+
+  it('does not retry unless asked', async () => {
+    const fetcher = vi.fn(async () => []);
+    const hook = mountHook(fetcher, [], { isEmpty });
+    hook.mount();
+    await act(async () => { await flush(10); });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(hook.latest().status).toBe('empty');
+    hook.unmount();
+  });
+});
+
 describe('useAsyncData — happy path', () => {
   it('starts loading, then resolves to success with the fetched data', async () => {
     const fetcher = vi.fn().mockResolvedValue([{ id: 1 }]);

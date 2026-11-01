@@ -56,6 +56,34 @@ describe('RankedRow reference count (still available to callers that pass it)', 
   });
 });
 
+describe('RankedRow references tap (Other options, 2.2)', () => {
+  it('opens the item on Health Details when the count is tapped', () => {
+    const onSelect = vi.fn();
+    render(<RankedRow food={{ id: 2, name: 'Iron' }} studyCount={3} onSelect={onSelect} />);
+    act(() => container.querySelector('[data-reference-count]').click());
+    expect(onSelect).toHaveBeenCalledWith({ id: 2, name: 'Iron', openDetails: true });
+  });
+
+  it('opens the item normally when the row itself is tapped', () => {
+    const onSelect = vi.fn();
+    render(<RankedRow food={{ id: 2, name: 'Iron' }} studyCount={3} onSelect={onSelect} />);
+    act(() => container.querySelector('button').click());
+    expect(onSelect).toHaveBeenCalledWith({ id: 2, name: 'Iron' });
+  });
+});
+
+describe('RankedRow serving size (1.5)', () => {
+  it("shows PR's serving size for an item that has one", () => {
+    render(<RankedRow food={{ id: 588, name: 'Margarine (salted)' }} onSelect={vi.fn()} />);
+    expect(container.textContent).toContain('Serving size: 20 g');
+  });
+
+  it('shows no size at all for an item without one', () => {
+    render(<RankedRow food={{ id: 382, name: 'Daikon' }} onSelect={vi.fn()} />);
+    expect(container.textContent).not.toMatch(/serving/i);
+  });
+});
+
 describe('CoverageNote (4.2)', () => {
   it('names scored and unscored conditions for a partial result', () => {
     render(<CoverageNote coverage={{ scored: ['Aging'], unscored: ['Gout', 'Asthma'] }} />);

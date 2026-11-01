@@ -63,15 +63,18 @@ if (!IS_CONFIGURED) {
 }
 
 /**
- * Max items shown per category/direction list on the Suggestions screens —
- * Top Dos & Don'ts (per direction) and Food Groups' category detail (per
- * Eat/Avoid list). A single named constant so every list-capping call site
- * stays in sync rather than hand-rolling its own magic number.
+ * Items shown at a time on the Suggestions screens' lists, with "Show more"
+ * revealing the rest (ShowMoreList.jsx) so nothing is dropped.
  */
-export const MAX_RECOMMENDATIONS_PER_CATEGORY = 20;
+export const RECOMMENDATIONS_PAGE_SIZE = 20;
+
+/** /suggest answers at most this many rows and has no limit parameter. */
+export const SUGGEST_MAX_ROWS = 20;
 
 /**
- * Fine food groups to exclude from food lists (non-food / lifestyle items).
+ * Fine food groups to exclude from food-only lists such as food search and the
+ * meal planner's pools (non-food / lifestyle items). The fine-group menu has
+ * its own rule, NOT_IN_FINE_GROUP_MENU: Alternative Therapies is browsable there.
  *
  * Filtering by FINE group (not coarse) matters: real foods like Taro leaves
  * and pork liver carry `coarseFoodGroup: 'x'` with a valid fine group, so a
@@ -82,6 +85,19 @@ export const MAX_RECOMMENDATIONS_PER_CATEGORY = 20;
  * - 'l' = recipes, which have their own surface (RecipesScreen/FoodDetailCard)
  */
 export const EXCLUDED_FINE_GROUPS = ['x', 'j1', 'l'];
+
+/** Fine groups kept out of the fine-group menu: recipes have their own surface, 'x' is unused. */
+export const NOT_IN_FINE_GROUP_MENU = ['x', 'l'];
+
+/**
+ * Menu order of the fine groups ("Suggestions"). One array so the final order
+ * is a one-line change.
+ * TODO(Mory): replace with the Suggest menu order from the Personal Remedies
+ * website (Recipes left out). This is the placeholder order, by code.
+ */
+export const FINE_GROUP_MENU_ORDER = [
+  'b1', 'b2', 'b3', 'c1', 'c2', 'c3', 'd', 'e', 'f', 'g1', 'g2', 'h1', 'h2', 'i1', 'i2', 'j1', 'k1', 'k2',
+];
 
 /**
  * Offline fallback labels for coarse food groups ONLY.
