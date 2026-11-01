@@ -73,7 +73,7 @@ const EMPTY_CONDITION_NAMES = [];
 const CALORIE_GAP_RATIO = 0.8;
 
 const ICON_BTN =
-  'tap-target inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/40 hover:bg-white/60 ' +
+  'tap-target inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/40 hover:bg-white/60 ' +
   'text-blue-950/70 shadow-sm transition duration-fast active:scale-95';
 
 /** The plan-day calorie total (sits in the day action card), hidden when nothing is countable. */
@@ -383,7 +383,7 @@ export default function MealQueueScreen() {
         description={plan ? COPY.stepDay : COPY.stepGenerate}
         className="bg-forest-300 rm-print-hide"
         right={
-          <div className="flex items-center gap-2 shrink-0 -mr-1">
+          <div className="flex items-center gap-1 shrink-0 -mr-1">
             <button
               type="button"
               onClick={() => setHowToUseOpen(true)}

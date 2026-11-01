@@ -14,7 +14,7 @@ export default function FavoritesNudge({ bySlot }) {
   return (
     <p className="rounded-xl bg-paper-200 px-4 py-3 font-sans text-sm text-blue-950">
       {COPY.nudge}. {COPY.nudgeShort(shortMeals)}.{' '}
-      <Link to="/app/favorites" className="font-semibold underline underline-offset-2">
+      <Link to="/app/favorites" className="tap-target inline-block font-semibold underline underline-offset-2">
         {COPY.goToFavorites}
       </Link>
     </p>

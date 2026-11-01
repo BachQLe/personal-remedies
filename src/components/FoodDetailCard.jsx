@@ -8,7 +8,7 @@ import FoodRating from './shared/FoodRating.jsx';
 import StudyReferences from './shared/StudyReferences.jsx';
 import EmptyState from './shared/EmptyState.jsx';
 import { SlowLoadingNote } from './shared/DataState.jsx';
-import { getServingSize } from '../api/localTables.js';
+import { getServingSize, getRecipeFlaggedItems } from '../api/localTables.js';
 import { getLibrary, addToLibrary, removeFromLibrary } from '../state/library.js';
 import { getFoodFacts, assessFood, getFoodIdByName, getGroupLabel } from '../api/api.js';
 import { storage } from '../api/storage.js';
@@ -92,7 +92,7 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
 
   return (
     <div className="py-3 border-b border-sand-100 last:border-b-0">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="font-sans text-sm font-medium text-char-900">
           {conditionName}
         </span>
@@ -101,7 +101,7 @@ function ConditionRow({ conditionAssessment, showReferences = true }) {
             Can&apos;t be scored yet
           </span>
         ) : (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <FoodRating numericId={numericId} size={14} tone="light" />
           {/* Fine group 'x' items have a /detailed verdict but no rating to draw. */}
           {numericId == null && verdict && (
@@ -469,6 +469,8 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
   if (!mounted || !item) return null;
 
   const servingSize = getServingSize(combinedFoodId);
+  // Sunny's R items are prepared foods: recipes to the app, but with no recipe page.
+  const hasRecipePage = isRecipe && !getRecipeFlaggedItems().some((flagged) => flagged.foodItemID === combinedFoodId);
   const dismissProgress = Math.min(1, dragY / DISMISS_THRESHOLD);
   const cardOpacity = 1 - dismissProgress * 0.4;
   const backdropOpacity = 1 - dismissProgress * 0.6;
@@ -727,7 +729,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
           >
             {/* Back header */}
             <div className="flex-shrink-0 flex flex-wrap items-center justify-between gap-2 px-5 pt-5 pb-3">
-              <div className="min-w-0 flex-[1_1_50%]">
+              <div className="min-w-0 flex-auto">
                 <h3 className="font-display text-xl font-semibold text-blue-950 leading-snug tracking-tightish">
                   {item?.name}
                 </h3>
@@ -983,7 +985,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 `linkTarget.label` already embeds the attribution text when
                 sourceUrl wins (see resolveRecipeLinkTarget) — never shown
                 as a separate/equal element alongside the search fallback. */}
-            {isRecipe && !item?.isPreparedFood && (
+            {hasRecipePage && (
               <div className="flex-shrink-0 px-4 pb-4">
                 <button
                   onClick={handleGetRecipe}

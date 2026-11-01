@@ -24,7 +24,7 @@ export default function PageHeader({ label, title, description, right, children,
 
       {(title || right) && (
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <h1 className="min-w-0 flex-[1_1_50%] font-display text-title font-semibold text-blue-950 leading-tight">
+          <h1 className="min-w-0 flex-auto font-display text-title font-semibold text-blue-950 leading-tight">
             {title}
           </h1>
           {right}

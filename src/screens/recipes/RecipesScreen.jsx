@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getProfile, getCategoryRecipes, buildRecipeDetail } from '../../api/api.js';
+import { getProfile, getRecipes, getCategoryRecipes, buildRecipeDetail } from '../../api/api.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import BackButton from '../../components/shared/BackButton.jsx';
 import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
@@ -184,12 +184,12 @@ export function RecipesBrowser() {
   // Retry instead of silently collapsing to "no recipes" (the previous
   // `catch(...) { setAllRecipes([]) }`). Bundled into one object because
   // both are needed together and `getProfile()` itself never rejects (it
-  // always resolves to a profile or null — see api.js) — only the recipes call
+  // always resolves to a profile or null — see api.js) — only `getRecipes`
   // can genuinely fail (network/API), and that failure now propagates.
   const fetcher = useCallback(async () => {
     let p = await getProfile();
     if (!p) p = EMPTY_PROFILE;
-    const { recipes, unscorableReason } = await getCategoryRecipes(p);
+    const { recipes, unscorableReason } = await getRecipes(p);
     return { profile: p, recipes: recipes ?? [], unscorableReason };
   }, []);
 
@@ -197,8 +197,17 @@ export function RecipesBrowser() {
     isEmpty: (d) => !d?.recipes?.length,
   });
 
+  // Sunny's Beverage/Snack/Dessert recipes and R items beyond the top 20. They
+  // join when scored, so they never hold the list back; a failure just leaves
+  // the top 20 on screen.
+  const categoryFetcher = useCallback(async () => {
+    const p = await getProfile();
+    return p ? getCategoryRecipes(p) : { recipes: [] };
+  }, []);
+  const { status: categoryStatus, data: categoryData } = useAsyncData(categoryFetcher);
+
   const profile = data?.profile ?? null;
-  const fetchedRecipes = data?.recipes ?? [];
+  const fetchedRecipes = [...(data?.recipes ?? []), ...(categoryData?.recipes ?? [])];
 
   // Ghost mode: render the real layout with placeholder data while loading.
   // Kept as its own bespoke treatment (not DataState's generic skeleton) —
@@ -226,7 +235,6 @@ export function RecipesBrowser() {
         conditions: recipe.matchedConditions ?? [],
         ingredients: recipe.ingredients,
         isRecipe: true,
-        isPreparedFood: recipe.isPreparedFood,
         // Forwarded so FoodDetailCard's "see other good recipes" link
         // (mealTypeToRecipesHref) can deep-link back to this recipe's own
         // meal type instead of an unfiltered list.
@@ -265,7 +273,6 @@ export function RecipesBrowser() {
       conditions: card.matchedConditions,
       ingredients: [],
       isRecipe: true,
-      isPreparedFood: recipe.isPreparedFood,
       // See the `seeded` branch above — same forwarding, for the same
       // reason. `buildRecipeDetail` doesn't read/copy `mealType` through
       // (it's not part of its documented output shape), so it's merged
@@ -273,19 +280,14 @@ export function RecipesBrowser() {
       mealType: recipe.mealType ?? null,
     });
     buildRecipeDetail(card, profile)
-      .then((detail) => setSelectedRecipe({
-        ...detail,
-        isRecipe: true,
-        isPreparedFood: recipe.isPreparedFood,
-        mealType: recipe.mealType ?? null,
-      }))
+      .then((detail) => setSelectedRecipe({ ...detail, isRecipe: true, mealType: recipe.mealType ?? null }))
       .catch(() => {});
   }
 
   return (
     <>
     {/* Outside the ghost wrapper, whose CSS blanks all text inside it. */}
-    {ghost && <SlowLoadingNote className="mb-3" />}
+    {(ghost || categoryStatus === 'loading') && <SlowLoadingNote className="mb-3" />}
     <div className={`flex flex-col gap-5${ghost ? ' rm-ghost' : ''}`} aria-busy={ghost}>
       {ghost ? (
         <BestRecipesRails

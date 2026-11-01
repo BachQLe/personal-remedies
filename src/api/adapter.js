@@ -1453,67 +1453,65 @@ async function buildRecipes(raw, conditionIds) {
 const LISTED_WHATEVER_RANK = ['beverage', 'snack', 'dessert'];
 
 /**
- * The recipe lists for Choose recipes / Best & Worst Choices (4.1, 4.2, 7.3):
- * `getRecipes`' top 20, plus Sunny's Beverage, Snack and Dessert recipes and her
- * R items (prepared foods) whatever their rank. Those extras are scored one by
- * one on /goodfor (bounded, cached 8h); one that fails to score stays listed,
- * unrated and unsaveable, rather than disappearing.
+ * What the recipe lists add to `getRecipes`' top 20 (4.1, 4.2, 7.3): Sunny's
+ * Beverage, Snack and Dessert recipes and her R items (prepared foods) that the
+ * top 20 left out. Separate from `getRecipes` because each is scored on /goodfor
+ * (bounded by her list, cached 8h), so the top 20 can show without waiting for
+ * them. A row that fails to score stays listed, unrated and unsaveable.
  * @param {import('./types.js').Profile} profile
- * @returns {Promise<{ recipes: import('./types.js').Recipe[], unscorableReason: string|null }>}
+ * @returns {Promise<{ recipes: import('./types.js').Recipe[] }>}
  */
 export async function getCategoryRecipes(profile) {
   const conditionIds = profile?.conditions || [];
-  if (!conditionIds.length) return { recipes: [], unscorableReason: null };
+  if (!conditionIds.length) return { recipes: [] };
 
-  const { result, unscorableReason } = await withAuthorized(
+  // Probing conditions here costs one /suggest each; the /goodfor fan-out below
+  // runs once, for the set that came through.
+  const { result: { ids, top } } = await withAuthorized(
     conditionIds,
-    async (ids) => {
-      const top = await getRecipesRaw(ids);
-      const listed = new Set(top.map((r) => r.id));
-      // Sunny's newest recipes aren't loaded in Nutridigm yet (/goodfor answers
-      // 400), so a row joins once the item dictionary has its id.
-      const loaded = await ensureFoodItems();
-      const extras = [
-        ...loadRecipeOverlay()
-          .filter((row) => loaded.has(row.foodItemID))
-          .filter((row) => [row.mealType, ...(row.alsoFits ?? [])].some((type) => LISTED_WHATEVER_RANK.includes(type)))
-          .map((row) => ({ id: row.foodItemID, name: row.name })),
-        ...getRecipeFlaggedItems().map((item) => ({
-          id: item.foodItemID,
-          name: item.displayAs || item.description,
-          coarseFoodGroup: item.coarseFoodGroup,
-          mealTypes: item.mealTypes,
-        })),
-      ].filter((extra) => !listed.has(extra.id));
-
-      const scored = await inBatches(extras, async (extra) => {
-        const raw = await cachedGoodFor(extra.id, ids).catch((err) => {
-          if (isUnauthorized(err)) throw err;
-          return null;
-        });
-        return {
-          foodItemID: extra.id,
-          foodItemDisplayAs: extra.name,
-          coarseFoodGroup: extra.coarseFoodGroup,
-          descriptionNumericID: raw?.descriptionNumericID,
-          notes: extra.mealTypes ? '' : raw?.notes,
-        };
-      });
-      const mealTypesById = new Map(extras.filter((e) => e.mealTypes).map((e) => [e.id, e.mealTypes]));
-      const recipes = (await buildRecipes(scored, ids)).map((recipe) => {
-        // Outside the top 20 it may rank low, so the card shows its per-condition
-        // verdicts rather than listing every condition as "Best for".
-        const extra = { ...recipe, matchedConditions: [] };
-        const mealTypes = mealTypesById.get(recipe.id);
-        if (!mealTypes) return extra;
-        const [mealType, ...alsoFits] = mealTypes;
-        return { ...extra, mealType, alsoFits, mealTypeDefaulted: false, isPreparedFood: true };
-      });
-      return [...top, ...recipes];
-    },
-    []
+    async (tried) => ({ ids: tried, top: await getRecipesRaw(tried) }),
+    { ids: [], top: [] }
   );
-  return { recipes: result, unscorableReason };
+  if (!ids.length) return { recipes: [] };
+
+  const listed = new Set(top.map((r) => r.id));
+  // Sunny's newest recipes aren't loaded in Nutridigm yet (/goodfor answers 400),
+  // so a row joins once the item dictionary has its id.
+  const loaded = await ensureFoodItems();
+  const extras = [
+    ...loadRecipeOverlay()
+      .filter((row) => loaded.has(row.foodItemID))
+      .filter((row) => [row.mealType, ...(row.alsoFits ?? [])].some((type) => LISTED_WHATEVER_RANK.includes(type)))
+      .map((row) => ({ id: row.foodItemID, name: row.name })),
+    ...getRecipeFlaggedItems().map((item) => ({
+      id: item.foodItemID,
+      name: item.displayAs || item.description,
+      coarseFoodGroup: item.coarseFoodGroup,
+      mealTypes: item.mealTypes,
+    })),
+  ].filter((extra) => !listed.has(extra.id));
+
+  const scored = await inBatches(extras, async (extra) => {
+    const raw = await cachedGoodFor(extra.id, ids).catch(() => null);
+    return {
+      foodItemID: extra.id,
+      foodItemDisplayAs: extra.name,
+      coarseFoodGroup: extra.coarseFoodGroup,
+      descriptionNumericID: raw?.descriptionNumericID,
+      notes: extra.mealTypes ? '' : raw?.notes,
+    };
+  });
+  const mealTypesById = new Map(extras.filter((e) => e.mealTypes).map((e) => [e.id, e.mealTypes]));
+  const recipes = (await buildRecipes(scored, ids)).map((recipe) => {
+    // Outside the top 20 it may rank low, so the card shows its per-condition
+    // verdicts rather than listing every condition as "Best for".
+    const extra = { ...recipe, matchedConditions: [] };
+    const mealTypes = mealTypesById.get(recipe.id);
+    if (!mealTypes) return extra;
+    const [mealType, ...alsoFits] = mealTypes;
+    return { ...extra, mealType, alsoFits, mealTypeDefaulted: false };
+  });
+  return { recipes };
 }
 
 /** Recipe tiers eligible to fill a Plan slot — reverse of numericIdToTier for 1/2/3 only. */

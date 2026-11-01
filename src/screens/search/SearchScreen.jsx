@@ -412,6 +412,9 @@ export default function SearchScreen({ active, onClose }) {
                 <input
                   ref={inputRef}
                   type="search"
+                  name="food-search"
+                  autoComplete="off"
+                  aria-label={HEADING}
                   value={query}
                   onChange={(e) => handleChange(e.target.value)}
                   onKeyDown={handleKeyDown}

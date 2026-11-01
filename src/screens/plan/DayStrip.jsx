@@ -54,7 +54,7 @@ export default function DayStrip({ days, selected, onSelect, bgClassName = 'bg-f
             onClick={() => onSelect(day.key)}
             aria-pressed={isSelected}
             aria-label={`${abbr} ${dayOfMonth}${isToday ? ' (today)' : ''}`}
-            className="relative flex flex-col items-center flex-1 min-w-[2.75rem] gap-0.5 py-2
+            className="relative flex flex-col items-center flex-1 min-w-[2.4rem] gap-0.5 py-2
               rounded-xl overflow-hidden transition-colors duration-fast
               active:scale-[0.97]"
           >
