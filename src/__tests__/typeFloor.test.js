@@ -5,11 +5,12 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import tailwindConfig from '../../tailwind.config.js';
 
 const CAPTION_REM = 0.875;
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
 function sourceFiles(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {

@@ -26,12 +26,10 @@ const flush = () => act(async () => { await new Promise((r) => setTimeout(r, 0))
 
 let container;
 let root;
-let search;
 let onClose;
 
 function SearchProbe() {
-  search = useLocation().search;
-  return null;
+  return <output data-testid="url-search" hidden>{useLocation().search}</output>;
 }
 
 const mount = (entry = '/app/search') => act(async () => {
@@ -85,7 +83,7 @@ describe('SearchScreen results and Back', () => {
     act(() => back().click());
     expect(container.textContent).not.toContain('Daikon');
     expect(input().value).toBe('daikon');
-    expect(search).toBe('?q=daikon');
+    expect(container.querySelector('[data-testid="url-search"]').textContent).toBe('?q=daikon');
     expect(onClose).not.toHaveBeenCalled();
   });
 
