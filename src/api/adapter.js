@@ -24,7 +24,6 @@ import {
   COARSE_GROUP_LABELS,
   FINE_GROUP_MENU_ORDER,
   NOT_IN_FINE_GROUP_MENU,
-  MEAL_SLOT_MAP,
   PLAN_SLOTS,
   PLAN_SLOT_KEYS,
 } from './config.js';
@@ -2363,123 +2362,6 @@ export async function getFineGroupSuggestions(profile, fineGroupCode) {
   );
 
   return { items: result, unscorableReason, coverage, requestedConditionIds: conditionIds };
-}
-
-/**
- * Build a meal plan from the profile via /topdoordonts.
- * @param {import('./types.js').Profile} profile
- * @param {import('./types.js').Food[]} [libraryItems]
- * @returns {Promise<import('./types.js').DayPlan>}
- */
-export async function buildMealPlan(profile, libraryItems) {
-  const conditionIds = profile.conditions || [];
-
-  if (!conditionIds.length) return { ...emptyMealPlan(), unscorableReason: null };
-
-  const { result, unscorableReason } = await withAuthorized(
-    conditionIds,
-    (ids) => buildMealPlanRaw(ids, libraryItems),
-    { ...emptyMealPlan(), conditionIds: [] }
-  );
-
-  return { ...result, unscorableReason };
-}
-
-/**
- * Empty meal plan shape (no conditions / no data available).
- * @returns {import('./types.js').DayPlan}
- */
-function emptyMealPlan() {
-  const today = new Date().toISOString().split('T')[0];
-  return {
-    date: today,
-    meals: [
-      { slot: 'Breakfast', items: [], recipes: [], calories: 500 },
-      { slot: 'Lunch', items: [], recipes: [], calories: 600 },
-      { slot: 'Dinner', items: [], recipes: [], calories: 600 },
-      { slot: 'Snack', items: [], recipes: [], calories: 200 },
-      { slot: 'Beverages', items: [], recipes: [], calories: 100 },
-    ],
-    totalCalories: 2000,
-  };
-}
-
-/**
- * Unwrapped buildMealPlan body.
- * @param {number[]} conditionIds
- * @param {import('./types.js').Food[]} [libraryItems]
- * @returns {Promise<import('./types.js').DayPlan>}
- */
-async function buildMealPlanRaw(conditionIds, libraryItems) {
-  const conditionIdStr = conditionIds.join(',');
-  const today = new Date().toISOString().split('T')[0];
-
-  const topFoods = await cachedTopDoOrDonts(conditionIdStr, 'consume', 40);
-  if (!topFoods || !topFoods.length) return { ...emptyMealPlan(), conditionIds };
-
-  const filtered = topFoods.filter((f) => !isExcludedItem(f));
-
-  const allFoods = await Promise.all(filtered.map(normalizeTopFood).map(attachGroupLabel));
-
-  if (libraryItems && libraryItems.length) {
-    for (const item of libraryItems) {
-      if (!allFoods.find((f) => f.id === item.id)) {
-        if (!item.groupLabel) await attachGroupLabel(item);
-        allFoods.push(item);
-      }
-    }
-  }
-
-  const buckets = {
-    Beverages: [],
-    Snack: [],
-    Breakfast: [],
-    Lunch: [],
-    Dinner: [],
-  };
-
-  for (const food of allFoods) {
-    const slotByFine = MEAL_SLOT_MAP[food.fineGroup];
-    if (slotByFine) {
-      buckets[slotByFine].push(food);
-    } else {
-      switch (food.group) {
-        case 'f':
-          buckets.Breakfast.push(food);
-          break;
-        case 'c':
-        case 'd':
-          buckets.Lunch.push(food);
-          break;
-        case 'b':
-        case 'e':
-        case 'g':
-        case 'i':
-          buckets.Dinner.push(food);
-          break;
-        default:
-          buckets.Lunch.push(food);
-      }
-    }
-  }
-
-  const DAILY_TARGET = 2000;
-  const slotCalories = {
-    Breakfast: Math.round(DAILY_TARGET * 0.25),
-    Lunch: Math.round(DAILY_TARGET * 0.30),
-    Dinner: Math.round(DAILY_TARGET * 0.30),
-    Snack: Math.round(DAILY_TARGET * 0.10),
-    Beverages: Math.round(DAILY_TARGET * 0.05),
-  };
-
-  const meals = ['Breakfast', 'Lunch', 'Dinner', 'Snack', 'Beverages'].map((slot) => ({
-    slot,
-    items: buckets[slot].slice(0, slot === 'Beverages' ? 4 : 5),
-    recipes: [],
-    calories: slotCalories[slot],
-  }));
-
-  return { date: today, meals, totalCalories: DAILY_TARGET, conditionIds };
 }
 
 /**

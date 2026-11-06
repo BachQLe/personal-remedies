@@ -47,7 +47,7 @@ import {
   loadSavedDay,
   isFavoritesPrunePending,
 } from '../../api/api.js';
-import { estimatePlanDayCalories, formatCalories } from '../../api/calorieNeeds.js';
+import { planDayCalories, formatCalories } from '../../api/calorieNeeds.js';
 import { formatWeekPlanText, buildPrintModel } from '../../api/planExport.js';
 import { printPage, share } from '../../api/browser.js';
 import { PLAN_SLOTS, MAX_SAVED_PLANS, MAX_SAVED_DAYS } from '../../api/config.js';
@@ -76,15 +76,19 @@ const ICON_BTN =
   'tap-target inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/40 hover:bg-white/60 ' +
   'text-blue-950/70 shadow-sm transition duration-fast active:scale-95';
 
-/** The plan-day calorie total (sits in the day action card), hidden when nothing is countable. */
+/**
+ * The plan-day calorie total (sits in the day action card): sourced numbers
+ * only, hidden when no item has one, and says how many items it leaves out.
+ */
 function CalorieLine({ slots }) {
-  const { total } = estimatePlanDayCalories(slots);
-  if (total <= 0) return null;
+  const { total, counted, uncounted } = planDayCalories(slots);
+  if (!counted) return null;
 
   return (
-    <p className="pl-4 font-sans text-sm font-semibold text-blue-950/70">
-      {`${formatCalories(total)} cal`}
-    </p>
+    <div className="pl-4">
+      <p className="font-sans text-sm font-semibold text-blue-950/70">{`${formatCalories(total)} cal`}</p>
+      {uncounted > 0 && <p className="font-sans text-xs text-blue-950/60">{COPY.caloriesMissing(uncounted)}</p>}
+    </div>
   );
 }
 
@@ -319,11 +323,12 @@ export default function MealQueueScreen() {
         restoreActiveSavedPlan(previousActive);
       });
 
-      // The gap sheet fires only here, once per creation. Its toast waits for
-      // the sheet to close so the two never overlap.
+      // The gap sheet fires only here, once per creation, and only when every
+      // item today has a sourced calorie number: a partial total always reads
+      // short. Its toast waits for the sheet to close so the two never overlap.
       const need = profile.calorieTarget ?? 2000;
-      const { total } = estimatePlanDayCalories(result.plan.days[todayKey()]?.slots);
-      if (total < need * CALORIE_GAP_RATIO) setGap({ need, total, announce });
+      const { total, counted, uncounted } = planDayCalories(result.plan.days[todayKey()]?.slots);
+      if (counted && !uncounted && total < need * CALORIE_GAP_RATIO) setGap({ need, total, announce });
       else announce();
     } catch (err) {
       console.error('MealQueueScreen: randomize from favorites failed', err);

@@ -37,7 +37,7 @@ export const COPY = {
 
   // My Favorites page
   favoritesTitle: 'My Favorites',
-  sectionRecipes: 'Favorite recipes',
+  sectionRecipes: 'Favorites',
   sectionDays: 'Favorite Daily Meal Plans',
   sectionWeeks: 'Favorite Weekly Meal Plans',
   groupLabel: 'Group favorites',
@@ -46,7 +46,7 @@ export const COPY = {
   browseRecipes: 'Browse recipes',
   chooseMoreRecipes: 'Choose more recipes',
   emptyTitle: 'No favorites yet',
-  emptyBody: 'Bookmark recipes you like and they show up here. Your meal plans are built from them.',
+  emptyBody: 'Save favorites you like and they show up here. Your meal plans are built from them.',
   noSavedDays: 'No Favorite Daily Meal Plans yet. Use Save day on any day of your plan.',
   noSavedWeeks: 'No Favorite Weekly Meal Plans yet. Use Save week on your plan.',
   savedOn: (date) => `Saved ${date}`,
@@ -57,6 +57,7 @@ export const COPY = {
   deleted: (name) => `Deleted “${name}”`,
 
   // Plan screen
+  caloriesMissing: (n) => `Doesn't include ${n} ${n === 1 ? 'item' : 'items'} without calorie data.`,
   tabPlan: 'My Meal Plan',
   newPlan: 'New meal plan',
   firstRunTitle: 'No meal plan yet',
@@ -106,7 +107,7 @@ export const COPY = {
   orSaveNew: 'Or save as a new week',
 
   // Load day sheet
-  loadDayTitle: 'Load a Favorite Daily Meal Plan',
+  loadDayTitle: 'Load a favorite day',
   loadDayHint: 'This replaces the meals on the day you are viewing.',
 
   // New Meal Plan sheet
@@ -114,10 +115,10 @@ export const COPY = {
   randomize: 'Randomize from my favorites',
   randomizeHint: 'Builds a full week in one tap',
   building: 'Building…',
-  loadWeek: 'Load a Favorite Weekly Meal Plan',
+  loadWeek: 'Load a favorite week',
   loadWeekHint: (n) => `${n} saved`,
   loadWeekNone: 'No Favorite Weekly Meal Plans yet',
-  loadWeekTitle: 'Load a Favorite Weekly Meal Plan',
+  loadWeekTitle: 'Load a favorite week',
   loadWeekSheetHint: 'This replaces your whole week. You can undo right after.',
   nudge: 'Tip: pick more than 3 favorites per meal for more variety',
   nudgeShort: (labels) => `Short on: ${labels.join(', ')}`,
@@ -128,7 +129,6 @@ export const COPY = {
   gapTitle: "My meal plan doesn't reach enough calories",
   gapQuestion: 'What would you like to do?',
   gapPlanned: (planned, need) => `${planned} cal planned today, target ${need} cal`,
-  gapNone: (need) => `No calories counted for today, target ${need} cal`,
   gapShort: (n) => `About ${n} cal short.`,
   gapContinue: 'Continue',
   gapAddMore: 'Add more favorites',

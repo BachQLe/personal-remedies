@@ -115,22 +115,7 @@
  * @property {number} [calorieTarget] - Daily calorie target, defaults to
  *   2000. Fixed and user-editable from the Profile screen ("Daily calorie
  *   target" sheet) — replaces the removed Mifflin-St Jeor estimate as the
- *   number `estimatePlanDayCalories`'s plan total is compared against.
- */
-
-/**
- * @typedef {Object} MealSlot
- * @property {string} slot - 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack' | 'Beverages'
- * @property {Food[]} items - Foods in this meal slot
- * @property {Recipe[]} recipes - Recipes in this slot
- * @property {number} calories - Mock per-meal calorie estimate
- */
-
-/**
- * @typedef {Object} DayPlan
- * @property {string} date - ISO date string
- * @property {MealSlot[]} meals - Meal slots for the day
- * @property {number} totalCalories - Mock daily total (default 2000)
+ *   number `planDayCalories`' plan total is compared against.
  */
 
 /**

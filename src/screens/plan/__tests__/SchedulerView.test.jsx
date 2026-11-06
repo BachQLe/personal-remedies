@@ -14,13 +14,13 @@ vi.mock('framer-motion', () => ({
 }));
 
 import SchedulerView from '../SchedulerView.jsx';
-import { estimatePlanDayCalories, formatCalories } from '../../../api/calorieNeeds.js';
+import { planDayCalories, formatCalories } from '../../../api/calorieNeeds.js';
 
 const slots = {
-  breakfast: [{ id: 1, name: 'Oatmeal bowl', kind: 'recipe', numericId: 2, image: 'a.jpg' }],
-  dinner: [{ id: 2, name: 'Salmon roast', kind: 'recipe', numericId: 2, image: 'b.jpg' }],
+  breakfast: [{ id: 1, name: 'Oatmeal bowl', kind: 'recipe', numericId: 2, image: 'a.jpg', nutritionPerServing: { calories: 320 } }],
+  dinner: [{ id: 2, name: 'Salmon roast', kind: 'recipe', numericId: 2, image: 'b.jpg', nutritionPerServing: { calories: 540 } }],
 };
-const expectedCal = `${formatCalories(estimatePlanDayCalories(slots).total)} cal`;
+const expectedCal = `${formatCalories(planDayCalories(slots).total)} cal`;
 
 let container;
 let root;
@@ -67,6 +67,13 @@ describe('SchedulerView', () => {
     expect(container.querySelector('[aria-label="Mark as eaten"]')).toBeNull();
     await mount({ days, showEaten: true });
     expect(container.querySelector('[aria-label="Mark as eaten"]')).toBeTruthy();
+  });
+
+  it('says how many items the total leaves out when some have no calorie data', async () => {
+    const partial = { ...slots, snacks: [{ id: 4, name: 'Muffin', kind: 'food' }] };
+    await mount({ days: [{ key: 'd', label: 'Meals', slots: partial }] });
+    expect(container.textContent).toContain(expectedCal);
+    expect(container.textContent).toContain("Doesn't include 1 item without calorie data.");
   });
 
   it('hides the calorie line when nothing is countable', async () => {

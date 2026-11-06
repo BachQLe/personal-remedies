@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check } from 'lucide-react';
-import { estimatePlanDayCalories, formatCalories } from '../../api/calorieNeeds.js';
+import { planDayCalories, formatCalories } from '../../api/calorieNeeds.js';
 import { markEaten, unmarkEaten } from '../../state/dailyPlan.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
 import { getOverlayImageFile } from '../../api/localTables.js';
 import { PLAN_SLOTS } from '../../api/config.js';
 import MealTypeTag from '../../components/shared/mealTypeMeta.jsx';
+import { COPY } from './plannerCopy.js';
 
 const calmSpring = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
 
@@ -38,7 +39,7 @@ export default function SchedulerView({ days, onSelectItem, showEaten = false })
         const eaten = day.eaten ?? [];
         const allItems = PLAN_SLOTS.flatMap((slot) => slots[slot.key] ?? []);
         const expanded = expandedKey === day.key;
-        const { total } = estimatePlanDayCalories(slots);
+        const { total, counted, uncounted } = planDayCalories(slots);
 
         return (
           <div key={day.key}>
@@ -84,10 +85,13 @@ export default function SchedulerView({ days, onSelectItem, showEaten = false })
                       </div>
                     ) : (
                       <>
-                        {total > 0 && (
-                          <div className="mb-3 flex items-center justify-between">
-                            <p className="font-label text-xs uppercase tracking-widest text-blue-950/50">Planned</p>
-                            <span className="text-sm font-semibold text-blue-950">{`${formatCalories(total)} cal`}</span>
+                        {counted > 0 && (
+                          <div className="mb-3">
+                            <div className="flex items-center justify-between">
+                              <p className="font-label text-xs uppercase tracking-widest text-blue-950/50">Planned</p>
+                              <span className="text-sm font-semibold text-blue-950">{`${formatCalories(total)} cal`}</span>
+                            </div>
+                            {uncounted > 0 && <p className="text-xs text-blue-950/60">{COPY.caloriesMissing(uncounted)}</p>}
                           </div>
                         )}
 

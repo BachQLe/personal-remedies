@@ -14,7 +14,6 @@
  */
 
 import { getSuggestions, getWorstFoods, getFoodDictionary, getFoodGroups, getConditions } from './adapter.js';
-import { getRecommendations } from './recommendations.js';
 import { getIngredientImage } from './ingredientImages.js';
 import { getOverlayImageFile } from './localTables.js';
 import { IS_CONFIGURED } from './config.js';
@@ -27,7 +26,7 @@ import { IS_CONFIGURED } from './config.js';
 let _warmedDictionaries = false;
 
 /**
- * Guards profile-scoped warming (suggestions/images/worst-foods/recommendations)
+ * Guards profile-scoped warming (suggestions/images/worst-foods)
  * — runs once, the first time a call is made WITH a non-empty profile. Kept
  * independent from `_warmedDictionaries` so a boot call with no profile can
  * never block the later post-onboarding call that actually has one.
@@ -88,8 +87,9 @@ function warmImages(suggestions) {
  * - Dictionary warming (getFoodDictionary, getFoodGroups, getConditions) has
  *   no profile dependency, so it runs on the very first call regardless of
  *   whether a profile exists yet (e.g. an un-onboarded boot call).
- * - Profile-scoped warming (getSuggestions→warmImages, getWorstFoods,
- *   getRecommendations) only runs once a non-empty `profile.conditions` is
+ * - Profile-scoped warming (getSuggestions→warmImages, getWorstFoods: the
+ *   same /topdoordonts cache keys Top Choices reads) only runs once a
+ *   non-empty `profile.conditions` is
  *   available — which may be on this same call or a later one (e.g. right
  *   after onboarding completes).
  *
@@ -116,6 +116,5 @@ export function prefetchAppData(profile) {
       .catch(() => {});
 
     getWorstFoods(profile).catch(() => {});
-    getRecommendations('breakfast', 0, 1).catch(() => {});
   }
 }

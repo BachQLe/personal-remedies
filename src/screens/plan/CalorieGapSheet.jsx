@@ -5,7 +5,8 @@ import { COPY, SHEET_Z } from './plannerCopy.js';
 
 /**
  * CalorieGapSheet - shown ONCE, right after "Randomize from my favorites"
- * builds a week whose today lands well under the calorie target. It only makes
+ * builds a week whose today lands well under the calorie target (only when
+ * every item today has a sourced calorie number). It only makes
  * the shortfall visible and offers two ways on: accept it, or add more
  * favorites. Dismissing it is the same as continuing. Never a running tally.
  *
@@ -29,11 +30,9 @@ export default function CalorieGapSheet({ need, total, onClose, onAddMore }) {
 
       <div className="mb-2 rounded-xl bg-paper-200 px-4 py-3">
         <p className="font-sans text-sm text-blue-950">
-          {total > 0
-            ? COPY.gapPlanned(formatCalories(total), need.toLocaleString())
-            : COPY.gapNone(need.toLocaleString())}
+          {COPY.gapPlanned(formatCalories(total), need.toLocaleString())}
         </p>
-        {total > 0 && shortfall > 0 && (
+        {shortfall > 0 && (
           <p className="mt-0.5 font-sans text-xs text-char-500">{COPY.gapShort(shortfall.toLocaleString())}</p>
         )}
       </div>

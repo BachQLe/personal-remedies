@@ -125,7 +125,7 @@ export const COARSE_GROUP_LABELS = {
 
 /**
  * Meal slot assignments by fine food group.
- * Used by buildMealPlan to bucket foods into meal slots.
+ * Used by planBuilder's inferSlotKey to put a food in a meal slot.
  */
 export const MEAL_SLOT_MAP = {
   h2: 'Beverages',
