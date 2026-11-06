@@ -15,7 +15,7 @@
  */
 export default function PageHeader({ label, title, description, right, children, className = '' }) {
   return (
-    <div className={`px-5 pt-[max(1rem,env(safe-area-inset-top))] ${className}`}>
+    <div className={`px-5 pt-[max(1rem,var(--safe-top))] ${className}`}>
       {label && (
         <p className="font-label text-xs tracking-widest uppercase text-blue-950/60">
           {label}

@@ -11,7 +11,7 @@ const STEPS = [COPY.stepFavorites, COPY.stepGenerate, COPY.stepDay, COPY.stepSav
 export default function HowToUseScreen() {
   return (
     <div className="min-h-screen -mb-28 bg-forest-300 flex flex-col">
-      <div className="px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex items-center gap-3">
+      <div className="px-5 pt-[max(1rem,var(--safe-top))] pb-4 flex items-center gap-3">
         <BackButton fallback="/app/home" />
         <h1 className="min-w-0 font-display text-title font-semibold text-blue-950 leading-tight">
           How to use

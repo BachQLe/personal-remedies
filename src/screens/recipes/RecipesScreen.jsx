@@ -380,7 +380,7 @@ export default function RecipesScreen() {
           card's "other options" link); My Favorites is only the deep-link
           fallback. Each rail below is its own meal-type filter, so there's no
           search or filter UI here. */}
-      <div className="px-5 pt-[max(1rem,env(safe-area-inset-top))] pb-4 flex flex-col gap-1">
+      <div className="px-5 pt-[max(1rem,var(--safe-top))] pb-4 flex flex-col gap-1">
         <div className="flex items-center gap-3">
           <BackButton fallback="/app/favorites" />
           <h1 className="min-w-0 font-display text-title font-semibold leading-tight text-blue-950">Choose recipes</h1>

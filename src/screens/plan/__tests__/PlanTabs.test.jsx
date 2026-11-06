@@ -41,14 +41,14 @@ afterEach(() => {
 const labels = () => [...container.querySelectorAll('button')].map((b) => b.textContent);
 
 describe('PlanTabs', () => {
-  it('puts My Favorites first, then My Meal Plan (6.1)', () => {
-    expect(labels()).toEqual(['My Favorites', 'My Meal Plan']);
+  it('puts My Meal Plan first, then My Favorites', () => {
+    expect(labels()).toEqual(['My Meal Plan', 'My Favorites']);
   });
 
   it('navigates so the back button on My Favorites returns to the plan', () => {
-    act(() => container.querySelector('button').click());
+    act(() => [...container.querySelectorAll('button')].find((b) => b.textContent === 'My Favorites').click());
     expect(labels()).toEqual(['back']);
     act(() => container.querySelector('button').click());
-    expect(labels()).toEqual(['My Favorites', 'My Meal Plan']);
+    expect(labels()).toEqual(['My Meal Plan', 'My Favorites']);
   });
 });

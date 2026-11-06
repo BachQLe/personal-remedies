@@ -7,6 +7,10 @@ const PHONE_H = 852;
 const BEZEL = 12;
 const RADIUS = 50;
 const GRID = 60;
+// Inside the frame's iframe there is no real notch, so env(safe-area-inset-top)
+// is 0 and headers slide under the drawn Dynamic Island. Give the app the 6.1"
+// iPhone's real 59px inset instead (read via --safe-top, see index.css).
+if (window.self !== window.top) document.documentElement.style.setProperty("--safe-top", "59px");
 
 const plusPattern = `url("data:image/svg+xml,${encodeURIComponent(
   `<svg xmlns='http://www.w3.org/2000/svg' width='${GRID * 2}' height='${GRID * 2}'>` +

@@ -12,6 +12,7 @@
 
 @layer base {
   html {
+    --safe-top: env(safe-area-inset-top, 0px);
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

@@ -400,7 +400,7 @@ export default function SearchScreen({ active, onClose }) {
               exit={{ paddingTop: PAD_IDLE, opacity: 0 }}
               transition={{ default: calmSpring, opacity: { duration: 0.25, ease: 'easeOut' } }}
             >
-              <div className="flex items-start gap-3 flex-none pointer-events-auto">
+              <div className="flex items-start gap-3 flex-none pointer-events-auto mt-[max(0px,calc(var(--safe-top)_-_1rem))]">
                 <BackButton onClick={handleBack} />
                 <h1 className="min-w-0 font-display text-title font-semibold text-blue-950 leading-tight">
                   {HEADING}
