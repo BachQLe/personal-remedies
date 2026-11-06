@@ -13,6 +13,7 @@ import { PLAN_SLOT_KEYS } from '../../api/config.js';
 import { GHOST_RECIPES } from '../../api/ghostData.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
+import { bestFirst } from '../../utils/rating.js';
 
 // No demo conditions here: a missing profile means no condition-scored recipes
 // (getRecipes returns an empty list for an empty conditions array), never a
@@ -194,7 +195,7 @@ export function RecipesBrowser() {
   }, []);
 
   const { status, data, retry } = useAsyncData(fetcher, [], {
-    isEmpty: (d) => !d?.recipes?.length,
+    isEmpty: (d) => !bestFirst(d?.recipes ?? []).length,
   });
 
   // Sunny's Beverage/Snack/Dessert recipes and R items beyond the top 20. They
@@ -207,7 +208,9 @@ export function RecipesBrowser() {
   const { status: categoryStatus, data: categoryData } = useAsyncData(categoryFetcher);
 
   const profile = data?.profile ?? null;
-  const fetchedRecipes = [...(data?.recipes ?? []), ...(categoryData?.recipes ?? [])];
+  // Good choices only, best first, the same every time (Prompt B 2): neutral,
+  // harmful and unscored rows drop out, and the extras sort in with the top 20.
+  const fetchedRecipes = bestFirst([...(data?.recipes ?? []), ...(categoryData?.recipes ?? [])]);
 
   // Ghost mode: render the real layout with placeholder data while loading.
   // Kept as its own bespoke treatment (not DataState's generic skeleton) —

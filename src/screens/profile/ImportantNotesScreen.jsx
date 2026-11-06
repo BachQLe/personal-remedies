@@ -1,28 +1,37 @@
 /**
- * ImportantNotesScreen — /app/profile/important-notes. Static disclaimer,
- * data-source note, legal links and publisher credit. Copy lives in
- * importantNotesContent.js.
+ * ImportantNotesScreen — /app/profile/important-notes. Three static sections
+ * (Privacy, Not medical advice, About), each tagged DRAFT until the legal copy
+ * lands. Copy lives in importantNotesContent.js.
  */
 import { Link } from 'react-router-dom';
 import BackButton from '../../components/shared/BackButton.jsx';
-import {
-  DISCLAIMER_TITLE,
-  DISCLAIMER_PARAGRAPHS,
-  DATA_SOURCE_TITLE,
-  DATA_SOURCE_PARAGRAPHS,
-  LEGAL_LINKS,
-  PUBLISHER_CREDIT,
-} from './importantNotesContent.js';
+import { NOTE_SECTIONS } from './importantNotesContent.js';
 
-function Section({ title, paragraphs }) {
+function Section({ title, paragraphs, links }) {
   return (
     <section>
-      <h2 className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-2">{title}</h2>
+      <h2 className="flex items-center gap-2 font-label text-xs uppercase tracking-eyebrow text-char-400 mb-2">
+        {title}
+        <span className="rounded-pill bg-sand-200 px-2 py-0.5 text-char-900">Draft</span>
+      </h2>
       <div className="flex flex-col gap-2">
         {paragraphs.map((p) => (
           <p key={p} className="text-sm text-char-900 font-sans leading-relaxed">{p}</p>
         ))}
       </div>
+      {links && (
+        <nav aria-label={title} className="flex flex-col mt-2">
+          {links.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              className="py-4 border-b border-sand-200 last:border-b-0 text-sm font-medium font-sans text-forest-700 hover:opacity-80"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
+      )}
     </section>
   );
 }
@@ -37,20 +46,7 @@ export default function ImportantNotesScreen() {
         </h1>
       </div>
       <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-6 pb-28 flex flex-col gap-6">
-        <Section title={DISCLAIMER_TITLE} paragraphs={DISCLAIMER_PARAGRAPHS} />
-        <Section title={DATA_SOURCE_TITLE} paragraphs={DATA_SOURCE_PARAGRAPHS} />
-        <nav aria-label="Legal" className="flex flex-col">
-          {LEGAL_LINKS.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className="py-4 border-b border-sand-200 last:border-b-0 text-sm font-medium font-sans text-forest-700 hover:opacity-80"
-            >
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-        <p className="text-xs text-char-400 font-sans">{PUBLISHER_CREDIT}</p>
+        {NOTE_SECTIONS.map((section) => <Section key={section.title} {...section} />)}
       </div>
     </div>
   );

@@ -9,7 +9,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Printer, Share2, HelpCircle, CalendarPlus, Bookmark, ArrowRight, FolderOpen } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
 import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
@@ -98,7 +98,9 @@ export default function MealQueueScreen() {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const online = useOnline();
   const [profile, setProfile] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(todayKey());
+  // `?day=` opens that day (Home's Today card links here); the activeDay guard below handles stale keys.
+  const [searchParams] = useSearchParams();
+  const [selectedDay, setSelectedDay] = useState(() => searchParams.get('day') ?? todayKey());
   const [pagerDirection, setPagerDirection] = useState(1);
   const [generating, setGenerating] = useState(false);
   const [gap, setGap] = useState(null);

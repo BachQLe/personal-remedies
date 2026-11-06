@@ -61,7 +61,7 @@
 
 .home-shortcut__label {
   max-width: 100%;
-  /* Shrinks a touch on narrow phones so "and Don'ts" stays on one line; rem
+  /* Shrinks a touch on narrow phones so each line of a label stays whole; rem
      floor/cap keep it following the system text size. */
   font-size: clamp(0.875rem, 4vw, 1rem);
   text-wrap: balance;

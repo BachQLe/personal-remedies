@@ -2,11 +2,13 @@
  * saveGate.js — Pure gating rule for whether an item can be saved to the
  * user's library (see src/state/library.js).
  *
- * Product rule: only recipes can be saved; plain food/ingredient items can
- * never be saved (ingredients were removed from the meal planner entirely,
- * so saving one is meaningless). Even a recipe can't be saved if it's
- * skull-rated (harmful) for the user's conditions — see `isHarmfulNumericId`
- * / `numericIdToTier` in src/utils/rating.js / src/api/adapter.js.
+ * Product rule (Prompt B 3, partly reversing checklist 1.14): recipes can be
+ * saved, and so can a plain food item that fits Breakfast, Snacks & Desserts
+ * or Beverages (Sunny's flags, `itemSlotKeys` in src/api/adapter.js). Any
+ * other item (raw ingredients, cuts, non-food rows) can't be saved. Nothing
+ * can be saved if it's skull-rated (harmful) for the user's conditions — see
+ * `isHarmfulNumericId` / `numericIdToTier` in src/utils/rating.js /
+ * src/api/adapter.js.
  *
  * A third reason, 'unscored' (Task T2C), blocks a recipe the live Nutridigm
  * API has never scored at all — no finite numericId AND no tier. See Track B
@@ -28,20 +30,21 @@
  */
 
 import { isHarmfulNumericId } from './rating.js';
+import { itemSlotKeys } from '../api/adapter.js';
 
 /**
  * Whether an item can be saved, and why not if it can't.
- * Only recipes are saveable; a harmful (skull-rated) recipe still isn't,
- * and neither is one the API has never scored at all. Order matters:
- * 'ingredient' short-circuits before either score check runs, and
- * 'harmful' is checked before 'unscored' so a recipe carrying both a
- * harmful tier/numericId and (inconsistently) a missing counterpart is
+ * Recipes and Breakfast / Snack / Beverage items are saveable; a harmful
+ * (skull-rated) one still isn't, and neither is one the API has never scored
+ * at all. Order matters: 'ingredient' short-circuits before either score
+ * check runs, and 'harmful' is checked before 'unscored' so an item carrying
+ * both a harmful tier/numericId and (inconsistently) a missing counterpart is
  * always reported as the more serious 'harmful'.
- * @param {{ kind?: string, tier?: string|null, numericId?: number|null }} item
+ * @param {{ id?: number|string, kind?: string, tier?: string|null, numericId?: number|null }} item
  * @returns {'ingredient' | 'harmful' | 'unscored' | null} null means saveable.
  */
 export function getSaveBlockReason(item) {
-  if (item?.kind !== 'recipe') return 'ingredient';
+  if (item?.kind !== 'recipe' && !itemSlotKeys(item?.id).length) return 'ingredient';
   if (isHarmful(item)) return 'harmful';
   if (isUnscored(item)) return 'unscored';
   return null;

@@ -8,17 +8,17 @@
  * `applyFavoritesPrune` (exact removal everywhere, score refresh, saved-week
  * re-stamp, flag cleared) and the refusals while the flag is pending.
  *
- * `getRecipes` is mocked; library/storage are real (jsdom).
+ * `scoreFoods` is mocked; library/storage are real (jsdom).
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../adapter.js', async (importOriginal) => ({
   ...(await importOriginal()),
-  getRecipes: vi.fn(),
+  scoreFoods: vi.fn(),
   getConditionNames: vi.fn(async (ids) => ids.map((id) => `Condition ${id}`)),
 }));
 
-import { getRecipes } from '../adapter.js';
+import { scoreFoods } from '../adapter.js';
 import {
   markFavoritesPrunePending,
   isFavoritesPrunePending,
@@ -41,7 +41,8 @@ import { todayKey } from '../../screens/plan/planDates.js';
 const fav = (id, name, numericId = 1, tier = 'Top') => ({
   id, name, image: null, group: null, fineGroup: null, tier, numericId, kind: 'recipe',
 });
-const scored = (id, numericId, tier = null) => ({ id, numericId, tier });
+/** /goodfor now rates each [id, numericId]; ids left out are unscored. */
+const scoring = (pairs) => scoreFoods.mockResolvedValue(new Map(pairs.map(([id, n]) => [String(id), n])));
 const slots = (over = {}) => ({ breakfast: [], lunch: [], dinner: [], snacks: [], beverages: [], ...over });
 const ids = (items) => items.map((i) => i.id);
 
@@ -74,17 +75,14 @@ function seed() {
 
 /** The API now ranks 1 and 3 low, 2 fine (and nicer than before), 4 not at all. */
 function mockScoring() {
-  getRecipes.mockResolvedValue({
-    recipes: [scored(1, 6, 'poor'), scored(2, 2, 'Strong'), scored(3, 5, 'poor'), scored(99, 7, 'poor')],
-    unscorableReason: null,
-  });
+  scoring([[1, 6], [2, 2], [3, 5], [99, 7]]);
 }
 
 beforeEach(() => {
   storage.clear();
   reloadLibrary();
   reloadPlan();
-  getRecipes.mockReset();
+  scoreFoods.mockReset();
 });
 afterEach(() => {
   storage.clear();
@@ -113,13 +111,13 @@ describe('findRecipesToPrune', () => {
       { id: 1, name: 'Low One' },
       { id: 3, name: 'Low Three' },
     ]); // 99 is low-ranked but nowhere stored; 2 fine; 4 and 9 not mentioned
-    expect(getRecipes).toHaveBeenCalledWith(NEW_PROFILE);
+    expect(scoreFoods).toHaveBeenCalledWith(NEW_PROFILE, expect.arrayContaining([1, 2, 3, 4, 9]));
   });
 
   it('finds a recipe that lives only in a saved week or saved day', async () => {
     storage.set('savedDays', [{ id: 'd', name: 'D', savedAt: 'x', slots: slots({ snacks: [fav(5, 'Day Only')] }) }]);
     storage.set('savedPlans', [{ id: 'w', name: 'W', savedAt: 'x', plan: { version: 2, conditionsKey: '', conditionNames: [], days: {}, picksBySlot: slots({ lunch: [fav(6, 'Pick Only')] }) } }]);
-    getRecipes.mockResolvedValue({ recipes: [scored(5, 5, 'poor'), scored(6, 7, 'poor')], unscorableReason: null });
+    scoring([[5, 5], [6, 7]]);
 
     const result = await findRecipesToPrune(NEW_PROFILE);
 
@@ -128,24 +126,41 @@ describe('findRecipesToPrune', () => {
 
   it('returns ok:false when scoring cannot be fetched — never "nothing to remove"', async () => {
     seed();
-    getRecipes.mockRejectedValue(new Error('network down'));
+    scoreFoods.mockRejectedValue(new Error('network down'));
 
     expect(await findRecipesToPrune(NEW_PROFILE)).toEqual({ ok: false });
   });
 
   it('is ok with nothing to remove for no conditions or conditions the API cannot score', async () => {
     seed();
-    getRecipes.mockResolvedValue({ recipes: [], unscorableReason: null });
+    scoring([]);
     expect(await findRecipesToPrune({ conditions: [] })).toMatchObject({ ok: true, recipes: [] });
-
-    getRecipes.mockResolvedValue({ recipes: [], unscorableReason: "We can't score food for X yet." });
     expect(await findRecipesToPrune(NEW_PROFILE)).toMatchObject({ ok: true, recipes: [] });
   });
 
   it('leaves recipes the new scoring returns unscored alone', async () => {
     seed();
-    getRecipes.mockResolvedValue({ recipes: [scored(1, null, null)], unscorableReason: null });
+    scoring([]);
     expect((await findRecipesToPrune(NEW_PROFILE)).recipes).toEqual([]);
+  });
+
+  it('finds a saved item (not just recipes) now ranked low (Prompt B 4)', async () => {
+    addToLibrary({ ...fav(502, 'Whole-wheat English muffins'), kind: 'food' });
+    storage.set('savedDays', [{ id: 'd', name: 'D', savedAt: 'x', slots: slots({ snacks: [{ ...fav(502, 'Whole-wheat English muffins'), kind: 'food' }] }) }]);
+    scoring([[502, 6]]);
+
+    const result = await findRecipesToPrune(NEW_PROFILE);
+    expect(result.recipes).toEqual([{ id: 502, name: 'Whole-wheat English muffins' }]);
+    await applyFavoritesPrune(result, NEW_PROFILE);
+    expect(getLibrary()).toEqual([]);
+    expect(getSavedDays()[0].slots.snacks).toEqual([]);
+  });
+
+  it('includes a library written in the same tick, as a sync pull does right after the profile', async () => {
+    scoring([[7, 7]]);
+    const pending = findRecipesToPrune(NEW_PROFILE);
+    addToLibrary(fav(7, 'Pulled Seven'));
+    expect((await pending).recipes).toEqual([{ id: 7, name: 'Pulled Seven' }]);
   });
 });
 
@@ -203,7 +218,7 @@ describe('applyFavoritesPrune', () => {
 
   it('clears the flag even when nothing needed removing', async () => {
     seed();
-    getRecipes.mockResolvedValue({ recipes: [scored(2, 2, 'Strong')], unscorableReason: null });
+    scoring([[2, 2]]);
     markFavoritesPrunePending();
 
     const result = await findRecipesToPrune(NEW_PROFILE);
@@ -216,7 +231,7 @@ describe('applyFavoritesPrune', () => {
 
   it('keeps the flag and removes nothing when handed a failed lookup', async () => {
     seed();
-    getRecipes.mockRejectedValue(new Error('offline'));
+    scoreFoods.mockRejectedValue(new Error('offline'));
     markFavoritesPrunePending();
 
     const result = await findRecipesToPrune(NEW_PROFILE);

@@ -320,7 +320,13 @@ export function initProfileSync() {
     const next = guidanceFingerprint(profile);
     const prev = lastFingerprint;
     lastFingerprint = next;
-    if (_hydrating) return;
+    if (_hydrating) {
+      // A guidance change made on another device: pullProfile already keeps
+      // the plan consistent, but this device's favorites and saved days/weeks
+      // still need the 1.26 prune.
+      if (prev !== null && next !== prev) markFavoritesPrunePending();
+      return;
+    }
     // Any guidance-relevant change (conditions, allergies, medications,
     // dietary pattern, religious restriction) wipes picks, plan and
     // schedule (storage-map.md §6 gap 5) and flags favorites / saved days /

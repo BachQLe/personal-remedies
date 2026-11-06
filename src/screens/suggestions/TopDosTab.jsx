@@ -105,7 +105,7 @@ export default function TopDosTab({ onSelectFood }) {
         <DataState
           status={status}
           onRetry={retry}
-          screenName="Top Dos & Don'ts"
+          screenName="Top Choices"
           emptyTitle="Nothing here yet"
           emptyBody={data?.consume?.unscorableReason || "We don't have dos & don'ts for your conditions right now."}
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}

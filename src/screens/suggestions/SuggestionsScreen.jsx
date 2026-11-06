@@ -26,7 +26,7 @@ import { RecipesBrowser } from '../recipes/RecipesScreen.jsx';
 // any link shipped during that window keeps landing somewhere correct.
 const TAB_META = {
   top: {
-    title: "Top Dos & Don'ts",
+    title: 'Top Choices',
   },
   groups: {
     title: 'Food Groups',

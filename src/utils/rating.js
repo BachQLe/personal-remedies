@@ -13,7 +13,7 @@
  * default), and 5-7 are genuinely harmful (skulls) — no shared scale, no
  * implied partial credit for a harmful item.
  *
- * Zero dependencies (mirrors src/utils/saveGate.js) so leaf UI components
+ * Zero dependencies so leaf UI components
  * (FoodRating, FoodImageCard, ...) can import this without pulling in the
  * adapter.js module graph.
  */
@@ -48,4 +48,25 @@ export const HARMFUL_MIN_NUMERIC_ID = 5;
  */
 export function isHarmfulNumericId(numericId) {
   return Number.isFinite(numericId) && numericId >= HARMFUL_MIN_NUMERIC_ID;
+}
+
+/**
+ * True when a numericId is a good choice (stars, 1-3). Neutral/OK (4) is not a
+ * safety guarantee, so recommendation lists leave it out with the harmful end.
+ * @param {number} numericId
+ * @returns {boolean}
+ */
+export function isGoodNumericId(numericId) {
+  return Number.isFinite(numericId) && numericId >= 1 && numericId < 4;
+}
+
+/**
+ * A recommendation list's order (Prompt B 2): good choices only, best first,
+ * the same every time. The sort is stable, so ties keep the API's own order.
+ * @template {{ numericId?: number|null }} T
+ * @param {T[]} items
+ * @returns {T[]}
+ */
+export function bestFirst(items) {
+  return items.filter((item) => isGoodNumericId(item.numericId)).sort((a, b) => a.numericId - b.numericId);
 }

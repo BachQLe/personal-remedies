@@ -30,13 +30,16 @@ export const COPY = {
   stepSave: 'Save a day or week you like so you can reuse it later.',
 
   stepPick: 'Pick your favorites',
+  // How to use page (Home), the interim stand-in for the 9.10 slideshow. DRAFT (C13).
+  howToUseNote:
+    "Important note: if you change your health profile, we'll remove any favorites and meal plans that are no longer recommended for you, and show you which ones first.",
   planTitle: 'Meal Planner',
 
   // My Favorites page
   favoritesTitle: 'My Favorites',
   sectionRecipes: 'Favorite recipes',
-  sectionDays: 'Saved days',
-  sectionWeeks: 'Saved weeks',
+  sectionDays: 'Favorite Daily Meal Plans',
+  sectionWeeks: 'Favorite Weekly Meal Plans',
   groupLabel: 'Group favorites',
   groupRecent: 'Most recent',
   groupMeal: 'By meal type',
@@ -44,8 +47,8 @@ export const COPY = {
   chooseMoreRecipes: 'Choose more recipes',
   emptyTitle: 'No favorites yet',
   emptyBody: 'Bookmark recipes you like and they show up here. Your meal plans are built from them.',
-  noSavedDays: 'No saved days yet. Use Save day on any day of your plan.',
-  noSavedWeeks: 'No saved weeks yet. Use Save week on your plan.',
+  noSavedDays: 'No Favorite Daily Meal Plans yet. Use Save day on any day of your plan.',
+  noSavedWeeks: 'No Favorite Weekly Meal Plans yet. Use Save week on your plan.',
   savedOn: (date) => `Saved ${date}`,
   peekHint: 'Load a day from the plan. Load a week with Load week on the plan.',
   meals: 'Meals',
@@ -103,7 +106,7 @@ export const COPY = {
   orSaveNew: 'Or save as a new week',
 
   // Load day sheet
-  loadDayTitle: 'Load a saved day',
+  loadDayTitle: 'Load a Favorite Daily Meal Plan',
   loadDayHint: 'This replaces the meals on the day you are viewing.',
 
   // New Meal Plan sheet
@@ -111,10 +114,10 @@ export const COPY = {
   randomize: 'Randomize from my favorites',
   randomizeHint: 'Builds a full week in one tap',
   building: 'Building…',
-  loadWeek: 'Load a saved week',
+  loadWeek: 'Load a Favorite Weekly Meal Plan',
   loadWeekHint: (n) => `${n} saved`,
-  loadWeekNone: 'No saved weeks yet',
-  loadWeekTitle: 'Load a saved week',
+  loadWeekNone: 'No Favorite Weekly Meal Plans yet',
+  loadWeekTitle: 'Load a Favorite Weekly Meal Plan',
   loadWeekSheetHint: 'This replaces your whole week. You can undo right after.',
   nudge: 'Tip: pick more than 3 favorites per meal for more variety',
   nudgeShort: (labels) => `Short on: ${labels.join(', ')}`,
@@ -133,7 +136,7 @@ export const COPY = {
   // Condition-change notice
   noticeTitle: 'Your favorites changed',
   noticeBody:
-    'Your health profile changed. These recipes now rank low for your profile and will be removed from My Favorites and your saved days and weeks:',
+    'Your health profile changed. These favorites now rank low for your profile and will be removed from My Favorites, Favorite Daily Meal Plans and Favorite Weekly Meal Plans:',
   noticeOk: 'OK',
 };
 
@@ -142,8 +145,8 @@ export const HELP_ITEMS = [
   { key: 'add', title: 'Add (+)', body: 'The Add from favorites tile at the end of each meal adds one of your favorite recipes for that meal.' },
   { key: 'remove', title: 'Remove (X)', body: 'The X on a recipe takes it off that day. Undo is right there if you tap it by mistake.' },
   { key: 'day', title: 'Save day / Load day', body: 'Save day keeps the meals of the day you are viewing under a name. Load day replaces that day with one you saved.' },
-  { key: 'week', title: 'Save week / Load week', body: 'Save week keeps your whole week under a name; Load week brings one back. If you loaded a saved week, you can update it or save a new copy.' },
+  { key: 'week', title: 'Save week / Load week', body: 'Save week keeps your whole week under a name; Load week brings one back. If you loaded one of your Favorite Weekly Meal Plans, you can update it or save a new copy.' },
   { key: 'new', title: 'New meal plan', body: 'Builds a fresh week from your favorites in one tap, or loads a week you saved.' },
-  { key: 'favorites', title: 'My Favorites', body: 'The My Favorites tab at the top opens your favorite recipes, saved days and saved weeks.' },
+  { key: 'favorites', title: 'My Favorites', body: 'The My Favorites tab at the top opens your favorite recipes and foods, Favorite Daily Meal Plans and Favorite Weekly Meal Plans.' },
   { key: 'print', title: 'Print & Share', body: 'The icons in the top-right corner print or share a plain, ink-friendly summary of your week.' },
 ];

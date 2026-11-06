@@ -3,8 +3,9 @@
  * saved weeks (checklist 1.26 / 3.4).
  *
  * A guidance-changing profile edit wipes the live plan (planBuilder.js) but
- * must NOT wipe the user's own collections — only recipes that are newly
- * low-ranked for the new profile come out, after the UI has shown a notice.
+ * must NOT wipe the user's own collections — only recipes and saved items that
+ * are newly low-ranked for the new profile come out, after the UI has shown a
+ * notice.
  * Flow the UI follows:
  *   1. profileSync calls `markFavoritesPrunePending()` on the change.
  *   2. UI sees `isFavoritesPrunePending()`, calls `findRecipesToPrune(profile)`.
@@ -15,10 +16,11 @@
  * (planBuilder.js), so a stale, possibly low-ranked recipe can't re-enter a plan.
  *
  * Saved days/weeks are device-local (not synced); the library syncs through
- * profileSync's normal `library` write hook.
+ * profileSync's normal `library` write hook, and a profile change pulled from
+ * another device sets the pending flag too (profileSync.js).
  */
 
-import { getRecipes, getConditionNames } from './adapter.js';
+import { scoreFoods, getConditionNames, numericIdToTier } from './adapter.js';
 import { storage } from './storage.js';
 import { SAVED_PLANS_KEY, SAVED_DAYS_KEY } from './config.js';
 import { getLibrary, reloadLibrary } from '../state/library.js';
@@ -60,35 +62,36 @@ function storedItems() {
 }
 
 /**
- * Re-score for the (new) profile and list the stored recipes that are now
- * low-ranked (`isHarmfulNumericId`, the rule `getSaveBlockReason` calls
- * 'harmful'). Recipes the new scoring does not mention (or leaves unscored) are kept. A profile with no / unscorable conditions
- * has nothing scored, so nothing is prunable.
+ * Re-score every stored recipe and item for the (new) profile on /goodfor
+ * (`scoreFoods`) and list the ones now low-ranked (`isHarmfulNumericId`, the
+ * rule `getSaveBlockReason` calls 'harmful'). Anything left unscored is kept.
+ * A profile with no / unscorable conditions has nothing scored, so nothing is
+ * prunable.
  * @param {import('./types.js').Profile} profile
  * @returns {Promise<{ ok: true, recipes: Array<{ id: number|string, name: string }>,
  *   scores: Object<string, { numericId: number|null, tier: string|null }> } | { ok: false }>}
- *   `ok: false` means scoring could not be fetched — NEVER read that as "nothing to remove".
+ *   `recipes` holds saved items too. `ok: false` means scoring could not be
+ *   fetched — NEVER read that as "nothing to remove".
  */
 export async function findRecipesToPrune(profile) {
-  let recipes;
+  // A sync pull writes the profile (which sets the pending flag) before the
+  // library, in one synchronous pass, so read the stored items a tick later.
+  await null;
+  const items = storedItems();
+
+  let numericIds;
   try {
-    ({ recipes } = await getRecipes(profile));
+    numericIds = await scoreFoods(profile, items.map((item) => item.id));
   } catch {
     return { ok: false };
   }
 
   const scores = {};
-  const lowRanked = new Set();
-  for (const recipe of recipes ?? []) {
-    if (!Number.isFinite(recipe.numericId)) continue; // unscored = not mentioned -> kept as-is
-    scores[recipe.id] = { numericId: recipe.numericId, tier: recipe.tier ?? null };
-    if (isHarmfulNumericId(recipe.numericId)) lowRanked.add(String(recipe.id));
-  }
-
   const found = new Map();
-  for (const item of storedItems()) {
+  for (const [id, numericId] of numericIds) scores[id] = { numericId, tier: numericIdToTier(numericId) };
+  for (const item of items) {
     const key = String(item.id);
-    if (lowRanked.has(key) && !found.has(key)) found.set(key, { id: item.id, name: item.name });
+    if (isHarmfulNumericId(numericIds.get(key)) && !found.has(key)) found.set(key, { id: item.id, name: item.name });
   }
   return { ok: true, recipes: [...found.values()], scores };
 }

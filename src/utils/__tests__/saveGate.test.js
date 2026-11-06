@@ -14,10 +14,19 @@ import { describe, expect, it } from 'vitest';
 import { getSaveBlockReason, SAVE_BLOCK_MESSAGES, recipeToSaveItem } from '../saveGate.js';
 
 describe('getSaveBlockReason precedence', () => {
-  it('blocks non-recipes as "ingredient" regardless of tier/numericId', () => {
-    expect(getSaveBlockReason({ kind: 'food', numericId: 1, tier: 'Top' })).toBe('ingredient');
+  it('blocks items that fit no Breakfast / Snack / Beverage slot as "ingredient" regardless of tier/numericId', () => {
+    expect(getSaveBlockReason({ id: 41, kind: 'food', numericId: 1, tier: 'Top' })).toBe('ingredient'); // Chicken breast
+    expect(getSaveBlockReason({ id: 844, kind: 'food', numericId: 1 })).toBe('ingredient'); // lifestyle row, Beverage-flagged
+    expect(getSaveBlockReason({ id: 302, kind: 'food', numericId: 1 })).toBe('ingredient'); // Goji berry (k2), Snack-flagged
+    expect(getSaveBlockReason({ kind: 'food', numericId: 1 })).toBe('ingredient');
     expect(getSaveBlockReason({ kind: undefined })).toBe('ingredient');
     expect(getSaveBlockReason(null)).toBe('ingredient');
+  });
+
+  it('lets a Breakfast / Snack / Beverage item save, with the same score checks as a recipe (Prompt B 3)', () => {
+    expect(getSaveBlockReason({ id: 502, kind: 'food', numericId: 2 })).toBeNull(); // Whole-wheat English muffins
+    expect(getSaveBlockReason({ id: 502, kind: 'food', numericId: 6 })).toBe('harmful');
+    expect(getSaveBlockReason({ id: 502, kind: 'food' })).toBe('unscored');
   });
 
   it('blocks harmful recipes by numericId (5-7)', () => {

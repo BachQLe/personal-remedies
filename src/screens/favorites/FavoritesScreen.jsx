@@ -16,7 +16,7 @@ import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
 import { favoritesBySlot, deleteSavedDay, restoreSavedDay, deleteSavedPlan, restoreSavedPlan, restoreActiveSavedPlan } from '../../api/api.js';
 import { getIngredientImage } from '../../api/ingredientImages.js';
-import { getOverlayImageFile } from '../../api/localTables.js';
+import { getOverlayImageFile, servingSizeLine } from '../../api/localTables.js';
 import { PLAN_SLOTS } from '../../api/config.js';
 import { getLibrary, subscribeLibrary } from '../../state/library.js';
 import { COPY } from '../plan/plannerCopy.js';
@@ -37,7 +37,7 @@ function FavoriteGrid({ items, onSelect, onBlocked }) {
             image={item.image || getIngredientImage(item.name, item.group, getOverlayImageFile(item.id))}
             numericId={item.numericId}
             title={item.name}
-            subtitle={item.tier ?? undefined}
+            subtitle={item.kind === 'recipe' ? item.tier ?? undefined : servingSizeLine(item.id) ?? item.tier ?? undefined}
             aspectRatio="4/5"
             onClick={() => onSelect(item)}
             saveAction={<SaveButton item={item} onBlocked={onBlocked} />}

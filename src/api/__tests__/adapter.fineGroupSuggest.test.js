@@ -200,8 +200,8 @@ describe('getFineGroupSuggestions: no profile conditions / no group code', () =>
   });
 });
 
-describe('getFineGroupSuggestions: ranking shows the FULL spread, including Avoid (5-7)', () => {
-  it('keeps every item with a descriptionNumericID (1-7), unlike the Plan-safety numericId 1-4 filter', async () => {
+describe('getFineGroupSuggestions: good choices only, best first (Prompt B 2)', () => {
+  it('keeps only descriptionNumericID 1-3: Neutral/OK and harmful items are left out', async () => {
     const { getFineGroupSuggestions } = await setupAdapter({
       fetchSuggestImpl: async (_csv, fineFoodGroup) => {
         if (fineFoodGroup !== 'b1') return [];
@@ -210,13 +210,14 @@ describe('getFineGroupSuggestions: ranking shows the FULL spread, including Avoi
           { foodItemID: 1, foodItemDisplayAs: 'Top Fish', descriptionNumericID: 1 },
           { foodItemID: 5, foodItemDisplayAs: 'Poor Fish', descriptionNumericID: 5 },
           { foodItemID: 4, foodItemDisplayAs: 'Neutral Fish', descriptionNumericID: 4 },
+          { foodItemID: 3, foodItemDisplayAs: 'Good Fish', descriptionNumericID: 3 },
         ];
       },
     });
 
     const result = await getFineGroupSuggestions({ conditions: CONDITIONS }, 'b1');
-    expect(result.items.map((i) => i.id)).toEqual([1, 4, 5, 7]);
-    expect(result.items.map((i) => i.tier)).toEqual(['Top', null, 'poor', 'poor']);
+    expect(result.items.map((i) => i.id)).toEqual([1, 3]);
+    expect(result.items.map((i) => i.tier)).toEqual(['Top', 'Good']);
   });
 
   it('drops items with no descriptionNumericID at all (nothing to rank by)', async () => {

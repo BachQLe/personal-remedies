@@ -14,13 +14,8 @@
  * Data/state pattern mirrors CategoryDetailPanel.jsx (the coarse group's
  * data panel), inlined here rather than split into its own file since a
  * fine group has no Eat/Avoid split to toggle between — getFineGroupSuggestions
- * returns ONE condition-ranked list spanning the full 1-7 tier spread, and
- * that full spread (Top/Strong/Good matches AND the Avoid end, 5-7) is
- * rendered honestly in a single list. This is the whole point of a browse
- * surface: someone scanning "Fish & Seafood" at a restaurant should see
- * which fish to avoid too, not have the harmful end silently filtered out
- * (contrast the Plan screen's pool, which deliberately filters Plan slots to
- * numericId 1-4 only — a Plan-safety rule that does NOT apply here).
+ * returns ONE list of good choices only (numericId 1-3), best first (Prompt B
+ * 2.2: Neutral/OK and harmful items stay out of recommendation lists).
  *   - resolves the profile via resolveProfileWithConditions()
  *   - fetches through useAsyncData with requiresProfile: true
  *   - real error/offline/no-profile states via the shared DataState, with
@@ -126,15 +121,10 @@ function FineGroupDetail({ fineGroupId }) {
   const items = data?.items ?? [];
 
   function handleSelectFood(food) {
-    // No Eat/Avoid tab to forward here (unlike CategoryDetailPanel) — this
-    // screen shows one unified ranked list across the full 1-7 spread, so
-    // the front-face ordering hint is derived from the tapped item's own
-    // numericId instead: 5-7 is the Avoid end (see getFineGroupSuggestions's
-    // docblock on why that end is deliberately included, unlike the Plan
-    // screen's pool).
-    const listType = typeof food.numericId === 'number' && food.numericId >= 5 ? 'harmful' : 'helpful';
+    // No Eat/Avoid tab to forward here (unlike CategoryDetailPanel): the list
+    // holds good choices only, so every row opens as 'helpful'.
     setSelectedFood(food);
-    setSelectedListType(listType);
+    setSelectedListType('helpful');
   }
 
   return (

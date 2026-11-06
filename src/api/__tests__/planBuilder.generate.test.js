@@ -126,6 +126,19 @@ describe('favoritesBySlot', () => {
     expect(b.dinner).toEqual([]);
   });
 
+  it('puts a saved item only in the slots Sunny flagged it for, never Lunch or Dinner (Prompt B 3)', () => {
+    const b = favoritesBySlot([
+      recipe(502, 'Whole-wheat English muffins', { kind: 'food' }), // Snack-flagged
+      recipe(147, 'Salmon (smoked, Lox)', { kind: 'food' }), // Breakfast-flagged
+      recipe(41, 'Chicken breast (no skin)', { kind: 'food' }), // no flag: not saveable
+    ]);
+    expect(ids(b.snacks)).toEqual([502]);
+    expect(ids(b.breakfast)).toEqual([147]);
+    expect(b.lunch).toEqual([]);
+    expect(b.dinner).toEqual([]);
+    expect(b.beverages).toEqual([]);
+  });
+
   it('returns all five slot keys even for no favorites', () => {
     expect(Object.keys(favoritesBySlot(undefined))).toEqual(PLAN_SLOT_KEYS);
   });

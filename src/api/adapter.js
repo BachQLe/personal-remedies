@@ -28,7 +28,7 @@ import {
   PLAN_SLOTS,
   PLAN_SLOT_KEYS,
 } from './config.js';
-import { getIngredientImage } from './ingredientImages.js';
+import { getIngredientImage, getNonFoodIcon } from './ingredientImages.js';
 import {
   fetchGoodFor,
   fetchTopDoOrDonts,
@@ -38,7 +38,8 @@ import {
   NutridigmAuthError,
 } from './nutridigm.js';
 import { cachedFetch, peekCache } from './cache.js';
-import { getItemTable, getConditionTable, getGroupTable, getOverlayImageFile, getRecipeFlaggedItems } from './localTables.js';
+import { isGoodNumericId } from '../utils/rating.js';
+import { getItemTable, getConditionTable, getGroupTable, getOverlayFlags, getOverlayImageFile, getRecipeFlaggedItems } from './localTables.js';
 import { joinRecipeOverlay, loadRecipeOverlay } from './recipeIngestion.js';
 
 // ── Cache TTLs ────────────────────────────────────────────────────────────────
@@ -496,6 +497,24 @@ export function isExcludedItem(raw) {
   if (raw.coarseFoodGroup === 'j') return true;
   if (!fine && ['x', 'l'].includes(raw.coarseFoodGroup)) return true;
   return false;
+}
+
+/** @type {Map<number, Object>|null} foodItemID -> item-table row, for the synchronous rule below. */
+let _itemRowsById = null;
+
+/**
+ * The meal slots a plain food item (not a recipe) can be saved into: Sunny's
+ * Breakfast, Snack and Beverage flags (`PLAN_SLOTS`' `itemFlagKey`), never
+ * Lunch or Dinner, and never a non-food row (1.10). Empty means unsaveable.
+ * @param {number|string} foodItemID
+ * @returns {string[]} plan slot keys
+ */
+export function itemSlotKeys(foodItemID) {
+  _itemRowsById ??= new Map(getItemTable().map((row) => [row.foodItemID, row]));
+  const row = _itemRowsById.get(Number(foodItemID));
+  if (!row || isExcludedItem(row) || getNonFoodIcon(row.coarseFoodGroup, row.fineFoodGroup)) return [];
+  const flags = getOverlayFlags(foodItemID);
+  return PLAN_SLOTS.filter((slot) => slot.itemFlagKey && flags[slot.itemFlagKey]).map((slot) => slot.key);
 }
 
 /**
@@ -1514,6 +1533,40 @@ export async function getCategoryRecipes(profile) {
   return { recipes };
 }
 
+/**
+ * The current /goodfor rating of each stored recipe or item, for the
+ * profile-change prune (1.26). Every id is scored, not just the top 20 recipes,
+ * so saved items and Sunny's category recipes are covered. An id /goodfor
+ * rejects (400: not loaded in Nutridigm yet) or answers empty stays unscored;
+ * any other failure rejects, so an outage never reads as "nothing to remove".
+ * @param {import('./types.js').Profile} profile
+ * @param {Array<number|string>} ids
+ * @returns {Promise<Map<string, number>>} String(id) -> descriptionNumericID
+ */
+export async function scoreFoods(profile, ids) {
+  const conditionIds = profile?.conditions || [];
+  if (!conditionIds.length) return new Map();
+
+  // Same authorization probe as getCategoryRecipes: one cached /suggest per condition.
+  const { result: scorable } = await withAuthorized(
+    conditionIds,
+    async (tried) => { await getRecipesRaw(tried); return tried; },
+    []
+  );
+  if (!scorable.length) return new Map();
+
+  const loaded = await ensureFoodItems();
+  const unique = [...new Set(ids.map(Number))].filter((id) => loaded.has(id) && !isGoodForRejected(loaded.get(id)));
+  const rows = await inBatches(unique, async (id) => {
+    const raw = await cachedGoodFor(id, scorable).catch((err) => {
+      if (err instanceof GoodForEmptyResult || /Bad request/.test(err?.message)) return null;
+      throw err;
+    });
+    return [String(id), raw?.descriptionNumericID];
+  });
+  return new Map(rows.filter(([, numericId]) => Number.isFinite(numericId)));
+}
+
 /** Recipe tiers eligible to fill a Plan slot — reverse of numericIdToTier for 1/2/3 only. */
 const TIER_TO_NUMERIC_ID = { Top: 1, Strong: 2, Good: 3 };
 
@@ -1522,11 +1575,8 @@ const TIER_TO_NUMERIC_ID = { Top: 1, Strong: 2, Good: 3 };
  * bearing display shape — id, name, resolved image, group, fineGroup, tier,
  * numericId. Factored out of `normalizePlanGroup` so `getFineGroupSuggestions`
  * (the Suggest browse surface) can reuse the exact same field resolution
- * WITHOUT `normalizePlanGroup`'s numericId 1-4 filter, which is a Plan-only
- * safety rule (a Plan slot must never suggest a harmful 5-7 food) that is
- * wrong for a browse surface — a fine-group browse list's whole point is
- * showing the group's full condition-ranked spread, including the "Avoid"
- * end (5-7), not just the Plan-safe subset. Does NOT apply `isExcludedItem`
+ * WITHOUT `normalizePlanGroup`'s numericId 1-4 filter (that list keeps only
+ * 1-3, see its own doc). Does NOT apply `isExcludedItem`
  * or any filtering/sorting at all — purely the per-item field mapping;
  * callers own their own filter/sort pass.
  * @param {Object} item - Raw /suggest item
@@ -2216,14 +2266,9 @@ export async function getIngredientAlternatives(profile, ingredient, { limit = 6
  * Nutridigm API has a daily rate limit, so this browse feature must ride the
  * existing 8h cache rather than add its own fetch path).
  *
- * Deliberately does NOT reuse `normalizePlanGroup` here (see
- * `suggestItemToCandidate`'s doc): that function's numericId 1-4 filter
- * exists to keep harmful (5-7) foods out of a Plan slot, which is the wrong
- * rule for a browse surface whose job is showing a fine group's FULL
- * condition-ranked spread, "Avoid" end included — a user browsing "Fish &
- * Seafood" should see which fish to avoid, not have them silently vanish.
- * This keeps every item that has a `descriptionNumericID` at all (can't rank
- * without one) and only drops `isExcludedItem` hits (defensive — /suggest
+ * Suggestions is a recommendation list (Prompt B 2.2): only good choices
+ * (descriptionNumericID 1-3) are kept, so Neutral/OK and harmful rows are
+ * left out. It also drops `isExcludedItem` hits (defensive — /suggest
  * items carry no fineFoodGroup/coarseFoodGroup of their own today, so this
  * is currently a no-op, exactly as it already is in `normalizePlanGroup`;
  * kept for parity/future-proofing, not because it does anything yet).
@@ -2254,7 +2299,7 @@ async function getFineGroupSuggestionsRaw(conditionIds, fineGroupCode) {
   if (!suggested || !suggested.length) return [];
   const raw = await withGoodForRatings(suggested, conditionIds);
 
-  const filtered = raw.filter((item) => item.descriptionNumericID != null && !isExcludedItem(item));
+  const filtered = raw.filter((item) => isGoodNumericId(item.descriptionNumericID) && !isExcludedItem(item));
   filtered.sort((a, b) => a.descriptionNumericID - b.descriptionNumericID);
 
   const matchedConditions = await getConditionNames(conditionIds);

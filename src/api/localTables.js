@@ -167,3 +167,14 @@ export function getServingSize(foodItemID) {
   }
   return _servingSizes.get(Number(foodItemID)) ?? null;
 }
+
+/**
+ * A saved item's card subtitle (Prompt B 3): "Serving size: 20 g" from PR, or
+ * undefined when PR gives no amount. Never a calorie figure.
+ * @param {number|string|null|undefined} foodItemID
+ * @returns {string|undefined}
+ */
+export function servingSizeLine(foodItemID) {
+  const size = getServingSize(foodItemID);
+  return size ? `Serving size: ${size}` : undefined;
+}

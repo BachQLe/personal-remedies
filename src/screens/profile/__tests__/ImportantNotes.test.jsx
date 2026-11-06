@@ -10,7 +10,7 @@ import { SUPPORT_EMAIL, PUBLISHER_CREDIT } from '../importantNotesContent.js';
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 describe('ImportantNotesScreen', () => {
-  it('renders disclaimer, sources, legal links and credit', async () => {
+  it('renders Privacy, Not medical advice and About, each tagged DRAFT, with legal links and credit', async () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
     const root = createRoot(el);
@@ -18,6 +18,7 @@ describe('ImportantNotesScreen', () => {
       root.render(h(MemoryRouter, null, h(ImportantNotesScreen)));
     });
     const text = el.textContent;
+    expect([...el.querySelectorAll('h2')].map((h2) => h2.textContent)).toEqual(['PrivacyDraft', 'Not medical adviceDraft', 'AboutDraft']);
     expect(text).toContain('not medical advice');
     expect(text).toContain('911');
     expect(text).toContain('Nutridigm');

@@ -105,7 +105,7 @@ export const ENTITLEMENT_CONFIG = {
     // C2 audit deliverable, not this file's.
     top_dos_donts: {
       key: 'top_dos_donts',
-      label: "Top Do's & Don'ts",
+      label: 'Top Choices',
       description: 'Condition-ranked list of which foods rank higher and which rank lower.',
     },
     food_group_detail: {

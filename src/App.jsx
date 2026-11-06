@@ -23,6 +23,7 @@ import GroupDetailScreen from "./screens/suggestions/GroupDetailScreen";
 import FineGroupDetailScreen from "./screens/suggestions/FineGroupDetailScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
 import ImportantNotesScreen from "./screens/profile/ImportantNotesScreen";
+import HowToUseScreen from "./screens/home/HowToUseScreen";
 import MealQueueScreen from "./screens/plan/MealQueueScreen";
 import RecipesScreen from "./screens/recipes/RecipesScreen";
 import FavoritesScreen from "./screens/favorites/FavoritesScreen";
@@ -210,6 +211,7 @@ function App() {
               <Route path="/app/plan" element={<RequireEntitlement feature="plan"><MealQueueScreen /></RequireEntitlement>} />
               <Route path="/app/profile" element={<ProfileScreen />} />
               <Route path="/app/profile/important-notes" element={<ImportantNotesScreen />} />
+              <Route path="/app/how-to-use" element={<HowToUseScreen />} />
               <Route path="/app/upgrade" element={<PaywallScreen />} />
             </Route>
             {/* Retired marketing URLs (/about, /news, …) and any other unknown

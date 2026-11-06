@@ -3,7 +3,7 @@ import { X, Plus } from 'lucide-react';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
 import { getIngredientImage } from '../../api/ingredientImages.js';
-import { getOverlayImageFile } from '../../api/localTables.js';
+import { getOverlayImageFile, servingSizeLine } from '../../api/localTables.js';
 import { MEAL_TYPE_META } from '../../components/shared/mealTypeMeta.jsx';
 import { COPY } from './plannerCopy.js';
 
@@ -78,7 +78,7 @@ export default function SlotSection({
                   image={cardImage(item)}
                   numericId={item.numericId}
                   title={item.name}
-                  subtitle={item.kind === 'recipe' ? item.sourceName : undefined}
+                  subtitle={item.kind === 'recipe' ? item.sourceName : servingSizeLine(item.id)}
                   aspectRatio="4/5"
                   onClick={() => onSelect(item)}
                   saveAction={() => <SaveButton item={item} onBlocked={onSaveBlocked} />}

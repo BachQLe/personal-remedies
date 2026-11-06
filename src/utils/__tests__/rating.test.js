@@ -6,7 +6,7 @@
  * skull-rated band that saveGate.js gates saves on.
  */
 import { describe, expect, it } from 'vitest';
-import { isHarmfulNumericId, numericIdToRating } from '../rating.js';
+import { bestFirst, isHarmfulNumericId, numericIdToRating } from '../rating.js';
 
 describe('isHarmfulNumericId (master plan §3.6)', () => {
   it('is true for the harmful band (5-7)', () => {
@@ -46,5 +46,16 @@ describe('numericIdToRating: 4 is an explicit neutral rating, distinct from out-
     expect(numericIdToRating(undefined)).toBeNull();
     expect(numericIdToRating(0)).toBeNull();
     expect(numericIdToRating(8)).toBeNull();
+  });
+});
+
+describe('bestFirst (Prompt B 2)', () => {
+  it('keeps good choices only, best first, ties in their original order', () => {
+    const items = [
+      { id: 'a', numericId: 3 }, { id: 'b', numericId: 4 }, { id: 'c', numericId: 1 },
+      { id: 'd', numericId: 6 }, { id: 'e', numericId: null }, { id: 'f', numericId: 3 },
+      { id: 'g', numericId: 2 },
+    ];
+    expect(bestFirst(items).map((item) => item.id)).toEqual(['c', 'g', 'a', 'f']);
   });
 });

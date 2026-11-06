@@ -24,7 +24,6 @@ import {
 import { getNonFoodIcon } from '../api/ingredientImages.js';
 import { resolveCardIngredients } from '../api/ingredientDerivation.js';
 import IngredientSwaps from './shared/IngredientSwaps.jsx';
-import NonFoodGuidance from './shared/NonFoodGuidance.jsx';
 import Snackbar from './shared/Snackbar.jsx';
 import { openUrl } from '../api/browser.js';
 
@@ -248,16 +247,15 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
   const combinedFoodId = item?.foodId ?? resolvedFoodId ?? null;
 
   // Save-gate: translate this card's item shape (isRecipe + async assessment)
-  // into the { kind, tier, numericId } shape getSaveBlockReason expects.
-  // Non-recipes don't depend on assessment.tier/numericId at all
-  // (getSaveBlockReason short-circuits to 'ingredient' for any non-recipe
-  // kind), so only recipes need to wait on the assessment settling. While
-  // detailLoading is true, we don't yet know assessment.tier/numericId for a
-  // recipe, so withhold the blocked state rather than show it then flip it
-  // off once the assessment resolves. Passing numericId (not just tier)
-  // makes this exact rather than relying on saveGate's tier-only fallback.
-  const gateItem = { kind, tier: assessment?.tier, numericId: assessment?.numericId };
-  const blockReason = (isRecipe && detailLoading) ? null : getSaveBlockReason(gateItem);
+  // into the { id, kind, tier, numericId } shape getSaveBlockReason expects.
+  // 'ingredient' needs no score, so it shows at once. The harmful/unscored
+  // checks need the assessment's tier/numericId, so while detailLoading is
+  // true they're withheld rather than shown then flipped off once the
+  // assessment resolves. Passing numericId (not just tier) makes this exact
+  // rather than relying on saveGate's tier-only fallback.
+  const gateItem = { id: combinedFoodId, kind, tier: assessment?.tier, numericId: assessment?.numericId };
+  const gateReason = getSaveBlockReason(gateItem);
+  const blockReason = detailLoading && gateReason !== 'ingredient' ? null : gateReason;
 
   // Lock body scroll while the card is open or animating closed — tied to
   // `mounted` rather than `open` so the background doesn't jump/scroll out
@@ -765,15 +763,6 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex flex-col gap-3">
-
-                {!isRecipe && nonFoodIcon && (
-                  <NonFoodGuidance
-                    foodId={combinedFoodId}
-                    group={assessment?.food?.group ?? facts?.group ?? item?.group}
-                    fineGroup={assessment?.food?.fineGroup ?? facts?.fineGroup ?? item?.fineGroup}
-                    longDescription={description}
-                  />
-                )}
 
                 {/* Conditions in your profile — per-condition breakdown (tier
                     pills, and for foods only: study counts, expandable

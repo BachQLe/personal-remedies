@@ -16,7 +16,7 @@
  * there; `favoritesPrune.js` removes only newly low-ranked recipes from them.
  */
 
-import { getMealPlanSuggestions, getConditionNames, guessMealType } from './adapter.js';
+import { getMealPlanSuggestions, getConditionNames, guessMealType, itemSlotKeys } from './adapter.js';
 import {
   PLAN_SLOTS,
   PLAN_SLOT_KEYS,
@@ -180,13 +180,15 @@ export function toPlanItem(candidate) {
 }
 
 /**
- * Bucket favorites by the plan slots they fit, keeping only saveable recipes
+ * Bucket favorites by the plan slots they fit, keeping only saveable ones
  * (`getSaveBlockReason(item) === null`) and each id at most once per slot. A
  * recipe lands in EVERY slot it fits: the content overlay's `mealType` +
  * `alsoFits` when its id resolves there, else an R item's `mealTypes`, else
  * `guessMealType(name)`. Snack and
  * dessert both fit `snacks`; beverage fits `beverages` (`PLAN_SLOTS`'
- * `recipeMealType`). Pure; also what the favorites-count nudge counts.
+ * `recipeMealType`). A plain item lands only in the slots Sunny flagged it for
+ * (`itemSlotKeys`: Breakfast, Snacks & Desserts, Beverages), never Lunch or
+ * Dinner. Pure; also what the favorites-count nudge counts.
  * @param {Array<Object>} favorites - library items (`recipeToSaveItem` shape)
  * @returns {Object<string, Array<Object>>} slotKey → favorites (all 5 keys)
  */
@@ -200,10 +202,14 @@ export function favoritesBySlot(favorites) {
     const mealTypes = row
       ? [row.mealType, ...(row.alsoFits ?? [])]
       : flagged.get(String(item.id)) ?? [guessMealType(item.name)];
+    const itemSlots = item.kind === 'recipe' ? null : itemSlotKeys(item.id);
     for (const slot of PLAN_SLOTS) {
       const bucket = buckets[slot.key];
       if (bucket.some((i) => i.id === item.id)) continue;
-      if ([slot.recipeMealType].flat().some((type) => mealTypes.includes(type))) bucket.push(item);
+      const fits = itemSlots
+        ? itemSlots.includes(slot.key)
+        : [slot.recipeMealType].flat().some((type) => mealTypes.includes(type));
+      if (fits) bucket.push(item);
     }
   }
   return buckets;

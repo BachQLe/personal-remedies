@@ -113,14 +113,16 @@ describe('4.11 — a group whose data is in flight shows loading, not "not found
 
     await act(async () => pending.resolve([
       { foodItemID: 102, foodItemDisplayAs: 'Tuna', descriptionNumericID: 1 },
+      { foodItemID: 104, foodItemDisplayAs: 'Cod', descriptionNumericID: 2 },
       { foodItemID: 103, foodItemDisplayAs: 'Swordfish', descriptionNumericID: 6 },
     ]));
     expect(container.textContent).toContain('Tuna');
+    expect(container.textContent).not.toContain('Swordfish'); // good choices only (Prompt B 2.2)
     // 4.15: the shared FoodRating glyphs, no tier pill text, no digit of the score.
     const labels = [...container.querySelectorAll('[role="img"]')].map((el) => el.getAttribute('aria-label'));
     expect(labels).toEqual([
       '3 of 3 stars — ranked higher for your conditions',
-      '2 of 3 skulls — ranked lower for your conditions',
+      '2 of 3 stars — ranked higher for your conditions',
     ]);
     expect(container.textContent).not.toMatch(/\bTop\b|Strong|Good|Poor match/);
   });

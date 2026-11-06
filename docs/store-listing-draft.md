@@ -91,7 +91,7 @@ Both stores use a questionnaire; the final rating comes from the answers. Answer
 
 - No user-generated content, chat, social features, gambling, or purchases of real goods.
 - **Medical or wellness topics:** yes. The app discusses health conditions and diet.
-- **Alcohol, tobacco and drug references:** the lifestyle items in the guidance include "Keeping an eye on alcohol" and a quit-smoking block (`src/data/nonFoodGuidance.js`). These are informational and discourage use, so answer "infrequent / mild" where the form asks, not "none".
+- **Alcohol, tobacco and drug references:** Nutridigm's lifestyle items include alcohol and smoking entries (e.g. Top Choices' Don'ts). These are informational and discourage use, so answer "infrequent / mild" where the form asks, not "none".
 - **Web access:** recipe cards open the original publisher's website in a browser. Answer according to Apple's current wording for links that leave the app (it is not an unrestricted browser).
 - **Children:** the app is for adults. The onboarding age choices are "Adult" and "Senior (65+)" only. Do not enrol in the Kids category. Apple should land at a low rating (4+ to 12+ depending on the medical and substance answers); I cannot confirm the exact number without running the questionnaire, so run it in App Store Connect and record the result here.
 - Google: complete the IARC questionnaire. Target audience: 18 and over (OPEN: Mory to confirm, and to match the privacy policy's children wording).

@@ -74,14 +74,14 @@ describe('NewPlanSheet', () => {
     expect(onRandomize).toHaveBeenCalledTimes(1);
   });
 
-  it('disables Load a saved week when there are none, and lists them when there are', async () => {
+  it('disables Load a Favorite Weekly Meal Plan when there are none, and lists them when there are', async () => {
     await mount({ favorites: many('breakfast', 4) });
-    expect(button('Load a saved week').disabled).toBe(true);
-    expect(container.textContent).toContain('No saved weeks yet');
+    expect(button('Load a Favorite Weekly Meal Plan').disabled).toBe(true);
+    expect(container.textContent).toContain('No Favorite Weekly Meal Plans yet');
 
     const onLoadWeek = vi.fn();
     await mount({ favorites: many('breakfast', 4), weeks: [week], onLoadWeek });
-    await act(async () => { button('Load a saved week').click(); });
+    await act(async () => { button('Load a Favorite Weekly Meal Plan').click(); });
     await act(async () => { button('Calm week').click(); });
     expect(onLoadWeek).toHaveBeenCalledWith('w1');
   });

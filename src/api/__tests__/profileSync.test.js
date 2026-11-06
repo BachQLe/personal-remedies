@@ -160,6 +160,21 @@ describe('initProfileSync: conditions-change purge guard (gap 1)', () => {
   });
 });
 
+describe('pullProfile: a guidance change made on another device (1.26)', () => {
+  it('flags favorites for pruning, so this device prunes its own copies too', async () => {
+    const row = { conditions: [244], preferences: {}, library: [], daily_plan: null, updated_at: '2026-08-10T00:00:00.000Z' };
+    vi.doMock(SUPABASE_MODULE, () => ({ supabase: makeSupabase(row), isSupabaseConfigured: true }));
+    const { storage, isFavoritesPrunePending, initProfileSync, pullProfile } = await loadFresh();
+
+    storage.set('profile', { conditions: [203] });
+    const teardown = initProfileSync();
+    await pullProfile({ id: 'user-3' });
+
+    expect(isFavoritesPrunePending()).toBe(true);
+    teardown();
+  });
+});
+
 describe('pullProfile: remote daily_plan/conditions consistency check (gap 2)', () => {
   it('hydrates profile, library, and dailyPlan when the remote row is internally consistent', async () => {
     const row = {

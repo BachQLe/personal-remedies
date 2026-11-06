@@ -20,14 +20,11 @@ async function mount() {
       <MemoryRouter initialEntries={['/app']}>
         <Routes>
           <Route path="/app" element={<HomeMail />} />
-          <Route path="/app/profile/important-notes" element={<p>Important notes page</p>} />
         </Routes>
       </MemoryRouter>,
     );
   });
 }
-const byText = (text) => [...container.ownerDocument.querySelectorAll('button')].find((b) => b.textContent.trim().startsWith(text));
-const notesLink = () => [...document.querySelectorAll('a')].find((a) => a.textContent.trim().startsWith('Important notes'));
 const mailButton = () => container.querySelector('button');
 
 beforeEach(() => {
@@ -45,27 +42,17 @@ describe('HomeMail', () => {
   it('is a labelled mail button with no unread marker when nothing is active', async () => {
     messages.getActiveMessages.mockResolvedValue([]);
     await mount();
-    expect(mailButton().getAttribute('aria-label')).toBe('Important notes and news');
+    expect(mailButton().getAttribute('aria-label')).toBe('News');
     expect(mailButton().querySelector('span')).toBeNull();
   });
 
-  it('shows an unread dot and opens News with the active messages', async () => {
+  it('shows an unread dot and opens News straight away with the active messages', async () => {
     messages.getActiveMessages.mockResolvedValue([note]);
     await mount();
-    expect(mailButton().getAttribute('aria-label')).toBe('Important notes and news, new');
+    expect(mailButton().getAttribute('aria-label')).toBe('News, new');
     expect(mailButton().querySelector('span')).toBeTruthy();
 
     await act(async () => mailButton().click());
-    await act(async () => byText('News').click());
     expect(document.body.textContent).toContain('Hello news');
-  });
-
-  it('routes Important notes to its page', async () => {
-    messages.getActiveMessages.mockResolvedValue([]);
-    await mount();
-    await act(async () => mailButton().click());
-    expect(notesLink().getAttribute('href')).toBe('/app/profile/important-notes');
-    await act(async () => notesLink().click());
-    expect(document.body.textContent).toContain('Important notes page');
   });
 });
