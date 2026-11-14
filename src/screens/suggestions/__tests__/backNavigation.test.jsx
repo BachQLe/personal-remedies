@@ -94,7 +94,7 @@ describe('SuggestionsScreen tab state lives in the URL', () => {
 
     await click('Food Groups');
     expect(loc()).toBe('/app/suggestions?tab=groups');
-    await click('Recipes');
+    await click('Top Recipes');
     expect(loc()).toBe('/app/suggestions?tab=recipes');
 
     await click('history back');

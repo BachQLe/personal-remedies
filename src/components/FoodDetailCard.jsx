@@ -26,12 +26,20 @@ import { resolveCardIngredients } from '../api/ingredientDerivation.js';
 import IngredientSwaps from './shared/IngredientSwaps.jsx';
 import Snackbar from './shared/Snackbar.jsx';
 import { openUrl } from '../api/browser.js';
+import { formatCalories } from '../api/calorieNeeds.js';
+import NutrientContent from './NutrientContent.jsx';
+import { isContentNutrient } from '../api/contentTable.js';
 
 const DISMISS_THRESHOLD = 100;
 
 // Recipe back face: ingredients block is hidden for now (not deleted) — flip
 // back to true to restore it.
 const SHOW_RECIPE_INGREDIENTS = false;
+
+// Nutrient content + top sources (checklist 7.4) read a USDA stand-in until the
+// PR `contents` table arrives via AWS — dev only until then (Mory: users never
+// see USDA). Set true once contentTable.js reads the real table.
+const SHOW_NUTRIENT_CONTENT = import.meta.env.DEV;
 
 // Open/close entrance-exit animation (separate from the drag-dismiss
 // transform above, which only ever applies while fully open). Opening lifts
@@ -413,6 +421,15 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
     navigate(path);
   };
 
+  // Opens another food's card on this screen while remembering this one, so
+  // Back returns to this card's details (same pattern as leaveCardFor).
+  const openFoodCard = (food) => {
+    onClose?.();
+    const { pathname, search, hash, state } = location;
+    navigate({ pathname, search, hash }, { replace: true, state: { ...state, reopenCard: { ...item, openDetails: true } } });
+    navigate({ pathname, search, hash }, { state: { ...state, reopenCard: food } });
+  };
+
   const handleClose = useCallback(() => {
     setFlipped(false);
     setDragY(0);
@@ -467,6 +484,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
   if (!mounted || !item) return null;
 
   const servingSize = getServingSize(combinedFoodId);
+  const calories = isRecipe ? formatCalories(item?.nutritionPerServing?.calories) : null;
   // Sunny's R items are prepared foods: recipes to the app, but with no recipe page.
   const hasRecipePage = isRecipe && !getRecipeFlaggedItems().some((flagged) => flagged.foodItemID === combinedFoodId);
   const dismissProgress = Math.min(1, dragY / DISMISS_THRESHOLD);
@@ -661,6 +679,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
               {servingSize && (
                 <p className="text-[0.875rem] text-white font-sans">Serving size: {servingSize}</p>
               )}
+              {calories && <p className="text-[0.875rem] text-white font-sans">{calories} cal per serving</p>}
               <p className="text-[0.875rem] text-white/60 font-sans">
                 Ask your doctor before changing your diet, especially if you take medication.
               </p>
@@ -829,6 +848,11 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                     />
                   )}
                 </div>
+
+                {SHOW_NUTRIENT_CONTENT && !isRecipe && combinedFoodId != null
+                  && (isContentNutrient(combinedFoodId) || !nonFoodIcon) && (
+                  <NutrientContent key={combinedFoodId} foodId={combinedFoodId} onOpenFood={openFoodCard} />
+                )}
 
                 {/* Ingredients (+ per-ingredient healthy swaps) — recipes
                     only. Real C1-overlay ingredient facts win whenever the

@@ -54,12 +54,12 @@ afterEach(() => {
 });
 
 describe('FavoritesScreen', () => {
-  it('has a back button and one title, without the My Favorites / My Meal Plan pair (7.1)', async () => {
+  it('looks like the plan screen: Plan title, no back button, both tabs', async () => {
     await mount();
-    expect(container.querySelector('button[aria-label="Go back"]')).not.toBeNull();
-    expect(container.querySelector('h1').textContent).toBe('My Favorites');
-    expect(container.textContent.match(/My Favorites/g)).toHaveLength(1);
-    expect(container.textContent).not.toContain('My Meal Plan');
+    expect(container.querySelector('button[aria-label="Go back"]')).toBeNull();
+    expect(container.querySelector('h1').textContent).toBe('Plan');
+    expect(byText('button', 'My Meal Plan')).toBeDefined();
+    expect(byText('button', 'My Favorites')).toBeDefined();
   });
 
   it('with no favorites, shows an empty state that links to Browse recipes', async () => {

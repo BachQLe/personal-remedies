@@ -33,7 +33,7 @@ export const COPY = {
   // How to use page (Home), the interim stand-in for the 9.10 slideshow. DRAFT (C13).
   howToUseNote:
     "Important note: if you change your health profile, we'll remove any favorites and meal plans that are no longer recommended for you, and show you which ones first.",
-  planTitle: 'Meal Planner',
+  planTitle: 'Plan',
 
   // My Favorites page
   favoritesTitle: 'My Favorites',
@@ -61,9 +61,7 @@ export const COPY = {
   tabPlan: 'My Meal Plan',
   newPlan: 'New meal plan',
   firstRunTitle: 'No meal plan yet',
-  firstRunBody: 'Choose your favorite recipes, then build a meal plan around it.',
   firstRunCta: 'Build my meal plan',
-  pickFavoritesCta: 'Pick favorite recipes',
   saveWeek: 'Save week',
   saveDay: 'Save day',
   loadDay: 'Load day',

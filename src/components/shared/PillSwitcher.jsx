@@ -12,13 +12,14 @@
  * @param {string} value - Currently selected option key
  * @param {(key: string) => void} onChange
  * @param {string} [className] - Extra classes on the container
- * @param {'sm'|'md'} [size] - Button vertical padding; 'md' (default, py-3) or 'sm' (py-2)
+ * @param {'xs'|'sm'|'md'} [size] - Button vertical padding; 'md' (default, py-3), 'sm' (py-2) or 'xs' (py-1, text-sm — secondary toggles under a primary one)
  * @param {string} [trackClassName] - Background class for the unselected track (default 'bg-white')
  * @param {'solid'|'outline'} [variant] - Neutral-tone thumb style; 'solid' (default, navy fill) or 'outline' (navy ring, for secondary toggles)
  */
 export default function PillSwitcher({ options, value, onChange, className = '', size = 'md', trackClassName = 'bg-white', variant = 'solid' }) {
   const count = options.length;
-  const padY = size === 'sm' ? 'py-2' : 'py-3';
+  const padY = size === 'xs' ? 'py-1' : size === 'sm' ? 'py-2' : 'py-3';
+  const textSize = size === 'xs' ? 'text-sm' : 'text-base';
   let selectedIndex = options.findIndex((o) => o.key === value);
   if (selectedIndex === -1) selectedIndex = 0;
   const selectedTone = options[selectedIndex]?.tone;
@@ -61,7 +62,7 @@ export default function PillSwitcher({ options, value, onChange, className = '',
             type="button"
             aria-pressed={isSelected}
             onClick={() => onChange(key)}
-            className={`relative z-10 flex-1 min-w-0 px-1 ${padY} rounded-pill text-base font-sans font-semibold transition-colors duration-fast active:scale-[0.99]
+            className={`relative z-10 flex-1 min-w-0 px-1 ${padY} rounded-pill ${textSize} font-sans font-semibold transition-colors duration-fast active:scale-[0.99]
               ${isSelected ? (outline ? 'text-blue-950' : 'text-white') : 'text-char-500 hover:text-char-700'}`}
           >
             {label}

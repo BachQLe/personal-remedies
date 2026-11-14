@@ -177,17 +177,15 @@ function ConditionsPanel({
   return (
     <section className="flex flex-col items-center h-full min-h-0">
       <div className="w-full max-w-[420px] flex flex-col flex-1 min-h-0 overflow-y-auto">
-        {!open && (
-          <div className="flex justify-center py-2 min-h-[150px]" style={{ flex: '0 1 calc(46dvh - 60px)' }}>
-            <FruitScene scene="garden" src={fruitIllustration} alt="A sunny yellow lemon laughing with delight" />
-          </div>
-        )}
+        <div className="flex justify-center flex-none h-[150px]">
+          <FruitScene scene="garden" src={fruitIllustration} alt="A sunny yellow lemon laughing with delight" />
+        </div>
         {/* Question — slides down from the top (snap) as the page opens */}
         <motion.h1
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ ...snappySpring, delay: 0.1 }}
-          className="flex-none -mx-3 text-title text-balance leading-[1.16] font-semibold tracking-tight text-center mt-3 mb-6"
+          className="flex-none -mx-3 text-title text-balance leading-[1.16] font-semibold tracking-tight text-center mt-2 mb-4"
           style={{ fontFamily: 'Chillax, sans-serif' }}
         >
           Select the health topics that matter most to you

@@ -29,34 +29,10 @@
  *                   anything actually saveable, so neither passes this prop.
  *                   It exists for a future caller that DOES have a real
  *                   recipe to offer save on.
- *   imageRight    — opt-in image-card layout (Top Dos & Don'ts only; off by
- *                   default so CategoryDetailPanel's plain text row is
- *                   unchanged). Renders the item's resolved photo absolutely
- *                   positioned over the right half of the row, clipped to
- *                   the row's rounded corners, with 10 decreasing-opacity
- *                   white vertical bars over the photo's left edge so it
- *                   fades into the left half instead of cutting off sharply
- *                   (no CSS gradient — see the user's standing "no
- *                   gradients, use fading bars" rule). The left half itself
- *                   isn't flat white: it's the same photo, mirrored
- *                   horizontally, under a 90% white wash — a
- *                   soft color-matched bleed instead of a hard white gap —
- *                   and the fade bars start at that same 90% so the seam
- *                   between the two halves reads as one continuous fade.
- *                   The photo is resolved via `getIngredientImage` — the
- *                   same resolver FoodImageCard/SuggestionsSheet rows use —
- *                   so EVERY row gets a photo, including lifestyle/water/
- *                   juice items (their coarse group isn't in
- *                   `GROUP_FALLBACKS`, so they land on `getIngredientImage`'s
- *                   generic DEFAULT_FALLBACK photo, same as any other
- *                   unmatched food). Text content and the trailing
- *                   study-count/chevron cluster are raised above the photo
- *                   with `relative z-10` (a plain CSS stacking fact: an
- *                   absolutely-positioned sibling always paints over
- *                   non-positioned flex children, regardless of DOM order),
- *                   and the trailing cluster gets a small squared-off (not
- *                   pill) white backdrop so it stays readable over the
- *                   photo.
+ *   thumbnail     — opt-in photo layout (Top Dos & Don'ts only; off by default so
+ *                   CategoryDetailPanel's plain text row is unchanged). Shows a left
+ *                   64px rounded photo, the same row as GroupsTab, with the group and
+ *                   serving-size lines hidden. Every row gets a photo via `getIngredientImage`.
  *
  * No leading category-icon avatar and no "Lifestyle" chip: every row
  * (ordinary food, water/juice, lifestyle) renders with the exact same
@@ -68,25 +44,8 @@ import { getIngredientImage } from '../../api/ingredientImages.js';
 import { getOverlayImageFile, getServingSize } from '../../api/localTables.js';
 import FoodRating from './FoodRating.jsx';
 
-// ── Image-right fade (10 discrete bars, never a CSS gradient) ───────────────
-
-// Starts at 90% — matching the left half's mirrored-blur wash opacity, so
-// the seam between the two halves reads as one continuous fade — and steps
-// down gently over ~80px.
-const FADE_OPACITIES = [0.90, 0.81, 0.72, 0.63, 0.54, 0.45, 0.36, 0.27, 0.18, 0.09];
-
-function ImageFadeEdge() {
-  return (
-    <div className="absolute inset-y-0 left-0 flex" aria-hidden="true">
-      {FADE_OPACITIES.map((opacity, i) => (
-        <div key={i} className="w-2 h-full bg-white" style={{ opacity }} />
-      ))}
-    </div>
-  );
-}
-
-export default function RankedRow({ food, studyCount, onSelect, saveAction, imageRight = false, showGroup = true }) {
-  const image = imageRight
+export default function RankedRow({ food, studyCount, onSelect, saveAction, thumbnail = false, showGroup = true }) {
+  const image = thumbnail
     ? food.image || getIngredientImage(food.name, food.group, getOverlayImageFile(food.id))
     : null;
   const servingSize = getServingSize(food.id);
@@ -94,63 +53,38 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, imag
   return (
     <button
       onClick={(e) => onSelect(e.target.closest('[data-reference-count]') ? { ...food, openDetails: true } : food)}
-      className={`relative w-full flex items-start gap-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left overflow-hidden
+      className={`relative w-full flex gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left overflow-hidden
         transition-all duration-fast hover:border-forest-300 hover:shadow-card active:scale-[0.99]
-        ${imageRight ? 'min-h-[68px] px-4 py-3 items-center' : 'px-4 py-3'}`}
+        ${thumbnail ? 'items-center' : 'items-start'}`}
     >
-      {/* Photo — right half only, image-right experiment (Top Dos & Don'ts).
-          Clipped to the button's rounded corners by the button's own
-          overflow-hidden above. The left half isn't flat white: it's a
-          mirrored echo of the same photo under a 90% white wash,
-          so the "empty" half reads as a soft bleed of the photo's own
-          color rather than a hard gap. */}
-      {imageRight && image && (
-        <>
-          <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden" aria-hidden="true">
-            <img
-              src={image}
-              alt=""
-              className="absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)] object-cover scale-x-[-1]"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-white/95" />
-          </div>
-          <div className="absolute inset-y-0 right-0 w-1/2">
-            <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-            <ImageFadeEdge />
-          </div>
-        </>
+      {thumbnail && image && (
+        <img src={image} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" loading="lazy" />
       )}
 
       {/* Name + rating + group */}
-      <span className={`flex-1 min-w-0 ${imageRight ? 'relative z-10' : ''}`}>
+      <span className="flex-1 min-w-0">
         <span className="flex items-center gap-2 flex-wrap">
-          <span className="font-sans text-sm font-semibold text-char-900">
+          <span className={`font-sans font-semibold text-char-900 break-words min-w-0 ${thumbnail ? 'text-base leading-snug' : 'text-sm'}`}>
             {food.name}
           </span>
           <FoodRating numericId={food.numericId} tone="light" size={13} />
         </span>
         {/* Skip 'x' — Nutridigm's catch-all fine group has no real label, so
             getGroupLabel echoes the raw code back (see adapter.js). */}
-        {showGroup && food.groupLabel && food.groupLabel !== 'x' && (
+        {!thumbnail && showGroup && food.groupLabel && food.groupLabel !== 'x' && (
           <span className="block text-[0.875rem] text-char-400 font-sans mt-0.5">
             {food.groupLabel}
           </span>
         )}
-        {servingSize && (
+        {!thumbnail && servingSize && (
           <span className="block text-[0.875rem] text-char-500 font-sans mt-0.5">
             Serving size: {servingSize}
           </span>
         )}
       </span>
 
-      {/* Trailing cluster: cache-only study count, optional save action,
-          chevron. Raised above the photo (imageRight) with a small
-          squared-off white backdrop so it stays legible. */}
-      <span
-        className={`flex-shrink-0 flex items-center gap-2 self-center
-          ${imageRight ? 'relative z-10 bg-white/90 rounded-md pl-2 pr-1.5 py-1' : ''}`}
-      >
+      {/* Trailing cluster: cache-only study count, optional save action, chevron. */}
+      <span className="flex-shrink-0 flex items-center gap-2 self-center">
         {typeof studyCount === 'number' && studyCount > 0 && (
           <span data-reference-count className="flex-shrink-0 self-center text-[0.875rem] text-char-400 font-sans underline underline-offset-2">
             {studyCount} {studyCount === 1 ? 'reference' : 'references'}

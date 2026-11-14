@@ -153,7 +153,7 @@ export default function OnboardingPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col overflow-hidden"
+      className="h-[100dvh] flex flex-col overflow-hidden"
       style={{ backgroundColor: DAILY_PICKS_BG, '--onboarding-bg': ONBOARDING_BG }}
     >
       <div

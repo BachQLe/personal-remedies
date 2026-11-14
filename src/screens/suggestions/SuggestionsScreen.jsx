@@ -11,36 +11,11 @@ import { RecipesBrowser } from '../recipes/RecipesScreen.jsx';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-// Screen-level title + description per tab, crossfaded in the shared
-// PageHeader (replaces the per-tab <h1> each tab used to render itself).
-//
-// Food Groups (TAB_META.groups) covers BOTH the coarse 10-group browse and
-// the 17 fine-group browse — basic and fine are two zoom levels of the same
-// idea, not separate tabs. See FoodGroupsTab.jsx's docblock for the full
-// reasoning. There is deliberately no TAB_META entry for 'suggest': it was a
-// short-lived 4th top-level pill (Wave 2) that crowded the strip at phone
-// width and forced "Dos & Don'ts" to be shortened just to make room; it has
-// been folded into Food Groups' inner mode toggle instead. resolveTab()
-// below still matches ?tab=suggest as a backward-compatible alias (resolving
-// to 'groups'; FoodGroupsTab's own resolveMode() puts it in 'fine' mode) so
-// any link shipped during that window keeps landing somewhere correct.
-const TAB_META = {
-  top: {
-    title: 'Top Choices',
-  },
-  groups: {
-    title: 'Food Groups',
-  },
-  recipes: {
-    title: 'Recipes',
-  },
-};
-
 // Resolves the active tab from the URL: ?tab=recipes / ?tab=groups win
-// outright; the retired ?tab=suggest aliases to 'groups' (see TAB_META's
-// docblock above — FoodGroupsTab resolves the fine-mode half of that alias
-// itself); anything else (including the legacy ?tab=bestworst) lands on Top
-// Dos & Don'ts, the default.
+// outright; the retired ?tab=suggest (a short-lived 4th pill, now
+// Food Groups' inner mode toggle) aliases to 'groups'; FoodGroupsTab resolves
+// the fine-mode half itself; anything else (including the legacy
+// ?tab=bestworst) lands on Top Dos & Don'ts, the default.
 function resolveTab(searchParams) {
   const tab = searchParams.get('tab');
   if (tab === 'recipes') return 'recipes';
@@ -71,7 +46,7 @@ export default function SuggestionsScreen() {
   const TAB_OPTIONS = [
     { key: 'top', label: "Dos & Don'ts" },
     { key: 'groups', label: 'Food Groups' },
-    { key: 'recipes', label: 'Recipes' },
+    { key: 'recipes', label: 'Top Recipes' },
   ];
 
   // Legacy deep link: ?category=<coarseGroupId> used to open the Food Groups
@@ -89,23 +64,7 @@ export default function SuggestionsScreen() {
     // pattern); the shell's own pb-28 keeps the last row clear of the bar.
     <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
 
-      <PageHeader label="Best & Worst Choices" className="pb-4">
-        {/* Title crossfade between tabs — min-height keeps the slider from
-            jumping while the title swaps. */}
-        <div className="min-h-[44px]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { duration: 0.2, ease: 'easeOut' } }}
-              exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeOut' } }}
-            >
-              <h1 className="font-display text-title font-semibold text-blue-950 leading-tight">
-                {TAB_META[activeTab].title}
-              </h1>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+      <PageHeader title="Choices" className="pb-4">
         <p className="text-[0.875rem] text-blue-950/60 font-sans mt-1">
           Ask your doctor before changing your diet, especially if you take medication.
         </p>

@@ -55,13 +55,13 @@ export default function DayStrip({ days, selected, onSelect, bgClassName = 'bg-f
             aria-pressed={isSelected}
             aria-label={`${abbr} ${dayOfMonth}${isToday ? ' (today)' : ''}`}
             className="relative flex flex-col items-center flex-1 min-w-[2.4rem] gap-0.5 py-2
-              rounded-xl overflow-hidden transition-colors duration-fast
+              rounded-xl transition-colors duration-fast
               active:scale-[0.97]"
           >
             {isSelected && (
               <motion.div
                 layoutId="plan-day-chip-active"
-                className="absolute inset-0 rounded-xl bg-blue-950"
+                className="absolute inset-0 m-auto w-11 h-11 rounded-full bg-blue-950"
                 transition={calmSpring}
               />
             )}

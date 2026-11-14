@@ -3,8 +3,8 @@ import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import Icon from '../shared/Icon.jsx';
 
 const TABS = [
-  // `alsoActive`: a sibling route that belongs to this tab's flow (My Favorites is part of Plan).
-  { to: '/app/plan', label: 'Plan', icon: 'clipboard-list', alsoActive: '/app/favorites' },
+  // `alsoActive`: a sibling route that belongs to this tab's flow (My Favorites and Choose recipes are part of Plan).
+  { to: '/app/plan', label: 'Plan', icon: 'clipboard-list', alsoActive: ['/app/favorites', '/app/recipes'] },
   { to: '/app/search', label: 'Search', icon: 'search' },
   { to: '/app/home', label: 'Home', icon: 'home' },
   { to: '/app/suggestions', label: 'Choices', icon: 'list' },
@@ -30,7 +30,7 @@ export default function TabBar() {
                 className="tabbar-link relative flex items-center justify-center rounded-md"
               >
                 {({ isActive: routeActive }) => {
-                  const isActive = routeActive || pathname === tab.alsoActive;
+                  const isActive = routeActive || tab.alsoActive?.includes(pathname);
                   return (
                   <>
                     {isActive && (

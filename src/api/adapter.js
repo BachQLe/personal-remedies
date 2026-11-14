@@ -2368,9 +2368,14 @@ export async function getFineGroupSuggestions(profile, fineGroupCode) {
  * Get all health conditions (for onboarding/profile editing).
  * @returns {Promise<import('./types.js').HealthCondition[]>}
  */
+// TEMP: the current Nutridigm key authorizes only these 12 of 271 conditions
+// (probed 2026-11-13); hide the rest from the pickers until more are covered.
+// Remove the filter in getConditions() to show everything again.
+const COVERED_CONDITION_IDS = new Set([1, 2, 16, 17, 59, 115, 149, 203, 204, 244, 306, 308]);
+
 export async function getConditions() {
   try {
-    return await ensureHealthConditions();
+    return (await ensureHealthConditions()).filter((c) => COVERED_CONDITION_IDS.has(c.healthConditionID));
   } catch {
     return [];
   }

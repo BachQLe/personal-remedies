@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CalendarDays, ChevronRight, HelpCircle, Info, ListChecks, Search } from 'lucide-react';
 import PageHeader from '../../components/shared/PageHeader.jsx';
-import HomeMail from './HomeMail.jsx';
 import { storage } from '../../api/storage.js';
 import { PLAN_SLOTS } from '../../api/config.js';
 import { ensurePlanForWeek } from '../../api/planBuilder.js';
@@ -17,19 +16,19 @@ const SHORTCUTS = [
     to: '/app/plan',
     label: 'Meal planner',
     icon: CalendarDays,
-    tile: 'bg-forest-100',
+    tile: 'bg-forest-300',
   },
   {
     to: '/app/suggestions',
     label: 'Top\nChoices',
     icon: ListChecks,
-    tile: 'bg-lavender-100',
+    tile: 'bg-lavender-300',
   },
   {
     to: '/app/search',
     label: 'Food\nlookup',
     icon: Search,
-    tile: 'bg-yellow-200',
+    tile: 'bg-yellow-300',
   },
 ];
 
@@ -100,7 +99,6 @@ export default function HomeScreen() {
         label="Home"
         title={firstName ? `Hey, ${firstName}` : 'Hey there'}
         className="home-screen__header pb-7"
-        right={<HomeMail />}
       />
 
       <div className="home-screen__body">

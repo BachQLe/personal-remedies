@@ -1,5 +1,9 @@
-import { useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { CalendarPlus } from 'lucide-react';
+import { getLibrary, subscribeLibrary } from '../../state/library.js';
+import { getPlan } from '../../state/dailyPlan.js';
+import { COPY } from '../plan/plannerCopy.js';
 import { getProfile, getRecipes, getCategoryRecipes, buildRecipeDetail } from '../../api/api.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import BackButton from '../../components/shared/BackButton.jsx';
@@ -368,6 +372,10 @@ export function RecipesBrowser() {
 }
 
 export default function RecipesScreen() {
+  const navigate = useNavigate();
+  const [noFavoritesYet] = useState(() => !getLibrary().length);
+  const [library, setLibrary] = useState(getLibrary);
+  useEffect(() => subscribeLibrary(setLibrary), []);
   return (
     // Green page + white paper shell — the same two-layer background every
     // other screen uses (see HomeScreen/SuggestionsScreen). `-mb-28` cancels
@@ -386,11 +394,25 @@ export default function RecipesScreen() {
           <h1 className="min-w-0 font-display text-title font-semibold leading-tight text-blue-950">Choose recipes</h1>
         </div>
         <p className="font-sans text-sm text-blue-950/70">Pick your favorite recipes from our suggestions!</p>
+        {noFavoritesYet && (
+          <p className="font-sans text-sm text-blue-950/70">After you choose some recipes, we can continue to building a meal plan!</p>
+        )}
       </div>
 
       {/* Content shell — full-bleed white container with rounded top corners */}
       <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col">
         <RecipesBrowser />
+        <div className="mt-8">
+          <button
+            type="button"
+            disabled={library.length === 0 && !getPlan()}
+            onClick={() => navigate('/app/plan')}
+            className="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-pill bg-blue-950 px-4 font-sans text-sm font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99] disabled:opacity-40 disabled:pointer-events-none"
+          >
+            <CalendarPlus size={16} aria-hidden="true" />
+            {COPY.firstRunCta}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -2,7 +2,8 @@
  * calorieNeeds.js — Pure calorie helpers (no UI imports).
  *
  * Remedi is explicitly NOT a calorie tracker (no logging, no streaks, no
- * per-food badges — see docs/ product decisions, July 2026). This module only
+ * per-food badges; a recipe's own sourced per-serving number may show on its
+ * detail card — see docs/ product decisions, July 2026). This module only
  * answers "how much does a planned day add up to" at the coarsest grain: one
  * total for a day's plan, compared once against the user's editable
  * `Profile.calorieTarget` at plan creation — never as a running tally.

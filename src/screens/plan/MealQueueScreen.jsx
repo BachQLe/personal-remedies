@@ -4,12 +4,13 @@
  * week card holds the day strip plus New meal plan, Save week and Load week.
  * Each day lists its meals with + (add a favorite) and X (remove); Save day /
  * Load day sit next to the day's calories at the top of the day. My Favorites /
- * My Meal Plan tabs on top. No calendars, no shuffling, no regenerating.
+ * My Meal Plan tabs on top. With no favorites and no plan it redirects to Choose recipes (/app/recipes).
+ * No calendars, no shuffling, no regenerating.
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Printer, Share2, HelpCircle, CalendarPlus, Bookmark, ArrowRight, FolderOpen } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
 import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
@@ -92,7 +93,14 @@ function CalorieLine({ slots }) {
   );
 }
 
+// No favorites and no plan yet: nothing to plan from, so go straight to Choose recipes.
+// replace, so Back from Choose recipes doesn't bounce off this redirect again.
 export default function MealQueueScreen() {
+  if (!getLibrary().length && !getPlan()) return <Navigate to="/app/recipes" replace />;
+  return <MealQueue />;
+}
+
+function MealQueue() {
   const { show } = useSnackbar();
   const [plan, setPlanState] = useState(getPlan);
   const [library, setLibrary] = useState(getLibrary);
@@ -188,7 +196,6 @@ export default function MealQueueScreen() {
 
   // No plan once the profile has loaded: first-run empty state.
   const firstRunEmpty = !building && !plan;
-  const noFavorites = library.length === 0;
 
   // Print view model from the REAL plan only, never ghost data.
   const printModel = plan ? buildPrintModel(plan, { conditionNames }) : null;
@@ -387,7 +394,6 @@ export default function MealQueueScreen() {
           `.plan-print-view` (bottom of this file) renders on paper. */}
       <PageHeader
         title={COPY.planTitle}
-        description={plan ? COPY.stepDay : COPY.stepGenerate}
         className="bg-forest-300 rm-print-hide"
         right={
           <div className="flex items-center gap-1 shrink-0 -mr-1">
@@ -472,41 +478,19 @@ export default function MealQueueScreen() {
           <EmptyState
             icon="calendar"
             title={COPY.firstRunTitle}
-            body={COPY.firstRunBody}
             size="lg"
             iconBgClassName="bg-blue-50"
             iconClassName="text-blue-950"
             action={
               <div className="flex flex-col items-center gap-1">
-                {noFavorites ? (
-                  <>
-                    <Link
-                      to="/app/favorites"
-                      className="inline-flex min-h-[48px] items-center gap-2 rounded-pill bg-blue-950 px-7 py-3.5 font-sans text-base
-                    font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
-                    >
-                      <Bookmark size={19} aria-hidden="true" />
-                      {COPY.pickFavoritesCta}
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => setNewPlanOpen(true)}
-                      className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-semibold text-blue-950/70
-                    transition-colors duration-fast hover:text-blue-950"
-                    >
-                      {COPY.firstRunCta}
-                      <ArrowRight size={14} aria-hidden="true" />
-                    </button>
-                  </>
-                ) : (
                   <>
                     <button
                       type="button"
                       onClick={() => setNewPlanOpen(true)}
-                      className="inline-flex min-h-[48px] items-center gap-2 rounded-pill bg-blue-950 px-7 py-3.5 font-sans text-base
+                      className="inline-flex min-h-[64px] items-center gap-2.5 rounded-md bg-blue-950 px-10 py-4 font-sans text-lg
                     font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
                     >
-                      <CalendarPlus size={19} aria-hidden="true" />
+                      <CalendarPlus size={22} aria-hidden="true" />
                       {COPY.firstRunCta}
                     </button>
                     <Link
@@ -518,7 +502,6 @@ export default function MealQueueScreen() {
                       <ArrowRight size={14} aria-hidden="true" />
                     </Link>
                   </>
-                )}
               </div>
             }
           />
