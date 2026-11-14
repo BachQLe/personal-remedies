@@ -72,8 +72,7 @@ export default function FavoritesPruneNotice() {
       <button
         type="button"
         onClick={acknowledge}
-        className="min-h-[48px] w-full rounded-pill bg-blue-950 px-4 py-3 font-sans text-sm font-semibold text-white
-          transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+        className="btn btn-primary w-full active:scale-[0.99]"
       >
         {COPY.noticeOk}
       </button>

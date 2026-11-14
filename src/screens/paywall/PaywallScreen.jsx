@@ -46,13 +46,13 @@ export default function PaywallScreen() {
       <PageHeader label="Personal Remedies Plus" className="pb-4">
         <div className="flex items-center gap-3 mt-3">
           <BackButton fallback="/app/profile" />
-          <h1 className="font-display text-2xl font-semibold text-blue-950 leading-tight">
+          <h1 className="font-display text-title font-semibold text-blue-950 leading-tight">
             Personal Remedies Plus
           </h1>
         </div>
       </PageHeader>
 
-      <div className="flex-1 bg-paper-100 rounded-t-2xl px-4 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-5">
+      <div className="paper-panel flex flex-col gap-5">
         {/* Draft indicator — required visible marker that nothing on this
             screen is final copy, positioning, or pricing (see file-header
             comment). Yellow, not the health-warning red ("avoid"/"signal")
@@ -72,7 +72,7 @@ export default function PaywallScreen() {
 
         {/* Price placeholder — deliberately fake, never a real number */}
         <div className="rounded-xl border border-sand-200 bg-white shadow-xs px-4 py-5 flex flex-col items-center text-center gap-1">
-          <p className="font-label text-xs uppercase tracking-eyebrow text-char-400">
+          <p className="eyebrow">
             Personal Remedies Plus
           </p>
           <p className="font-display text-title font-semibold text-blue-950 leading-tight mt-1">
@@ -86,14 +86,14 @@ export default function PaywallScreen() {
             hardcoded JSX, so it always matches what ENTITLEMENT_CONFIG
             registers. */}
         <div>
-          <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-3">
+          <p className="eyebrow mb-3">
             What's included
           </p>
           <div className="flex flex-col gap-2">
             {features.map((feature) => (
               <div
                 key={feature.key}
-                className="flex items-start gap-3 px-4 py-3 rounded-lg bg-white border border-sand-200"
+                className="flex items-start gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200"
               >
                 <span className="text-forest-700 mt-0.5 flex-shrink-0">
                   <Icon name="check" size={16} aria-hidden="true" />
@@ -123,7 +123,7 @@ export default function PaywallScreen() {
             just explains that purchasing isn't wired up yet. */}
         <button
           onClick={handleUpgrade}
-          className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base mt-2 bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
+          className="btn btn-primary w-full mt-2"
         >
           Upgrade (placeholder)
         </button>

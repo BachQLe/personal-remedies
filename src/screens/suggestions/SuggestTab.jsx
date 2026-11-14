@@ -97,9 +97,9 @@ const SKELETON_BUCKETS = [
 function SkeletonTile() {
   return (
     <div className="flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs">
-      <div className="w-16 h-16 rounded-lg bg-sand-200 animate-pulse flex-shrink-0" />
+      <div className="w-16 h-16 rounded-lg bg-paper-200 animate-pulse flex-shrink-0" />
       <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-        <div className="h-4 w-1/2 rounded bg-sand-200 animate-pulse" />
+        <div className="h-4 w-1/2 rounded bg-paper-200 animate-pulse" />
       </div>
     </div>
   );
@@ -111,7 +111,7 @@ function SkeletonGrid() {
       {SKELETON_BUCKETS.map((codes, i) => (
         <div key={i} className="flex flex-col gap-2.5">
           {codes.length > 1 && (
-            <div className="h-3 w-28 rounded bg-sand-200 animate-pulse mb-0.5 ml-1" />
+            <div className="h-3 w-28 rounded bg-paper-200 animate-pulse mb-0.5 ml-1" />
           )}
           {codes.map((code) => <SkeletonTile key={code} />)}
         </div>
@@ -131,7 +131,7 @@ function FineGroupList({ fineGroups, coarseLabels, onOpen }) {
           {/* Single-fine-group families (d/e/f today) skip the header — see
               docblock above. */}
           {bucket.groups.length > 1 && (
-            <h2 className="text-xs font-sans font-semibold uppercase tracking-wide text-char-700 px-1">
+            <h2 className="eyebrow px-1">
               {coarseLabels[bucket.coarse] ?? COARSE_GROUP_LABELS[bucket.coarse] ?? bucket.coarse}
             </h2>
           )}
@@ -139,8 +139,8 @@ function FineGroupList({ fineGroups, coarseLabels, onOpen }) {
             <button
               key={fg.code}
               onClick={() => onOpen(fg.code)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left
-                transition-all duration-fast hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
+              className="list-row
+                transition-all duration-fast active:scale-[0.99]"
             >
               <img
                 src={FINE_GROUP_IMAGES[fg.code]}

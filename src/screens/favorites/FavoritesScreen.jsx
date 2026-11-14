@@ -25,7 +25,7 @@ import SavedPeekSheet from './SavedPeekSheet.jsx';
 import { useSavedLists } from './useSavedLists.js';
 import { useRecipeDetail } from './useRecipeDetail.js';
 
-const LABEL = 'font-label text-xs uppercase tracking-widest text-blue-950/70';
+const LABEL = 'eyebrow';
 
 function FavoriteGrid({ items, onSelect, onBlocked }) {
   return (
@@ -85,8 +85,7 @@ export default function FavoritesScreen() {
   const browse = (
     <Link
       to="/app/recipes"
-      className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-pill bg-blue-950 px-6 py-3 font-sans text-sm
-        font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+      className="btn btn-primary active:scale-[0.99]"
     >
       {COPY.browseRecipes}
       <ArrowRight size={16} aria-hidden="true" />
@@ -99,14 +98,13 @@ export default function FavoritesScreen() {
     <div className="bg-forest-300 flex flex-col min-h-screen -mb-28">
       <PageHeader title={COPY.planTitle} className="bg-forest-300" />
 
-      <div className="mt-4 flex flex-1 flex-col gap-8 rounded-t-2xl bg-paper-100 px-5 pb-28 pt-5 shadow-[0_-2px_16px_rgba(45,36,24,0.05)]">
+      <div className="paper-panel mt-4 flex flex-col gap-8">
         <PlanTabs value="/app/favorites" />
         <section aria-labelledby="fav-recipes" className="flex flex-col gap-4">
           {library.length > 0 && (
             <Link
               to="/app/recipes"
-              className="inline-flex min-h-[56px] items-center justify-center gap-2 w-full rounded-md bg-blue-950 px-6 py-4
-                font-sans text-sm font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+              className="btn btn-primary w-full active:scale-[0.99]"
             >
               {COPY.chooseMoreRecipes}
               <ArrowRight size={16} aria-hidden="true" />
@@ -121,7 +119,7 @@ export default function FavoritesScreen() {
                   id="fav-group"
                   value={group}
                   onChange={(e) => setGroup(e.target.value)}
-                  className="min-h-[44px] max-w-full appearance-none rounded-pill border border-sand-200 bg-white pl-4 pr-9 font-sans
+                  className="min-h-[44px] max-w-full appearance-none rounded-md border border-blue-950/15 bg-white pl-4 pr-9 font-sans
                     text-sm font-semibold text-blue-950"
                 >
                   <option value="recent">{COPY.groupRecent}</option>

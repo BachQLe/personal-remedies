@@ -66,7 +66,7 @@ const LIST_TYPES = [
 // ── Skeleton row (card-shaped, matches the button-card result rows) ─────────
 
 function SkeletonRow() {
-  return <div className="h-[52px] rounded-xl animate-pulse bg-sand-200" />;
+  return <div className="h-[52px] rounded-sm animate-pulse bg-sand-200" />;
 }
 
 function isItemsEmpty(data) {
@@ -91,7 +91,7 @@ function DetailList({ group, listType, groupLabel, onSelectFood }) {
   if (status === 'loading') {
     return (
       <>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5">
           {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonRow key={i} />)}
         </div>
         <SlowLoadingNote />
@@ -108,7 +108,7 @@ function DetailList({ group, listType, groupLabel, onSelectFood }) {
       emptyBody={status === 'empty' ? data?.unscorableReason || LIST_TYPES.find((t) => t.key === listType)?.emptyBody : undefined}
       emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
     >
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2.5">
         <CoverageNote coverage={data?.coverage} />
         <ShowMoreList
           items={data?.items ?? []}

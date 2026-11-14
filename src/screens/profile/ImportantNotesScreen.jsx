@@ -10,13 +10,13 @@ import { NOTE_SECTIONS } from './importantNotesContent.js';
 function Section({ title, paragraphs, links }) {
   return (
     <section>
-      <h2 className="flex items-center gap-2 font-label text-xs uppercase tracking-eyebrow text-char-400 mb-2">
+      <h2 className="eyebrow flex items-center gap-2 mb-2">
         {title}
         <span className="rounded-pill bg-sand-200 px-2 py-0.5 text-char-900">Draft</span>
       </h2>
       <div className="flex flex-col gap-2">
         {paragraphs.map((p) => (
-          <p key={p} className="text-sm text-char-900 font-sans leading-relaxed">{p}</p>
+          <p key={p} className="text-base text-char-900 font-sans leading-relaxed">{p}</p>
         ))}
       </div>
       {links && (
@@ -45,7 +45,7 @@ export default function ImportantNotesScreen() {
           Important notes
         </h1>
       </div>
-      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-6 pb-28 flex flex-col gap-6">
+      <div className="paper-panel flex flex-col gap-6">
         {NOTE_SECTIONS.map((section) => <Section key={section.title} {...section} />)}
       </div>
     </div>

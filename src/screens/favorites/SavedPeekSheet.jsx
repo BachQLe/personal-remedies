@@ -32,9 +32,7 @@ export default function SavedPeekSheet({ kind, entry, hidden = false, onSelectIt
       <button
         type="button"
         onClick={onDelete}
-        className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-pill border border-sand-200
-          bg-white px-4 py-3 font-sans text-sm font-semibold text-avoid-700 transition duration-fast
-          hover:bg-paper-200 active:scale-[0.99]"
+        className="btn btn-secondary mt-4 w-full text-avoid-700 active:scale-[0.99]"
       >
         <Trash2 size={16} aria-hidden="true" />
         {COPY.delete}

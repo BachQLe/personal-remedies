@@ -60,14 +60,14 @@ function AgeSlider({ value, onChange }) {
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onKeyDown={handleKeyDown}
-      className="relative w-full h-[46px] p-[3px] rounded-pill border-[1.5px] border-blue-950/15 bg-white/40 shadow-sm touch-none select-none cursor-pointer"
+      className="relative w-full h-[46px] p-[3px] rounded-md border-[1.5px] border-blue-950/15 bg-white/40 shadow-sm touch-none select-none cursor-pointer"
     >
       <motion.div
         aria-hidden="true"
         initial={false}
         animate={{ x: knobX, opacity: value ? 1 : 0.55 }}
         transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-        className="absolute top-[3px] bottom-[3px] left-[3px] rounded-pill bg-white shadow-md"
+        className="absolute top-[3px] bottom-[3px] left-[3px] rounded-sm bg-white shadow-md"
         style={{ width: 'calc(50% - 3px)' }}
       />
 
@@ -81,7 +81,7 @@ function AgeSlider({ value, onChange }) {
               role="radio"
               aria-checked={selected}
               onClick={() => onChange(opt.value)}
-              className={`flex-1 h-full rounded-pill bg-transparent text-sm font-sans transition-colors duration-fast outline-none focus-visible:ring-2 focus-visible:ring-blue-950/30 ${
+              className={`flex-1 h-full rounded-sm bg-transparent text-sm font-sans transition-colors duration-fast outline-none focus-visible:ring-2 focus-visible:ring-blue-950/30 ${
                 selected ? 'text-blue-950 font-semibold' : 'text-blue-950/55'
               }`}
             >
@@ -114,7 +114,7 @@ export default function PersonalDetails({ profile, onChange, onNext, onBack }) {
         <FruitScene scene="kitchen" src={fruitIllustration} alt="A green pear with a playful wink and smile" />
       </div>
       <div className="flex flex-col pt-3 pb-6">
-        <h1 className="text-title text-balance leading-[1.16] font-semibold tracking-tight text-center" style={{ fontFamily: 'Chillax, sans-serif' }}>
+        <h1 className="font-display text-blue-950 text-title text-balance leading-[1.16] font-semibold tracking-tight text-center">
           A little about you
         </h1>
         <p className="mt-4 mb-5 text-center font-sans text-base leading-relaxed text-blue-950/75">
@@ -130,13 +130,13 @@ export default function PersonalDetails({ profile, onChange, onNext, onBack }) {
             placeholder="Your first name"
             autoComplete="given-name"
             enterKeyHint="next"
-            className="w-full px-5 py-3.5 rounded-pill border-[1.5px] border-blue-950/15 bg-white/70 text-blue-950 placeholder:text-blue-950/40 text-base font-sans outline-none focus:border-blue-950/40 focus:bg-white"
+            className="w-full px-5 py-3.5 rounded-md border-[1.5px] border-blue-950/15 bg-white/70 text-blue-950 placeholder:text-blue-950/40 text-base font-sans outline-none focus:border-blue-950/40 focus:bg-white"
           />
           <p className="font-sans text-sm font-semibold mt-2">Your age group</p>
           <AgeSlider value={profile.ageBand} onChange={(ageBand) => onChange({ ...profile, ageBand })} />
         </div>
       </div>
-      <button type="submit" disabled={!canContinue} className="mt-auto w-full py-4 rounded-pill bg-blue-950 text-white font-sans font-semibold flex-none min-h-[56px] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-950">
+      <button type="submit" disabled={!canContinue} className="btn btn-primary mt-auto w-full flex-none disabled:opacity-40 disabled:cursor-not-allowed">
         Continue
       </button>
     </form>

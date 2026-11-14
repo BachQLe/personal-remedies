@@ -29,7 +29,7 @@ export default function AddFavoriteSheet({ slot, options, hasAny, onAdd, onClose
               <button
                 type="button"
                 onClick={() => onAdd(item)}
-                className="flex min-h-[64px] w-full items-center gap-3 rounded-xl bg-paper-200 p-2 pr-4 text-left
+                className="flex min-h-[64px] w-full items-center gap-3 rounded-sm bg-paper-200 p-2 pr-4 text-left
                   transition duration-fast active:scale-[0.99]"
               >
                 <img
@@ -55,8 +55,7 @@ export default function AddFavoriteSheet({ slot, options, hasAny, onAdd, onClose
           </p>
           <Link
             to={hasAny ? '/app/favorites' : mealTypeToRecipesHref([slot.recipeMealType].flat()[0])}
-            className="inline-flex min-h-[44px] items-center rounded-pill bg-blue-950 px-5 py-2 font-sans text-sm font-semibold text-white
-              transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+            className="btn btn-primary active:scale-[0.99]"
           >
             {hasAny ? COPY.goToFavorites : COPY.chooseMealRecipes(slot.label)}
           </Link>

@@ -400,14 +400,14 @@ export default function RecipesScreen() {
       </div>
 
       {/* Content shell — full-bleed white container with rounded top corners */}
-      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col">
+      <div className="paper-panel flex flex-col">
         <RecipesBrowser />
         <div className="mt-8">
           <button
             type="button"
             disabled={library.length === 0 && !getPlan()}
             onClick={() => navigate('/app/plan')}
-            className="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-pill bg-blue-950 px-4 font-sans text-sm font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99] disabled:opacity-40 disabled:pointer-events-none"
+            className="btn btn-primary w-full active:scale-[0.99]"
           >
             <CalendarPlus size={16} aria-hidden="true" />
             {COPY.firstRunCta}

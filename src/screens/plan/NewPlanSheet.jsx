@@ -14,7 +14,7 @@ function Choice({ title, hint, onClick, disabled, primary }) {
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`flex min-h-[64px] w-full flex-col items-start justify-center gap-0.5 rounded-xl px-5 py-3 text-left
+      className={`flex min-h-[64px] w-full flex-col items-start justify-center gap-0.5 rounded-md px-5 py-3 text-left
         transition duration-fast active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50
         ${primary ? 'bg-blue-950 text-white hover:bg-blue-900' : 'border border-sand-200 bg-white text-blue-950 hover:bg-paper-200'}`}
     >

@@ -31,7 +31,7 @@ import { useEntitlement } from '../../components/shared/useEntitlement.js';
 const HEADING = 'Food & Nutrient Lookup';
 const PLACEHOLDER = 'Search foods, recipes, nutrients…';
 const BACKDROP_COLOR = '#C8E87A';
-const ACCENT_FOCUS_CLASS = 'focus:border-yellow-500';
+const ACCENT_FOCUS_CLASS = 'focus:border-blue-950';
 const SPINNER_CLASS = 'text-yellow-600';
 
 // Section order + labels for `searchEverything`'s sectioned result shape
@@ -105,7 +105,7 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
             <Icon name="leaf" size={18} aria-hidden="true" />
           </span>
           <span className="flex-1 min-w-0">
-            <span className="block font-semibold text-sm text-char-900 leading-tight">{title}</span>
+            <span className="block font-semibold text-base text-char-900 leading-tight">{title}</span>
             {subtitle && <span className="block text-xs text-char-500 mt-0.5">{subtitle}</span>}
             {servingSize && <span className="block text-xs text-char-500 mt-0.5">Serving size: {servingSize}</span>}
           </span>
@@ -142,7 +142,7 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
       </span>
 
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-char-900 leading-tight">{title}</p>
+        <p className="font-semibold text-base text-char-900 leading-tight">{title}</p>
         {subtitle && <p className="text-xs text-char-500 mt-0.5">{subtitle}</p>}
       </div>
 
@@ -343,7 +343,7 @@ export default function SearchScreen({ active, onClose }) {
     if (!rows || !rows.length) return null;
     return (
       <div key={key}>
-        <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
+        <p className="eyebrow mb-2">
           {label}
         </p>
         <div className="flex flex-col gap-2.5">
@@ -420,7 +420,7 @@ export default function SearchScreen({ active, onClose }) {
                   onKeyDown={handleKeyDown}
                   autoFocus
                   placeholder={PLACEHOLDER}
-                  className={`w-full pl-12 pr-12 py-4 rounded-xl bg-white border-[1.5px] border-sand-200
+                  className={`w-full pl-12 pr-12 py-4 rounded-md bg-white border-[1.5px] border-sand-200
                     text-base text-char-900 placeholder:text-char-400 font-sans
                     [&::-webkit-search-cancel-button]:appearance-none
                     shadow-[0_2px_8px_rgba(45,36,24,0.06)]
@@ -469,7 +469,7 @@ export default function SearchScreen({ active, onClose }) {
                       >
                         {recents.length > 0 && (
                           <>
-                            <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
+                            <p className="eyebrow mb-2">
                               Recent searches
                             </p>
                             <div className="flex flex-wrap gap-2">

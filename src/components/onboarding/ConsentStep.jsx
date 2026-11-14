@@ -25,7 +25,7 @@ export default function ConsentStep({ onNext, onBack }) {
         <FruitScene scene="room" src={privacyFruit} alt="A contented apple beside a pear looking over with a gentle smile" />
       </div>
       <div className="flex flex-col my-auto py-6">
-        <h1 className="text-title text-balance leading-[1.16] font-semibold tracking-tight text-center" style={{ fontFamily: 'Chillax, sans-serif' }}>
+        <h1 className="font-display text-blue-950 text-title text-balance leading-[1.16] font-semibold tracking-tight text-center">
           Before you add health information
         </h1>
         <div className="mt-4 mb-5 font-sans text-base leading-relaxed text-blue-950/75 flex flex-col gap-3">
@@ -53,7 +53,7 @@ export default function ConsentStep({ onNext, onBack }) {
           I understand, and I agree to Personal Remedies using the health information I enter to personalize my results.
         </label>
       </div>
-      <button type="submit" disabled={!agreed} className="w-full py-4 rounded-pill bg-blue-950 text-white font-sans font-semibold flex-none min-h-[56px] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-950">
+      <button type="submit" disabled={!agreed} className="btn btn-primary w-full flex-none disabled:opacity-40 disabled:cursor-not-allowed">
         Continue
       </button>
     </form>

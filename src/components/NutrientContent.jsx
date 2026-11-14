@@ -10,8 +10,8 @@ import {
   isContentNutrient,
 } from '../api/contentTable.js';
 
-const BOX = 'rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4';
-const EYEBROW = 'text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-400 mb-3';
+const BOX = 'rounded-xl border border-blue-950/10 shadow-xs bg-white p-4';
+const EYEBROW = 'eyebrow mb-3';
 
 // Level is about amount, not goodness, so never green/red.
 function Dots({ level }) {

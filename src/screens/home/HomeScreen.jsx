@@ -34,7 +34,7 @@ const SHORTCUTS = [
 
 const CARD = 'flex items-center gap-3 rounded-2xl bg-white p-4 shadow-xs text-blue-950 transition duration-fast hover:bg-sand-100 active:scale-[0.99]';
 // Same small secondary pill as the plan's Save day / Load day, on white because Home's body is paper.
-const PILL = 'tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-pill bg-white px-3 font-sans text-xs ' +
+const PILL = 'tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-md bg-white px-3 font-sans text-xs ' +
   'font-semibold text-blue-950 shadow-xs transition duration-fast hover:bg-sand-100 active:scale-95';
 
 /**
@@ -69,7 +69,7 @@ function TodayMeals({ profile }) {
   return (
     <Link to={`/app/plan?day=${day}`} className={CARD}>
       <div className="min-w-0 flex-1">
-        <p className="font-label text-xs uppercase tracking-widest text-blue-950/70">Today’s meals</p>
+        <p className="eyebrow">Today’s meals</p>
         <dl className="mt-2 flex flex-col gap-1.5 font-sans text-sm">
           {rows.map(({ slot, first }) => (
             <div key={slot.key} className="flex flex-wrap gap-x-3">

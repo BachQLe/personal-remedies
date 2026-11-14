@@ -40,11 +40,11 @@ import { resolveProfileWithConditions } from './profileFallback.js';
 
 function SkeletonRows() {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
         <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs">
-          <div className="w-16 h-16 rounded-lg bg-sand-200 animate-pulse flex-shrink-0" />
-          <div className="flex-1"><div className="h-4 w-1/2 rounded bg-sand-200 animate-pulse" /></div>
+          <div className="w-16 h-16 rounded-lg bg-paper-200 animate-pulse flex-shrink-0" />
+          <div className="flex-1"><div className="h-4 w-1/2 rounded bg-paper-200 animate-pulse" /></div>
         </div>
       ))}
     </div>
@@ -109,7 +109,7 @@ export default function TopDosTab({ onSelectFood }) {
           emptyBody={data?.consume?.unscorableReason || "We don't have dos & don'ts for your conditions right now."}
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
         >
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             <CoverageNote coverage={data?.consume?.coverage} />
             {items.length === 0 ? (
               <p className="text-sm text-char-500 font-sans text-center py-6">

@@ -470,7 +470,7 @@ export default function SuggestionsSheet({
                 <div className="flex flex-col gap-6">
                   {scopedEntriesForActiveGroup.map(({ sourceItem, substitutes }) => (
                     <div key={sourceItem.id}>
-                      <p className="font-label text-xs tracking-widest uppercase text-blue-950/50 mb-2">
+                      <p className="eyebrow mb-2">
                         Instead of {sourceItem.name}
                       </p>
 
@@ -523,7 +523,7 @@ export default function SuggestionsSheet({
 
               <div className="flex flex-col gap-3">
                 {scopedEntriesForActiveGroup.length > 0 && (
-                  <p className="font-label text-xs tracking-widest uppercase text-blue-950/50">
+                  <p className="eyebrow">
                     More from {activeGroup.label}
                   </p>
                 )}
@@ -561,7 +561,7 @@ export default function SuggestionsSheet({
             truncated), on top of the group picker above. Tapping a card
             ADDS it to the slot (no source item to swap for). */}
         <div className="flex flex-col gap-4">
-          <p className="font-label text-xs tracking-widest uppercase text-blue-950/50">
+          <p className="eyebrow">
             All {slot?.label} options
           </p>
           <p className="text-xs text-char-500">

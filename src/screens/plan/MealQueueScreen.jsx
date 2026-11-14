@@ -421,7 +421,7 @@ function MealQueue() {
 
       {/* White paper panel: full-bleed, rounded top corners; its pb-28 clears
           the floating TabBar and paints paper behind it. */}
-      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-8 mt-4 rm-print-hide">
+      <div className="paper-panel flex flex-col gap-8 mt-4 rm-print-hide">
         <PlanTabs value="/app/plan" />
 
         {!firstRunEmpty && (
@@ -431,8 +431,7 @@ function MealQueue() {
               <button
                 type="button"
                 onClick={() => setNewPlanOpen(true)}
-                className="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-pill bg-blue-950 px-4
-                  font-sans text-sm font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+                className="btn btn-primary w-full active:scale-[0.99]"
               >
                 <CalendarPlus size={16} aria-hidden="true" />
                 {COPY.newPlan}
@@ -442,8 +441,7 @@ function MealQueue() {
                   type="button"
                   onClick={() => setSaveWeekOpen(true)}
                   disabled={showGhost}
-                  className={`inline-flex min-h-[44px] flex-[1_1_9rem] items-center justify-center gap-2 rounded-pill bg-paper-100 px-4 font-sans text-sm
-                    font-semibold text-blue-950 transition duration-fast active:scale-95
+                  className={`btn btn-secondary btn-sm flex-[1_1_9rem] active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
                   <Bookmark size={16} aria-hidden="true" />
@@ -453,8 +451,7 @@ function MealQueue() {
                   type="button"
                   onClick={() => setLoadWeekOpen(true)}
                   disabled={showGhost}
-                  className={`inline-flex min-h-[44px] flex-[1_1_9rem] items-center justify-center gap-2 rounded-pill bg-paper-100 px-4 font-sans text-sm
-                    font-semibold text-blue-950 transition duration-fast active:scale-95
+                  className={`btn btn-secondary btn-sm flex-[1_1_9rem] active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
                   <FolderOpen size={16} aria-hidden="true" />
@@ -487,8 +484,7 @@ function MealQueue() {
                     <button
                       type="button"
                       onClick={() => setNewPlanOpen(true)}
-                      className="inline-flex min-h-[64px] items-center gap-2.5 rounded-md bg-blue-950 px-10 py-4 font-sans text-lg
-                    font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+                      className="btn btn-primary min-h-[64px] gap-2.5 px-10 py-4 text-lg active:scale-[0.99]"
                     >
                       <CalendarPlus size={22} aria-hidden="true" />
                       {COPY.firstRunCta}
@@ -518,8 +514,7 @@ function MealQueue() {
                 <div className="flex shrink-0 items-center gap-1">
                   <button
                     onClick={handleUpdateWeek}
-                    className="min-h-[44px] rounded-pill bg-blue-950 px-4 font-sans text-xs font-semibold text-white
-                      transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+                    className="btn btn-primary btn-sm active:scale-[0.99]"
                   >
                     {COPY.save}
                   </button>
@@ -541,7 +536,7 @@ function MealQueue() {
                   type="button"
                   onClick={() => setSaveDayOpen(true)}
                   disabled={showGhost}
-                  className={`tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-pill bg-paper-100 px-3 font-sans text-xs
+                  className={`tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-md bg-paper-100 px-3 font-sans text-xs
                     font-semibold text-blue-950 transition duration-fast active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
@@ -552,7 +547,7 @@ function MealQueue() {
                   type="button"
                   onClick={() => setLoadDayOpen(true)}
                   disabled={showGhost}
-                  className={`tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-pill bg-paper-100 px-3 font-sans text-xs
+                  className={`tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-md bg-paper-100 px-3 font-sans text-xs
                     font-semibold text-blue-950 transition duration-fast active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >

@@ -65,7 +65,7 @@ export default function SuggestionsScreen() {
     <div className="bg-forest-300 flex flex-col -mb-28" style={{ minHeight: '100dvh' }}>
 
       <PageHeader title="Choices" className="pb-4">
-        <p className="text-[0.875rem] text-blue-950/60 font-sans mt-1">
+        <p className="text-sm text-blue-950/70 font-sans mt-1">
           Ask your doctor before changing your diet, especially if you take medication.
         </p>
       </PageHeader>
@@ -76,7 +76,7 @@ export default function SuggestionsScreen() {
           lifts it off the green page. Its pb-28 both clears the floating
           TabBar and paints paper behind it (appshell-cream-fix). Shared by all
           three tabs so the panel doesn't change shape when you switch. */}
-      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col">
+      <div className="paper-panel flex flex-col">
         {/* Tab switcher — shared PillSwitcher slider (same as Search). Lives
             inside the shell rather than the header so the paper container
             wraps the tab strip too, and the strip stays put while only the
