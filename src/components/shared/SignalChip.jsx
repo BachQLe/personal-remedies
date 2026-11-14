@@ -70,7 +70,7 @@ export default function SignalChip({
 
   return (
     <span
-      className={`inline-flex items-center gap-[7px] h-[30px] px-3 pl-2.5 rounded-pill font-sans text-sm font-semibold ${c.bg} ${c.fg} ${className}`}
+      className={`inline-flex items-center gap-[7px] min-h-[30px] px-3 pl-2.5 rounded-pill font-sans text-sm font-semibold ${c.bg} ${c.fg} ${className}`}
     >
       <span
         className={`inline-flex items-center justify-center w-5 h-5 rounded-full ${c.dot} text-white flex-none`}

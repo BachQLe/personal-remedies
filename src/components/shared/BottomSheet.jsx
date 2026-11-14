@@ -132,10 +132,10 @@ export default function BottomSheet({
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1 flex-shrink-0" aria-hidden="true">
-          <div className="w-10 h-1 rounded-full bg-sand-200" />
+          <div className="w-10 h-1 rounded-full bg-paper-200" />
         </div>
         {title && (
-          <div className="flex items-center justify-between px-5 pb-3 pt-1 flex-shrink-0 border-b border-sand-200">
+          <div className="flex items-center justify-between px-5 pb-3 pt-1 flex-shrink-0 border-b border-paper-200">
             <h2 id={titleId} className="font-display font-semibold text-blue-950 text-lg tracking-tightish">
               {title}
             </h2>

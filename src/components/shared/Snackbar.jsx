@@ -56,7 +56,7 @@ export default function Snackbar({ snackbar, onUndo, onDismiss, actionLabel = 'U
           className="fixed bottom-[88px] left-0 right-0 mx-auto z-50
             max-w-[360px] w-[calc(100%-40px)]
             flex items-center justify-between gap-3
-            px-4 py-3 rounded-xl
+            px-4 py-3 rounded-md
             bg-char-900 text-white shadow-lg"
         >
           <span className="font-sans text-sm font-medium">{snackbar.message}</span>

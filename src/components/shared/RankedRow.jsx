@@ -53,8 +53,7 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, thum
   return (
     <button
       onClick={(e) => onSelect(e.target.closest('[data-reference-count]') ? { ...food, openDetails: true } : food)}
-      className={`relative w-full flex gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left overflow-hidden
-        transition-all duration-fast hover:border-forest-300 hover:shadow-card active:scale-[0.99]
+      className={`list-row relative overflow-hidden active:scale-[0.99]
         ${thumbnail ? 'items-center' : 'items-start'}`}
     >
       {thumbnail && image && (
@@ -64,7 +63,7 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, thum
       {/* Name + rating + group */}
       <span className="flex-1 min-w-0">
         <span className="flex items-center gap-2 flex-wrap">
-          <span className={`font-sans font-semibold text-char-900 break-words min-w-0 ${thumbnail ? 'text-base leading-snug' : 'text-sm'}`}>
+          <span className={`font-sans font-semibold text-char-900 break-words min-w-0 text-base leading-snug`}>
             {food.name}
           </span>
           <FoodRating numericId={food.numericId} tone="light" size={13} />

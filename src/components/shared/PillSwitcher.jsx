@@ -40,10 +40,10 @@ export default function PillSwitcher({ options, value, onChange, className = '',
       : 'bg-blue-950 shadow-xs';
 
   return (
-    <div className={`relative flex ${trackClassName} rounded-pill p-1 w-full ${className}`}>
+    <div className={`relative flex ${trackClassName} rounded-md p-1 w-full ${className}`}>
       {/* Sliding thumb */}
       <div
-        className={`absolute rounded-pill transition-transform duration-base ease-ds-out transition-colors ${thumbClasses}`}
+        className={`absolute rounded-sm transition-transform duration-base ease-ds-out transition-colors ${thumbClasses}`}
         style={{
           width: `calc((100% - 8px) / ${count})`,
           left: '4px',
@@ -62,7 +62,7 @@ export default function PillSwitcher({ options, value, onChange, className = '',
             type="button"
             aria-pressed={isSelected}
             onClick={() => onChange(key)}
-            className={`relative z-10 flex-1 min-w-0 px-1 ${padY} rounded-pill ${textSize} font-sans font-semibold transition-colors duration-fast active:scale-[0.99]
+            className={`relative z-10 flex-1 min-w-0 px-1 ${padY} rounded-sm tap-target ${textSize} font-sans font-semibold transition-colors duration-fast active:scale-[0.99]
               ${isSelected ? (outline ? 'text-blue-950' : 'text-white') : 'text-char-500 hover:text-char-700'}`}
           >
             {label}

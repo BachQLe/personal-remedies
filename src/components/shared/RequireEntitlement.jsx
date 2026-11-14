@@ -26,7 +26,7 @@ function Upsell({ featureKey }) {
       )}
       <Link
         to={upgradePath(featureKey)}
-        className="mt-2 px-6 py-3 rounded-xs bg-forest-700 hover:bg-forest-800 text-white font-semibold font-sans text-base transition-colors duration-fast"
+        className="btn btn-primary mt-2"
       >
         See Personal Remedies Plus
       </Link>

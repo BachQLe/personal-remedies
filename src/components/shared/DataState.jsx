@@ -75,8 +75,7 @@ const STATUS_COPY = {
 };
 
 const RETRY_BTN_CLS =
-  'px-5 py-2.5 rounded-xs bg-forest-700 text-white text-sm font-semibold font-sans ' +
-  'transition-all duration-fast ease-ds-out hover:bg-forest-800 active:scale-[0.98]';
+  'btn btn-primary btn-sm active:scale-[0.98]';
 
 const ERROR_STATUSES = ['error-network', 'error-api', 'offline-no-cache'];
 
