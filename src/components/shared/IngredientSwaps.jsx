@@ -118,7 +118,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
                     type="button"
                     onClick={() => toggle(key, ing)}
                     aria-expanded={isOpen}
-                    className="tap-target flex-shrink-0 h-8 pl-2.5 pr-2 rounded-full bg-sand-50 border border-blue-950/10
+                    className="tap-target flex-shrink-0 h-8 pl-2.5 pr-2 rounded-md bg-sand-50 border border-blue-950/10
                       flex items-center gap-1 text-char-500 text-xs font-sans
                       hover:bg-sand-100 hover:text-char-700 transition-all duration-fast"
                   >

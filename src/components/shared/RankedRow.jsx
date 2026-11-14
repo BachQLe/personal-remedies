@@ -63,7 +63,7 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, thum
       {/* Name + rating + group */}
       <span className="flex-1 min-w-0">
         <span className="flex items-center gap-2 flex-wrap">
-          <span className={`font-sans font-semibold text-char-900 break-words min-w-0 text-base leading-snug`}>
+          <span className={`font-sans font-semibold text-char-900 break-words min-w-0 ${thumbnail ? 'text-base leading-snug' : 'row-title'}`}>
             {food.name}
           </span>
           <FoodRating numericId={food.numericId} tone="light" size={13} />

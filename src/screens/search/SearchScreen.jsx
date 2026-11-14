@@ -105,7 +105,7 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
             <Icon name="leaf" size={18} aria-hidden="true" />
           </span>
           <span className="flex-1 min-w-0">
-            <span className="block font-semibold text-base text-char-900 leading-tight">{title}</span>
+            <span className="block font-semibold row-title text-char-900 leading-tight">{title}</span>
             {subtitle && <span className="block text-xs text-char-500 mt-0.5">{subtitle}</span>}
             {servingSize && <span className="block text-xs text-char-500 mt-0.5">Serving size: {servingSize}</span>}
           </span>
@@ -115,7 +115,7 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
           type="button"
           onClick={onGoodForMe}
           aria-label={`Check ${title} against my profile`}
-          className="min-h-[44px] px-3 py-2 rounded-pill border border-forest-400 bg-forest-50 text-forest-700
+          className="min-h-[44px] px-3 py-2 rounded-md border border-forest-400 bg-forest-50 text-forest-700
             text-xs font-semibold transition-colors duration-fast hover:bg-forest-100 active:bg-forest-100"
         >
           Check against my profile
@@ -142,7 +142,7 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
       </span>
 
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-base text-char-900 leading-tight">{title}</p>
+        <p className="font-semibold row-title text-char-900 leading-tight">{title}</p>
         {subtitle && <p className="text-xs text-char-500 mt-0.5">{subtitle}</p>}
       </div>
 

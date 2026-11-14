@@ -773,7 +773,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                   hover:bg-sand-100 transition-all duration-fast shadow-xs"
                 aria-label="Back to overview"
               >
-                <BackArrow width={15} height={15} aria-hidden="true" />
+                <BackArrow width={20} height={20} aria-hidden="true" />
                 <span>Overview</span>
               </button>
             </div>
@@ -957,7 +957,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                   <button
                     type="button"
                     onClick={() => leaveCardFor(groupLinkTarget.path)}
-                    className="w-full flex items-center justify-between gap-3 rounded-xl border border-blue-950/10
+                    className="w-full flex items-center justify-between gap-3 rounded-sm border border-blue-950/10
                       shadow-xs bg-white p-4 text-left transition-all duration-base ease-ds-out
                       hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
                   >
@@ -979,7 +979,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                   <button
                     type="button"
                     onClick={() => leaveCardFor('/app/suggestions?tab=groups&mode=fine')}
-                    className="w-full flex items-center justify-between gap-3 rounded-xl border border-blue-950/10
+                    className="w-full flex items-center justify-between gap-3 rounded-sm border border-blue-950/10
                       shadow-xs bg-white p-4 text-left transition-all duration-base ease-ds-out
                       hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
                   >

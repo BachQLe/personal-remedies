@@ -44,7 +44,7 @@ export default function PaywallScreen() {
     // different surface.
     <div className="min-h-screen -mb-28 bg-forest-300 flex flex-col">
       <PageHeader label="Personal Remedies Plus" className="pb-4">
-        <div className="flex items-center gap-3 mt-3">
+        <div className="flex items-start gap-3 mt-3">
           <BackButton fallback="/app/profile" />
           <h1 className="font-display text-title font-semibold text-blue-950 leading-tight">
             Personal Remedies Plus

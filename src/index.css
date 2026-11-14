@@ -340,7 +340,7 @@
     @apply bg-blue-950 text-white hover:bg-blue-900;
   }
   .btn-secondary {
-    @apply bg-white text-blue-950 border border-blue-950/15 hover:border-blue-950/40;
+    @apply bg-white text-blue-950 border-solid border-[1.5px] border-blue-950/20 hover:border-blue-950/40;
   }
   .btn-danger {
     @apply bg-avoid-700 text-white;
@@ -356,6 +356,12 @@
   }
   .list-row {
     @apply w-full flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left transition-all duration-fast hover:border-forest-300 hover:shadow-card;
+  }
+  /* Row titles: 16px normally; at the largest accessibility text size they
+     stop at the width the old 14px titles had, so names do not break mid-word. */
+  .row-title {
+    font-size: min(1rem, 11.8vw);
+    @apply leading-snug;
   }
   .paper-panel {
     @apply flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)];

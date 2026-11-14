@@ -112,3 +112,49 @@ Paths are relative to `src/`. Line numbers are from commit `88e36c6`.
 - Tests: 1 failed, 1112 passed (the failure is the 11px class in `GroupsTab.jsx`).
 - Lint: 60 errors, 3 warnings, all in files outside this cleanup (`ds-bundle/`, `nutridigm-mcp/`, `scripts/`, marketing, KitchenSink, PhoneFrame) plus one warning in `FoodDetailCard.jsx`.
 - Before screenshots: `output/cohesion/before/normal/` and `output/cohesion/before/largest/` (393 × 852, WebKit; "largest" is a 53px root size, the largest iOS accessibility setting).
+
+## 8. What changed, screen by screen
+
+Screenshots are local (the `output/` folder is gitignored). Each scene exists four times: `output/cohesion/{before,after}/{normal,largest}/<file>.png`. They are regenerated with `node .qa_tmp/cohesion-shots-app.mjs <dir>` and `node .qa_tmp/cohesion-shots-flows.mjs <dir>` against a running dev server.
+
+| Screen | Change | Screenshot file |
+|---|---|---|
+| Home | Panel corner 32px to 36px; "How to use" / "Important Notes" pills take the 14px corner; "Today's meals" label uses `.eyebrow` | `01-home` |
+| Choices: Dos & Don'ts | Tabs and Do / Don't toggle squarish, toggle taps at 44px; rows use `.list-row` with the food-group gap; "Show more" is a bordered secondary button; subtitle contrast up | `02-choices-dos`, `03-choices-donts` |
+| Choices: Food Groups | Rows share `.list-row`; the 11px uppercase sub-line is 14px sentence case; group headers use `.eyebrow`; skeleton bars visible | `04-choices-groups-broad`, `05-choices-groups-narrow` |
+| Choices: Top Recipes | Panel uses `.paper-panel` (no visible change intended) | `06-choices-top-recipes` |
+| Group detail, fine-group detail | Title 24px to 32px; food names 14px to 16px; Eat / Avoid toggle squarish; row gap and skeleton corner match the rows | `07-group-detail`, `08-group-detail-avoid`, `09-fine-detail` |
+| Choose recipes | "Build my meal plan" is the standard navy button with a 16px label | `10-recipes`, `11-plan-empty-redirect` |
+| Favorites | "Browse recipes" and "Choose more recipes" are the same button; select and saved rows take the squarish and row corners | `12-favorites-empty`, `13-favorites-filled` |
+| Plan | "New meal plan" squarish; Save week / Load week and Save day / Load day are one grey squarish style at 44px (the day pair was 36px); section labels use `.eyebrow` | `14-plan-filled` |
+| Search | Field squarish with a navy focus border (was amber); result titles 14px to 16px; "Check against my profile" squarish; section labels use `.eyebrow` | `15-search-empty`, `16-search-results`, `40-search-good-for-me-sheet` |
+| Profile | Green 6px buttons become the navy standard; inputs are 16px with a visible border; condition picker and its search squarish; calorie presets squarish with a navy selected state; Delete is the danger button, Cancel a bordered secondary | `17-profile`, `47` to `51` |
+| Important notes, How to use, What's new | Reading copy 14px to 16px; panels and labels use the shared classes | `18-important-notes`, `19-how-to-use`, `49-profile-whats-new-sheet` |
+| Paywall (not reachable today) | Title 32px; navy button; rows take the row corner | `20-paywall` |
+| Onboarding | Four Continue buttons squarish; headings navy and set by class; name field, age slider and condition search squarish | `30` to `34` |
+| Food and recipe card | Both main buttons are standard buttons (no display font); "Overview" uses the app's back arrow with a 14px corner; link rows take the row corner; borders faint navy; labels use `.eyebrow` | `35` to `38` |
+| Sheets (Plan, Favorites, Recipes) | Drag handle and title divider visible; primary and secondary buttons standard; name field uses `.field` | `39`, `41` to `46` |
+| Login | Navy standard button, navy heading, bordered Google button | `52-login` |
+
+Two standards were adjusted after verification and are part of the shared set:
+
+- `.btn-secondary` carries `border-solid`. The repo's base rule `button { border: none }` otherwise removes the border, which is also why the old white-bordered buttons never showed one.
+- `.row-title` (16px, capped at `11.8vw`) is used only for titles that were 14px before. It keeps them 16px at normal sizes and no wider than the old 14px text at the largest accessibility size, so names such as "Swordfish" do not break mid-word there.
+
+## 9. Verification
+
+Done by two agents that made none of the changes, with their claims spot-checked against the images and the code.
+
+- **Screenshots.** 43 scenes × 2 text sizes, before and after (172 images). Automatic checks (horizontal overflow; text elements wider or taller than their box) are identical before and after in all 86 after captures; no scene overflows horizontally.
+- **Build.** `npm run build` passes.
+- **Tests.** 1113 of 1113 pass (baseline: 1 failing).
+- **Lint.** 60 errors and 3 warnings, the same count and the same files as the baseline; none in files this cleanup touched except one pre-existing warning in `FoodDetailCard.jsx`.
+- **Typecheck.** Not run: the repo has none.
+
+Known and left as found:
+
+- At the largest text size the onboarding steps 2 to 4 already clipped the name field, checkbox and Continue button off-screen before this work, and still do. Fixing it needs layout changes.
+- At the largest text size the Choices tabs, the small toggles and several long words already broke mid-word before this work. The cleanup does not add new breaks in titles. The food-group sub-line, which used to be a fixed 11px that ignored the text-size setting, now scales with it and wraps more.
+- In the "Overview" control the back arrow looks light next to the label at the largest text size.
+- The Name sheet's "Update" button label is 16px instead of 14px, so at the largest size it wraps to three lines instead of two.
+- One false alarm worth recording: the recipe card button reads "Open recipe" or "View recipe at …" depending on live data (`src/utils/foodDetailCard.js`); the cleanup did not change it.

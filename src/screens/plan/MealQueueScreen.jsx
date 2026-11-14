@@ -441,7 +441,7 @@ function MealQueue() {
                   type="button"
                   onClick={() => setSaveWeekOpen(true)}
                   disabled={showGhost}
-                  className={`btn btn-secondary btn-sm flex-[1_1_9rem] active:scale-95
+                  className={`btn btn-secondary btn-sm bg-paper-100 border-transparent flex-[1_1_9rem] active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
                   <Bookmark size={16} aria-hidden="true" />
@@ -451,7 +451,7 @@ function MealQueue() {
                   type="button"
                   onClick={() => setLoadWeekOpen(true)}
                   disabled={showGhost}
-                  className={`btn btn-secondary btn-sm flex-[1_1_9rem] active:scale-95
+                  className={`btn btn-secondary btn-sm bg-paper-100 border-transparent flex-[1_1_9rem] active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
                   <FolderOpen size={16} aria-hidden="true" />
@@ -536,7 +536,7 @@ function MealQueue() {
                   type="button"
                   onClick={() => setSaveDayOpen(true)}
                   disabled={showGhost}
-                  className={`tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-md bg-paper-100 px-3 font-sans text-xs
+                  className={`tap-target inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-paper-100 px-4 font-sans text-xs
                     font-semibold text-blue-950 transition duration-fast active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
@@ -547,7 +547,7 @@ function MealQueue() {
                   type="button"
                   onClick={() => setLoadDayOpen(true)}
                   disabled={showGhost}
-                  className={`tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-md bg-paper-100 px-3 font-sans text-xs
+                  className={`tap-target inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-paper-100 px-4 font-sans text-xs
                     font-semibold text-blue-950 transition duration-fast active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
