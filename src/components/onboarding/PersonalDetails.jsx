@@ -60,14 +60,14 @@ function AgeSlider({ value, onChange }) {
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onKeyDown={handleKeyDown}
-      className="relative w-full h-[46px] p-[3px] rounded-md border-[1.5px] border-blue-950/15 bg-white/40 shadow-sm touch-none select-none cursor-pointer"
+      className="relative w-full h-[46px] p-[3px] rounded-pill border-[1.5px] border-blue-950/15 bg-white/40 shadow-sm touch-none select-none cursor-pointer"
     >
       <motion.div
         aria-hidden="true"
         initial={false}
         animate={{ x: knobX, opacity: value ? 1 : 0.55 }}
         transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-        className="absolute top-[3px] bottom-[3px] left-[3px] rounded-sm bg-white shadow-md"
+        className="absolute top-[3px] bottom-[3px] left-[3px] rounded-pill bg-white shadow-md"
         style={{ width: 'calc(50% - 3px)' }}
       />
 
@@ -81,7 +81,7 @@ function AgeSlider({ value, onChange }) {
               role="radio"
               aria-checked={selected}
               onClick={() => onChange(opt.value)}
-              className={`flex-1 h-full rounded-sm bg-transparent text-sm font-sans transition-colors duration-fast outline-none focus-visible:ring-2 focus-visible:ring-blue-950/30 ${
+              className={`flex-1 h-full rounded-pill bg-transparent text-sm font-sans transition-colors duration-fast outline-none focus-visible:ring-2 focus-visible:ring-blue-950/30 ${
                 selected ? 'text-blue-950 font-semibold' : 'text-blue-950/55'
               }`}
             >
