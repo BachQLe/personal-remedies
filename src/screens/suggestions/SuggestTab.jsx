@@ -44,6 +44,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ease, dur, staggerDelay } from '../../lib/motion.js';
 import { getGroupLabels, getFineFoodGroups } from '../../api/api.js';
 import { COARSE_GROUP_LABELS } from '../../api/config.js';
 import { FINE_GROUP_IMAGES } from '../../assets/food-groups/index.js';
@@ -135,9 +137,14 @@ function FineGroupList({ fineGroups, coarseLabels, onOpen }) {
               {coarseLabels[bucket.coarse] ?? COARSE_GROUP_LABELS[bucket.coarse] ?? bucket.coarse}
             </h2>
           )}
-          {bucket.groups.map((fg) => (
-            <button
+          {bucket.groups.map((fg, i) => (
+            <motion.div
               key={fg.code}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: dur.base, ease: ease.out, delay: staggerDelay(i) }}
+            >
+            <button
               onClick={() => onOpen(fg.code)}
               className="list-row
                 transition-all duration-fast active:scale-[0.99]"
@@ -152,6 +159,7 @@ function FineGroupList({ fineGroups, coarseLabels, onOpen }) {
               </div>
               <ChevronRight size={16} className="text-char-400 shrink-0" aria-hidden="true" />
             </button>
+            </motion.div>
           ))}
         </div>
       ))}

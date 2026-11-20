@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { ease, dur, staggerDelay } from '../../lib/motion.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Loader2 } from 'lucide-react';
@@ -338,6 +339,14 @@ export default function SearchScreen({ active, onClose }) {
   const padTarget = PAD_CENTER;
   const searching = debouncePending || status === 'loading';
 
+  // Stagger rows only for the first results reveal, not on every keystroke.
+  const staggeredRef = useRef(false);
+  const staggerNow = !staggeredRef.current;
+  useEffect(() => {
+    if (SECTIONS.some(({ key }) => results[key]?.length)) staggeredRef.current = true;
+  });
+  let rowIndex = 0;
+
   const sections = SECTIONS.map(({ key, label }) => {
     const rows = results[key];
     if (!rows || !rows.length) return null;
@@ -347,8 +356,14 @@ export default function SearchScreen({ active, onClose }) {
           {label}
         </p>
         <div className="flex flex-col gap-2.5">
-          {rows.map((item) =>
-            item.kind === 'food' ? (
+          {rows.map((item) => (
+            <motion.div
+              key={item.key}
+              initial={staggerNow ? { opacity: 0, y: 8 } : false}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: dur.base, ease: ease.out, delay: staggerNow ? staggerDelay(rowIndex++) : 0 }}
+            >
+            {item.kind === 'food' ? (
               <ResultRow
                 key={item.key}
                 kind="food"
@@ -368,8 +383,9 @@ export default function SearchScreen({ active, onClose }) {
                 saveItem={recipeToSaveItem(item.recipe)}
                 onSaveBlocked={show}
               />
-            ),
-          )}
+            )}
+            </motion.div>
+          ))}
         </div>
       </div>
     );
@@ -388,8 +404,8 @@ export default function SearchScreen({ active, onClose }) {
               className="absolute inset-0"
               initial={{ opacity: 0, backgroundColor: BACKDROP_COLOR }}
               animate={{ opacity: 1, backgroundColor: BACKDROP_COLOR }}
-              exit={{ opacity: 0 }}
-              transition={{ opacity: { duration: 0.25, ease: 'easeOut' }, backgroundColor: { duration: 0.35, ease: 'easeOut' } }}
+              exit={{ opacity: 0, transition: { duration: dur.exit, ease: ease.in } }}
+              transition={{ opacity: { duration: dur.base, ease: ease.out }, backgroundColor: { duration: dur.panel, ease: ease.out } }}
               onClick={onClose}
             />,
             <motion.div
@@ -397,8 +413,8 @@ export default function SearchScreen({ active, onClose }) {
               className="absolute inset-0 max-w-[430px] mx-auto px-5 flex flex-col pointer-events-none overflow-y-auto hide-scrollbar"
               initial={{ paddingTop: PAD_IDLE, opacity: 0 }}
               animate={{ paddingTop: padTarget, opacity: 1 }}
-              exit={{ paddingTop: PAD_IDLE, opacity: 0 }}
-              transition={{ default: calmSpring, opacity: { duration: 0.25, ease: 'easeOut' } }}
+              exit={{ paddingTop: PAD_IDLE, opacity: 0, transition: { opacity: { duration: dur.exit, ease: ease.in }, default: { duration: dur.exit, ease: ease.in } } }}
+              transition={{ default: calmSpring, opacity: { duration: dur.base, ease: ease.out } }}
             >
               <div className="flex items-start gap-3 flex-none pointer-events-auto mt-[max(0px,calc(var(--safe-top)_-_1rem))]">
                 <BackButton onClick={handleBack} />
@@ -440,8 +456,8 @@ export default function SearchScreen({ active, onClose }) {
                         key="results"
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                        exit={{ opacity: 0, y: -8, transition: { duration: dur.exit, ease: ease.in } }}
+                        transition={{ duration: dur.base, ease: ease.out }}
                         className="h-full overflow-y-auto hide-scrollbar pb-28 flex flex-col gap-5"
                       >
                         {/* Idle-vs-no-results distinction (must survive): this
@@ -463,8 +479,8 @@ export default function SearchScreen({ active, onClose }) {
                         key="chips"
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                        exit={{ opacity: 0, y: -8, transition: { duration: dur.exit, ease: ease.in } }}
+                        transition={{ duration: dur.base, ease: ease.out }}
                         className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
                       >
                         {recents.length > 0 && (

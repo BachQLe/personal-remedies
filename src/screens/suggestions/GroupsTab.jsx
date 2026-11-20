@@ -26,6 +26,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ease, dur, staggerDelay } from '../../lib/motion.js';
 import { getGroupLabels, getFineGroupLabelsByCoarse } from '../../api/api.js';
 import { COARSE_GROUP_LABELS } from '../../api/config.js';
 import { COARSE_GROUP_IMAGES } from '../../assets/food-groups/index.js';
@@ -63,12 +65,17 @@ function SkeletonGrid() {
 function CategoryGrid({ coarseLabels, fineLabelsByGroup, onOpen }) {
   return (
     <div className="flex flex-col gap-2.5">
-      {CATEGORY_GRID_GROUPS.map((group) => {
+      {CATEGORY_GRID_GROUPS.map((group, i) => {
         const label = coarseLabels[group] ?? COARSE_GROUP_LABELS[group] ?? group;
         const fineLine = (fineLabelsByGroup[group] ?? []).join(' · ');
         return (
-          <button
+          <motion.div
             key={group}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: dur.base, ease: ease.out, delay: staggerDelay(i) }}
+          >
+          <button
             onClick={() => onOpen(group)}
             className="list-row
               transition-all duration-fast active:scale-[0.99]"
@@ -86,6 +93,7 @@ function CategoryGrid({ coarseLabels, fineLabelsByGroup, onOpen }) {
             </div>
             <ChevronRight size={16} className="text-char-400 shrink-0" aria-hidden="true" />
           </button>
+          </motion.div>
         );
       })}
     </div>

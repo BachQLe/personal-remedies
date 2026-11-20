@@ -9,10 +9,18 @@ import { createRoot } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('framer-motion', () => ({
-  motion: { div: ({ children }) => <div>{children}</div> },
-  AnimatePresence: ({ children }) => <>{children}</>,
-}));
+// Keep DOM/a11y props (role, aria-*, ref, onClick…); drop framer-only motion props.
+vi.mock('framer-motion', () => {
+  const MOTION = new Set(['initial', 'animate', 'exit', 'transition', 'whileTap', 'whileHover', 'layout', 'layoutId']);
+  const strip = (Tag) => ({ children, ...props }) => {
+    const dom = Object.fromEntries(Object.entries(props).filter(([k]) => !MOTION.has(k)));
+    return <Tag {...dom}>{children}</Tag>;
+  };
+  return {
+    motion: { div: strip('div'), span: strip('span') },
+    AnimatePresence: ({ children }) => <>{children}</>,
+  };
+});
 vi.mock('../../../components/FoodDetailCard.jsx', () => ({ default: () => null }));
 const show = vi.fn();
 vi.mock('../../../context/SnackbarContext.jsx', () => ({ useSnackbar: () => ({ show }) }));

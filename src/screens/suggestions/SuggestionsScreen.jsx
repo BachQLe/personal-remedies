@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ease, dur } from '../../lib/motion.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
@@ -89,8 +90,8 @@ export default function SuggestionsScreen() {
           <motion.div
             key={activeTab}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: 0.2, ease: 'easeOut' } }}
-            exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeOut' } }}
+            animate={{ opacity: 1, transition: { duration: dur.base, ease: ease.out } }}
+            exit={{ opacity: 0, transition: { duration: dur.exit, ease: ease.in } }}
           >
             {activeTab === 'top' ? (
               <RequireEntitlement feature="top_dos_donts" variant="inline"><TopDosTab onSelectFood={setSelectedFood} /></RequireEntitlement>

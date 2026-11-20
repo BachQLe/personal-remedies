@@ -4,6 +4,8 @@ import { AuthProvider } from "./context/AuthContext";
 import { storage } from "./api/storage.js";
 import { prefetchAppData } from "./api/prefetch.js";
 import { useGoBack } from "./hooks/useGoBack.js";
+import { motion } from "framer-motion";
+import { ease, dur } from "./lib/motion.js";
 // Marketing site is hidden — see the routes block below. The pages themselves
 // (Home, Survey, Providers, Developers, Science, About, News, Contact) are kept
 // in src/pages/marketing; only their routes are gone, so restoring the site is
@@ -123,9 +125,18 @@ function AppLayout() {
     <RequireOnboarding>
       <SnackbarProvider>
         <AppShell>
-          <RouteErrorBoundary key={location.pathname}>
-            <Outlet />
-          </RouteErrorBoundary>
+          {/* Tab switches are high-frequency: quick fade + 4px rise, no exit.
+              Search is a fixed overlay, so it skips the transform wrapper. */}
+          <motion.div
+            key={location.pathname}
+            initial={location.pathname === "/app/search" ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: dur.base, ease: ease.out }}
+          >
+            <RouteErrorBoundary key={location.pathname}>
+              <Outlet />
+            </RouteErrorBoundary>
+          </motion.div>
         </AppShell>
         <FavoritesPruneNotice />
         <RestoredFoodCard />
@@ -137,7 +148,7 @@ function AppLayout() {
 // Must match SearchScreen's exit-fade duration: its backdrop/group
 // AnimatePresence `exit` transitions animate opacity out over 250ms (see
 // src/screens/search/SearchScreen.jsx), plus a small buffer before navigating.
-const SEARCH_CLOSE_MS = 260;
+const SEARCH_CLOSE_MS = 170;
 
 // Route wrapper for /app/search — owns the open/close lifecycle only.
 // SearchScreen itself is now a single "Food & Nutrient Lookup" surface with

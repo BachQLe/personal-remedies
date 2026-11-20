@@ -6,6 +6,8 @@
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ease, dur, staggerDelay } from '../../lib/motion.js';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
@@ -30,8 +32,14 @@ const LABEL = 'eyebrow';
 function FavoriteGrid({ items, onSelect, onBlocked }) {
   return (
     <div className="flex flex-wrap gap-3">
-      {items.map((item) => (
-        <div key={item.id} className="w-[calc(50%-0.375rem)] min-w-[min(9rem,100%)]">
+      {items.map((item, i) => (
+        <motion.div
+          key={item.id}
+          className="w-[calc(50%-0.375rem)] min-w-[min(9rem,100%)]"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: dur.base, ease: ease.out, delay: staggerDelay(i) }}
+        >
           <FoodImageCard
             id={item.id}
             image={item.image || getIngredientImage(item.name, item.group, getOverlayImageFile(item.id))}
@@ -44,7 +52,7 @@ function FavoriteGrid({ items, onSelect, onBlocked }) {
             saveActionPosition="top"
             className="w-full"
           />
-        </div>
+        </motion.div>
       ))}
     </div>
   );

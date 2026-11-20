@@ -35,6 +35,8 @@
  * that simply hasn't been checked yet.
  */
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { ease, dur, staggerDelay } from '../../lib/motion.js';
 import { useParams, Navigate } from 'react-router-dom';
 import { getFineFoodGroups, getFineGroupSuggestions, getGroupLabel } from '../../api/api.js';
 import { SUGGEST_MAX_ROWS } from '../../api/config.js';
@@ -168,14 +170,20 @@ function FineGroupDetail({ fineGroupId }) {
             >
               <div className="flex flex-col gap-2.5">
                 <CoverageNote coverage={data?.coverage} />
-                {items.map((food) => (
-                  <RankedRow
+                {items.map((food, i) => (
+                  <motion.div
                     key={food.id}
-                    food={food}
-                    studyCount={food.referenceTotal}
-                    showGroup={false}
-                    onSelect={handleSelectFood}
-                  />
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: dur.base, ease: ease.out, delay: staggerDelay(i) }}
+                  >
+                    <RankedRow
+                      food={food}
+                      studyCount={food.referenceTotal}
+                      showGroup={false}
+                      onSelect={handleSelectFood}
+                    />
+                  </motion.div>
                 ))}
                 {/* /suggest stops at 20 rows, so say so rather than imply this is everything. */}
                 {items.length >= SUGGEST_MAX_ROWS && (

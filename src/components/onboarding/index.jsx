@@ -7,6 +7,7 @@ import ConsentStep from './ConsentStep';
 import ProfileBuilder from './ProfileBuilder';
 import { saveProfile } from '../../api/api.js';
 import { prefetchAppData } from '../../api/prefetch.js';
+import { ease, dur } from '../../lib/motion.js';
 
 const ONBOARDING_BG = '#F3F0E7';
 const DAILY_PICKS_BG = '#384C37';
@@ -110,6 +111,7 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
   const [profile, setProfile] = useState({
     firstName: '',
     ageBand: 'adult',
@@ -140,13 +142,15 @@ export default function OnboardingPage() {
     await saveProfile(payload);
     prefetchAppData(payload);
     setSaving(false);
-    navigate('/app/home');
+    // Peak-end: a short checkmark moment (~600ms) before landing on Home.
+    setDone(true);
+    setTimeout(() => navigate('/app/home'), 600);
   };
 
   const slideVariants = {
     enter: { opacity: 0 },
-    center: { opacity: 1 },
-    exit: { opacity: 0 },
+    center: { opacity: 1, transition: { duration: dur.panel, ease: ease.out } },
+    exit: { opacity: 0, transition: { duration: dur.exit, ease: ease.in } },
   };
 
   const totalStripeH = STRIPE_COUNT * STRIPE_H;
@@ -171,7 +175,6 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-col flex-1 absolute inset-0 overflow-y-auto"
             >
               {step === 0 && <RemediWelcome onNext={() => setStep(1)} />}
@@ -202,6 +205,38 @@ export default function OnboardingPage() {
                 />
               )}
             </motion.div>
+          </AnimatePresence>
+          <AnimatePresence>
+            {done && (
+              <motion.div
+                key="done"
+                className="absolute inset-0 z-50 flex items-center justify-center"
+                style={{ backgroundColor: ONBOARDING_BG }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: dur.base, ease: ease.out }}
+                aria-hidden="true"
+              >
+                <motion.svg
+                  width="72" height="72" viewBox="0 0 72 72" fill="none"
+                  initial={{ scale: 0.85 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: dur.panel, ease: ease.out }}
+                >
+                  <motion.circle
+                    cx="36" cy="36" r="32" stroke={DAILY_PICKS_BG} strokeWidth="4"
+                    initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+                    transition={{ duration: dur.panel, ease: ease.out }}
+                  />
+                  <motion.path
+                    d="M22 37l10 10 18-21" stroke={DAILY_PICKS_BG} strokeWidth="5"
+                    strokeLinecap="round" strokeLinejoin="round"
+                    initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+                    transition={{ duration: dur.base, ease: ease.out, delay: 0.2 }}
+                  />
+                </motion.svg>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
         <div style={{ height: totalStripeH, flexShrink: 0 }}>
