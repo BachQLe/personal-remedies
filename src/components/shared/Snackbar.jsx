@@ -1,10 +1,6 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// Same spring feel as the rest of the Plan screens' `calmSpring` constant —
-// hardcoded here (rather than imported) so this component has no dependency
-// on any single screen's local constants.
-const calmSpring = { type: 'spring', stiffness: 120, damping: 22, mass: 1 };
+import { ease, dur } from '../../lib/motion.js';
 
 /**
  * Snackbar — bottom-anchored, framer-motion slide-up toast. Auto-dismisses
@@ -46,10 +42,9 @@ export default function Snackbar({ snackbar, onUndo, onDismiss, actionLabel = 'U
       {snackbar && (
         <motion.div
           key={snackbar.id}
-          initial={{ y: 80, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 40, opacity: 0 }}
-          transition={calmSpring}
+          initial={{ y: 32, opacity: 0, scale: 0.98 }}
+          animate={{ y: 0, opacity: 1, scale: 1, transition: { duration: 0.3, ease: ease.out } }}
+          exit={{ y: 12, opacity: 0, scale: 0.98, transition: { duration: dur.exit, ease: ease.in } }}
           role="status"
           aria-live="polite"
           aria-atomic="true"
@@ -63,8 +58,8 @@ export default function Snackbar({ snackbar, onUndo, onDismiss, actionLabel = 'U
           {snackbar.canUndo && (
             <button
               onClick={onUndo}
-              className="font-sans text-sm font-semibold text-forest-300 hover:text-forest-200
-                transition-colors duration-fast shrink-0"
+              className="tap-target font-sans text-sm font-semibold text-forest-300 mouse:hover:text-forest-200
+                transition-[transform,color] duration-press ease-ux-out active:scale-95 shrink-0"
             >
               {actionLabel}
             </button>

@@ -24,6 +24,7 @@ export default function GlassPanel({ children, className = '', style = {} }) {
         borderLeft: '1px solid rgba(255,255,255,0.45)',
         borderRight: '1px solid rgba(255,255,255,0.45)',
         borderRadius: '24px 24px 0 0',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35), 0 -6px 24px rgba(45,36,24,0.05)',
         ...style,
       }}
     >

@@ -16,7 +16,9 @@ export default function SecondaryButton({
       onClick={onClick}
       disabled={disabled}
       className={`btn btn-secondary w-full
-        active:translate-y-[1px] active:scale-[0.99]
+        transition-[transform,background-color,border-color,box-shadow] duration-press ease-ux-out
+        shadow-xs mouse:hover:shadow-sm active:scale-[0.97] active:shadow-none
+        disabled:transform-none
         ${className}`}
     >
       {children}

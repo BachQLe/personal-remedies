@@ -53,7 +53,7 @@ export default function RankedRow({ food, studyCount, onSelect, saveAction, thum
   return (
     <button
       onClick={(e) => onSelect(e.target.closest('[data-reference-count]') ? { ...food, openDetails: true } : food)}
-      className={`list-row relative overflow-hidden active:scale-[0.99]
+      className={`list-row relative overflow-hidden active:translate-y-px active:scale-[0.985]
         ${thumbnail ? 'items-center' : 'items-start'}`}
     >
       {thumbnail && image && (

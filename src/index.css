@@ -226,6 +226,23 @@
 .rm-ghost input::placeholder,
 .rm-ghost textarea::placeholder { color: transparent !important; }
 
+/* Skeleton — soft highlight sweeps over the block's own bg colour (linear is
+   right for a loop). */
+@keyframes skeleton-shimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+.skeleton-shimmer {
+  background-image: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.55) 50%, transparent 80%);
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: skeleton-shimmer 1.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer { animation: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rm-ghost :is(div, a, button, figure, picture, span):has(> img),
   .rm-ghost :is(div, a, button, figure, picture, span):has(> svg),
@@ -269,6 +286,7 @@
      duration so hover/focus/active feedback still reads as a state change. */
   [class*="animate-"],
   [class*="transition-transform"],
+  [class*="transition-[transform"],
   [class*="hover:scale"],
   [class*="hover:-translate"],
   [class*="hover:translate"],
@@ -290,27 +308,27 @@
   }
 
   .pill-btn {
-    @apply inline-flex items-center justify-center rounded-pill px-6 py-3 text-[0.9375rem] font-medium tracking-tight transition-all duration-base ease-ds-out;
+    @apply inline-flex items-center justify-center rounded-pill px-6 py-3 text-[0.9375rem] font-medium tracking-tight transition-[transform,background-color,border-color,box-shadow] duration-press ease-ux-out;
   }
 
   .pill-forest {
-    @apply pill-btn bg-forest-700 text-[#F3EFE6] hover:bg-forest-800 active:translate-y-[1px] active:scale-[0.99];
+    @apply pill-btn bg-forest-700 text-[#F3EFE6] mouse:hover:bg-forest-800 active:scale-[0.97];
   }
 
   .pill-plum {
-    @apply pill-btn bg-plum-700 text-[#F3EFE6] hover:bg-plum-800 active:translate-y-[1px] active:scale-[0.99];
+    @apply pill-btn bg-plum-700 text-[#F3EFE6] mouse:hover:bg-plum-800 active:scale-[0.97];
   }
 
   .pill-ghost {
-    @apply pill-btn border border-sand-200 bg-white text-char-900 hover:bg-forest-50;
+    @apply pill-btn border border-sand-200 bg-white text-char-900 mouse:hover:bg-forest-50;
   }
 
   .pill-ghost-dark {
-    @apply pill-btn border border-[#F3EFE6]/25 bg-transparent text-[#F3EFE6] hover:bg-[#F3EFE6]/10;
+    @apply pill-btn border border-[#F3EFE6]/25 bg-transparent text-[#F3EFE6] mouse:hover:bg-[#F3EFE6]/10;
   }
 
   .pill-honey {
-    @apply pill-btn bg-honey-700 text-white hover:bg-honey-800 active:translate-y-[1px] active:scale-[0.99];
+    @apply pill-btn bg-honey-700 text-white mouse:hover:bg-honey-800 active:scale-[0.97];
   }
 
   .tag {
@@ -318,7 +336,7 @@
   }
 
   .ds-card {
-    @apply bg-white rounded-xl border border-sand-200 shadow-card transition-all duration-fast ease-ds-out hover:-translate-y-[2px] hover:shadow-md;
+    @apply bg-white rounded-xl border border-sand-200 shadow-depth transition-[transform,box-shadow] duration-base ease-ux-out mouse:hover:-translate-y-[2px] mouse:hover:shadow-depth-lift active:scale-[0.985];
   }
 
   .ds-num {
@@ -334,13 +352,13 @@
 
   /* App cohesion standards — documented in docs/cohesion-audit.md */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 min-h-[56px] font-sans text-base font-semibold text-center transition-colors duration-fast disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-950/40 focus-visible:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-5 py-3 min-h-[56px] font-sans text-base font-semibold text-center transition-[transform,background-color,border-color,box-shadow,color] duration-press ease-ux-out disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-950/40 focus-visible:ring-offset-2;
   }
   .btn-primary {
-    @apply bg-blue-950 text-white hover:bg-blue-900;
+    @apply bg-blue-950 text-white mouse:hover:bg-blue-900 active:scale-[0.97];
   }
   .btn-secondary {
-    @apply bg-white text-blue-950 border-solid border-[1.5px] border-blue-950/20 hover:border-blue-950/40;
+    @apply bg-white text-blue-950 border-solid border-[1.5px] border-blue-950/20 mouse:hover:border-blue-950/40;
   }
   .btn-danger {
     @apply bg-avoid-700 text-white;
@@ -355,7 +373,7 @@
     @apply font-label text-xs uppercase tracking-eyebrow text-blue-950/70;
   }
   .list-row {
-    @apply w-full flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left transition-all duration-fast hover:border-forest-300 hover:shadow-card;
+    @apply w-full flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left transition-[transform,box-shadow,border-color] duration-base ease-ux-out mouse:hover:border-forest-300 mouse:hover:shadow-card mouse:hover:-translate-y-px;
   }
   /* Row titles: 16px normally; at the largest accessibility text size they
      stop at the width the old 14px titles had, so names do not break mid-word. */

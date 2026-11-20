@@ -17,11 +17,11 @@ export default function PrimaryButton({
       onClick={onClick}
       disabled={disabled || loading}
       className={`relative overflow-hidden w-full min-h-[52px] rounded-[6px] bg-forest-700 font-sans font-semibold
-        text-base tracking-tight flex items-center justify-center gap-2 shadow-md
-        transition-all duration-fast ease-ds-out
-        hover:bg-forest-800
-        active:translate-y-[1px] active:scale-[0.99]
-        disabled:opacity-[0.38] disabled:cursor-not-allowed disabled:transform-none
+        text-base tracking-tight flex items-center justify-center gap-2 shadow-btn
+        transition-[transform,box-shadow,background-color,opacity] duration-press ease-ux-out
+        mouse:hover:bg-forest-800 mouse:hover:-translate-y-px
+        active:translate-y-px active:scale-[0.97] active:shadow-btn-down
+        disabled:opacity-[0.38] disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none
         ${className}`}
       style={{ color: '#F3EFE6' }}
     >

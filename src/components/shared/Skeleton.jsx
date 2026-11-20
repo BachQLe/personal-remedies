@@ -25,7 +25,7 @@ export default function Skeleton({
   }
 
   return (
-    <div className={`animate-pulse ${bg} ${base} ${className}`} />
+    <div className={`skeleton-shimmer ${bg} ${base} ${className}`} />
   );
 }
 
