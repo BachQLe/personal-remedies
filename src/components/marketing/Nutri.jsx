@@ -88,10 +88,10 @@ export default function Nutri() {
   return (
     <section className="relative overflow-hidden py-8 lg:py-12 bg-paper-200">
       <div
-        className="relative mx-auto max-w-7xl overflow-hidden px-10 py-4 lg:px-16 lg:py-24"
+        className="relative mx-auto max-w-7xl overflow-hidden px-8 py-4 lg:px-14 lg:py-24"
       >
         <div className="relative mx-auto max-w-7xl container-px">
-          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-center">
+          <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* LEFT -- headline copy */}
             <div>
               <Reveal>

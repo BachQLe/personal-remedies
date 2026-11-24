@@ -149,11 +149,13 @@ export default function News() {
                 Press inquiry or{" "}
                 <em className="font-display italic font-normal text-yellow-400">partnership?</em>
               </h2>
-              <div className="font-sans text-[1rem] leading-[1.6] shrink-0">
-                <p className="font-semibold text-[#F3EFE6]">Contact our team</p>
-                <p className="text-[#F3EFE6]/80">Charlottesville, Virginia</p>
-                <a href="mailto:ronanv@caucasusconsultinggroup.org" className="text-yellow-400 hover:underline">ronanv@caucasusconsultinggroup.org</a>
-              </div>
+              <Link
+                to="/providers"
+                className="inline-flex items-center gap-2 font-sans text-[1rem] font-semibold px-7 py-3 rounded-[6px] bg-yellow-400 text-blue-950 hover:bg-yellow-500 active:translate-y-[1px] active:scale-[0.99] transition-all duration-base ease-ds-out shrink-0"
+              >
+                Contact us
+                <Icon name="arrow-right" size={20} />
+              </Link>
             </div>
           </Reveal>
         </div>
