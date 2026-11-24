@@ -166,7 +166,7 @@ export default function Survey() {
       <header className="flex items-center px-6 py-4 border-b border-sand-200">
         <button
           onClick={() => navigate("/")}
-          className="font-display font-semibold text-[1.375rem] tracking-tightish text-blue-950"
+          className="font-display font-medium text-[1.375rem] tracking-tightish text-blue-950"
         >
           personalRemedies
         </button>
@@ -207,7 +207,7 @@ export default function Survey() {
                   <div className="mx-auto mb-5 w-14 h-14 flex items-center justify-center">
                     <div className="w-10 h-10 rounded-full border-[3px] border-forest-700 border-t-transparent animate-spin" />
                   </div>
-                  <h2 className="font-display font-semibold tracking-tightish text-2xl text-blue-950 leading-snug">
+                  <h2 className="font-display font-medium tracking-tightish text-2xl text-blue-950 leading-snug">
                     Building your personalized plan
                   </h2>
                   <p className="text-sm text-char-500 mt-2 font-sans">
@@ -225,7 +225,7 @@ export default function Survey() {
                     A fact while you wait
                   </p>
                   <div className="bg-white rounded-[28px] border border-sand-200 shadow-card px-8 py-5 text-left">
-                    <p className="font-display font-semibold text-2xl text-forest-700 leading-none mb-3">
+                    <p className="font-display font-medium text-2xl text-forest-700 leading-none mb-3">
                       {fact.stat}
                     </p>
                     <p className="text-[1.125rem] leading-[1.6] text-char-900 font-sans mb-2">
@@ -248,7 +248,7 @@ export default function Survey() {
                 </motion.div>
 
                 <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500">Your plan is ready</p>
-                <h2 className="font-display font-semibold tracking-tightish mt-3 text-[2.25rem] sm:text-[3rem] leading-[1.06] text-blue-950">
+                <h2 className="font-display font-medium tracking-tightish mt-3 text-[2.25rem] sm:text-[3rem] leading-[1.06] text-blue-950">
                   Here's{" "}
                   <em className="font-display italic font-normal text-forest-700 mr-1">your</em>
                   {" "}superfood plan.
@@ -320,7 +320,7 @@ export default function Survey() {
                 <p className="font-label text-[0.875rem] uppercase tracking-[.14em] text-char-500 mb-5">
                   Question {step + 1}
                 </p>
-                <h2 className="font-display font-semibold tracking-tightish text-[1.75rem] sm:text-[2.25rem] leading-[1.1] text-blue-950 mb-8">
+                <h2 className="font-display font-medium tracking-tightish text-[1.75rem] sm:text-[2.25rem] leading-[1.1] text-blue-950 mb-8">
                   {current.question}
                 </h2>
 

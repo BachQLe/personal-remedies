@@ -55,7 +55,7 @@ function NewsCard({ item }) {
     >
       <p className="font-mono text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500">{item.date}</p>
       <h3
-        className={`font-display font-semibold tracking-[-0.02em] mt-3 text-[1.25rem] sm:text-[1.375rem] leading-[1.2] text-blue-950 ${
+        className={`font-display font-medium tracking-[-0.02em] mt-3 text-[1.25rem] sm:text-[1.375rem] leading-[1.2] text-blue-950 ${
           linked ? "group-hover:text-forest-700 transition-colors duration-base ease-ds-out" : ""
         }`}
       >
@@ -86,7 +86,7 @@ export default function News() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500">Updates</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h1 className="font-display font-semibold tracking-[-0.02em] mt-4 text-[2.125rem] leading-[1.08] sm:text-[3rem] sm:leading-[1.08] lg:text-[3.5rem] lg:leading-[1.08] text-blue-950">
+            <h1 className="font-display font-medium tracking-[-0.02em] mt-4 text-[2.125rem] leading-[1.08] sm:text-[3rem] sm:leading-[1.08] lg:text-[3.5rem] lg:leading-[1.08] text-blue-950">
               News &amp; recognition
             </h1>
           </Reveal>
@@ -118,7 +118,7 @@ export default function News() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500 block text-center">Awards</span>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="font-display font-semibold tracking-[-0.02em] mt-4 text-[1.875rem] leading-[1.08] sm:text-[2.625rem] sm:leading-[1.08] text-center mb-12 text-blue-950">
+            <h2 className="font-display font-medium tracking-[-0.02em] mt-4 text-[1.875rem] leading-[1.08] sm:text-[2.625rem] sm:leading-[1.08] text-center mb-12 text-blue-950">
               Recognition
             </h2>
           </Reveal>
@@ -145,7 +145,7 @@ export default function News() {
         <div className="mx-auto max-w-5xl container-px">
           <Reveal>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-              <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.625rem] sm:text-title leading-[1.08] text-[#F3EFE6]">
+              <h2 className="font-display font-medium tracking-[-0.02em] text-[1.625rem] sm:text-title leading-[1.08] text-[#F3EFE6]">
                 Press inquiry or{" "}
                 <em className="font-display italic font-normal text-yellow-400">partnership?</em>
               </h2>
