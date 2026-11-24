@@ -160,8 +160,8 @@ export default function Differentiators() {
 
   return (
     <section id="how" className="py-16 lg:py-24">
-      <div className="mx-auto max-w-7xl container-px overflow-hidden px-8 py-12 lg:px-14 lg:py-16">
-        <div className="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+      <div className="mx-auto max-w-7xl container-px overflow-hidden px-10 py-12 lg:px-16 lg:py-16">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-10 items-center">
 
           {/* Left: text */}
           <div>
