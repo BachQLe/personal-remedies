@@ -72,7 +72,7 @@ export default function Providers() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500">For providers</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h1 className="font-display font-medium tracking-[-0.02em] mt-5 text-[2.125rem] leading-[1.08] sm:text-[3rem] sm:leading-[1.04] lg:text-[3.625rem] lg:leading-[1.02] max-w-[18ch] mx-auto text-blue-950">
+            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-[2.125rem] leading-[1.08] sm:text-[3rem] sm:leading-[1.04] lg:text-[3.625rem] lg:leading-[1.02] max-w-[18ch] mx-auto text-blue-950">
               Better chronic care starts with{" "}
               <em className="font-display italic font-normal text-forest-700">better nutrition intelligence.</em>
             </h1>
@@ -116,7 +116,7 @@ export default function Providers() {
       <section className="pb-4 bg-paper-200">
         <div className="mx-auto max-w-3xl container-px text-center">
           <Reveal>
-            <h2 className="font-display font-medium tracking-[-0.02em] text-[1.875rem] leading-[1.12] sm:text-[2.5rem] sm:leading-[1.06] text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.875rem] leading-[1.12] sm:text-[2.5rem] sm:leading-[1.06] text-blue-950">
               The gap your patients feel every day
             </h2>
           </Reveal>
@@ -135,7 +135,7 @@ export default function Providers() {
       <section className="py-16 lg:py-24 bg-paper-100 border-y border-sand-200">
         <div className="mx-auto max-w-3xl container-px">
           <Reveal>
-            <h2 className="font-display font-medium tracking-[-0.02em] text-[1.75rem] leading-[1.12] sm:text-[2.25rem] sm:leading-[1.08] text-center mb-12 text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.75rem] leading-[1.12] sm:text-[2.25rem] sm:leading-[1.08] text-center mb-12 text-blue-950">
               What we offer
             </h2>
           </Reveal>
@@ -161,7 +161,7 @@ export default function Providers() {
       <section className="py-20 lg:py-28 bg-forest-900">
         <div className="mx-auto max-w-5xl container-px">
           <Reveal>
-            <h2 className="font-display font-medium tracking-[-0.02em] text-[1.875rem] leading-[1.1] sm:text-[2.625rem] sm:leading-[1.06] text-center max-w-[20ch] mx-auto text-[#F3EFE6]">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.875rem] leading-[1.1] sm:text-[2.625rem] sm:leading-[1.06] text-center max-w-[20ch] mx-auto text-[#F3EFE6]">
               Why providers choose{" "}
               <em className="font-display italic font-normal text-yellow-400">Personal Remedies</em>
             </h2>
@@ -171,7 +171,7 @@ export default function Providers() {
               <StaggerItem key={d.title}>
                 <div className="h-full rounded-[28px] bg-[#F3EFE6]/[0.06] border border-[#F3EFE6]/15 p-8">
                   <Icon name={d.icon} size={28} className="text-yellow-400 mb-4 block" />
-                  <h3 className="font-display font-medium text-[1.25rem] sm:text-[1.375rem] leading-tight text-[#F3EFE6]">{d.title}</h3>
+                  <h3 className="font-display font-semibold text-[1.25rem] sm:text-[1.375rem] leading-tight text-[#F3EFE6]">{d.title}</h3>
                   <p className="mt-3 text-[0.9375rem] leading-[1.6] text-[#F3EFE6]/70 font-sans">{d.body}</p>
                 </div>
               </StaggerItem>
@@ -184,7 +184,7 @@ export default function Providers() {
       <section className="py-24 lg:py-32 bg-paper-200">
         <div className="mx-auto max-w-3xl container-px text-center">
           <Reveal>
-            <h2 className="font-display font-medium tracking-[-0.02em] text-title leading-[1.08] sm:text-[2.875rem] sm:leading-[1.04] text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-title leading-[1.08] sm:text-[2.875rem] sm:leading-[1.04] text-blue-950">
               Let's talk about your{" "}
               <em className="font-display italic font-normal text-lavender-700">patient population.</em>
             </h2>

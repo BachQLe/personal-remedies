@@ -85,7 +85,7 @@ export default function Science() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500">The science</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h1 className="font-display font-medium tracking-[-0.02em] mt-5 text-[2.125rem] leading-[1.08] sm:text-[3rem] sm:leading-[1.08] lg:text-[3.625rem] lg:leading-[1.08] max-w-[20ch] mx-auto text-blue-950">
+            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-[2.125rem] leading-[1.08] sm:text-[3rem] sm:leading-[1.08] lg:text-[3.625rem] lg:leading-[1.08] max-w-[20ch] mx-auto text-blue-950">
               The human body is too complex for{" "}
               <em className="font-display italic font-normal text-forest-700">human memory alone.</em>
             </h1>
@@ -105,7 +105,7 @@ export default function Science() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500 block text-center">The problem</span>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="font-display font-medium tracking-[-0.02em] mt-4 text-[1.75rem] leading-[1.08] sm:text-[2.5rem] sm:leading-[1.08] text-center max-w-[24ch] mx-auto text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] mt-4 text-[1.75rem] leading-[1.08] sm:text-[2.5rem] sm:leading-[1.08] text-center max-w-[24ch] mx-auto text-blue-950">
               Why no doctor, dietitian, or app has solved this --{" "}
               <em className="font-display italic font-normal text-forest-700">until now</em>
             </h2>
@@ -155,7 +155,7 @@ export default function Science() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500 block text-center">Our data</span>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="font-display font-medium tracking-[-0.02em] mt-4 text-[1.875rem] leading-[1.08] sm:text-[2.625rem] sm:leading-[1.08] text-center mb-12 text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] mt-4 text-[1.875rem] leading-[1.08] sm:text-[2.625rem] sm:leading-[1.08] text-center mb-12 text-blue-950">
               Where the data comes from
             </h2>
           </Reveal>
@@ -164,7 +164,7 @@ export default function Science() {
               <StaggerItem key={s.title}>
                 <div className="h-full rounded-[28px] bg-white border border-sand-200 shadow-card p-8">
                   <Icon name={s.icon} size={28} className="text-forest-700 mb-4 block" />
-                  <h3 className="font-display font-medium tracking-[-0.02em] text-[1.25rem] sm:text-[1.375rem] leading-tight text-blue-950">{s.title}</h3>
+                  <h3 className="font-display font-semibold tracking-[-0.02em] text-[1.25rem] sm:text-[1.375rem] leading-tight text-blue-950">{s.title}</h3>
                   <p className="mt-3 font-sans text-[0.9375rem] leading-[1.6] text-char-500">{s.body}</p>
                 </div>
               </StaggerItem>
@@ -192,7 +192,7 @@ export default function Science() {
       <section className="py-20 lg:py-28 bg-forest-700 text-[#F3EFE6]">
         <div className="mx-auto max-w-3xl container-px text-center">
           <Reveal>
-            <h2 className="font-display font-medium tracking-[-0.02em] text-[1.875rem] leading-[1.08] sm:text-[2.75rem] sm:leading-[1.08] text-[#F3EFE6]">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.875rem] leading-[1.08] sm:text-[2.75rem] sm:leading-[1.08] text-[#F3EFE6]">
               It's not a search engine.{" "}
               <em className="font-display italic font-normal text-yellow-400">It's a reasoning engine.</em>
             </h2>

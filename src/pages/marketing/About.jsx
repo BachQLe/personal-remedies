@@ -41,7 +41,7 @@ export default function About() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500">About us</span>
           </Reveal>
           <Reveal delay={0.1}>
-            <h1 className="font-display font-medium tracking-[-0.02em] mt-5 text-title leading-[1.08] sm:text-[2.875rem] sm:leading-[1.08] lg:text-[3.375rem] lg:leading-[1.08] max-w-[24ch] mx-auto text-blue-950">
+            <h1 className="font-display font-semibold tracking-[-0.02em] mt-5 text-title leading-[1.08] sm:text-[2.875rem] sm:leading-[1.08] lg:text-[3.375rem] lg:leading-[1.08] max-w-[24ch] mx-auto text-blue-950">
               Built by people who believe food is the{" "}
               <em className="font-display italic font-normal text-forest-700">most underused medicine in the world.</em>
             </h1>
@@ -62,7 +62,7 @@ export default function About() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500">Our mission</span>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="font-display font-medium tracking-[-0.02em] mt-4 text-[1.875rem] leading-[1.08] sm:text-[2.5rem] sm:leading-[1.08] text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] mt-4 text-[1.875rem] leading-[1.08] sm:text-[2.5rem] sm:leading-[1.08] text-blue-950">
               Why we exist
             </h2>
           </Reveal>
@@ -84,7 +84,7 @@ export default function About() {
             <span className="font-label text-[0.875rem] font-semibold tracking-[.14em] uppercase text-char-500 block text-center">Leadership</span>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="font-display font-medium tracking-[-0.02em] mt-4 text-[1.875rem] leading-[1.08] sm:text-[2.625rem] sm:leading-[1.08] text-center mb-12 text-blue-950">
+            <h2 className="font-display font-semibold tracking-[-0.02em] mt-4 text-[1.875rem] leading-[1.08] sm:text-[2.625rem] sm:leading-[1.08] text-center mb-12 text-blue-950">
               The team
             </h2>
           </Reveal>
@@ -131,7 +131,7 @@ export default function About() {
       <section className="py-24 lg:py-32 bg-forest-700 text-[#F3EFE6]">
         <div className="mx-auto max-w-3xl container-px text-center">
           <Reveal>
-            <h2 className="font-display font-medium tracking-[-0.02em] text-[1.875rem] leading-[1.08] sm:text-[2.75rem] sm:leading-[1.08] text-[#F3EFE6]">
+            <h2 className="font-display font-semibold tracking-[-0.02em] text-[1.875rem] leading-[1.08] sm:text-[2.75rem] sm:leading-[1.08] text-[#F3EFE6]">
               Our{" "}
               <em className="font-display italic font-normal text-yellow-400">partners</em>
             </h2>
