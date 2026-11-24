@@ -85,7 +85,7 @@ export default function Providers() {
           </Reveal>
           <Reveal delay={0.3}>
             <Link to="/onboarding" className="mt-9 inline-flex items-center justify-center font-sans font-semibold text-[1rem] px-7 py-3 rounded-[6px] bg-forest-700 text-[#F3EFE6] hover:bg-forest-800 active:translate-y-[1px] active:scale-[0.99] transition-all duration-fast">
-              Get in contact / apply
+              Talk to our team
             </Link>
           </Reveal>
         </div>
