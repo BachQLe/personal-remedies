@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { todayKey } from './planDates.js';
 
-const calmSpring = { type: 'spring', stiffness: 300, damping: 30 };
+import { sliderSpring } from '../../lib/motion.js';
 
 const WEEKDAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -54,15 +54,15 @@ export default function DayStrip({ days, selected, onSelect, bgClassName = 'bg-f
             onClick={() => onSelect(day.key)}
             aria-pressed={isSelected}
             aria-label={`${abbr} ${dayOfMonth}${isToday ? ' (today)' : ''}`}
-            className="relative flex flex-col items-center flex-1 min-w-[2.4rem] gap-0.5 py-2
-              rounded-xl transition-colors duration-fast
+            className="relative flex flex-col items-center flex-1 min-w-[2.4rem] gap-0.5 py-2.5
+              rounded-full transition-colors duration-fast
               active:scale-[0.97]"
           >
             {isSelected && (
               <motion.div
                 layoutId="plan-day-chip-active"
-                className="absolute inset-0 m-auto w-11 h-11 rounded-full bg-blue-950"
-                transition={calmSpring}
+                className="absolute inset-x-0.5 inset-y-0 rounded-full bg-blue-950"
+                transition={sliderSpring}
               />
             )}
             <span

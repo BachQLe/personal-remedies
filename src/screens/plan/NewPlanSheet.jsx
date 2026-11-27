@@ -5,7 +5,6 @@ import BackButton from '../../components/shared/BackButton.jsx';
 import SavedList from '../favorites/SavedList.jsx';
 import { favoritesBySlot } from '../../api/api.js';
 import { PLAN_SLOTS } from '../../api/config.js';
-import FavoritesNudge from './FavoritesNudge.jsx';
 import { COPY, SHEET_Z } from './plannerCopy.js';
 
 function Choice({ title, hint, onClick, disabled, primary }) {
@@ -19,7 +18,7 @@ function Choice({ title, hint, onClick, disabled, primary }) {
         ${primary ? 'bg-blue-950 text-white hover:bg-blue-900' : 'border border-sand-200 bg-white text-blue-950 hover:bg-paper-200'}`}
     >
       <span className="font-sans text-base font-semibold">{title}</span>
-      <span className={`font-sans text-xs ${primary ? 'text-white/70' : 'text-char-500'}`}>{hint}</span>
+      {hint && <span className={`font-sans text-xs ${primary ? 'text-white/70' : 'text-char-500'}`}>{hint}</span>}
     </button>
   );
 }
@@ -59,24 +58,19 @@ export default function NewPlanSheet({ favorites, weeks, ready, generating, onRa
         </>
       ) : (
         <div className="flex flex-col gap-4">
-          <p className="font-sans text-sm text-char-500">{COPY.stepGenerate}</p>
-
-          {noneFit ? (
+          {noneFit && (
             <div className="flex flex-col items-start gap-1.5 rounded-xl bg-paper-200 px-4 py-3">
               <p className="font-sans text-sm text-blue-950">{COPY.noFavorites}</p>
               <Link to="/app/favorites" className="inline-flex min-h-[44px] items-center font-sans text-sm font-semibold text-blue-950 underline underline-offset-2">
                 {COPY.goToFavorites}
               </Link>
             </div>
-          ) : (
-            <FavoritesNudge bySlot={bySlot} />
           )}
 
           <div className="flex flex-col gap-3">
             <Choice
               primary
               title={generating ? COPY.building : COPY.randomize}
-              hint={COPY.randomizeHint}
               onClick={onRandomize}
               disabled={!ready || generating || noneFit}
             />

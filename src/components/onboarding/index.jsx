@@ -7,7 +7,7 @@ import ConsentStep from './ConsentStep';
 import ProfileBuilder from './ProfileBuilder';
 import { saveProfile } from '../../api/api.js';
 import { prefetchAppData } from '../../api/prefetch.js';
-import { ease, dur } from '../../lib/motion.js';
+import { ease, dur, pageVariants } from '../../lib/motion.js';
 
 const ONBOARDING_BG = '#F3F0E7';
 const DAILY_PICKS_BG = '#384C37';
@@ -147,12 +147,6 @@ export default function OnboardingPage() {
     setTimeout(() => navigate('/app/home'), 600);
   };
 
-  const slideVariants = {
-    enter: { opacity: 0 },
-    center: { opacity: 1, transition: { duration: dur.panel, ease: ease.out } },
-    exit: { opacity: 0, transition: { duration: dur.exit, ease: ease.in } },
-  };
-
   const totalStripeH = STRIPE_COUNT * STRIPE_H;
 
   return (
@@ -171,9 +165,9 @@ export default function OnboardingPage() {
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
               exit="exit"
               className="flex flex-col flex-1 absolute inset-0 overflow-y-auto"
             >

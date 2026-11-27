@@ -46,21 +46,6 @@ afterEach(() => {
 });
 
 describe('NewPlanSheet', () => {
-  it('nudges, naming the short meals, when any meal has 3 or fewer favorites', async () => {
-    await mount({ favorites: [...many('breakfast', 5), ...many('lunch', 2, 100)] });
-    expect(container.textContent).toContain('Tip: pick more than 3 favorites per meal for more variety');
-    expect(container.textContent).toContain('Short on: Lunch, Dinner, Snacks & Desserts, Beverages');
-    expect(container.textContent).not.toContain('Short on: Breakfast');
-    expect(container.querySelector('a[href="/app/favorites"]')).toBeTruthy();
-  });
-
-  it('shows no nudge when every meal has more than 3', async () => {
-    const favorites = ['breakfast', 'lunch', 'dinner', 'snacks', 'beverages'].flatMap((s, i) => many(s, 4, i * 10));
-    await mount({ favorites });
-    expect(container.textContent).not.toContain('Tip:');
-    expect(button('Randomize from my favorites').disabled).toBe(false);
-  });
-
   it('explains and disables randomizing when no favorite fits any meal', async () => {
     await mount({ favorites: [] });
     expect(container.textContent).toContain('None of your favorites fit a meal yet');

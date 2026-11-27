@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { sliderSpring } from '../../lib/motion.js';
 import fruitIllustration from '../../assets/fruit-pear-graphic.png';
 import FruitScene from './FruitScene.jsx';
 import BackButton from '../shared/BackButton.jsx';
@@ -66,10 +67,12 @@ function AgeSlider({ value, onChange }) {
         aria-hidden="true"
         initial={false}
         animate={{ x: knobX, opacity: value ? 1 : 0.55 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-        className="absolute top-[3px] bottom-[3px] left-[3px] rounded-pill bg-white shadow-md"
+        transition={sliderSpring}
+        className="absolute top-[3px] bottom-[3px] left-[3px] rounded-pill"
         style={{ width: 'calc(50% - 3px)' }}
-      />
+      >
+        <div key={value} className="squash-stretch w-full h-full rounded-pill bg-white shadow-md" />
+      </motion.div>
 
       <div className="relative flex h-full">
         {AGE_OPTIONS.map((opt) => {

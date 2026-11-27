@@ -1,3 +1,6 @@
+import { motion } from 'framer-motion';
+import { sliderSpring } from '../../lib/motion.js';
+
 /**
  * PillSwitcher — full-width segmented pill tab switcher with a sliding thumb.
  *
@@ -42,16 +45,20 @@ export default function PillSwitcher({ options, value, onChange, className = '',
   return (
     <div className={`relative flex ${trackClassName} rounded-pill p-1 w-full ${className}`}>
       {/* Sliding thumb */}
-      <div
-        className={`absolute rounded-pill transition-[transform,background-color,border-color] duration-[260ms] ease-ux-inout ${thumbClasses}`}
+      <motion.div
+        initial={false}
+        animate={{ x: `${selectedIndex * 100}%` }}
+        transition={sliderSpring}
+        className="absolute rounded-pill"
         style={{
           width: `calc((100% - 8px) / ${count})`,
           left: '4px',
           top: '4px',
           bottom: '4px',
-          transform: `translateX(${selectedIndex * 100}%)`,
         }}
-      />
+      >
+        <div key={selectedIndex} className={`squash-stretch w-full h-full rounded-pill transition-[background-color,border-color] duration-[260ms] ease-ux-inout ${thumbClasses}`} />
+      </motion.div>
 
       {options.map(({ key, label }, index) => {
         const isSelected = index === selectedIndex;

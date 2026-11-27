@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import Icon from '../shared/Icon.jsx';
-import { ease, dur, spring } from '../../lib/motion.js';
+import { ease, dur, spring, sliderSpring } from '../../lib/motion.js';
 
 const TABS = [
   // `alsoActive`: a sibling route that belongs to this tab's flow (My Favorites and Choose recipes are part of Plan).
@@ -35,10 +35,12 @@ export default function TabBar() {
                     {isActive && (
                       <motion.span
                         layoutId="tabbar-pill"
-                        transition={spring}
-                        className="absolute inset-0 rounded-md bg-white"
+                        transition={sliderSpring}
+                        className="absolute inset-0"
                         aria-hidden="true"
-                      />
+                      >
+                        <span className="squash-stretch block w-full h-full rounded-md bg-white" />
+                      </motion.span>
                     )}
                     <motion.span
                       whileTap={{ scale: 0.92 }}

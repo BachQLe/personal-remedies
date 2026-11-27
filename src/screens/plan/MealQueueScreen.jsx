@@ -23,7 +23,6 @@ import { useOnline, planLoadState } from './usePlanLoadState.js';
 import SlotSection from './SlotSection.jsx';
 import DayStrip from './DayStrip.jsx';
 import PlanTabs from './PlanTabs.jsx';
-import FavoritesNudge from './FavoritesNudge.jsx';
 import HowToUseSheet from './HowToUseSheet.jsx';
 import SuggestionsSheet from './SuggestionsSheet.jsx';
 import CalorieGapSheet from './CalorieGapSheet.jsx';
@@ -503,8 +502,6 @@ function MealQueue() {
           />
         ) : (
           <div className="flex flex-col gap-4">
-            {!showGhost && <FavoritesNudge bySlot={favoritesBySlot(library)} />}
-
             {/* Unsaved-changes banner: shown once the live week has drifted from the saved week it came from. */}
             {dirty && (
               <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3">

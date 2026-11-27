@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { ease, dur, staggerDelay } from '../../lib/motion.js';
+import { ease, dur, staggerDelay, pageVariants } from '../../lib/motion.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Loader2 } from 'lucide-react';
@@ -454,10 +454,10 @@ export default function SearchScreen({ active, onClose }) {
                     {showResults ? (
                       <motion.div
                         key="results"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8, transition: { duration: dur.exit, ease: ease.in } }}
-                        transition={{ duration: dur.base, ease: ease.out }}
+                        variants={pageVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
                         className="h-full overflow-y-auto hide-scrollbar pb-28 flex flex-col gap-5"
                       >
                         {/* Idle-vs-no-results distinction (must survive): this
@@ -477,10 +477,10 @@ export default function SearchScreen({ active, onClose }) {
                     ) : (
                       <motion.div
                         key="chips"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8, transition: { duration: dur.exit, ease: ease.in } }}
-                        transition={{ duration: dur.base, ease: ease.out }}
+                        variants={pageVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
                         className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
                       >
                         {recents.length > 0 && (
