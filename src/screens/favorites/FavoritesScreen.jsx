@@ -1,14 +1,15 @@
 /**
- * FavoritesScreen - /app/favorites, reached from the Plan page: the user's favorite
+ * FavoritesScreen - /app/favorites, the second Plan tab (PlanTabs, same header as the plan): the user's favorite
  * recipes (grouped by recency or meal type), plus their saved days and saved
  * weeks. Saved days / weeks open a read-only peek; loading happens on the plan.
  * Bookmarking a recipe anywhere in the app adds it here.
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ease, dur, staggerDelay } from '../../lib/motion.js';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import PageHeader from '../../components/shared/PageHeader.jsx';
-import BackButton from '../../components/shared/BackButton.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
 import FoodImageCard from '../../components/shared/FoodImageCard.jsx';
 import SaveButton from '../../components/shared/SaveButton.jsx';
@@ -20,18 +21,25 @@ import { getOverlayImageFile, servingSizeLine } from '../../api/localTables.js';
 import { PLAN_SLOTS } from '../../api/config.js';
 import { getLibrary, subscribeLibrary } from '../../state/library.js';
 import { COPY } from '../plan/plannerCopy.js';
+import PlanTabs from '../plan/PlanTabs.jsx';
 import SavedList from './SavedList.jsx';
 import SavedPeekSheet from './SavedPeekSheet.jsx';
 import { useSavedLists } from './useSavedLists.js';
 import { useRecipeDetail } from './useRecipeDetail.js';
 
-const LABEL = 'font-label text-xs uppercase tracking-widest text-blue-950/70';
+const LABEL = 'eyebrow';
 
 function FavoriteGrid({ items, onSelect, onBlocked }) {
   return (
     <div className="flex flex-wrap gap-3">
-      {items.map((item) => (
-        <div key={item.id} className="w-[calc(50%-0.375rem)] min-w-[min(9rem,100%)]">
+      {items.map((item, i) => (
+        <motion.div
+          key={item.id}
+          className="w-[calc(50%-0.375rem)] min-w-[min(9rem,100%)]"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: dur.base, ease: ease.out, delay: staggerDelay(i) }}
+        >
           <FoodImageCard
             id={item.id}
             image={item.image || getIngredientImage(item.name, item.group, getOverlayImageFile(item.id))}
@@ -44,7 +52,7 @@ function FavoriteGrid({ items, onSelect, onBlocked }) {
             saveActionPosition="top"
             className="w-full"
           />
-        </div>
+        </motion.div>
       ))}
     </div>
   );
@@ -85,8 +93,7 @@ export default function FavoritesScreen() {
   const browse = (
     <Link
       to="/app/recipes"
-      className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-pill bg-blue-950 px-6 py-3 font-sans text-sm
-        font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+      className="btn btn-primary active:scale-[0.99]"
     >
       {COPY.browseRecipes}
       <ArrowRight size={16} aria-hidden="true" />
@@ -97,23 +104,15 @@ export default function FavoritesScreen() {
 
   return (
     <div className="bg-forest-300 flex flex-col min-h-screen -mb-28">
-      <PageHeader className="bg-forest-300">
-        <div className="flex items-center gap-3">
-          <BackButton fallback="/app/plan" />
-          <h1 className="min-w-0 font-display text-title font-semibold text-blue-950 leading-tight">
-            {COPY.favoritesTitle}
-          </h1>
-        </div>
-        <p className="text-sm text-blue-950/70 font-sans mt-1">{COPY.stepFavorites}</p>
-      </PageHeader>
+      <PageHeader title={COPY.planTitle} className="bg-forest-300" />
 
-      <div className="mt-4 flex flex-1 flex-col gap-8 rounded-t-2xl bg-paper-100 px-5 pb-28 pt-5 shadow-[0_-2px_16px_rgba(45,36,24,0.05)]">
+      <div className="paper-panel mt-4 flex flex-col gap-8">
+        <PlanTabs value="/app/favorites" />
         <section aria-labelledby="fav-recipes" className="flex flex-col gap-4">
           {library.length > 0 && (
             <Link
               to="/app/recipes"
-              className="inline-flex min-h-[56px] items-center justify-center gap-2 w-full rounded-md bg-blue-950 px-6 py-4
-                font-sans text-sm font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+              className="btn btn-primary w-full active:scale-[0.99]"
             >
               {COPY.chooseMoreRecipes}
               <ArrowRight size={16} aria-hidden="true" />
@@ -128,7 +127,7 @@ export default function FavoritesScreen() {
                   id="fav-group"
                   value={group}
                   onChange={(e) => setGroup(e.target.value)}
-                  className="min-h-[44px] max-w-full appearance-none rounded-pill border border-sand-200 bg-white pl-4 pr-9 font-sans
+                  className="min-h-[44px] max-w-full appearance-none rounded-md border border-blue-950/15 bg-white pl-4 pr-9 font-sans
                     text-sm font-semibold text-blue-950"
                 >
                   <option value="recent">{COPY.groupRecent}</option>

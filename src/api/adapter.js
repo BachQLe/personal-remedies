@@ -40,6 +40,7 @@ import { cachedFetch, peekCache } from './cache.js';
 import { isGoodNumericId } from '../utils/rating.js';
 import { getItemTable, getConditionTable, getGroupTable, getOverlayFlags, getOverlayImageFile, getRecipeFlaggedItems } from './localTables.js';
 import { joinRecipeOverlay, loadRecipeOverlay } from './recipeIngestion.js';
+import { SLOT_RULES, mpIds, mpRecipe, selectCandidates } from './favoriteCandidates.js';
 
 // ── Cache TTLs ────────────────────────────────────────────────────────────────
 
@@ -1533,6 +1534,92 @@ export async function getCategoryRecipes(profile) {
 }
 
 /**
+ * My Favorites candidates per the Meal Planner Implementation Notes (v11-20-26): for each
+ * meal, /suggest first, then MP-DB top-ups (rules + Limit in favoriteCandidates.js), every
+ * row rated by /goodfor. Replaces getRecipes + getCategoryRecipes for the Choose-recipes
+ * screen. Each Recipe's mealType/alsoFits is the slots it qualified for (lunch and dinner
+ * share one pool: MP-Recipes doesn't tell them apart); calories come from MP-DB's Kcal.
+ * @param {import('./types.js').Profile} profile
+ * @returns {Promise<{ recipes: import('./types.js').Recipe[], unscorableReason: string|null }>}
+ */
+export async function getFavoriteCandidates(profile) {
+  const conditionIds = profile?.conditions || [];
+  if (!conditionIds.length) return { recipes: [], unscorableReason: null };
+  const { result, unscorableReason } = await withAuthorized(conditionIds, getFavoriteCandidatesRaw, []);
+  return { recipes: result, unscorableReason };
+}
+
+const SLOT_MEAL_TYPE = { breakfast: 'breakfast', lunch: 'lunch', dinner: 'dinner', snacks: 'snack', beverages: 'beverage' };
+
+async function getFavoriteCandidatesRaw(ids) {
+  const csv = ids.join(',');
+  const dictionary = await ensureFoodItems();
+  const nameOf = (id) => dictionary.get(id)?.displayAs || dictionary.get(id)?.description;
+  const suggestRows = async (group) =>
+    (await withGoodForRatings((await cachedSuggest(csv, group)) ?? [], ids)).filter((r) => !isExcludedItem(r));
+  const asRow = (r, extra) => ({ id: r.foodItemID, numericId: r.descriptionNumericID ?? null, raw: r, ...extra });
+
+  const read = (slot) => async ({ from, meal }) => {
+    if (from === 'suggest') {
+      if (slot === 'lunch' || slot === 'dinner') {
+        const top = await cachedFetch(`recipes:${csv}:${RECIPE_FINE_GROUP}`, RECIPES_TTL_MS, () => fetchSuggest(csv, RECIPE_FINE_GROUP));
+        return (await withGoodForRatings(top ?? [], ids))
+          .filter((r) => mpRecipe(r.foodItemID)?.meals.includes('ld'))
+          .map((r) => asRow(r, { suggested: true }));
+      }
+      const groups = PLAN_SLOTS.find((s) => s.key === slot).fineGroups;
+      return (await Promise.all(groups.map(suggestRows))).flat().map((r) => asRow(r));
+    }
+    // Sunny's newest recipes aren't loaded in Nutridigm yet (/goodfor answers 400): skip them.
+    const candidates = mpIds(from === 'mp' ? 'recipes' : 'more', meal).filter((id) => dictionary.has(id));
+    return inBatches(candidates, async (id) => {
+      const g = await cachedGoodFor(id, ids).catch(() => null);
+      return asRow({
+        foodItemID: id,
+        foodItemDisplayAs: nameOf(id),
+        coarseFoodGroup: dictionary.get(id)?.coarseFoodGroup,
+        descriptionNumericID: g?.descriptionNumericID,
+        notes: g?.notes,
+      });
+    });
+  };
+
+  const slotKeys = ['breakfast', 'lunch', 'snacks', 'beverages'];
+  const picked = Object.fromEntries(
+    await Promise.all(slotKeys.map(async (slot) => [slot, await selectCandidates(SLOT_RULES[slot], read(slot))]))
+  );
+  picked.dinner = picked.lunch;
+
+  const slotsById = new Map();
+  const rowsById = new Map();
+  for (const slot of PLAN_SLOT_KEYS) {
+    for (const row of picked[slot]) {
+      slotsById.set(row.id, [...(slotsById.get(row.id) ?? []), slot]);
+      rowsById.set(row.id, row);
+    }
+  }
+  const rows = [...rowsById.values()];
+  const built = await buildRecipes(
+    rows.map((r) => ({ ...r.raw, foodItemDisplayAs: r.raw.foodItemDisplayAs || r.raw.description, descriptionNumericID: r.numericId })),
+    ids
+  );
+  return built.map((recipe) => {
+    const [first, ...rest] = slotsById.get(recipe.id).map((slot) => SLOT_MEAL_TYPE[slot]);
+    const mp = mpRecipe(recipe.id);
+    return {
+      ...recipe,
+      mealType: first,
+      alsoFits: rest,
+      mealTypeDefaulted: false,
+      // Only the /suggest top 20 is "best for" these conditions; MP-DB top-ups may rank lower.
+      matchedConditions: rowsById.get(recipe.id).suggested ? recipe.matchedConditions : [],
+      ...(mp?.url && { sourceUrl: mp.url }),
+      ...(mp && { nutritionPerServing: { calories: mp.kcal } }),
+    };
+  });
+}
+
+/**
  * The current /goodfor rating of each stored recipe or item, for the
  * profile-change prune (1.26). Every id is scored, not just the top 20 recipes,
  * so saved items and Sunny's category recipes are covered. An id /goodfor
@@ -2368,9 +2455,14 @@ export async function getFineGroupSuggestions(profile, fineGroupCode) {
  * Get all health conditions (for onboarding/profile editing).
  * @returns {Promise<import('./types.js').HealthCondition[]>}
  */
+// TEMP: the current Nutridigm key authorizes only these 12 of 271 conditions
+// (probed 2026-11-13); hide the rest from the pickers until more are covered.
+// Remove the filter in getConditions() to show everything again.
+const COVERED_CONDITION_IDS = new Set([1, 2, 16, 17, 59, 115, 149, 203, 204, 244, 306, 308]);
+
 export async function getConditions() {
   try {
-    return await ensureHealthConditions();
+    return (await ensureHealthConditions()).filter((c) => COVERED_CONDITION_IDS.has(c.healthConditionID));
   } catch {
     return [];
   }

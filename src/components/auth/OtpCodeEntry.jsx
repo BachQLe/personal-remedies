@@ -120,7 +120,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="font-sans text-[0.9375rem] text-char-900">
+        <p className="font-sans text-base text-char-900">
           We emailed a 6-digit code to <strong>{email}</strong>.
         </p>
         <p className="font-sans text-[0.875rem] text-char-500 mt-1">Enter it below to continue.</p>
@@ -165,7 +165,7 @@ export default function OtpCodeEntry({ email, sentAt, onVerified, onCancel }) {
         <button
           type="submit"
           disabled={!isValidCode(code) || verifying}
-          className="w-full bg-char-900 text-[#F3EFE6] font-sans font-semibold text-[1rem] py-3 rounded-[6px] hover:bg-char-700 disabled:opacity-50 disabled:cursor-not-allowed active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
+          className="btn btn-primary w-full active:translate-y-px active:scale-[0.98]"
           style={{ minHeight: 44 }}
         >
           {verifying ? 'Verifying…' : 'Verify code'}

@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, Bookmark, ChevronLeft, ExternalLink } from 'lucide-react';
+import { X, Bookmark, ExternalLink } from 'lucide-react';
 import ConditionTag from './shared/ConditionTag.jsx';
-import Icon from './shared/Icon.jsx';
+import Icon, { BackArrow } from './shared/Icon.jsx';
 import Skeleton from './shared/Skeleton.jsx';
 import FoodRating from './shared/FoodRating.jsx';
 import StudyReferences from './shared/StudyReferences.jsx';
@@ -26,12 +26,20 @@ import { resolveCardIngredients } from '../api/ingredientDerivation.js';
 import IngredientSwaps from './shared/IngredientSwaps.jsx';
 import Snackbar from './shared/Snackbar.jsx';
 import { openUrl } from '../api/browser.js';
+import { formatCalories } from '../api/calorieNeeds.js';
+import NutrientContent from './NutrientContent.jsx';
+import { isContentNutrient } from '../api/contentTable.js';
 
 const DISMISS_THRESHOLD = 100;
 
 // Recipe back face: ingredients block is hidden for now (not deleted) — flip
 // back to true to restore it.
 const SHOW_RECIPE_INGREDIENTS = false;
+
+// Nutrient content + top sources (checklist 7.4) read a USDA stand-in until the
+// PR `contents` table arrives via AWS — dev only until then (Mory: users never
+// see USDA). Set true once contentTable.js reads the real table.
+const SHOW_NUTRIENT_CONTENT = import.meta.env.DEV;
 
 // Open/close entrance-exit animation (separate from the drag-dismiss
 // transform above, which only ever applies while fully open). Opening lifts
@@ -413,6 +421,15 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
     navigate(path);
   };
 
+  // Opens another food's card on this screen while remembering this one, so
+  // Back returns to this card's details (same pattern as leaveCardFor).
+  const openFoodCard = (food) => {
+    onClose?.();
+    const { pathname, search, hash, state } = location;
+    navigate({ pathname, search, hash }, { replace: true, state: { ...state, reopenCard: { ...item, openDetails: true } } });
+    navigate({ pathname, search, hash }, { state: { ...state, reopenCard: food } });
+  };
+
   const handleClose = useCallback(() => {
     setFlipped(false);
     setDragY(0);
@@ -467,6 +484,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
   if (!mounted || !item) return null;
 
   const servingSize = getServingSize(combinedFoodId);
+  const calories = isRecipe ? formatCalories(item?.nutritionPerServing?.calories) : null;
   // Sunny's R items are prepared foods: recipes to the app, but with no recipe page.
   const hasRecipePage = isRecipe && !getRecipeFlaggedItems().some((flagged) => flagged.foodItemID === combinedFoodId);
   const dismissProgress = Math.min(1, dragY / DISMISS_THRESHOLD);
@@ -661,6 +679,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
               {servingSize && (
                 <p className="text-[0.875rem] text-white font-sans">Serving size: {servingSize}</p>
               )}
+              {calories && <p className="text-[0.875rem] text-white font-sans">{calories} cal per serving</p>}
               <p className="text-[0.875rem] text-white/60 font-sans">
                 Ask your doctor before changing your diet, especially if you take medication.
               </p>
@@ -674,7 +693,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                 <div className="flex flex-col gap-1">
                   {conditionGroups.map((g) => (
                     <div key={g.key} className="flex items-start gap-2 flex-wrap">
-                      <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-white/50 flex-none pt-0.5">
+                      <p className="eyebrow text-white/50 flex-none pt-0.5">
                         {g.label}
                       </p>
                       <div className="flex flex-wrap gap-1.5">
@@ -705,8 +724,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => setFlipped(true)}
-                className="mt-2 w-full py-3.5 rounded-xl bg-white text-blue-950
-                  font-display font-semibold text-base shadow-fab
+                className="btn mt-2 w-full bg-white text-blue-950 shadow-fab
                   transition-all duration-base ease-ds-out
                   hover:bg-sand-50 hover:-translate-y-[1px] hover:shadow-lg
                   active:translate-y-[1px] active:scale-[0.99]"
@@ -750,12 +768,12 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
               </div>
               <button
                 onClick={() => setFlipped(false)}
-                className="tap-target min-w-0 min-h-9 px-3.5 rounded-full bg-white border border-neutral-200
+                className="tap-target min-w-0 min-h-9 px-3.5 rounded-md bg-white border border-blue-950/10
                   flex items-center gap-1 text-char-600 text-sm font-sans
                   hover:bg-sand-100 transition-all duration-fast shadow-xs"
                 aria-label="Back to overview"
               >
-                <ChevronLeft size={15} aria-hidden="true" />
+                <BackArrow width={20} height={20} aria-hidden="true" />
                 <span>Overview</span>
               </button>
             </div>
@@ -768,8 +786,8 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                     pills, and for foods only: study counts, expandable
                     citations, "couldn't load studies" state). Recipes show
                     verdicts but never studies. */}
-                <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
-                  <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-400 mb-3">
+                <div className="rounded-xl border border-blue-950/10 shadow-xs bg-white p-4">
+                  <p className="eyebrow mb-3">
                     Conditions in your profile
                   </p>
 
@@ -804,8 +822,8 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                         <button
                           type="button"
                           onClick={handleRetry}
-                          className="px-5 py-2.5 rounded-xs bg-forest-700 text-white text-sm font-semibold font-sans
-                            transition-all duration-fast ease-ds-out hover:bg-forest-800 active:scale-[0.98]"
+                          className="btn btn-primary btn-sm
+                            transition-all duration-fast ease-ds-out active:scale-[0.98]"
                         >
                           Retry
                         </button>
@@ -829,6 +847,11 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                     />
                   )}
                 </div>
+
+                {SHOW_NUTRIENT_CONTENT && !isRecipe && combinedFoodId != null
+                  && (isContentNutrient(combinedFoodId) || !nonFoodIcon) && (
+                  <NutrientContent key={combinedFoodId} foodId={combinedFoodId} onOpenFood={openFoodCard} />
+                )}
 
                 {/* Ingredients (+ per-ingredient healthy swaps) — recipes
                     only. Real C1-overlay ingredient facts win whenever the
@@ -874,9 +897,9 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                     `realIngredients` (above) when a C1 overlay match exists,
                     or nothing. */}
                 {!isRecipe && item?.topFoodsForConditions?.length > 1 && (
-                  <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
+                  <div className="rounded-xl border border-blue-950/10 shadow-xs bg-white p-4">
                     {/* COPY-REVIEW: flagged for C2 health-claim audit */}
-                    <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-400 mb-3">
+                    <p className="eyebrow mb-3">
                       Top-ranked foods for your conditions
                     </p>
                     <div className="flex gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-1 px-1">
@@ -934,7 +957,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                   <button
                     type="button"
                     onClick={() => leaveCardFor(groupLinkTarget.path)}
-                    className="w-full flex items-center justify-between gap-3 rounded-xl border border-neutral-300/50
+                    className="w-full flex items-center justify-between gap-3 rounded-sm border border-blue-950/10
                       shadow-xs bg-white p-4 text-left transition-all duration-base ease-ds-out
                       hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
                   >
@@ -956,7 +979,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
                   <button
                     type="button"
                     onClick={() => leaveCardFor('/app/suggestions?tab=groups&mode=fine')}
-                    className="w-full flex items-center justify-between gap-3 rounded-xl border border-neutral-300/50
+                    className="w-full flex items-center justify-between gap-3 rounded-sm border border-blue-950/10
                       shadow-xs bg-white p-4 text-left transition-all duration-base ease-ds-out
                       hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
                   >
@@ -978,9 +1001,7 @@ export default function FoodDetailCard({ item: itemProp, open, onClose, listType
               <div className="flex-shrink-0 px-4 pb-4">
                 <button
                   onClick={handleGetRecipe}
-                  className="w-full py-3.5 px-4 rounded-xl bg-blue-950 text-white
-                    font-display font-semibold text-base shadow-fab
-                    flex items-center justify-center gap-2
+                  className="btn btn-primary w-full shadow-fab
                     transition-all duration-base ease-ds-out
                     hover:-translate-y-[1px] hover:shadow-lg
                     active:translate-y-[1px] active:scale-[0.99]"

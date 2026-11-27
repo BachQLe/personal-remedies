@@ -60,12 +60,12 @@ function EditList({ title, value, placeholder, onChange, onClose }) {
             onKeyDown={(e) => e.key === 'Enter' && add()}
             placeholder={placeholder}
             aria-label={title}
-            className="flex-1 bg-paper-100 border border-sand-200 rounded-lg px-4 py-3 text-sm font-sans outline-none focus:border-forest-700 transition-colors duration-base"
+            className="flex-1 field"
           />
           <button
             onClick={add}
             disabled={!input.trim()}
-            className="px-4 py-3 rounded-lg text-sm font-semibold font-sans text-white bg-forest-700 hover:bg-forest-800 disabled:opacity-40 transition-all duration-fast"
+            className="btn btn-primary"
           >
             Add
           </button>
@@ -89,7 +89,7 @@ function EditList({ title, value, placeholder, onChange, onClose }) {
         </div>
         <button
           onClick={() => { onChange(items); onClose(); }}
-          className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base mt-auto bg-forest-700 hover:bg-forest-800 transition-colors duration-fast"
+          className="btn btn-primary w-full mt-auto"
         >
           Save
         </button>
@@ -138,7 +138,7 @@ function EditCalorieTarget({ profile, onChange, onClose }) {
               type="button"
               onClick={() => setValue(String(kcal))}
               aria-pressed={parsed === kcal}
-              className="flex-1 py-3 rounded-lg border border-sand-200 bg-paper-100 text-sm font-semibold font-sans text-char-900 aria-pressed:bg-forest-700 aria-pressed:text-white aria-pressed:border-forest-700 transition-colors duration-fast"
+              className="flex-1 py-3 rounded-md border border-sand-200 bg-paper-100 text-sm font-semibold font-sans text-char-900 aria-pressed:bg-blue-950 aria-pressed:text-white aria-pressed:border-blue-950 transition-colors duration-fast"
               style={{ minHeight: 44 }}
             >
               {label} · {kcal.toLocaleString('en-US')}
@@ -156,14 +156,14 @@ function EditCalorieTarget({ profile, onChange, onClose }) {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="e.g. 2000"
-            className="flex-1 bg-paper-100 border border-sand-200 rounded-lg px-4 py-3 text-sm font-sans outline-none focus:border-forest-700 transition-colors duration-base"
+            className="flex-1 field"
           />
         </div>
 
         <button
           onClick={save}
           disabled={!isValid}
-          className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base mt-2 bg-forest-700 hover:bg-forest-800 disabled:opacity-40 transition-colors duration-fast"
+          className="btn btn-primary w-full mt-2"
         >
           Save
         </button>
@@ -323,7 +323,7 @@ function ConditionDropdown({ value, onChange }) {
         disabled={loading}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-2 pl-4 pr-3 py-[15px] rounded-full border-[1.5px] bg-white text-[1rem] text-char-500 font-sans shadow-sm outline-none transition-all duration-fast ease-ds-out disabled:opacity-60"
+        className="w-full flex items-center justify-between gap-2 pl-4 pr-3 py-[15px] rounded-md border-[1.5px] bg-white text-[1rem] text-char-500 font-sans shadow-sm outline-none transition-all duration-fast ease-ds-out disabled:opacity-60"
         style={{ borderColor: open ? '#111E58' : '#FFFFFF' }}
       >
         <span className="min-w-0">
@@ -354,7 +354,7 @@ function ConditionDropdown({ value, onChange }) {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search conditions…"
                 aria-label="Search conditions"
-                className="w-full pl-10 pr-3 py-2.5 rounded-full border-[1.5px] border-sand-200 bg-paper-100 text-[0.9375rem] text-char-900 placeholder:text-char-400 font-sans outline-none transition-colors duration-fast ease-ds-out focus:border-blue-900 focus:bg-white"
+                className="w-full pl-10 pr-3 py-2.5 rounded-md border-[1.5px] border-sand-200 bg-paper-100 text-base text-char-900 placeholder:text-char-400 font-sans outline-none transition-colors duration-fast ease-ds-out focus:border-blue-900 focus:bg-white"
               />
             </div>
           </div>
@@ -517,7 +517,7 @@ function BackupSheet({ onClose }) {
               aria-label="Email address"
               autoComplete="email"
               autoFocus
-              className="flex-1 bg-paper-100 border border-sand-200 rounded-lg px-4 py-3 text-sm font-sans outline-none focus:border-forest-700 transition-colors duration-base"
+              className="flex-1 field"
             />
             {error && <p className="text-sm text-signal-avoid font-sans">{error}</p>}
             {!isSupabaseConfigured && (
@@ -528,7 +528,7 @@ function BackupSheet({ onClose }) {
             <button
               type="submit"
               disabled={sending}
-              className="w-full py-4 rounded-xs text-white font-semibold font-sans text-base bg-forest-700 hover:bg-forest-800 disabled:opacity-40 transition-colors duration-fast"
+              className="btn btn-primary w-full"
             >
               {sending ? 'Sending…' : 'Send code'}
             </button>
@@ -570,7 +570,7 @@ function DeleteAccountSheet({ user, onClose }) {
             Your data was removed. We couldn&apos;t remove your sign-in record automatically; it will be removed on request.{' '}
             <a className="underline" href={buildSupportMailto()}>Email support</a> to finish.
           </p>
-          <button onClick={() => window.location.replace('/onboarding')} className="w-full py-3 rounded-full bg-char-900 text-white text-sm font-semibold font-sans">Continue</button>
+          <button onClick={() => window.location.replace('/onboarding')} className="btn btn-primary w-full">Continue</button>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
@@ -582,10 +582,10 @@ function DeleteAccountSheet({ user, onClose }) {
               {result.reason === 'offline' ? "You're offline." : "Something went wrong."} Nothing was deleted. Check your connection and try again.
             </p>
           )}
-          <button onClick={confirm} disabled={busy} className="w-full py-3 rounded-full bg-avoid-700 text-white text-sm font-semibold font-sans disabled:opacity-40">
+          <button onClick={confirm} disabled={busy} className="btn btn-danger w-full">
             {busy ? 'Deleting…' : result ? 'Retry' : user ? 'Delete account & data' : 'Delete my data'}
           </button>
-          <button onClick={onClose} disabled={busy} className="w-full py-3 rounded-full border border-sand-200 text-char-900 text-sm font-semibold font-sans disabled:opacity-40">Cancel</button>
+          <button onClick={onClose} disabled={busy} className="btn btn-secondary w-full">Cancel</button>
         </div>
       )}
     </BottomSheet>
@@ -733,14 +733,14 @@ export default function ProfileScreen() {
       {/* ── 2. Lower shell — glance button + inline editor ─────────────────── */}
       {/* flex-1 stretches paper-100 to the bottom (and behind the navbar via its
           own pb-28) so the base cream never shows. */}
-      <div className="flex-1 bg-paper-100 rounded-t-2xl px-4 pt-4 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-5">
+      <div className="paper-panel flex flex-col gap-5">
 
         {/* Inline profile editor — scroll down to edit conditions & details.
             Conditions save on change; the header chips update live off profile. */}
         <div className="flex flex-col gap-5">
           {/* Section 1 — Conditions */}
           <div>
-            <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-3">
+            <p className="eyebrow mb-3">
               Your conditions
             </p>
             <div className="flex flex-col gap-3">
@@ -757,7 +757,7 @@ export default function ProfileScreen() {
 
           {/* Section 2 — Sub-edit rows (other profile fields) */}
           <div>
-            <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-1">
+            <p className="eyebrow mb-1">
               Profile details
             </p>
             <SubEditRow icon="scale" label="Daily calorie target" onClick={() => setSheet('calorieTarget')} />
@@ -771,7 +771,7 @@ export default function ProfileScreen() {
           </div>
 
           <div>
-            <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-1">
+            <p className="eyebrow mb-1">
               About
             </p>
             <SubEditRow icon="info" label="Important notes" onClick={() => navigate('/app/profile/important-notes')} />
@@ -790,7 +790,7 @@ export default function ProfileScreen() {
               today, so this just opens the placeholder paywall screen —
               never auto-triggered, never an interstitial. */}
           <div>
-            <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-1">
+            <p className="eyebrow mb-1">
               Upgrade
             </p>
             <SubEditRow icon="award" label="Personal Remedies Plus" onClick={() => navigate('/app/upgrade')} />
@@ -801,7 +801,7 @@ export default function ProfileScreen() {
               the email + OTP flow; signed-in shows the account email + sign
               out. Nothing here ever blocks using the app. */}
           <div>
-            <p className="font-label text-xs uppercase tracking-eyebrow text-char-400 mb-1">
+            <p className="eyebrow mb-1">
               Account
             </p>
             {user ? (

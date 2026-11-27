@@ -57,7 +57,7 @@ export default function GoodForMeSheet({ food, profile, onClose }) {
         <div className="flex items-center gap-3">
           <BackButton onClick={onClose} aria-label="Close" />
           <div className="min-w-0">
-            <p className="font-label text-[0.875rem] tracking-[0.14em] uppercase text-char-500">Check against my profile</p>
+            <p className="eyebrow">Check against my profile</p>
             <h2 className="font-display text-xl font-semibold text-char-900 leading-tight">{food?.name}</h2>
             {servingSize && <p className="text-xs text-char-500 mt-0.5">Serving size: {servingSize}</p>}
           </div>
@@ -90,8 +90,7 @@ export default function GoodForMeSheet({ food, profile, onClose }) {
               <button
                 type="button"
                 onClick={retry}
-                className="mt-3 px-5 py-2.5 rounded-xs bg-forest-700 text-white text-sm font-semibold
-                  transition-all duration-fast ease-ds-out hover:bg-forest-800 active:scale-[0.98]"
+                className="btn btn-primary btn-sm mt-3 active:scale-[0.98]"
               >
                 Retry
               </button>

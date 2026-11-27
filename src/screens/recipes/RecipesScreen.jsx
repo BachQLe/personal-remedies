@@ -1,6 +1,10 @@
-import { useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { getProfile, getRecipes, getCategoryRecipes, buildRecipeDetail } from '../../api/api.js';
+import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { CalendarPlus } from 'lucide-react';
+import { getLibrary, subscribeLibrary } from '../../state/library.js';
+import { getPlan } from '../../state/dailyPlan.js';
+import { COPY } from '../plan/plannerCopy.js';
+import { getProfile, getFavoriteCandidates, buildRecipeDetail } from '../../api/api.js';
 import FoodDetailCard from '../../components/FoodDetailCard.jsx';
 import BackButton from '../../components/shared/BackButton.jsx';
 import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
@@ -13,7 +17,6 @@ import { PLAN_SLOT_KEYS } from '../../api/config.js';
 import { GHOST_RECIPES } from '../../api/ghostData.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
 import { useSnackbar } from '../../context/SnackbarContext.jsx';
-import { bestFirst } from '../../utils/rating.js';
 
 // No demo conditions here: a missing profile means no condition-scored recipes
 // (getRecipes returns an empty list for an empty conditions array), never a
@@ -190,27 +193,18 @@ export function RecipesBrowser() {
   const fetcher = useCallback(async () => {
     let p = await getProfile();
     if (!p) p = EMPTY_PROFILE;
-    const { recipes, unscorableReason } = await getRecipes(p);
+    const { recipes, unscorableReason } = await getFavoriteCandidates(p);
     return { profile: p, recipes: recipes ?? [], unscorableReason };
   }, []);
 
   const { status, data, retry } = useAsyncData(fetcher, [], {
-    isEmpty: (d) => !bestFirst(d?.recipes ?? []).length,
+    isEmpty: (d) => !(d?.recipes ?? []).length,
   });
 
-  // Sunny's Beverage/Snack/Dessert recipes and R items beyond the top 20. They
-  // join when scored, so they never hold the list back; a failure just leaves
-  // the top 20 on screen.
-  const categoryFetcher = useCallback(async () => {
-    const p = await getProfile();
-    return p ? getCategoryRecipes(p) : { recipes: [] };
-  }, []);
-  const { status: categoryStatus, data: categoryData } = useAsyncData(categoryFetcher);
-
   const profile = data?.profile ?? null;
-  // Good choices only, best first, the same every time (Prompt B 2): neutral,
-  // harmful and unscored rows drop out, and the extras sort in with the top 20.
-  const fetchedRecipes = bestFirst([...(data?.recipes ?? []), ...(categoryData?.recipes ?? [])]);
+  // Candidates per the Meal Planner notes (v11-20-26): already rated, filtered and
+  // capped per meal by getFavoriteCandidates, so nothing more to do here.
+  const fetchedRecipes = data?.recipes ?? [];
 
   // Ghost mode: render the real layout with placeholder data while loading.
   // Kept as its own bespoke treatment (not DataState's generic skeleton) —
@@ -290,7 +284,7 @@ export function RecipesBrowser() {
   return (
     <>
     {/* Outside the ghost wrapper, whose CSS blanks all text inside it. */}
-    {(ghost || categoryStatus === 'loading') && <SlowLoadingNote className="mb-3" />}
+    {ghost && <SlowLoadingNote className="mb-3" />}
     <div className={`flex flex-col gap-5${ghost ? ' rm-ghost' : ''}`} aria-busy={ghost}>
       {ghost ? (
         <BestRecipesRails
@@ -368,6 +362,9 @@ export function RecipesBrowser() {
 }
 
 export default function RecipesScreen() {
+  const navigate = useNavigate();
+  const [library, setLibrary] = useState(getLibrary);
+  useEffect(() => subscribeLibrary(setLibrary), []);
   return (
     // Green page + white paper shell — the same two-layer background every
     // other screen uses (see HomeScreen/SuggestionsScreen). `-mb-28` cancels
@@ -385,12 +382,22 @@ export default function RecipesScreen() {
           <BackButton fallback="/app/favorites" />
           <h1 className="min-w-0 font-display text-title font-semibold leading-tight text-blue-950">Choose recipes</h1>
         </div>
-        <p className="font-sans text-sm text-blue-950/70">Pick your favorite recipes from our suggestions!</p>
       </div>
 
       {/* Content shell — full-bleed white container with rounded top corners */}
-      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col">
+      <div className="paper-panel flex flex-col">
         <RecipesBrowser />
+        <div className="mt-8">
+          <button
+            type="button"
+            disabled={library.length === 0 && !getPlan()}
+            onClick={() => navigate('/app/plan')}
+            className="btn btn-primary w-full active:scale-[0.99]"
+          >
+            <CalendarPlus size={16} aria-hidden="true" />
+            {COPY.firstRunCta}
+          </button>
+        </div>
       </div>
     </div>
   );

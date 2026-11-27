@@ -76,7 +76,7 @@ export default function Login() {
             <img src={remedyMark} alt="Personal Remedies" className="h-10 w-auto" />
           </Link>
 
-          <h1 className="font-display font-semibold tracking-[-0.02em] text-2xl text-char-900 text-center mb-1">
+          <h1 className="font-display font-semibold tracking-[-0.02em] text-2xl text-blue-950 text-center mb-1">
             Welcome back
           </h1>
           <p className="font-sans text-[1rem] text-char-500 text-center mb-8">
@@ -127,7 +127,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={sending}
-                className="w-full bg-char-900 text-[#F3EFE6] font-sans font-semibold text-[1rem] py-3 rounded-[6px] hover:bg-char-700 disabled:opacity-50 disabled:cursor-not-allowed active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
+                className="btn btn-primary w-full active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
               >
                 {sending ? "Sending…" : "Continue with email"}
               </button>
@@ -148,7 +148,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={handleGoogle}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-6 border border-sand-200 rounded-[6px] hover:bg-paper-100 active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
+                  className="btn btn-secondary w-full active:translate-y-px active:scale-[0.98] transition-all duration-[120ms]"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

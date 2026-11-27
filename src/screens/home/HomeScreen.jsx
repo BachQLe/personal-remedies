@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ease, dur, staggerDelay } from '../../lib/motion.js';
 import { ArrowRight, CalendarDays, ChevronRight, HelpCircle, Info, ListChecks, Search } from 'lucide-react';
 import PageHeader from '../../components/shared/PageHeader.jsx';
-import HomeMail from './HomeMail.jsx';
 import { storage } from '../../api/storage.js';
 import { PLAN_SLOTS } from '../../api/config.js';
 import { ensurePlanForWeek } from '../../api/planBuilder.js';
 import { getPlan, subscribePlan } from '../../state/dailyPlan.js';
 import { todayKey } from '../plan/planDates.js';
 import './HomeScreen.css';
+
+// Opacity-only entry: HomeScreen.css owns the tiles' hover/press transform.
+const MotionLink = motion.create(Link);
 
 // The two half-width tiles carry their own line break (rendered via pre-line) so they balance;
 // the full-width Meal planner stays on one line.
@@ -17,25 +21,25 @@ const SHORTCUTS = [
     to: '/app/plan',
     label: 'Meal planner',
     icon: CalendarDays,
-    tile: 'bg-forest-100',
+    tile: 'bg-forest-300',
   },
   {
     to: '/app/suggestions',
     label: 'Top\nChoices',
     icon: ListChecks,
-    tile: 'bg-lavender-100',
+    tile: 'bg-lavender-300',
   },
   {
     to: '/app/search',
     label: 'Food\nlookup',
     icon: Search,
-    tile: 'bg-yellow-200',
+    tile: 'bg-yellow-300',
   },
 ];
 
 const CARD = 'flex items-center gap-3 rounded-2xl bg-white p-4 shadow-xs text-blue-950 transition duration-fast hover:bg-sand-100 active:scale-[0.99]';
 // Same small secondary pill as the plan's Save day / Load day, on white because Home's body is paper.
-const PILL = 'tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-pill bg-white px-3 font-sans text-xs ' +
+const PILL = 'tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-md bg-white px-3 font-sans text-xs ' +
   'font-semibold text-blue-950 shadow-xs transition duration-fast hover:bg-sand-100 active:scale-95';
 
 /**
@@ -70,7 +74,7 @@ function TodayMeals({ profile }) {
   return (
     <Link to={`/app/plan?day=${day}`} className={CARD}>
       <div className="min-w-0 flex-1">
-        <p className="font-label text-xs uppercase tracking-widest text-blue-950/70">Today’s meals</p>
+        <p className="eyebrow">Today’s meals</p>
         <dl className="mt-2 flex flex-col gap-1.5 font-sans text-sm">
           {rows.map(({ slot, first }) => (
             <div key={slot.key} className="flex flex-wrap gap-x-3">
@@ -100,18 +104,24 @@ export default function HomeScreen() {
         label="Home"
         title={firstName ? `Hey, ${firstName}` : 'Hey there'}
         className="home-screen__header pb-7"
-        right={<HomeMail />}
       />
 
       <div className="home-screen__body">
         <nav className="home-shortcuts" aria-label="Explore Personal Remedies">
-          {SHORTCUTS.map(({ to, label, icon: Icon, tile }) => (
-            <Link key={to} to={to} className={`home-shortcut shadow-xs ${tile}`}>
+          {SHORTCUTS.map(({ to, label, icon: Icon, tile }, i) => (
+            <MotionLink
+              key={to}
+              to={to}
+              className={`home-shortcut shadow-xs ${tile}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: dur.base, ease: ease.out, delay: staggerDelay(i) }}
+            >
               <Icon className="home-shortcut__icon text-blue-950" size={40} strokeWidth={1.75} aria-hidden="true" />
               <span className="home-shortcut__label font-display font-semibold text-blue-950 leading-tight tracking-tight">
                 {label}
               </span>
-            </Link>
+            </MotionLink>
           ))}
         </nav>
 

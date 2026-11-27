@@ -57,7 +57,7 @@ export default function WhatsNewSheet({ messages, onDismiss, onClose }) {
             return (
               <div key={message.id} className={`rounded-lg p-4 ${tone.bg}`}>
                 <p className={`text-sm font-semibold font-sans ${tone.fg}`}>{message.title}</p>
-                <p className="text-sm text-char-700 font-sans mt-1 leading-normal">{message.body}</p>
+                <p className="text-base text-char-700 font-sans mt-1 leading-normal">{message.body}</p>
                 {dismissible && (
                   <div className="flex justify-end mt-2 -mr-2 -mb-2">
                     <button

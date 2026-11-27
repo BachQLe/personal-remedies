@@ -149,10 +149,10 @@ export default function FoodImageCard({
   return (
     <button
       onClick={handleCardClick}
-      className={`relative overflow-hidden rounded-xl text-left flex items-end
-        transition-all duration-base ease-ds-out
-        hover:-translate-y-[2px] hover:shadow-lg
-        active:translate-y-[1px] active:scale-[0.99]
+      className={`group relative overflow-hidden rounded-xl text-left flex items-end shadow-depth
+        transition-[transform,box-shadow] duration-base ease-ux-out
+        mouse:hover:-translate-y-[2px] mouse:hover:shadow-depth-lift
+        active:translate-y-px active:scale-[0.985] active:shadow-depth
         ${className}`}
     >
       {/* Holds the card's shape as a minimum height (percent padding resolves
@@ -170,7 +170,7 @@ export default function FoodImageCard({
         <img
           src={image}
           alt={imageAlt}
-          className={`absolute inset-0 w-full h-full object-cover ${dimImage ? 'brightness-[0.75]' : ''}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-transform duration-panel ease-ux-out mouse:group-hover:scale-[1.03] ${dimImage ? 'brightness-[0.75]' : ''}`}
           loading={loading}
         />
       ) : (
@@ -179,6 +179,9 @@ export default function FoodImageCard({
 
       {/* Gradient overlay */}
       <div className={`absolute inset-0 bg-gradient-to-t ${gradient}`} />
+
+      {/* Faint lit top edge for depth */}
+      <div aria-hidden="true" className="absolute inset-0 rounded-xl pointer-events-none shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]" />
 
       {/* Badge at top-left */}
       {badgeLabel && (
@@ -194,7 +197,7 @@ export default function FoodImageCard({
           }}
           className={`tap-target absolute top-3 left-3 inline-flex items-center rounded-full
             px-2.5 py-1 text-[0.875rem] font-semibold font-sans cursor-pointer
-            transition-all duration-fast hover:scale-105 active:scale-95
+            transition-transform duration-press ease-ux-out mouse:hover:scale-105 active:scale-95
             ${badgeVariantClasses[badgeVariant] || badgeVariantClasses.primary}`}
         >
           {badgeLabel}
@@ -227,8 +230,8 @@ export default function FoodImageCard({
               aria-label={actionLabel}
               className="tap-target w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm
                 flex items-center justify-center shadow-sm cursor-pointer
-                transition-all duration-fast
-                hover:bg-white hover:shadow-md active:scale-95"
+                transition-[transform,background-color,box-shadow] duration-press ease-ux-out
+                mouse:hover:bg-white mouse:hover:shadow-md active:scale-90"
             >
               {action}
             </span>

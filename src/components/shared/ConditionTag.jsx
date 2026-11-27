@@ -22,7 +22,7 @@ export default function ConditionTag({
   return (
     <span
       className={`inline-flex items-center rounded-pill font-sans font-medium
-        ${compact ? "gap-1 h-[22px] px-2 text-[0.875rem]" : "gap-2 h-[30px] px-3.5 text-sm"}
+        ${compact ? "gap-1 min-h-[22px] px-2 text-[0.875rem]" : "gap-2 min-h-[30px] px-3.5 text-sm"}
         ${solid ? "bg-forest-50 border border-transparent" : "bg-white border border-sand-200"}
         ${truncate ? "max-w-full" : ""}
         text-char-900 ${className}`}

@@ -147,7 +147,7 @@ export default function ProfileBuilder({ profile, onChange, onSubmit, saving, on
           type="button"
           onClick={onSubmit}
           disabled={conditions.length === 0 || saving}
-          className="w-full py-4 rounded-pill text-white font-semibold text-base bg-blue-950 hover:bg-blue-900 disabled:opacity-40 disabled:cursor-not-allowed min-h-[56px] font-sans focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-950"
+          className="btn btn-primary w-full disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {saving ? 'Saving your profile…' : 'Continue'}
         </button>
@@ -177,18 +177,15 @@ function ConditionsPanel({
   return (
     <section className="flex flex-col items-center h-full min-h-0">
       <div className="w-full max-w-[420px] flex flex-col flex-1 min-h-0 overflow-y-auto">
-        {!open && (
-          <div className="flex justify-center py-2 min-h-[150px]" style={{ flex: '0 1 calc(46dvh - 60px)' }}>
-            <FruitScene scene="garden" src={fruitIllustration} alt="A sunny yellow lemon laughing with delight" />
-          </div>
-        )}
+        <div className="flex justify-center flex-none h-[150px]">
+          <FruitScene scene="garden" src={fruitIllustration} alt="A sunny yellow lemon laughing with delight" />
+        </div>
         {/* Question — slides down from the top (snap) as the page opens */}
         <motion.h1
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ ...snappySpring, delay: 0.1 }}
-          className="flex-none -mx-3 text-title text-balance leading-[1.16] font-semibold tracking-tight text-center mt-3 mb-6"
-          style={{ fontFamily: 'Chillax, sans-serif' }}
+          className="font-display text-blue-950 flex-none -mx-3 text-title text-balance leading-[1.16] font-semibold tracking-tight text-center mt-2 mb-4"
         >
           Select the health topics that matter most to you
         </motion.h1>
@@ -207,7 +204,7 @@ function ConditionsPanel({
             onBlur={() => setFocused(false)}
             aria-label="Search conditions, diets, allergies"
             placeholder="Search conditions, diets, allergies…"
-            className="w-full pl-11 pr-4 py-[15px] rounded-full border-[1.5px] border-blue-950/10 bg-[#E6E8DD] text-[1rem] text-blue-950 placeholder:text-blue-950/55 font-sans shadow-sm transition-all duration-fast ease-ds-out focus:outline-none focus:border-blue-950/40 focus:shadow-sm"
+            className="w-full pl-11 pr-4 py-[15px] rounded-md border-[1.5px] border-blue-950/10 bg-[#E6E8DD] text-[1rem] text-blue-950 placeholder:text-blue-950/55 font-sans shadow-sm transition-all duration-fast ease-ds-out focus:outline-none focus:border-blue-950/40 focus:shadow-sm"
           />
         </div>
 
@@ -295,7 +292,7 @@ function ConditionsPanel({
                 </motion.button>
               ))}
               {conditionQuery.trim() && conditionResults.length === 0 && (
-                <p className="text-[0.9375rem] text-center py-8 font-sans font-medium tracking-wide" style={{ color: '#6B645A' }}>
+                <p className="text-base text-center py-8 font-sans font-medium tracking-wide" style={{ color: '#6B645A' }}>
                   No conditions found for "{conditionQuery}"
                 </p>
               )}

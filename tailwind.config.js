@@ -194,6 +194,12 @@ export default {
         nav: "0 1px 0 rgba(45, 36, 24, 0.06), 0 8px 24px rgba(45, 36, 24, 0.06)",
         fab: "0 6px 20px rgba(30, 71, 54, 0.28)",
         inset: "inset 0 1px 2px rgba(45, 36, 24, 0.06)",
+        // Layered depth: top-edge highlight + tight contact shadow + soft ambient.
+        depth: "inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 1px 2px rgba(45, 36, 24, 0.05), 0 4px 12px rgba(45, 36, 24, 0.06), 0 12px 28px rgba(45, 36, 24, 0.05)",
+        "depth-lift": "inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 4px rgba(45, 36, 24, 0.06), 0 10px 24px rgba(45, 36, 24, 0.10), 0 22px 44px rgba(45, 36, 24, 0.08)",
+        // Buttons: lit top edge, pressed-down version collapses the lift.
+        btn: "inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 1px 2px rgba(45, 36, 24, 0.14), 0 6px 16px rgba(45, 36, 24, 0.12)",
+        "btn-down": "inset 0 1px 2px rgba(0, 0, 0, 0.18), 0 1px 1px rgba(45, 36, 24, 0.10)",
       },
       letterSpacing: {
         eyebrow: "0.14em",
@@ -202,11 +208,19 @@ export default {
       transitionTimingFunction: {
         "ds-out": "cubic-bezier(0.22, 0.61, 0.36, 1)",
         "ds-spring": "cubic-bezier(0.34, 1.4, 0.64, 1)",
+        // ux-motion tokens — mirror src/lib/motion.js `ease`.
+        "ux-out": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "ux-in": "cubic-bezier(0.7, 0, 0.84, 0)",
+        "ux-inout": "cubic-bezier(0.65, 0, 0.35, 1)",
       },
       transitionDuration: {
         fast: "120ms",
         base: "200ms",
         slow: "320ms",
+        // mirror src/lib/motion.js `dur`
+        press: "120ms",
+        exit: "140ms",
+        panel: "360ms",
       },
       keyframes: {
         // BottomSheet enter — slide up from below + fade in.
@@ -219,8 +233,22 @@ export default {
           "0%": { opacity: "0", backdropFilter: "blur(0px)" },
           "100%": { opacity: "1", backdropFilter: "blur(4px)" },
         },
+        // SaveButton "moment that matters": overshoot to ~1.28x, dip, settle.
+        "save-pop": {
+          "0%": { transform: "scale(1)" },
+          "38%": { transform: "scale(1.28)" },
+          "72%": { transform: "scale(0.95)" },
+          "100%": { transform: "scale(1)" },
+        },
+        // Secondary action: quiet ring ripples out and fades.
+        "save-ring": {
+          "0%": { transform: "scale(0.8)", opacity: "0.7" },
+          "100%": { transform: "scale(1.7)", opacity: "0" },
+        },
       },
       animation: {
+        "save-pop": "save-pop 420ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "save-ring": "save-ring 450ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
         // Quick & snappy — ds-out easing, ~220ms.
         "sheet-up": "sheet-up 220ms cubic-bezier(0.22, 0.61, 0.36, 1)",
         "backdrop-in": "backdrop-in 220ms ease-out",
@@ -230,5 +258,8 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // `mouse:` — apply only on real pointers, so touch devices never get stuck hover states.
+    ({ addVariant }) => addVariant("mouse", "@media (hover: hover) and (pointer: fine)"),
+  ],
 };

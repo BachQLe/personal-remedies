@@ -6,7 +6,7 @@ function Button({ onClick, ariaLabel }) {
     <button
       type="button"
       onClick={onClick}
-      className="tap-target w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-colors duration-fast hover:bg-sand-100 flex-shrink-0"
+      className="tap-target w-9 h-9 flex items-center justify-center rounded-full bg-white border border-sand-200 text-char-900 shadow-xs transition-[transform,background-color,box-shadow] duration-press ease-ux-out mouse:hover:bg-sand-100 mouse:hover:shadow-sm active:scale-[0.92] flex-shrink-0"
       aria-label={ariaLabel}
     >
       <BackArrow aria-hidden="true" />

@@ -17,7 +17,7 @@ export default function HowToUseScreen() {
           How to use
         </h1>
       </div>
-      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-6 pb-28 flex flex-col gap-6">
+      <div className="paper-panel flex flex-col gap-6">
         <ol className="flex flex-col gap-4">
           {STEPS.map((step, i) => (
             <li key={step} className="flex gap-3">
@@ -27,11 +27,11 @@ export default function HowToUseScreen() {
               >
                 {i + 1}
               </span>
-              <p className="min-w-0 pt-0.5 text-sm text-char-900 font-sans leading-relaxed">{step}</p>
+              <p className="min-w-0 pt-0.5 text-base text-char-900 font-sans leading-relaxed">{step}</p>
             </li>
           ))}
         </ol>
-        <p className="rounded-xl bg-white p-4 text-sm text-char-900 font-sans leading-relaxed">{COPY.howToUseNote}</p>
+        <p className="rounded-xl bg-white p-4 text-base text-char-900 font-sans leading-relaxed">{COPY.howToUseNote}</p>
       </div>
     </div>
   );

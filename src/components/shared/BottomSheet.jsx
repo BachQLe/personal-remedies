@@ -27,7 +27,9 @@
  *     button instead of hunting for a focusable backdrop.
  */
 import { useEffect, useId, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Icon from "./Icon.jsx";
+import { ease, dur } from "../../lib/motion.js";
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -106,51 +108,69 @@ export default function BottomSheet({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
 
-  if (!open) return null;
-
   const labelProps = title
     ? { "aria-labelledby": titleId }
     : { "aria-label": ariaLabel || "Dialog" };
 
+  // Enter: ease-out, slides up. Exit: faster, ease-in. Both retarget from the
+  // current value, so a close mid-open (or reopen mid-close) never jumps.
+  const enter = { duration: dur.panel, ease: ease.out };
+  const exit = { duration: dur.exit, ease: ease.in };
+
   return (
-    <div className={`fixed inset-0 ${zClass} flex items-end justify-center`}>
-      {/* Backdrop — mouse-only affordance by design; keyboard users close via
-          Escape or a real close/back button (see docblock above). */}
-      <div
-        className="absolute inset-0 bg-char-900/40 backdrop-blur-sm animate-backdrop-in"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      {/* Sheet — slides up on open */}
-      <div
-        ref={sheetRef}
-        role="dialog"
-        aria-modal="true"
-        tabIndex={-1}
-        {...labelProps}
-        className="relative bg-white rounded-t-2xl shadow-sheet max-h-[85vh] flex flex-col w-full max-w-[430px] animate-sheet-up outline-none"
-      >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1 flex-shrink-0" aria-hidden="true">
-          <div className="w-10 h-1 rounded-full bg-sand-200" />
-        </div>
-        {title && (
-          <div className="flex items-center justify-between px-5 pb-3 pt-1 flex-shrink-0 border-b border-sand-200">
-            <h2 id={titleId} className="font-display font-semibold text-blue-950 text-lg tracking-tightish">
-              {title}
-            </h2>
-            <button
-              onClick={onClose}
-              className="tap-target w-8 h-8 rounded-full bg-paper-200 flex items-center justify-center text-char-500
-                transition-colors duration-fast ease-ds-out hover:bg-sand-200"
-              aria-label="Close"
-            >
-              <Icon name="x" size={18} aria-hidden="true" />
-            </button>
+    <AnimatePresence>
+      {open && (
+        <div key="sheet" className={`fixed inset-0 ${zClass} flex items-end justify-center`}>
+          {/* Backdrop — mouse-only affordance by design; keyboard users close via
+              Escape or a real close/back button (see docblock above). */}
+          <motion.div
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: enter }}
+            exit={{ opacity: 0, transition: exit }}
+          >
+            <div className="absolute inset-0 bg-char-900/40 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+          </motion.div>
+          {/* Sheet — slides up on open. The motion wrapper only animates; the
+              dialog itself stays a plain element. */}
+          <motion.div
+            className="relative w-full max-w-[430px]"
+            initial={{ y: "24%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1, transition: enter }}
+            exit={{ y: "16%", opacity: 0, transition: exit }}
+          >
+          <div
+            ref={sheetRef}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
+            {...labelProps}
+            className="bg-white rounded-t-2xl shadow-sheet max-h-[85vh] flex flex-col w-full outline-none"
+          >
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0" aria-hidden="true">
+              <div className="w-10 h-1 rounded-full bg-paper-200" />
+            </div>
+            {title && (
+              <div className="flex items-center justify-between px-5 pb-3 pt-1 flex-shrink-0 border-b border-paper-200">
+                <h2 id={titleId} className="font-display font-semibold text-blue-950 text-lg tracking-tightish">
+                  {title}
+                </h2>
+                <button
+                  onClick={onClose}
+                  className="tap-target w-8 h-8 rounded-full bg-paper-200 flex items-center justify-center text-char-500
+                    transition-[transform,background-color] duration-press ease-ux-out mouse:hover:bg-sand-200 active:scale-90"
+                  aria-label="Close"
+                >
+                  <Icon name="x" size={18} aria-hidden="true" />
+                </button>
+              </div>
+            )}
+            <div className="overflow-y-auto overscroll-contain flex-1 px-5 py-4">{children}</div>
           </div>
-        )}
-        <div className="overflow-y-auto overscroll-contain flex-1 px-5 py-4">{children}</div>
-      </div>
-    </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

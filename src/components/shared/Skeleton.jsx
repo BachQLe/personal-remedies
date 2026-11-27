@@ -14,7 +14,7 @@ export default function Skeleton({
   children,
 }) {
   const base = SHAPE_CLS[shape] || SHAPE_CLS.text;
-  const bg = tint || 'bg-sand-200';
+  const bg = tint || 'bg-paper-200';
 
   if (children) {
     return (
@@ -25,7 +25,7 @@ export default function Skeleton({
   }
 
   return (
-    <div className={`animate-pulse ${bg} ${base} ${className}`} />
+    <div className={`skeleton-shimmer ${bg} ${base} ${className}`} />
   );
 }
 

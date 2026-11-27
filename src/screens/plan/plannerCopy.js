@@ -1,5 +1,3 @@
-import { PLAN_SLOTS } from '../../api/config.js';
-
 /**
  * plannerCopy.js - every user-facing string of the My Favorites + New Meal Plan
  * flow (checklist 1.24), in one file so the copy review is a one-file job.
@@ -8,18 +6,6 @@ import { PLAN_SLOTS } from '../../api/config.js';
 
 /** Layer for this flow's sheets: above the app-shell toast (z-50), so a toast never covers a sheet's title. */
 export const SHEET_Z = 'z-[60]';
-
-// At or below this many favorites for a meal, the randomizer repeats itself.
-const NUDGE_AT_OR_BELOW = 3;
-
-/**
- * Labels of the meals too short on favorites for the plan to vary day to day (1.25).
- * @param {Object<string, Array>} bySlot - favoritesBySlot's result
- * @returns {string[]}
- */
-export function mealsShortOnFavorites(bySlot) {
-  return PLAN_SLOTS.filter((slot) => bySlot[slot.key].length <= NUDGE_AT_OR_BELOW).map((slot) => slot.label);
-}
 
 export const COPY = {
   // Step labels: one instruction at the top of each page (checklist 1.24).
@@ -33,7 +19,7 @@ export const COPY = {
   // How to use page (Home), the interim stand-in for the 9.10 slideshow. DRAFT (C13).
   howToUseNote:
     "Important note: if you change your health profile, we'll remove any favorites and meal plans that are no longer recommended for you, and show you which ones first.",
-  planTitle: 'Meal Planner',
+  planTitle: 'Plan',
 
   // My Favorites page
   favoritesTitle: 'My Favorites',
@@ -61,9 +47,7 @@ export const COPY = {
   tabPlan: 'My Meal Plan',
   newPlan: 'New meal plan',
   firstRunTitle: 'No meal plan yet',
-  firstRunBody: 'Choose your favorite recipes, then build a meal plan around it.',
   firstRunCta: 'Build my meal plan',
-  pickFavoritesCta: 'Pick favorite recipes',
   saveWeek: 'Save week',
   saveDay: 'Save day',
   loadDay: 'Load day',
@@ -113,15 +97,12 @@ export const COPY = {
   // New Meal Plan sheet
   newPlanTitle: 'New meal plan',
   randomize: 'Randomize from my favorites',
-  randomizeHint: 'Builds a full week in one tap',
   building: 'Building…',
   loadWeek: 'Load a favorite week',
   loadWeekHint: (n) => `${n} saved`,
   loadWeekNone: 'No Favorite Weekly Meal Plans yet',
   loadWeekTitle: 'Load a favorite week',
   loadWeekSheetHint: 'This replaces your whole week. You can undo right after.',
-  nudge: 'Tip: pick more than 3 favorites per meal for more variety',
-  nudgeShort: (labels) => `Short on: ${labels.join(', ')}`,
   noFavorites: 'None of your favorites fit a meal yet. Pick a few first, then come back.',
   backToOptions: 'Back to new meal plan options',
 

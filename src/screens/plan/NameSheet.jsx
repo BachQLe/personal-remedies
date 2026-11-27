@@ -21,15 +21,12 @@ export default function NameSheet({ title, placeholder, onSubmit, onClose, updat
 
   return (
     <BottomSheet open onClose={onClose} title={title} zClass={SHEET_Z}>
-      <p className="mb-4 font-sans text-sm text-char-500">{COPY.stepSave}</p>
-
       {updateName && (
         <div className="mb-5 flex flex-col gap-3">
           <button
             type="button"
             onClick={onUpdate}
-            className="min-h-[44px] rounded-pill bg-blue-950 px-4 py-3 font-sans text-sm font-semibold text-white
-              transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+            className="btn btn-primary active:scale-[0.99]"
           >
             {COPY.update(updateName)}
           </button>
@@ -55,14 +52,12 @@ export default function NameSheet({ title, placeholder, onSubmit, onClose, updat
             onChange={(e) => setName(e.target.value)}
             placeholder={placeholder}
             maxLength={40}
-            className="min-h-[44px] min-w-0 flex-1 rounded-xl border border-sand-200 bg-paper-100 px-3 py-2.5
-              font-sans text-base text-blue-950 placeholder:text-char-400"
+            className="field min-h-[44px] min-w-0 flex-1 placeholder:text-char-400"
           />
           <button
             type="submit"
-            className={`min-h-[44px] shrink-0 rounded-pill px-5 py-2.5 font-sans text-sm font-semibold
-              transition duration-fast active:scale-[0.99]
-              ${updateName ? 'border border-sand-200 bg-white text-blue-950 hover:bg-paper-200' : 'bg-blue-950 text-white hover:bg-blue-900'}`}
+            className={`btn btn-sm shrink-0 active:scale-[0.99]
+              ${updateName ? 'btn-secondary' : 'btn-primary'}`}
           >
             {updateName ? COPY.saveAsNew : COPY.save}
           </button>

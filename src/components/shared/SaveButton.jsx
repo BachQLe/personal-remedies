@@ -47,6 +47,8 @@ import { getSaveBlockReason, SAVE_BLOCK_MESSAGES } from '../../utils/saveGate.js
 
 export default function SaveButton({ item, size = 18, onBlocked, className = '' }) {
   const [saved, setSaved] = useState(() => getLibrary().some((f) => f.id === item?.id));
+  // Bumped on each user-initiated save; remounts the icon/ring so the CSS pop replays.
+  const [popKey, setPopKey] = useState(0);
 
   useEffect(() => {
     const unsubscribe = subscribeLibrary((items) => {
@@ -67,6 +69,7 @@ export default function SaveButton({ item, size = 18, onBlocked, className = '' 
       onBlocked?.(SAVE_BLOCK_MESSAGES[blockReason]);
       return;
     }
+    setPopKey((k) => k + 1);
     addToLibrary({
       id: item.id,
       name: item.name,
@@ -101,7 +104,7 @@ export default function SaveButton({ item, size = 18, onBlocked, className = '' 
       aria-label={ariaLabel}
       className={`tap-target inline-flex items-center justify-center w-8 h-8 rounded-full
         bg-white/90 backdrop-blur-sm shadow-sm cursor-pointer
-        transition-all duration-fast hover:bg-white hover:shadow-md active:scale-95
+        transition-[transform,background-color,box-shadow,color] duration-press ease-ux-out mouse:hover:bg-white mouse:hover:shadow-md active:scale-90
         ${saved ? 'text-forest-700' : blockReason ? 'text-char-400' : 'text-char-700'}
         ${className}`}
     >
@@ -115,7 +118,20 @@ export default function SaveButton({ item, size = 18, onBlocked, className = '' 
           />
         </span>
       ) : (
-        <Bookmark size={size} fill={saved ? 'currentColor' : 'none'} aria-hidden="true" />
+        <>
+          {/* Secondary action: a quiet ring ripples out behind the pop. */}
+          {popKey > 0 && (
+            <span
+              key={`ring-${popKey}`}
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full border-2 border-forest-400 pointer-events-none animate-save-ring"
+            />
+          )}
+          {/* Exaggerated pop: overshoot to ~1.25x, dip, settle. */}
+          <span key={`pop-${popKey}`} className={`inline-flex ${popKey > 0 ? 'animate-save-pop' : ''}`}>
+            <Bookmark size={size} fill={saved ? 'currentColor' : 'none'} aria-hidden="true" />
+          </span>
+        </>
       )}
     </span>
   );

@@ -35,6 +35,8 @@
  * that simply hasn't been checked yet.
  */
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { ease, dur, staggerDelay } from '../../lib/motion.js';
 import { useParams, Navigate } from 'react-router-dom';
 import { getFineFoodGroups, getFineGroupSuggestions, getGroupLabel } from '../../api/api.js';
 import { SUGGEST_MAX_ROWS } from '../../api/config.js';
@@ -52,7 +54,7 @@ import { resolveProfileWithConditions } from './profileFallback.js';
 // ── Skeleton row (same card shape RankedRow renders, so load→loaded doesn't jump) ─
 
 function SkeletonRow() {
-  return <div className="h-[52px] rounded-xl animate-pulse bg-sand-200" />;
+  return <div className="h-[52px] rounded-sm animate-pulse bg-sand-200" />;
 }
 
 function isItemsEmpty(data) {
@@ -137,7 +139,7 @@ function FineGroupDetail({ fineGroupId }) {
           {/* Real history back (4.10); the fallback is the canonical URL,
               same as the invalid-param redirect above, for deep links. */}
           <BackButton fallback="/app/suggestions?tab=groups&mode=fine" />
-          <h1 className="font-display text-2xl font-semibold text-blue-950 leading-tight min-w-0">
+          <h1 className="font-display text-title font-semibold text-blue-950 leading-tight text-balance min-w-0">
             {groupLabel}
           </h1>
         </div>
@@ -148,7 +150,7 @@ function FineGroupDetail({ fineGroupId }) {
         <div className="flex flex-col gap-3">
           {status === 'loading' ? (
             <>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 {[0, 1, 2, 3, 4, 5].map((i) => <SkeletonRow key={i} />)}
               </div>
               <SlowLoadingNote />
@@ -166,16 +168,22 @@ function FineGroupDetail({ fineGroupId }) {
               }
               emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
             >
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2.5">
                 <CoverageNote coverage={data?.coverage} />
-                {items.map((food) => (
-                  <RankedRow
+                {items.map((food, i) => (
+                  <motion.div
                     key={food.id}
-                    food={food}
-                    studyCount={food.referenceTotal}
-                    showGroup={false}
-                    onSelect={handleSelectFood}
-                  />
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: dur.base, ease: ease.out, delay: staggerDelay(i) }}
+                  >
+                    <RankedRow
+                      food={food}
+                      studyCount={food.referenceTotal}
+                      showGroup={false}
+                      onSelect={handleSelectFood}
+                    />
+                  </motion.div>
                 ))}
                 {/* /suggest stops at 20 rows, so say so rather than imply this is everything. */}
                 {items.length >= SUGGEST_MAX_ROWS && (

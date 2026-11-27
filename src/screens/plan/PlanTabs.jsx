@@ -1,7 +1,7 @@
 /**
  * PlanTabs - the My Meal Plan | My Favorites pair at the top of the plan screen.
- * My Favorites is its own screen, so a tap is a real navigation that its back
- * button returns from.
+ * My Favorites is its own route, but these are true tabs: a tap REPLACES the
+ * history entry (like the Best & Worst tabs), so there is no back stack per tab.
  */
 import { useNavigate } from 'react-router-dom';
 import PillSwitcher from '../../components/shared/PillSwitcher.jsx';
@@ -18,7 +18,7 @@ export default function PlanTabs({ value }) {
     <PillSwitcher
       options={TABS}
       value={value}
-      onChange={(to) => { if (to !== value) navigate(to); }}
+      onChange={(to) => { if (to !== value) navigate(to, { replace: true }); }}
     />
   );
 }

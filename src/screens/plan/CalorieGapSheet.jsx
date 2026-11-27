@@ -41,15 +41,13 @@ export default function CalorieGapSheet({ need, total, onClose, onAddMore }) {
         <Link
           to="/app/favorites"
           onClick={onAddMore}
-          className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-pill border border-sand-200 bg-white py-3
-            font-sans text-sm font-semibold text-blue-950 transition duration-fast hover:bg-paper-200 active:scale-[0.99]"
+          className="btn btn-secondary flex-1 active:scale-[0.99]"
         >
           {COPY.gapAddMore}
         </Link>
         <button
           onClick={onClose}
-          className="min-h-[44px] flex-1 rounded-pill bg-blue-950 py-3 font-sans text-sm font-semibold text-white
-            transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+          className="btn btn-primary flex-1 active:scale-[0.99]"
         >
           {COPY.gapContinue}
         </button>

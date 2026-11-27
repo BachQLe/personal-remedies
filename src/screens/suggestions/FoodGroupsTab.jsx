@@ -36,8 +36,8 @@ import GroupsTab from './GroupsTab.jsx';
 import SuggestTab from './SuggestTab.jsx';
 
 const MODE_OPTIONS = [
-  { key: 'basic', label: 'Choose this, not that', tone: 'neutral' },
-  { key: 'fine', label: 'Suggestions', tone: 'neutral' },
+  { key: 'basic', label: 'Broad categories', tone: 'neutral' },
+  { key: 'fine', label: 'Narrow categories', tone: 'neutral' },
 ];
 
 const SUBTITLE = {
@@ -65,7 +65,7 @@ export default function FoodGroupsTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      <PillSwitcher options={MODE_OPTIONS} value={mode} onChange={setMode} size="sm" variant="outline" />
+      <PillSwitcher options={MODE_OPTIONS} value={mode} onChange={setMode} size="xs" variant="outline" />
 
       <p className="text-sm text-blue-950/70 font-sans">{SUBTITLE[mode]}</p>
 

@@ -9,10 +9,18 @@ import { createRoot } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('framer-motion', () => ({
-  motion: { div: ({ children }) => <div>{children}</div> },
-  AnimatePresence: ({ children }) => <>{children}</>,
-}));
+// Keep DOM/a11y props (role, aria-*, ref, onClick…); drop framer-only motion props.
+vi.mock('framer-motion', () => {
+  const MOTION = new Set(['initial', 'animate', 'exit', 'transition', 'whileTap', 'whileHover', 'layout', 'layoutId']);
+  const strip = (Tag) => ({ children, ...props }) => {
+    const dom = Object.fromEntries(Object.entries(props).filter(([k]) => !MOTION.has(k)));
+    return <Tag {...dom}>{children}</Tag>;
+  };
+  return {
+    motion: { div: strip('div'), span: strip('span') },
+    AnimatePresence: ({ children }) => <>{children}</>,
+  };
+});
 vi.mock('../../../components/FoodDetailCard.jsx', () => ({ default: () => null }));
 const show = vi.fn();
 vi.mock('../../../context/SnackbarContext.jsx', () => ({ useSnackbar: () => ({ show }) }));
@@ -54,12 +62,12 @@ afterEach(() => {
 });
 
 describe('FavoritesScreen', () => {
-  it('has a back button and one title, without the My Favorites / My Meal Plan pair (7.1)', async () => {
+  it('looks like the plan screen: Plan title, no back button, both tabs', async () => {
     await mount();
-    expect(container.querySelector('button[aria-label="Go back"]')).not.toBeNull();
-    expect(container.querySelector('h1').textContent).toBe('My Favorites');
-    expect(container.textContent.match(/My Favorites/g)).toHaveLength(1);
-    expect(container.textContent).not.toContain('My Meal Plan');
+    expect(container.querySelector('button[aria-label="Go back"]')).toBeNull();
+    expect(container.querySelector('h1').textContent).toBe('Plan');
+    expect(byText('button', 'My Meal Plan')).toBeDefined();
+    expect(byText('button', 'My Favorites')).toBeDefined();
   });
 
   it('with no favorites, shows an empty state that links to Browse recipes', async () => {

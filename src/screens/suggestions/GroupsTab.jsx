@@ -26,6 +26,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ease, dur, staggerDelay } from '../../lib/motion.js';
 import { getGroupLabels, getFineGroupLabelsByCoarse } from '../../api/api.js';
 import { COARSE_GROUP_LABELS } from '../../api/config.js';
 import { COARSE_GROUP_IMAGES } from '../../assets/food-groups/index.js';
@@ -49,10 +51,10 @@ function SkeletonGrid() {
           key={group}
           className="flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs"
         >
-          <div className="w-16 h-16 rounded-lg bg-sand-200 animate-pulse flex-shrink-0" />
+          <div className="w-16 h-16 rounded-lg bg-paper-200 animate-pulse flex-shrink-0" />
           <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-            <div className="h-4 w-1/2 rounded bg-sand-200 animate-pulse" />
-            <div className="h-3 w-3/4 rounded bg-sand-200 animate-pulse" />
+            <div className="h-4 w-1/2 rounded bg-paper-200 animate-pulse" />
+            <div className="h-3 w-3/4 rounded bg-paper-200 animate-pulse" />
           </div>
         </div>
       ))}
@@ -63,15 +65,20 @@ function SkeletonGrid() {
 function CategoryGrid({ coarseLabels, fineLabelsByGroup, onOpen }) {
   return (
     <div className="flex flex-col gap-2.5">
-      {CATEGORY_GRID_GROUPS.map((group) => {
+      {CATEGORY_GRID_GROUPS.map((group, i) => {
         const label = coarseLabels[group] ?? COARSE_GROUP_LABELS[group] ?? group;
         const fineLine = (fineLabelsByGroup[group] ?? []).join(' · ');
         return (
-          <button
+          <motion.div
             key={group}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: dur.base, ease: ease.out, delay: staggerDelay(i) }}
+          >
+          <button
             onClick={() => onOpen(group)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs text-left
-              transition-all duration-fast hover:border-forest-300 hover:shadow-card active:scale-[0.99]"
+            className="list-row
+              transition-all duration-fast active:scale-[0.99]"
           >
             <img
               src={COARSE_GROUP_IMAGES[group]}
@@ -81,11 +88,12 @@ function CategoryGrid({ coarseLabels, fineLabelsByGroup, onOpen }) {
             <div className="min-w-0 flex-1">
               <p className="font-sans text-base font-semibold text-char-900 leading-snug">{label}</p>
               {fineLine && (
-                <p className="text-xs font-sans font-semibold uppercase tracking-wide text-char-700 mt-0.5">{fineLine}</p>
+                <p className="text-sm font-sans font-medium text-char-500 mt-0.5">{fineLine}</p>
               )}
             </div>
             <ChevronRight size={16} className="text-char-400 shrink-0" aria-hidden="true" />
           </button>
+          </motion.div>
         );
       })}
     </div>

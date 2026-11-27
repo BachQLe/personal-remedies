@@ -1,17 +1,16 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import Icon from '../shared/Icon.jsx';
+import { ease, dur, spring, sliderSpring } from '../../lib/motion.js';
 
 const TABS = [
-  // `alsoActive`: a sibling route that belongs to this tab's flow (My Favorites is part of Plan).
-  { to: '/app/plan', label: 'Plan', icon: 'clipboard-list', alsoActive: '/app/favorites' },
+  // `alsoActive`: a sibling route that belongs to this tab's flow (My Favorites and Choose recipes are part of Plan).
+  { to: '/app/plan', label: 'Plan', icon: 'clipboard-list', alsoActive: ['/app/favorites', '/app/recipes'] },
   { to: '/app/search', label: 'Search', icon: 'search' },
   { to: '/app/home', label: 'Home', icon: 'home' },
   { to: '/app/suggestions', label: 'Choices', icon: 'list' },
   { to: '/app/profile', label: 'Profile', icon: 'user' },
 ];
-
-const PILL_SPRING = { type: 'spring', stiffness: 420, damping: 34 };
 
 export default function TabBar() {
   const { pathname } = useLocation();
@@ -30,18 +29,22 @@ export default function TabBar() {
                 className="tabbar-link relative flex items-center justify-center rounded-md"
               >
                 {({ isActive: routeActive }) => {
-                  const isActive = routeActive || pathname === tab.alsoActive;
+                  const isActive = routeActive || tab.alsoActive?.includes(pathname);
                   return (
                   <>
                     {isActive && (
                       <motion.span
                         layoutId="tabbar-pill"
-                        transition={PILL_SPRING}
-                        className="absolute inset-0 rounded-md bg-white"
+                        transition={sliderSpring}
+                        className="absolute inset-0"
                         aria-hidden="true"
-                      />
+                      >
+                        <span className="squash-stretch block w-full h-full rounded-md bg-white" />
+                      </motion.span>
                     )}
-                    <span
+                    <motion.span
+                      whileTap={{ scale: 0.92 }}
+                      transition={{ duration: dur.press, ease: ease.out }}
                       className={`relative flex items-center gap-1.5 transition-colors duration-fast ${
                         isActive ? 'text-[#1A1F2B]' : 'text-[#A3ABBD]'
                       }`}
@@ -53,15 +56,15 @@ export default function TabBar() {
                             key="label"
                             initial={{ opacity: 0, width: 0 }}
                             animate={{ opacity: 1, width: 'auto' }}
-                            exit={{ opacity: 0, width: 0 }}
-                            transition={{ duration: 0.18, ease: 'easeOut' }}
+                            exit={{ opacity: 0, width: 0, transition: { duration: dur.exit, ease: ease.in } }}
+                            transition={{ duration: dur.base, ease: ease.out }}
                             className="tabbar-label overflow-hidden whitespace-nowrap text-[0.875rem] font-semibold font-sans"
                           >
                             {tab.label}
                           </motion.span>
                         )}
                       </AnimatePresence>
-                    </span>
+                    </motion.span>
                   </>
                   );
                 }}

@@ -40,7 +40,7 @@ export default function SlotSection({
   return (
     <section className={ghost ? 'rm-ghost' : ''}>
       <div className="mb-4 flex flex-col gap-2">
-        <p className="flex items-center gap-1.5 font-label text-xs uppercase tracking-widest text-blue-950/70">
+        <p className="eyebrow flex items-center gap-1.5">
           {SlotIcon && <SlotIcon size={14} strokeWidth={2} aria-hidden="true" />}
           {slot.label}
         </p>

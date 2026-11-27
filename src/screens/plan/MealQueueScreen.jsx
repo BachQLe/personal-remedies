@@ -4,12 +4,13 @@
  * week card holds the day strip plus New meal plan, Save week and Load week.
  * Each day lists its meals with + (add a favorite) and X (remove); Save day /
  * Load day sit next to the day's calories at the top of the day. My Favorites /
- * My Meal Plan tabs on top. No calendars, no shuffling, no regenerating.
+ * My Meal Plan tabs on top. With no favorites and no plan it redirects to Choose recipes (/app/recipes).
+ * No calendars, no shuffling, no regenerating.
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Printer, Share2, HelpCircle, CalendarPlus, Bookmark, ArrowRight, FolderOpen } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import PageHeader from '../../components/shared/PageHeader.jsx';
 import EmptyState from '../../components/shared/EmptyState.jsx';
 import DataState, { SlowLoadingNote } from '../../components/shared/DataState.jsx';
@@ -22,7 +23,6 @@ import { useOnline, planLoadState } from './usePlanLoadState.js';
 import SlotSection from './SlotSection.jsx';
 import DayStrip from './DayStrip.jsx';
 import PlanTabs from './PlanTabs.jsx';
-import FavoritesNudge from './FavoritesNudge.jsx';
 import HowToUseSheet from './HowToUseSheet.jsx';
 import SuggestionsSheet from './SuggestionsSheet.jsx';
 import CalorieGapSheet from './CalorieGapSheet.jsx';
@@ -92,7 +92,14 @@ function CalorieLine({ slots }) {
   );
 }
 
+// No favorites and no plan yet: nothing to plan from, so go straight to Choose recipes.
+// replace, so Back from Choose recipes doesn't bounce off this redirect again.
 export default function MealQueueScreen() {
+  if (!getLibrary().length && !getPlan()) return <Navigate to="/app/recipes" replace />;
+  return <MealQueue />;
+}
+
+function MealQueue() {
   const { show } = useSnackbar();
   const [plan, setPlanState] = useState(getPlan);
   const [library, setLibrary] = useState(getLibrary);
@@ -188,7 +195,6 @@ export default function MealQueueScreen() {
 
   // No plan once the profile has loaded: first-run empty state.
   const firstRunEmpty = !building && !plan;
-  const noFavorites = library.length === 0;
 
   // Print view model from the REAL plan only, never ghost data.
   const printModel = plan ? buildPrintModel(plan, { conditionNames }) : null;
@@ -387,7 +393,6 @@ export default function MealQueueScreen() {
           `.plan-print-view` (bottom of this file) renders on paper. */}
       <PageHeader
         title={COPY.planTitle}
-        description={plan ? COPY.stepDay : COPY.stepGenerate}
         className="bg-forest-300 rm-print-hide"
         right={
           <div className="flex items-center gap-1 shrink-0 -mr-1">
@@ -415,7 +420,7 @@ export default function MealQueueScreen() {
 
       {/* White paper panel: full-bleed, rounded top corners; its pb-28 clears
           the floating TabBar and paints paper behind it. */}
-      <div className="flex-1 bg-paper-100 rounded-t-2xl px-5 pt-5 pb-28 shadow-[0_-2px_16px_rgba(45,36,24,0.05)] flex flex-col gap-8 mt-4 rm-print-hide">
+      <div className="paper-panel flex flex-col gap-8 mt-4 rm-print-hide">
         <PlanTabs value="/app/plan" />
 
         {!firstRunEmpty && (
@@ -425,8 +430,7 @@ export default function MealQueueScreen() {
               <button
                 type="button"
                 onClick={() => setNewPlanOpen(true)}
-                className="inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-pill bg-blue-950 px-4
-                  font-sans text-sm font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+                className="btn btn-primary w-full active:scale-[0.99]"
               >
                 <CalendarPlus size={16} aria-hidden="true" />
                 {COPY.newPlan}
@@ -436,8 +440,7 @@ export default function MealQueueScreen() {
                   type="button"
                   onClick={() => setSaveWeekOpen(true)}
                   disabled={showGhost}
-                  className={`inline-flex min-h-[44px] flex-[1_1_9rem] items-center justify-center gap-2 rounded-pill bg-paper-100 px-4 font-sans text-sm
-                    font-semibold text-blue-950 transition duration-fast active:scale-95
+                  className={`btn btn-secondary btn-sm bg-paper-100 border-transparent flex-[1_1_9rem] active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
                   <Bookmark size={16} aria-hidden="true" />
@@ -447,8 +450,7 @@ export default function MealQueueScreen() {
                   type="button"
                   onClick={() => setLoadWeekOpen(true)}
                   disabled={showGhost}
-                  className={`inline-flex min-h-[44px] flex-[1_1_9rem] items-center justify-center gap-2 rounded-pill bg-paper-100 px-4 font-sans text-sm
-                    font-semibold text-blue-950 transition duration-fast active:scale-95
+                  className={`btn btn-secondary btn-sm bg-paper-100 border-transparent flex-[1_1_9rem] active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
                   <FolderOpen size={16} aria-hidden="true" />
@@ -472,41 +474,18 @@ export default function MealQueueScreen() {
           <EmptyState
             icon="calendar"
             title={COPY.firstRunTitle}
-            body={COPY.firstRunBody}
             size="lg"
             iconBgClassName="bg-blue-50"
             iconClassName="text-blue-950"
             action={
               <div className="flex flex-col items-center gap-1">
-                {noFavorites ? (
-                  <>
-                    <Link
-                      to="/app/favorites"
-                      className="inline-flex min-h-[48px] items-center gap-2 rounded-pill bg-blue-950 px-7 py-3.5 font-sans text-base
-                    font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
-                    >
-                      <Bookmark size={19} aria-hidden="true" />
-                      {COPY.pickFavoritesCta}
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => setNewPlanOpen(true)}
-                      className="inline-flex min-h-[44px] items-center gap-1.5 font-sans text-sm font-semibold text-blue-950/70
-                    transition-colors duration-fast hover:text-blue-950"
-                    >
-                      {COPY.firstRunCta}
-                      <ArrowRight size={14} aria-hidden="true" />
-                    </button>
-                  </>
-                ) : (
                   <>
                     <button
                       type="button"
                       onClick={() => setNewPlanOpen(true)}
-                      className="inline-flex min-h-[48px] items-center gap-2 rounded-pill bg-blue-950 px-7 py-3.5 font-sans text-base
-                    font-semibold text-white transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+                      className="btn btn-primary min-h-[64px] gap-2.5 px-10 py-4 text-lg active:scale-[0.99]"
                     >
-                      <CalendarPlus size={19} aria-hidden="true" />
+                      <CalendarPlus size={22} aria-hidden="true" />
                       {COPY.firstRunCta}
                     </button>
                     <Link
@@ -518,14 +497,11 @@ export default function MealQueueScreen() {
                       <ArrowRight size={14} aria-hidden="true" />
                     </Link>
                   </>
-                )}
               </div>
             }
           />
         ) : (
           <div className="flex flex-col gap-4">
-            {!showGhost && <FavoritesNudge bySlot={favoritesBySlot(library)} />}
-
             {/* Unsaved-changes banner: shown once the live week has drifted from the saved week it came from. */}
             {dirty && (
               <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3">
@@ -535,8 +511,7 @@ export default function MealQueueScreen() {
                 <div className="flex shrink-0 items-center gap-1">
                   <button
                     onClick={handleUpdateWeek}
-                    className="min-h-[44px] rounded-pill bg-blue-950 px-4 font-sans text-xs font-semibold text-white
-                      transition duration-fast hover:bg-blue-900 active:scale-[0.99]"
+                    className="btn btn-primary btn-sm active:scale-[0.99]"
                   >
                     {COPY.save}
                   </button>
@@ -558,7 +533,7 @@ export default function MealQueueScreen() {
                   type="button"
                   onClick={() => setSaveDayOpen(true)}
                   disabled={showGhost}
-                  className={`tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-pill bg-paper-100 px-3 font-sans text-xs
+                  className={`tap-target inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-paper-100 px-4 font-sans text-xs
                     font-semibold text-blue-950 transition duration-fast active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >
@@ -569,7 +544,7 @@ export default function MealQueueScreen() {
                   type="button"
                   onClick={() => setLoadDayOpen(true)}
                   disabled={showGhost}
-                  className={`tap-target inline-flex min-h-[36px] items-center gap-1.5 rounded-pill bg-paper-100 px-3 font-sans text-xs
+                  className={`tap-target inline-flex min-h-[44px] items-center gap-1.5 rounded-md bg-paper-100 px-4 font-sans text-xs
                     font-semibold text-blue-950 transition duration-fast active:scale-95
                     ${showGhost ? 'pointer-events-none opacity-40' : 'hover:bg-sand-100'}`}
                 >

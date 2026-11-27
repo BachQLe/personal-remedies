@@ -15,7 +15,7 @@ export default function RemediWelcome({ onNext }) {
         />
       </div>
       <div className="text-center pt-3 pb-6">
-        <h1 className="text-title text-balance leading-[1.16] font-semibold tracking-tight" style={{ fontFamily: 'Chillax, sans-serif' }}>
+        <h1 className="font-display text-blue-950 text-title text-balance leading-[1.16] font-semibold tracking-tight">
           Eating for your health can feel overwhelming.
         </h1>
         <p className="font-sans text-base leading-relaxed text-blue-950/75 mt-4 max-w-[320px] mx-auto">
@@ -32,7 +32,7 @@ export default function RemediWelcome({ onNext }) {
         <button
           type="button"
           onClick={onNext}
-          className="flex-none w-full py-4 rounded-pill bg-blue-950 text-white font-sans font-semibold text-base min-h-[56px] hover:bg-blue-900 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-950"
+          className="btn btn-primary flex-none w-full"
         >
           Get started
         </button>

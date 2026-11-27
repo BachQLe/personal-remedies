@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { BrowserRouter, Routes, Route, Outlet, useLocation, useNavigationType, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useOutlet, useLocation, useNavigationType, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { storage } from "./api/storage.js";
 import { prefetchAppData } from "./api/prefetch.js";
 import { useGoBack } from "./hooks/useGoBack.js";
+import { motion, AnimatePresence } from "framer-motion";
+import { pageVariants } from "./lib/motion.js";
 // Marketing site is hidden — see the routes block below. The pages themselves
 // (Home, Survey, Providers, Developers, Science, About, News, Contact) are kept
 // in src/pages/marketing; only their routes are gone, so restoring the site is
@@ -119,13 +121,35 @@ function AppShell({ children }) {
 // failures outside the gated app shell entirely.
 function AppLayout() {
   const location = useLocation();
+  // useOutlet captures the element, so the leaving page keeps rendering
+  // itself while it plays its exit.
+  const outlet = useOutlet();
+  const isSearch = location.pathname === "/app/search";
+  const page = (
+    <RouteErrorBoundary key={location.pathname}>{outlet}</RouteErrorBoundary>
+  );
   return (
     <RequireOnboarding>
       <SnackbarProvider>
         <AppShell>
-          <RouteErrorBoundary key={location.pathname}>
-            <Outlet />
-          </RouteErrorBoundary>
+          {/* Same swap as every other page/tab body: leaving page drops + fades,
+              next one rises + fades. Search is a fixed overlay with its own
+              open/close, so it gets a plain div (no transform, no exit). */}
+          <AnimatePresence mode="wait">
+            {isSearch ? (
+              <div key={location.pathname}>{page}</div>
+            ) : (
+              <motion.div
+                key={location.pathname}
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                {page}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </AppShell>
         <FavoritesPruneNotice />
         <RestoredFoodCard />
@@ -137,7 +161,7 @@ function AppLayout() {
 // Must match SearchScreen's exit-fade duration: its backdrop/group
 // AnimatePresence `exit` transitions animate opacity out over 250ms (see
 // src/screens/search/SearchScreen.jsx), plus a small buffer before navigating.
-const SEARCH_CLOSE_MS = 260;
+const SEARCH_CLOSE_MS = 170;
 
 // Route wrapper for /app/search — owns the open/close lifecycle only.
 // SearchScreen itself is now a single "Food & Nutrient Lookup" surface with

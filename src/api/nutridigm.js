@@ -74,6 +74,9 @@ const _loggedErrors = new Set();
 /** @type {Map<string, number>} endpoint path (e.g. 'goodfor') -> request count. */
 const _requestCounts = new Map();
 
+// A stalled API call rejects instead of hanging, so screens show their error + Retry state rather than an endless spinner.
+const REQUEST_TIMEOUT_MS = 15000;
+
 const DAILY_KEY = 'requestCounts';
 const DAILY_RETENTION_DAYS = 14;
 
@@ -227,7 +230,7 @@ async function request(endpoint, params = {}) {
  */
 async function performRequest(urlStr) {
   recordRequest(urlStr);
-  const res = await fetch(urlStr);
+  const res = await fetch(urlStr, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
 
   // 220 = empty but valid
   if (res.status === 220) {

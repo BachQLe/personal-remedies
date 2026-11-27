@@ -9,10 +9,10 @@
  */
 
 const VARIANT_CLS = {
-  default: "bg-white border border-sand-200 shadow-card",
+  default: "bg-white border border-sand-200 shadow-depth",
   flat: "bg-white border border-sand-200",
-  raised: "bg-white shadow-md",
-  warm: "bg-paper-100 border border-sand-200 shadow-card",
+  raised: "bg-white shadow-depth",
+  warm: "bg-paper-100 border border-sand-200 shadow-depth",
   forest: "bg-forest-700 border-transparent text-white",
   lavender: "bg-lavender-700 border-transparent text-white",
   /* legacy alias */
@@ -60,7 +60,7 @@ export default function Card({
       className={`rounded-[28px] overflow-hidden
         ${VARIANT_CLS[variant] || VARIANT_CLS.default}
         ${PAD_CLS[padding] || PAD_CLS.md}
-        ${interactive ? "cursor-pointer transition-all duration-base ease-ds-out hover:-translate-y-[2px] hover:shadow-lg active:translate-y-[1px] active:scale-[0.99] focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest-600 focus-visible:outline-offset-2" : ""}
+        ${interactive ? "cursor-pointer transition-[transform,box-shadow] duration-base ease-ux-out mouse:hover:-translate-y-[2px] mouse:hover:shadow-depth-lift active:translate-y-px active:scale-[0.985] active:shadow-depth focus-visible:outline focus-visible:outline-2 focus-visible:outline-forest-600 focus-visible:outline-offset-2" : ""}
         ${className}`}
       onClick={onClick}
       {...interactiveProps}

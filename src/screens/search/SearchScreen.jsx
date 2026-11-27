@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { ease, dur, staggerDelay, pageVariants } from '../../lib/motion.js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Loader2 } from 'lucide-react';
@@ -31,7 +32,7 @@ import { useEntitlement } from '../../components/shared/useEntitlement.js';
 const HEADING = 'Food & Nutrient Lookup';
 const PLACEHOLDER = 'Search foods, recipes, nutrients…';
 const BACKDROP_COLOR = '#C8E87A';
-const ACCENT_FOCUS_CLASS = 'focus:border-yellow-500';
+const ACCENT_FOCUS_CLASS = 'focus:border-blue-950';
 const SPINNER_CLASS = 'text-yellow-600';
 
 // Section order + labels for `searchEverything`'s sectioned result shape
@@ -105,7 +106,7 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
             <Icon name="leaf" size={18} aria-hidden="true" />
           </span>
           <span className="flex-1 min-w-0">
-            <span className="block font-semibold text-sm text-char-900 leading-tight">{title}</span>
+            <span className="block font-semibold row-title text-char-900 leading-tight">{title}</span>
             {subtitle && <span className="block text-xs text-char-500 mt-0.5">{subtitle}</span>}
             {servingSize && <span className="block text-xs text-char-500 mt-0.5">Serving size: {servingSize}</span>}
           </span>
@@ -115,7 +116,7 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
           type="button"
           onClick={onGoodForMe}
           aria-label={`Check ${title} against my profile`}
-          className="min-h-[44px] px-3 py-2 rounded-pill border border-forest-400 bg-forest-50 text-forest-700
+          className="min-h-[44px] px-3 py-2 rounded-md border border-forest-400 bg-forest-50 text-forest-700
             text-xs font-semibold transition-colors duration-fast hover:bg-forest-100 active:bg-forest-100"
         >
           Check against my profile
@@ -142,7 +143,7 @@ function ResultRow({ kind, title, subtitle, servingSize, onClick, saveItem, onSa
       </span>
 
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm text-char-900 leading-tight">{title}</p>
+        <p className="font-semibold row-title text-char-900 leading-tight">{title}</p>
         {subtitle && <p className="text-xs text-char-500 mt-0.5">{subtitle}</p>}
       </div>
 
@@ -338,17 +339,31 @@ export default function SearchScreen({ active, onClose }) {
   const padTarget = PAD_CENTER;
   const searching = debouncePending || status === 'loading';
 
+  // Stagger rows only for the first results reveal, not on every keystroke.
+  const staggeredRef = useRef(false);
+  const staggerNow = !staggeredRef.current;
+  useEffect(() => {
+    if (SECTIONS.some(({ key }) => results[key]?.length)) staggeredRef.current = true;
+  });
+  let rowIndex = 0;
+
   const sections = SECTIONS.map(({ key, label }) => {
     const rows = results[key];
     if (!rows || !rows.length) return null;
     return (
       <div key={key}>
-        <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
+        <p className="eyebrow mb-2">
           {label}
         </p>
         <div className="flex flex-col gap-2.5">
-          {rows.map((item) =>
-            item.kind === 'food' ? (
+          {rows.map((item) => (
+            <motion.div
+              key={item.key}
+              initial={staggerNow ? { opacity: 0, y: 8 } : false}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: dur.base, ease: ease.out, delay: staggerNow ? staggerDelay(rowIndex++) : 0 }}
+            >
+            {item.kind === 'food' ? (
               <ResultRow
                 key={item.key}
                 kind="food"
@@ -368,8 +383,9 @@ export default function SearchScreen({ active, onClose }) {
                 saveItem={recipeToSaveItem(item.recipe)}
                 onSaveBlocked={show}
               />
-            ),
-          )}
+            )}
+            </motion.div>
+          ))}
         </div>
       </div>
     );
@@ -388,8 +404,8 @@ export default function SearchScreen({ active, onClose }) {
               className="absolute inset-0"
               initial={{ opacity: 0, backgroundColor: BACKDROP_COLOR }}
               animate={{ opacity: 1, backgroundColor: BACKDROP_COLOR }}
-              exit={{ opacity: 0 }}
-              transition={{ opacity: { duration: 0.25, ease: 'easeOut' }, backgroundColor: { duration: 0.35, ease: 'easeOut' } }}
+              exit={{ opacity: 0, transition: { duration: dur.exit, ease: ease.in } }}
+              transition={{ opacity: { duration: dur.base, ease: ease.out }, backgroundColor: { duration: dur.panel, ease: ease.out } }}
               onClick={onClose}
             />,
             <motion.div
@@ -397,8 +413,8 @@ export default function SearchScreen({ active, onClose }) {
               className="absolute inset-0 max-w-[430px] mx-auto px-5 flex flex-col pointer-events-none overflow-y-auto hide-scrollbar"
               initial={{ paddingTop: PAD_IDLE, opacity: 0 }}
               animate={{ paddingTop: padTarget, opacity: 1 }}
-              exit={{ paddingTop: PAD_IDLE, opacity: 0 }}
-              transition={{ default: calmSpring, opacity: { duration: 0.25, ease: 'easeOut' } }}
+              exit={{ paddingTop: PAD_IDLE, opacity: 0, transition: { opacity: { duration: dur.exit, ease: ease.in }, default: { duration: dur.exit, ease: ease.in } } }}
+              transition={{ default: calmSpring, opacity: { duration: dur.base, ease: ease.out } }}
             >
               <div className="flex items-start gap-3 flex-none pointer-events-auto mt-[max(0px,calc(var(--safe-top)_-_1rem))]">
                 <BackButton onClick={handleBack} />
@@ -420,7 +436,7 @@ export default function SearchScreen({ active, onClose }) {
                   onKeyDown={handleKeyDown}
                   autoFocus
                   placeholder={PLACEHOLDER}
-                  className={`w-full pl-12 pr-12 py-4 rounded-xl bg-white border-[1.5px] border-sand-200
+                  className={`w-full pl-12 pr-12 py-4 rounded-md bg-white border-[1.5px] border-sand-200
                     text-base text-char-900 placeholder:text-char-400 font-sans
                     [&::-webkit-search-cancel-button]:appearance-none
                     shadow-[0_2px_8px_rgba(45,36,24,0.06)]
@@ -438,10 +454,10 @@ export default function SearchScreen({ active, onClose }) {
                     {showResults ? (
                       <motion.div
                         key="results"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                        variants={pageVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
                         className="h-full overflow-y-auto hide-scrollbar pb-28 flex flex-col gap-5"
                       >
                         {/* Idle-vs-no-results distinction (must survive): this
@@ -461,15 +477,15 @@ export default function SearchScreen({ active, onClose }) {
                     ) : (
                       <motion.div
                         key="chips"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                        variants={pageVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
                         className="h-full overflow-y-auto hide-scrollbar pb-1 flex flex-col gap-5"
                       >
                         {recents.length > 0 && (
                           <>
-                            <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-700 mb-2">
+                            <p className="eyebrow mb-2">
                               Recent searches
                             </p>
                             <div className="flex flex-wrap gap-2">

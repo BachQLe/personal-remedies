@@ -47,7 +47,7 @@ export default function SchedulerView({ days, onSelectItem, showEaten = false })
               type="button"
               onClick={() => setExpandedKey(expanded ? null : day.key)}
               aria-expanded={expanded}
-              className={`flex min-h-[48px] w-full items-center justify-between rounded-xl bg-white px-4 py-3
+              className={`flex min-h-[48px] w-full items-center justify-between rounded-sm bg-white px-4 py-3
                 ${expanded ? 'rounded-b-none' : ''}`}
             >
               <div className="flex items-baseline gap-2">
@@ -88,7 +88,7 @@ export default function SchedulerView({ days, onSelectItem, showEaten = false })
                         {counted > 0 && (
                           <div className="mb-3">
                             <div className="flex items-center justify-between">
-                              <p className="font-label text-xs uppercase tracking-widest text-blue-950/50">Planned</p>
+                              <p className="eyebrow">Planned</p>
                               <span className="text-sm font-semibold text-blue-950">{`${formatCalories(total)} cal`}</span>
                             </div>
                             {uncounted > 0 && <p className="text-xs text-blue-950/60">{COPY.caloriesMissing(uncounted)}</p>}

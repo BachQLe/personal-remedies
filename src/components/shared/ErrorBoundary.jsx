@@ -37,7 +37,7 @@ export default class ErrorBoundary extends Component {
           <button
             type="button"
             onClick={this.handleReload}
-            className="mt-2 rounded-full bg-blue-950 text-white text-sm font-semibold font-sans px-5 py-2.5"
+            className="btn btn-primary btn-sm mt-2"
           >
             Reload
           </button>
@@ -91,7 +91,7 @@ export class RouteErrorBoundary extends Component {
           <button
             type="button"
             onClick={this.handleRetry}
-            className="mt-2 rounded-full bg-blue-950 text-white text-sm font-semibold font-sans px-5 py-2.5"
+            className="btn btn-primary btn-sm mt-2"
           >
             Try again
           </button>

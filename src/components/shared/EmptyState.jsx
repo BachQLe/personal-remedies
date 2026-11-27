@@ -46,7 +46,7 @@ export default function EmptyState({
         </p>
       )}
       {body && (
-        <p className="text-char-500 text-sm max-w-[300px] leading-normal">
+        <p className="text-char-500 text-base max-w-[300px] leading-normal">
           {body}
         </p>
       )}

@@ -25,7 +25,7 @@ export default function SavedList({ entries, onPick, emptyText, rowClassName = '
           <button
             type="button"
             onClick={() => onPick(entry)}
-            className={`flex min-h-[56px] w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left
+            className={`flex min-h-[56px] w-full items-center justify-between gap-3 rounded-sm px-4 py-3 text-left
               transition duration-fast active:scale-[0.99] ${rowClassName}`}
           >
             <span className="flex min-w-0 flex-col">

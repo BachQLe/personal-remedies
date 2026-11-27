@@ -45,10 +45,10 @@ describe('PlanTabs', () => {
     expect(labels()).toEqual(['My Meal Plan', 'My Favorites']);
   });
 
-  it('navigates so the back button on My Favorites returns to the plan', () => {
+  it('replaces the history entry, so back from My Favorites does not return to the plan', () => {
     act(() => [...container.querySelectorAll('button')].find((b) => b.textContent === 'My Favorites').click());
     expect(labels()).toEqual(['back']);
     act(() => container.querySelector('button').click());
-    expect(labels()).toEqual(['My Meal Plan', 'My Favorites']);
+    expect(labels()).toEqual(['back']);
   });
 });

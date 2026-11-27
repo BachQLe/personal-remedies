@@ -72,8 +72,8 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
   if (!ingredients?.length) return null;
 
   return (
-    <div className="rounded-xl border border-neutral-300/50 shadow-xs bg-white p-4">
-      <p className="text-[0.875rem] font-label tracking-[0.14em] uppercase text-char-400">
+    <div className="rounded-xl border border-blue-950/10 shadow-xs bg-white p-4">
+      <p className="eyebrow">
         Ingredients
       </p>
       <p className="text-[0.875rem] text-char-400 font-sans mt-1 mb-3 leading-snug">
@@ -118,7 +118,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
                     type="button"
                     onClick={() => toggle(key, ing)}
                     aria-expanded={isOpen}
-                    className="tap-target flex-shrink-0 h-8 pl-2.5 pr-2 rounded-full bg-sand-50 border border-neutral-200
+                    className="tap-target flex-shrink-0 h-8 pl-2.5 pr-2 rounded-md bg-sand-50 border border-blue-950/10
                       flex items-center gap-1 text-char-500 text-xs font-sans
                       hover:bg-sand-100 hover:text-char-700 transition-all duration-fast"
                   >
@@ -151,8 +151,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
                       <button
                         type="button"
                         onClick={() => load(key, ing)}
-                        className="flex-shrink-0 px-3 py-1.5 rounded-xs bg-forest-700 text-white text-[0.875rem] font-semibold font-sans
-                          transition-all duration-fast ease-ds-out hover:bg-forest-800 active:scale-[0.98]"
+                        className="flex-shrink-0 btn btn-primary btn-sm active:scale-[0.98]"
                       >
                         Retry
                       </button>
@@ -174,7 +173,7 @@ export default function IngredientSwaps({ ingredients, derived, profile }) {
                             <button
                               type="button"
                               onClick={() => setSwaps((prev) => ({ ...prev, [key]: alt }))}
-                              className={`w-full flex items-center gap-2.5 p-1.5 rounded-lg text-left
+                              className={`w-full flex items-center gap-2.5 p-1.5 rounded-md text-left
                                 transition-all duration-fast hover:bg-white active:scale-[0.99]
                                 ${chosen ? 'bg-white shadow-xs' : ''}`}
                             >

@@ -13,10 +13,9 @@
  *   structurally identical to ordinary food rows — no chip, no icon, no
  *   separate notes/description text; nothing visually marks a row as
  *   lifestyle vs. food.
- * - RankedRow's `imageRight` image-card layout is enabled here (and only
+ * - RankedRow's `thumbnail` layout is enabled here (and only
  *   here — CategoryDetailPanel keeps the plain text row): each row shows
- *   the item's resolved photo over its right half, fading into the white
- *   row background via stacked bars (see RankedRow's header doc).
+ *   the item's resolved photo as a left 64px thumbnail (see RankedRow's header doc).
  *
  * State-matrix (T5B): both directions are fetched together through a single
  * useAsyncData call (src/hooks/useAsyncData.js) so loading/error/offline/
@@ -41,11 +40,11 @@ import { resolveProfileWithConditions } from './profileFallback.js';
 
 function SkeletonRows() {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2.5">
       {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-        <div key={i} className="relative flex items-center gap-3 min-h-[68px] py-3 px-4 rounded-xl bg-white border border-sand-200 shadow-xs overflow-hidden">
-          <div className="h-3.5 flex-1 rounded animate-pulse bg-sand-200" />
-          <div className="absolute inset-y-0 right-0 w-1/2 animate-pulse bg-sand-200" />
+        <div key={i} className="flex items-center gap-3 px-4 py-3 rounded-sm bg-white border border-sand-200 shadow-xs">
+          <div className="w-16 h-16 rounded-lg bg-paper-200 animate-pulse flex-shrink-0" />
+          <div className="flex-1"><div className="h-4 w-1/2 rounded bg-paper-200 animate-pulse" /></div>
         </div>
       ))}
     </div>
@@ -92,7 +91,7 @@ export default function TopDosTab({ onSelectFood }) {
         ]}
         value={direction}
         onChange={setDirection}
-        size="sm"
+        size="xs"
         variant="outline"
       />
 
@@ -110,7 +109,7 @@ export default function TopDosTab({ onSelectFood }) {
           emptyBody={data?.consume?.unscorableReason || "We don't have dos & don'ts for your conditions right now."}
           emptyAction={status === 'empty-no-profile' ? <ProfileSetupAction /> : undefined}
         >
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             <CoverageNote coverage={data?.consume?.coverage} />
             {items.length === 0 ? (
               <p className="text-sm text-char-500 font-sans text-center py-6">
@@ -127,7 +126,7 @@ export default function TopDosTab({ onSelectFood }) {
                     key={food.id}
                     food={food}
                     onSelect={onSelectFood}
-                    imageRight
+                    thumbnail
                   />
                 )}
               />

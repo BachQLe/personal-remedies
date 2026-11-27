@@ -391,6 +391,10 @@ deno_version = 2
 # JWT. Do not flip to true unless every caller is authenticated.
 verify_jwt = false
 
+[functions.mp-db]
+# Not called by the app yet; keep the JWT check (anon key) until a real caller needs otherwise.
+verify_jwt = true
+
 [analytics]
 enabled = true
 port = 54327
